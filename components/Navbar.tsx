@@ -36,10 +36,10 @@ const Navbar: React.FC = () => {
                 <NISLogo className="h-14 w-14 md:h-16 md:w-16" showText={false} />
               </div>
               <div className="flex flex-col">
-                <span className="text-lg md:text-xl font-black text-[#1e3a8a] tracking-tight leading-none">
+                <span className="text-base md:text-xl font-black text-[#1e3a8a] tracking-tight leading-none">
                   {lang === 'ar' ? 'المعاهد القومية' : 'National Institutes'}
                 </span>
-                <span className="text-[9px] md:text-[10px] text-[#991b1b] font-black tracking-[0.15em] md:tracking-[0.25em] uppercase mt-1.5 arabic-font whitespace-nowrap opacity-90">
+                <span className="text-[7px] md:text-[10px] text-[#991b1b] font-black tracking-[0.05em] md:tracking-[0.25em] uppercase mt-1 arabic-font opacity-90 max-w-[120px] md:max-w-none leading-tight">
                   {lang === 'ar' ? 'الجمعية العامة للمعاهد القومية' : 'General Assembly of National Institutes'}
                 </span>
               </div>
@@ -47,7 +47,7 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className={`hidden md:flex items-center ${isRTL ? 'space-x-reverse space-x-8' : 'space-x-8'}`}>
+          <div className={`hidden lg:flex items-center ${isRTL ? 'space-x-reverse space-x-8' : 'space-x-8'}`}>
             {navLinks.map((link) => (
               <Link
                 key={link.path}
@@ -74,7 +74,7 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Utility Icons & Language Toggle */}
-          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3 md:space-x-6' : 'space-x-3 md:space-x-6'}`}>
+          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2 md:space-x-6' : 'space-x-2 md:space-x-6'}`}>
             <button
               onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
               className="flex items-center space-x-1 text-gray-400 hover:text-[#1e3a8a] font-black text-[10px] uppercase transition-all px-2 py-1 rounded-md hover:bg-gray-50"
@@ -98,7 +98,7 @@ const Navbar: React.FC = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-gray-500 hover:text-[#1e3a8a] transition-colors rounded-lg hover:bg-gray-50"
+              className="lg:hidden p-2 text-gray-500 hover:text-[#1e3a8a] transition-colors rounded-lg hover:bg-gray-50"
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -107,7 +107,7 @@ const Navbar: React.FC = () => {
       </div>
 
       {/* Mobile Menu Dropdown */}
-      <div className={`md:hidden absolute top-20 left-0 w-full bg-white border-b border-gray-100 shadow-xl transition-all duration-300 ease-in-out transform overflow-hidden
+      <div className={`lg:hidden absolute top-20 left-0 w-full bg-white border-b border-gray-100 shadow-xl transition-all duration-300 ease-in-out transform overflow-hidden
         ${mobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}>
         <div className="px-4 pt-4 pb-8 space-y-4">
           {navLinks.map((link) => (

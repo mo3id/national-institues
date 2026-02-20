@@ -20,8 +20,19 @@ const Home: React.FC = () => {
   const { t, isRTL, lang } = useLanguage();
   const [newsIndex, setNewsIndex] = useState(0);
   const [selectedGov, setSelectedGov] = useState<string | null>(null);
-  const itemsPerPage = 3;
+  const [itemsPerPage, setItemsPerPage] = useState(3);
   const maxNewsIndex = Math.max(0, NEWS.length - itemsPerPage);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) setItemsPerPage(1);
+      else if (window.innerWidth < 1024) setItemsPerPage(2);
+      else setItemsPerPage(3);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const nextNews = () => setNewsIndex(prev => Math.min(prev + 1, maxNewsIndex));
   const prevNews = () => setNewsIndex(prev => Math.max(prev - 1, 0));
@@ -41,7 +52,7 @@ const Home: React.FC = () => {
   ];
 
   return (
-    <div className="">
+    <div className="overflow-x-hidden">
       {/* Hero Slider */}
       <section className="relative h-[90vh] bg-blue-900 overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://picsum.photos/seed/school/1920/1080')] bg-cover bg-center opacity-40 mix-blend-overlay scale-110 animate-slow-zoom" />
@@ -53,7 +64,7 @@ const Home: React.FC = () => {
               <span className="flex h-2 w-2 rounded-full bg-red-500 animate-pulse" />
               <span className="text-red-400 text-xs font-bold uppercase tracking-[0.2em]">{t.hero.badge}</span>
             </div>
-            <h1 className="text-6xl md:text-8xl font-black text-white leading-[1.1] tracking-tight">
+            <h1 className="text-4xl sm:text-6xl lg:text-8xl font-black text-white leading-[1.1] tracking-tight">
               {t.hero.title} <span className="text-red-600">.</span>
             </h1>
             <p className="text-xl text-blue-50/70 leading-relaxed max-w-xl font-medium">
@@ -73,10 +84,10 @@ const Home: React.FC = () => {
       </section>
 
       {/* Chairman Message */}
-      <section className="py-24 bg-white relative">
+      <section className="py-24 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`grid grid-cols-1 lg:grid-cols-2 gap-20 items-center ${isRTL ? 'lg:flex-row-reverse' : ''}`}>
-            <div className="relative group">
+            <div className="relative group overflow-hidden md:overflow-visible">
               <div className="absolute -inset-4 bg-gray-100 rounded-3xl -rotate-2 group-hover:rotate-0 transition-transform duration-700" />
               <div className="relative aspect-[4/5] overflow-hidden rounded-2xl shadow-3xl bg-gray-200">
                 <img
@@ -86,10 +97,10 @@ const Home: React.FC = () => {
                   loading="lazy"
                 />
               </div>
-              <div className="absolute -bottom-8 -right-8 bg-blue-900 p-8 rounded-2xl shadow-2xl border-4 border-white animate-bounce-subtle">
+              <div className="absolute -bottom-4 -right-4 md:-bottom-8 md:-right-8 bg-blue-900 p-4 md:p-8 rounded-2xl shadow-2xl border-4 border-white animate-bounce-subtle">
                 <div className="flex flex-col items-center">
-                  <span className="text-white text-3xl font-black italic">100+</span>
-                  <span className="text-blue-100 text-[10px] font-bold uppercase tracking-widest">{t.chairman.years}</span>
+                  <span className="text-white text-xl md:text-3xl font-black italic">100+</span>
+                  <span className="text-blue-100 text-[8px] md:text-[10px] font-bold uppercase tracking-widest">{t.chairman.years}</span>
                 </div>
               </div>
             </div>
@@ -119,21 +130,23 @@ const Home: React.FC = () => {
       </section>
 
       {/* School Logos Bar */}
-      <section className="py-16 bg-gray-50 overflow-hidden border-y border-gray-100">
-        <div className={`flex animate-scroll whitespace-nowrap ${isRTL ? 'flex-row-reverse' : ''}`}>
-          {[...SCHOOLS, ...SCHOOLS, ...SCHOOLS].map((school, i) => (
-            <div key={i} className="flex flex-col items-center mx-16 opacity-40 hover:opacity-100 transition-opacity">
-              <div className="h-20 w-20 bg-white rounded-2xl shadow-sm flex items-center justify-center p-3 mb-4 group cursor-pointer border border-transparent hover:border-red-200">
-                <img
-                  src={school.logo}
-                  alt={school.name}
-                  className="max-h-full max-w-full grayscale group-hover:grayscale-0 transition-all"
-                  loading="lazy"
-                />
+      <section className="py-16 bg-gray-50 overflow-hidden border-y border-gray-100 w-full">
+        <div className="max-w-[calc(100vw-1px)]">
+          <div className={`flex animate-scroll whitespace-nowrap ${isRTL ? 'flex-row-reverse' : ''}`}>
+            {[...SCHOOLS, ...SCHOOLS, ...SCHOOLS].map((school, i) => (
+              <div key={i} className="flex flex-col items-center mx-16 opacity-40 hover:opacity-100 transition-opacity">
+                <div className="h-20 w-20 bg-white rounded-2xl shadow-sm flex items-center justify-center p-3 mb-4 group cursor-pointer border border-transparent hover:border-red-200">
+                  <img
+                    src={school.logo}
+                    alt={school.name}
+                    className="max-h-full max-w-full grayscale group-hover:grayscale-0 transition-all"
+                    loading="lazy"
+                  />
+                </div>
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{school.name}</span>
               </div>
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{school.name}</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
@@ -303,7 +316,7 @@ const Home: React.FC = () => {
               style={{ transform: `translateX(${isRTL ? '+' : '-'}${newsIndex * (100 / itemsPerPage)}%)` }}
             >
               {NEWS.map((item) => (
-                <div key={item.id} className="w-full md:w-1/3 flex-shrink-0 px-4">
+                <div key={item.id} className={`${itemsPerPage === 1 ? 'w-full' : itemsPerPage === 2 ? 'w-1/2' : 'w-1/3'} flex-shrink-0 px-4`}>
                   <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 group border border-gray-100 flex flex-col h-full text-start">
                     <div className="relative h-64 overflow-hidden">
                       <img
@@ -337,7 +350,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Join the Legacy CTA */}
-      <section className="py-20 bg-blue-900 relative">
+      <section className="py-20 bg-blue-900 relative overflow-hidden">
         <div className="absolute inset-0 bg-red-900/10 skew-y-3 transform translate-y-12" />
         <div className="max-w-4xl mx-auto text-center relative z-10 px-4 space-y-8">
           <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">{t.cta.title}</h2>
