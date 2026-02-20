@@ -1,0 +1,9 @@
+{
+  "name": "National Institutes Schools Portal (NIS)",
+  "description": "A premium educational portal for the National Institutes in Egypt, featuring AI-powered school analysis, image generation, and career management.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
