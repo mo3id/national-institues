@@ -6,13 +6,13 @@ import { useLanguage } from '../LanguageContext';
 import { translations } from '../translations';
 
 const Footer: React.FC = () => {
-  const { lang, isRTL } = useLanguage();
-  const t = translations[lang].footer;
+  const { lang, isRTL, t: translationsRoot } = useLanguage();
+  const t = translationsRoot.footer;
 
   return (
     <footer className="bg-[#0f172a] text-gray-400 py-20 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-64 h-64 bg-red-900/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-12 relative z-10 text-start">
         <div className="space-y-8">
           <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
@@ -50,7 +50,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div>
-           <h4 className={`text-white font-bold mb-8 uppercase tracking-widest text-xs flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+          <h4 className={`text-white font-bold mb-8 uppercase tracking-widest text-xs flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
             <Star className="h-3 w-3 text-red-500 fill-red-500" />
             <span>{t.regionsTitle}</span>
           </h4>
@@ -62,7 +62,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div>
-           <h4 className={`text-white font-bold mb-8 uppercase tracking-widest text-xs flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+          <h4 className={`text-white font-bold mb-8 uppercase tracking-widest text-xs flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
             <Star className="h-3 w-3 text-red-500 fill-red-500" />
             <span>{t.infoTitle}</span>
           </h4>

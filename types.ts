@@ -12,8 +12,10 @@ export interface School {
 export interface NewsItem {
   id: string;
   title: string;
+  titleAr: string;
   date: string;
   summary: string;
+  summaryAr: string;
   image: string;
 }
 

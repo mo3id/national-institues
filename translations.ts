@@ -10,11 +10,13 @@ export const translations = {
       aiStudio: "AI Studio",
       feedback: "Feedback"
     },
-    hero: [
-      { title: "Legacy of Excellence", subtitle: "Leading Egyptian education since 1956", cta: "Admission 2024" },
-      { title: "World Class Campus", subtitle: "40+ schools across 5 governorates", cta: "Admission 2024" },
-      { title: "Shape the Future", subtitle: "Empowering students to lead and innovate", cta: "Admission 2024" }
-    ],
+    hero: {
+      badge: "Legacy of Excellence",
+      title: "Nurturing Global Leaders",
+      subtitle: "Leading Egyptian education since 1956 with a network of 40+ schools across 5 governorates.",
+      ctaSearch: "Find a School",
+      ctaAbout: "Our Legacy"
+    },
     chairman: {
       tag: "Founding Message",
       title: "Nurturing Leaders Since 1956",
@@ -122,11 +124,13 @@ export const translations = {
       aiStudio: "استوديو الذكاء الاصطناعي",
       feedback: "الاقتراحات والشكاوى"
     },
-    hero: [
-      { title: "إرث من التميز", subtitle: "رائد التعليم المصري منذ عام ١٩٥٦", cta: "التقديم ٢٠٢٤" },
-      { title: "مجمعات تعليمية عالمية", subtitle: "أكثر من ٤٠ مدرسة في ٥ محافظات", cta: "التقديم ٢٠٢٤" },
-      { title: "شكل المستقبل", subtitle: "تمكين الطلاب من القيادة والابتكار", cta: "التقديم ٢٠٢٤" }
-    ],
+    hero: {
+      badge: "إرث من التميز",
+      title: "رعاية قادة المستقبل",
+      subtitle: "نقود التعليم المصري منذ عام ١٩٥٦ عبر شبكة تضم أكثر من ٤٠ مدرسة في ٥ محافظات.",
+      ctaSearch: "ابحث عن مدرسة",
+      ctaAbout: "عن المعاهد"
+    },
     chairman: {
       tag: "رسالة التأسيس",
       title: "رعاية القادة منذ عام ١٩٥٦",

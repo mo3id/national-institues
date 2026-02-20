@@ -10,22 +10,21 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, lang }: any) =>
   <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all group flex flex-col h-full">
     <div className="flex justify-between items-start mb-8">
       <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center p-2 border border-gray-100 group-hover:scale-110 transition-transform">
-        <img 
-          src={school.logo} 
-          alt={school.name} 
-          className="max-w-full max-h-full grayscale group-hover:grayscale-0" 
+        <img
+          src={school.logo}
+          alt={school.name}
+          className="max-w-full max-h-full grayscale group-hover:grayscale-0"
           loading="lazy"
         />
       </div>
-      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-        school.type === 'International' ? 'bg-purple-100 text-purple-700' :
-        school.type === 'Language' ? 'bg-blue-100 text-blue-700' :
-        'bg-green-100 text-green-700'
-      }`}>
+      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${school.type === 'International' ? 'bg-purple-100 text-purple-700' :
+          school.type === 'Language' ? 'bg-blue-100 text-blue-700' :
+            'bg-green-100 text-green-700'
+        }`}>
         {school.type}
       </span>
     </div>
-    
+
     <div className="mb-8">
       <h3 className="text-xl font-black text-gray-900 mb-2 group-hover:text-blue-900 transition-colors text-start">{school.name}</h3>
       <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-1' : 'space-x-1'} text-gray-400 text-xs font-bold uppercase tracking-wider`}>
@@ -54,8 +53,8 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, lang }: any) =>
 ));
 
 const Schools: React.FC = () => {
-  const { lang, isRTL } = useLanguage();
-  const t = translations[lang].schools;
+  const { lang, isRTL, t: translationsRoot } = useLanguage();
+  const t = translationsRoot.schools;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGov, setSelectedGov] = useState('');
@@ -65,8 +64,8 @@ const Schools: React.FC = () => {
 
   const filteredSchools = useMemo(() => {
     return SCHOOLS.filter(school => {
-      const matchesSearch = school.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            school.location.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = school.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        school.location.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesGov = selectedGov === '' || school.governorate === selectedGov;
       const matchesType = selectedType === '' || school.type === selectedType;
       return matchesSearch && matchesGov && matchesType;
@@ -109,18 +108,18 @@ const Schools: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div className="lg:col-span-2 relative">
               <Search className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'right-4' : 'left-4'} h-5 w-5 text-gray-400`} />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder={t.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={`w-full ${isRTL ? 'pr-12' : 'pl-12'} py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all font-medium`}
               />
             </div>
-            
+
             <div className="relative">
               <Filter className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'right-4' : 'left-4'} h-5 w-5 text-gray-400`} />
-              <select 
+              <select
                 value={selectedGov}
                 onChange={(e) => setSelectedGov(e.target.value)}
                 className={`w-full ${isRTL ? 'pr-12' : 'pl-12'} py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none appearance-none font-bold text-sm`}
@@ -132,7 +131,7 @@ const Schools: React.FC = () => {
 
             <div className="relative">
               <Star className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'right-4' : 'left-4'} h-5 w-5 text-gray-400`} />
-              <select 
+              <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
                 className={`w-full ${isRTL ? 'pr-12' : 'pl-12'} py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none appearance-none font-bold text-sm`}
@@ -156,7 +155,7 @@ const Schools: React.FC = () => {
                 <Search className="h-10 w-10 text-gray-300" />
               </div>
               <p className="text-xl font-bold text-gray-900">{t.noResults}</p>
-              <button 
+              <button
                 onClick={clearFilters}
                 className="mt-4 text-blue-900 font-black text-xs uppercase tracking-widest underline"
               >

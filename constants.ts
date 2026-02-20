@@ -38,18 +38,114 @@ export const GOVERNORATES = [
 ];
 
 export const NEWS: NewsItem[] = [
-  { id: '1', title: 'NIS National Sports Day 2024', date: '2024-03-15', summary: 'Over 5,000 students participated in our multi-governorate sports festival held at the Olympic Center.', image: 'https://picsum.photos/seed/news1/800/600' },
-  { id: '2', title: 'New Science Labs in Alexandria', date: '2024-03-12', summary: 'Victoria College inaugurates state-of-the-art STEM laboratories to enhance practical learning.', image: 'https://picsum.photos/seed/news2/800/600' },
-  { id: '3', title: 'Arabic Calligraphy Competition', date: '2024-03-10', summary: 'Celebrating our rich heritage through the annual NIS calligraphy championship for middle schoolers.', image: 'https://picsum.photos/seed/news3/800/600' },
-  { id: '4', title: 'Teacher Excellence Awards', date: '2024-03-08', summary: 'Recognizing the dedication of our 8,500+ educators at the annual NIS Cairo summit.', image: 'https://picsum.photos/seed/news4/800/600' },
-  { id: '5', title: 'Robotics Team Wins Bronze', date: '2024-03-05', summary: 'The Giza National School robotics team secured 3rd place in the international FIRST LEGO League.', image: 'https://picsum.photos/seed/news5/800/600' },
-  { id: '6', title: 'Summer Camps Enrollment Open', date: '2024-03-01', summary: 'Diverse summer programs ranging from coding to art are now available across all NIS campuses.', image: 'https://picsum.photos/seed/news6/800/600' },
-  { id: '7', title: 'IGCSE Top Achievers Ceremony', date: '2024-02-25', summary: 'Honoring our students who achieved world-highest scores in the Cambridge IGCSE examinations.', image: 'https://picsum.photos/seed/news7/800/600' },
-  { id: '8', title: 'Sustainable Campus Initiative', date: '2024-02-20', summary: 'NIS Mansoura launches the first solar-powered primary school section in the Delta region.', image: 'https://picsum.photos/seed/news8/800/600' },
-  { id: '9', title: 'Chess Tournament Finals', date: '2024-02-15', summary: 'The final showdown of the inter-school chess championship takes place in Maadi this weekend.', image: 'https://picsum.photos/seed/news9/800/600' },
-  { id: '10', title: 'Community Service Week', date: '2024-02-10', summary: 'Students from 40+ schools joined forces to plant 10,000 trees across 5 governorates.', image: 'https://picsum.photos/seed/news10/800/600' },
-  { id: '11', title: 'Digital Transformation Phase 2', date: '2024-02-05', summary: 'All NIS classrooms are now equipped with interactive smart boards and high-speed fiber optics.', image: 'https://picsum.photos/seed/news11/800/600' },
-  { id: '12', title: 'Music and Arts Festival', date: '2024-02-01', summary: 'A showcase of Egyptian talent at the Cairo Opera House featuring our NIS symphony orchestra.', image: 'https://picsum.photos/seed/news12/800/600' },
+  {
+    id: '1',
+    title: 'NIS National Sports Day 2024',
+    titleAr: 'اليوم الرياضي للمعاهد القومية ٢٠٢٤',
+    date: '2024-03-15',
+    summary: 'Over 5,000 students participated in our multi-governorate sports festival held at the Olympic Center.',
+    summaryAr: 'شارك أكثر من ٥٠٠٠ طالب في مهرجاننا الرياضي الذي أقيم في المركز الأوليمبي.',
+    image: 'https://picsum.photos/seed/news1/800/600'
+  },
+  {
+    id: '2',
+    title: 'New Science Labs in Alexandria',
+    titleAr: 'مختبرات علوم جديدة في الإسكندرية',
+    date: '2024-03-12',
+    summary: 'Victoria College inaugurates state-of-the-art STEM laboratories to enhance practical learning.',
+    summaryAr: 'كلية فيكتوريا تفتتح مختبرات STEM الحديثة لتعزيز التعلم العملي.',
+    image: 'https://picsum.photos/seed/news2/800/600'
+  },
+  {
+    id: '3',
+    title: 'Arabic Calligraphy Competition',
+    titleAr: 'مسابقة الخط العربي',
+    date: '2024-03-10',
+    summary: 'Celebrating our rich heritage through the annual NIS calligraphy championship for middle schoolers.',
+    summaryAr: 'الاحتفال بتراثنا الغني من خلال بطولة الخط السنوية لطلاب المرحلة الإعدادية.',
+    image: 'https://picsum.photos/seed/news3/800/600'
+  },
+  {
+    id: '4',
+    title: 'Teacher Excellence Awards',
+    titleAr: 'جوائز التميز للمعلمين',
+    date: '2024-03-08',
+    summary: 'Recognizing the dedication of our 8,500+ educators at the annual NIS Cairo summit.',
+    summaryAr: 'تكريم جهود أكثر من ٨٥٠٠ معلم في قمة المعاهد القومية السنوية بالقاهرة.',
+    image: 'https://picsum.photos/seed/news4/800/600'
+  },
+  {
+    id: '5',
+    title: 'Robotics Team Wins Bronze',
+    titleAr: 'فريق الروبوتات يحصد البرونزية',
+    date: '2024-03-05',
+    summary: 'The Giza National School robotics team secured 3rd place in the international FIRST LEGO League.',
+    summaryAr: 'حقق فريق الروبوتات بمدرسة الجيزة القومية المركز الثالث في مسابقة FIRST LEGO League الدولية.',
+    image: 'https://picsum.photos/seed/news5/800/600'
+  },
+  {
+    id: '6',
+    title: 'Summer Camps Enrollment Open',
+    titleAr: 'فتح باب التسجيل في المعسكرات الصيفية',
+    date: '2024-03-01',
+    summary: 'Diverse summer programs ranging from coding to art are now available across all NIS campuses.',
+    summaryAr: 'برامج صيفية متنوعة تتراوح من البرمجة إلى الفنون متاحة الآن في جميع فروعنا.',
+    image: 'https://picsum.photos/seed/news6/800/600'
+  },
+  {
+    id: '7',
+    title: 'IGCSE Top Achievers Ceremony',
+    titleAr: 'حفل تكريم أوائل الـ IGCSE',
+    date: '2024-02-25',
+    summary: 'Honoring our students who achieved world-highest scores in the Cambridge IGCSE examinations.',
+    summaryAr: 'تكريم طلابنا الذين حققوا أعلى الدرجات العالمية في امتحانات كامبريدج IGCSE.',
+    image: 'https://picsum.photos/seed/news7/800/600'
+  },
+  {
+    id: '8',
+    title: 'Sustainable Campus Initiative',
+    titleAr: 'مبادرة الحرم المدرسي المستدام',
+    date: '2024-02-20',
+    summary: 'NIS Mansoura launches the first solar-powered primary school section in the Delta region.',
+    summaryAr: 'المعاهد القومية بالمنصورة تطلق أول قسم ابتدائي يعمل بالطاقة الشمسية في منطقة الدلتا.',
+    image: 'https://picsum.photos/seed/news8/800/600'
+  },
+  {
+    id: '9',
+    title: 'Chess Tournament Finals',
+    titleAr: 'نهائيات بطولة الشطرنج',
+    date: '2024-02-15',
+    summary: 'The final showdown of the inter-school chess championship takes place in Maadi this weekend.',
+    summaryAr: 'المواجهة النهائية لبطولة الشطرنج بين المدارس تقام في المعادي هذا الأسبوع.',
+    image: 'https://picsum.photos/seed/news9/800/600'
+  },
+  {
+    id: '10',
+    title: 'Community Service Week',
+    titleAr: 'أسبوع الخدمة المجتمعية',
+    date: '2024-02-10',
+    summary: 'Students from 40+ schools joined forces to plant 10,000 trees across 5 governorates.',
+    summaryAr: 'تعاون طلاب من أكثر من ٤٠ مدرسة لزراعة ١٠,٠٠٠ شجرة في ٥ محافظات.',
+    image: 'https://picsum.photos/seed/news10/800/600'
+  },
+  {
+    id: '11',
+    title: 'Digital Transformation Phase 2',
+    titleAr: 'المرحلة الثانية من التحول الرقمي',
+    date: '2024-02-05',
+    summary: 'All NIS classrooms are now equipped with interactive smart boards and high-speed fiber optics.',
+    summaryAr: 'تم تجهيز جميع فصولنا بسبورات ذكية تفاعلية وألياف ضوئية عالية السرعة.',
+    image: 'https://picsum.photos/seed/news11/800/600'
+  },
+  {
+    id: '12',
+    title: 'Music and Arts Festival',
+    titleAr: 'مهرجان الموسيقى والفنون',
+    date: '2024-02-01',
+    summary: 'A showcase of Egyptian talent at the Cairo Opera House featuring our NIS symphony orchestra.',
+    summaryAr: 'عرض للمواهب المصرية في دار الأوبرا المصرية يضم أوركسترا السيمفوني للمعاهد القومية.',
+    image: 'https://picsum.photos/seed/news12/800/600'
+  },
 ];
 
 export const JOBS: JobVacancy[] = [

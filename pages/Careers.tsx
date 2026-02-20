@@ -6,8 +6,8 @@ import { useLanguage } from '../LanguageContext';
 import { translations } from '../translations';
 
 const Careers: React.FC = () => {
-  const { lang, isRTL } = useLanguage();
-  const t = translations[lang].careers;
+  const { lang, isRTL, t: translationsRoot } = useLanguage();
+  const t = translationsRoot.careers;
   const [submitted, setSubmitted] = useState(false);
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
 
@@ -31,11 +31,10 @@ const Careers: React.FC = () => {
           <div className="lg:col-span-2 space-y-6">
             <h2 className="text-2xl font-bold mb-6 text-gray-900 text-start">{t.openings}</h2>
             {JOBS.map((job) => (
-              <div 
-                key={job.id} 
-                className={`bg-white p-8 rounded-2xl shadow-md border-2 transition-all cursor-pointer text-start ${
-                  selectedJob === job.id ? 'border-blue-500' : 'border-transparent hover:border-gray-200'
-                }`}
+              <div
+                key={job.id}
+                className={`bg-white p-8 rounded-2xl shadow-md border-2 transition-all cursor-pointer text-start ${selectedJob === job.id ? 'border-blue-500' : 'border-transparent hover:border-gray-200'
+                  }`}
                 onClick={() => setSelectedJob(job.id)}
               >
                 <div className={`flex justify-between items-start mb-4`}>

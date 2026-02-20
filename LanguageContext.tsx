@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { translations } from './translations';
 
 type Language = 'en' | 'ar';
 
@@ -7,6 +8,7 @@ interface LanguageContextType {
   lang: Language;
   setLang: (lang: Language) => void;
   isRTL: boolean;
+  t: any;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -20,9 +22,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [lang]);
 
   const isRTL = lang === 'ar';
+  const t = translations[lang];
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, isRTL }}>
+    <LanguageContext.Provider value={{ lang, setLang, isRTL, t }}>
       <div className={isRTL ? 'arabic-font' : ''} dir={isRTL ? 'rtl' : 'ltr'}>
         {children}
       </div>

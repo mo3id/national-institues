@@ -1,0 +1,375 @@
+
+> national-institutes-schools-portal-(nis)@0.0.0 dev
+> vite
+
+Port 3000 is in use, trying another one...
+
+  VITE v6.4.1  ready in 1540 ms
+
+  ➜  Local:   http://localhost:3001/
+  ➜  Network: http://192.168.1.3:3001/
+  ➜  press h + enter to show help
+9:26:47 AM [vite] .env.local changed, restarting server...
+9:26:47 AM [vite] server restarted.
+10:11:52 AM [vite] (client) hmr update /pages/Home.tsx, /pages/Careers.tsx, /pages/Schools.tsx
+10:11:54 AM [vite] (client) hmr update /pages/Home.tsx
+10:12:06 AM [vite] (client) hmr update /pages/Home.tsx
+10:12:06 AM [vite] (client) hmr update /pages/Home.tsx, /pages/Careers.tsx, /pages/Schools.tsx
+10:29:18 AM [vite] (client) hmr update /pages/Home.tsx
+10:52:17 AM [vite] (client) hmr update /pages/Home.tsx
+10:56:22 AM [vite] (client) hmr update /pages/Home.tsx
+11:00:18 AM [vite] (client) hmr update /pages/Home.tsx
+11:26:54 AM [vite] (client) hmr update /pages/Home.tsx
+11:26:54 AM [vite] Internal server error: /Users/mohamedeidali/Desktop/national-institues/pages/Home.tsx: Expected corresponding JSX closing tag for <div>. (405:14)
+
+  403 |                   );
+  404 |                 })}
+> 405 |               </svg>
+      |               ^
+  406 |
+  407 |               {/* Schools List Overlay when selected */}
+  408 |               {selectedGov && (
+  Plugin: vite:react-babel
+  File: /Users/mohamedeidali/Desktop/national-institues/pages/Home.tsx:405:14
+  403|                    );
+  404|                  })}
+  405|                </svg>
+     |                ^
+  406|  
+  407|                {/* Schools List Overlay when selected */}
+      at constructor (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:6599:19)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4727:16)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElement (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4749:17)
+      at TypeScriptParserMixin.parseExprAtom (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4759:19)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11081:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11066:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11046:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9837:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10899:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10904:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10881:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10831:21)
+      at /Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9775:39
+      at TypeScriptParserMixin.tryParse (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:6907:20)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9775:18)
+      at /Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10800:39
+      at TypeScriptParserMixin.allowInAnd (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12426:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10800:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12493:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11675:28)
+      at TypeScriptParserMixin.parseExprAtom (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11331:23)
+      at TypeScriptParserMixin.parseExprAtom (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4764:20)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11081:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11066:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11046:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9837:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10899:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10904:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10881:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10831:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9786:20)
+      at TypeScriptParserMixin.parseExpressionBase (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10784:23)
+      at /Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10780:39
+      at TypeScriptParserMixin.allowInAnd (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12421:16)
+      at TypeScriptParserMixin.parseExpression (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10780:17)
+      at TypeScriptParserMixin.parseReturnStatement (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13142:28)
+      at TypeScriptParserMixin.parseStatementContent (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12798:21)
+      at TypeScriptParserMixin.parseStatementContent (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9508:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12767:17)
+      at TypeScriptParserMixin.parseStatementListItem (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12747:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13316:61)
+      at TypeScriptParserMixin.parseBlockBody (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13309:10)
+      at TypeScriptParserMixin.parseBlock (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13297:10)
+      at TypeScriptParserMixin.parseFunctionBody (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12100:24)
+11:26:54 AM [vite] Internal server error: /Users/mohamedeidali/Desktop/national-institues/pages/Home.tsx: Expected corresponding JSX closing tag for <div>. (405:14)
+
+  403 |                   );
+  404 |                 })}
+> 405 |               </svg>
+      |               ^
+  406 |
+  407 |               {/* Schools List Overlay when selected */}
+  408 |               {selectedGov && (
+  Plugin: vite:react-babel
+  File: /Users/mohamedeidali/Desktop/national-institues/pages/Home.tsx:405:14
+  403|                    );
+  404|                  })}
+  405|                </svg>
+     |                ^
+  406|  
+  407|                {/* Schools List Overlay when selected */}
+      at constructor (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:6599:19)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4727:16)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElement (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4749:17)
+      at TypeScriptParserMixin.parseExprAtom (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4759:19)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11081:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11066:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11046:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9837:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10899:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10904:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10881:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10831:21)
+      at /Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9775:39
+      at TypeScriptParserMixin.tryParse (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:6907:20)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9775:18)
+      at /Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10800:39
+      at TypeScriptParserMixin.allowInAnd (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12426:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10800:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12493:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11675:28)
+      at TypeScriptParserMixin.parseExprAtom (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11331:23)
+      at TypeScriptParserMixin.parseExprAtom (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4764:20)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11081:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11066:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11046:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9837:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10899:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10904:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10881:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10831:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9786:20)
+      at TypeScriptParserMixin.parseExpressionBase (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10784:23)
+      at /Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10780:39
+      at TypeScriptParserMixin.allowInAnd (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12421:16)
+      at TypeScriptParserMixin.parseExpression (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10780:17)
+      at TypeScriptParserMixin.parseReturnStatement (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13142:28)
+      at TypeScriptParserMixin.parseStatementContent (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12798:21)
+      at TypeScriptParserMixin.parseStatementContent (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9508:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12767:17)
+      at TypeScriptParserMixin.parseStatementListItem (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12747:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13316:61)
+      at TypeScriptParserMixin.parseBlockBody (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13309:10)
+      at TypeScriptParserMixin.parseBlock (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13297:10)
+      at TypeScriptParserMixin.parseFunctionBody (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12100:24)
+11:26:54 AM [vite] Internal server error: /Users/mohamedeidali/Desktop/national-institues/pages/Home.tsx: Expected corresponding JSX closing tag for <div>. (405:14)
+
+  403 |                   );
+  404 |                 })}
+> 405 |               </svg>
+      |               ^
+  406 |
+  407 |               {/* Schools List Overlay when selected */}
+  408 |               {selectedGov && (
+  Plugin: vite:react-babel
+  File: /Users/mohamedeidali/Desktop/national-institues/pages/Home.tsx:405:14
+  403|                    );
+  404|                  })}
+  405|                </svg>
+     |                ^
+  406|  
+  407|                {/* Schools List Overlay when selected */}
+      at constructor (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:6599:19)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4727:16)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElement (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4749:17)
+      at TypeScriptParserMixin.parseExprAtom (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4759:19)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11081:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11066:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11046:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9837:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10899:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10904:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10881:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10831:21)
+      at /Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9775:39
+      at TypeScriptParserMixin.tryParse (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:6907:20)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9775:18)
+      at /Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10800:39
+      at TypeScriptParserMixin.allowInAnd (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12426:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10800:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12493:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11675:28)
+      at TypeScriptParserMixin.parseExprAtom (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11331:23)
+      at TypeScriptParserMixin.parseExprAtom (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4764:20)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11081:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11066:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11046:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9837:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10899:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10904:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10881:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10831:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9786:20)
+      at TypeScriptParserMixin.parseExpressionBase (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10784:23)
+      at /Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10780:39
+      at TypeScriptParserMixin.allowInAnd (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12421:16)
+      at TypeScriptParserMixin.parseExpression (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10780:17)
+      at TypeScriptParserMixin.parseReturnStatement (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13142:28)
+      at TypeScriptParserMixin.parseStatementContent (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12798:21)
+      at TypeScriptParserMixin.parseStatementContent (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9508:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12767:17)
+      at TypeScriptParserMixin.parseStatementListItem (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12747:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13316:61)
+      at TypeScriptParserMixin.parseBlockBody (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13309:10)
+      at TypeScriptParserMixin.parseBlock (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13297:10)
+      at TypeScriptParserMixin.parseFunctionBody (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12100:24)
+11:26:54 AM [vite] Internal server error: /Users/mohamedeidali/Desktop/national-institues/pages/Home.tsx: Expected corresponding JSX closing tag for <div>. (405:14)
+
+  403 |                   );
+  404 |                 })}
+> 405 |               </svg>
+      |               ^
+  406 |
+  407 |               {/* Schools List Overlay when selected */}
+  408 |               {selectedGov && (
+  Plugin: vite:react-babel
+  File: /Users/mohamedeidali/Desktop/national-institues/pages/Home.tsx:405:14
+  403|                    );
+  404|                  })}
+  405|                </svg>
+     |                ^
+  406|  
+  407|                {/* Schools List Overlay when selected */}
+      at constructor (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:6599:19)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4727:16)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElement (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4749:17)
+      at TypeScriptParserMixin.parseExprAtom (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4759:19)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11081:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11066:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11046:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9837:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10899:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10904:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10881:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10831:21)
+      at /Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9775:39
+      at TypeScriptParserMixin.tryParse (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:6907:20)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9775:18)
+      at /Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10800:39
+      at TypeScriptParserMixin.allowInAnd (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12426:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10800:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12493:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11675:28)
+      at TypeScriptParserMixin.parseExprAtom (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11331:23)
+      at TypeScriptParserMixin.parseExprAtom (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4764:20)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11081:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11066:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11046:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9837:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10899:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10904:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10881:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10831:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9786:20)
+      at TypeScriptParserMixin.parseExpressionBase (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10784:23)
+      at /Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10780:39
+      at TypeScriptParserMixin.allowInAnd (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12421:16)
+      at TypeScriptParserMixin.parseExpression (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10780:17)
+      at TypeScriptParserMixin.parseReturnStatement (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13142:28)
+      at TypeScriptParserMixin.parseStatementContent (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12798:21)
+      at TypeScriptParserMixin.parseStatementContent (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9508:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12767:17)
+      at TypeScriptParserMixin.parseStatementListItem (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12747:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13316:61)
+      at TypeScriptParserMixin.parseBlockBody (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13309:10)
+      at TypeScriptParserMixin.parseBlock (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13297:10)
+      at TypeScriptParserMixin.parseFunctionBody (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12100:24)
+11:26:54 AM [vite] Internal server error: /Users/mohamedeidali/Desktop/national-institues/pages/Home.tsx: Expected corresponding JSX closing tag for <div>. (405:14)
+
+  403 |                   );
+  404 |                 })}
+> 405 |               </svg>
+      |               ^
+  406 |
+  407 |               {/* Schools List Overlay when selected */}
+  408 |               {selectedGov && (
+  Plugin: vite:react-babel
+  File: /Users/mohamedeidali/Desktop/national-institues/pages/Home.tsx:405:14
+  403|                    );
+  404|                  })}
+  405|                </svg>
+     |                ^
+  406|  
+  407|                {/* Schools List Overlay when selected */}
+      at constructor (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:6599:19)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4727:16)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4698:32)
+      at TypeScriptParserMixin.jsxParseElement (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4749:17)
+      at TypeScriptParserMixin.parseExprAtom (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4759:19)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11081:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11066:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11046:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9837:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10899:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10904:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10881:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10831:21)
+      at /Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9775:39
+      at TypeScriptParserMixin.tryParse (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:6907:20)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9775:18)
+      at /Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10800:39
+      at TypeScriptParserMixin.allowInAnd (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12426:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10800:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12493:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11675:28)
+      at TypeScriptParserMixin.parseExprAtom (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11331:23)
+      at TypeScriptParserMixin.parseExprAtom (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:4764:20)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11081:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11066:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:11046:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9837:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10899:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10904:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10881:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10831:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9786:20)
+      at TypeScriptParserMixin.parseExpressionBase (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10784:23)
+      at /Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10780:39
+      at TypeScriptParserMixin.allowInAnd (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12421:16)
+      at TypeScriptParserMixin.parseExpression (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:10780:17)
+      at TypeScriptParserMixin.parseReturnStatement (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13142:28)
+      at TypeScriptParserMixin.parseStatementContent (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12798:21)
+      at TypeScriptParserMixin.parseStatementContent (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:9508:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12767:17)
+      at TypeScriptParserMixin.parseStatementListItem (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12747:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13316:61)
+      at TypeScriptParserMixin.parseBlockBody (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13309:10)
+      at TypeScriptParserMixin.parseBlock (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:13297:10)
+      at TypeScriptParserMixin.parseFunctionBody (/Users/mohamedeidali/Desktop/national-institues/node_modules/@babel/parser/lib/index.js:12100:24)
+11:33:07 AM [vite] (client) hmr update /pages/Home.tsx
+11:35:27 AM [vite] (client) hmr update /LanguageContext.tsx
+11:35:27 AM [vite] (client) hmr invalidate /LanguageContext.tsx Could not Fast Refresh ("useLanguage" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+11:35:27 AM [vite] (client) hmr update /App.tsx, /components/Footer.tsx, /components/Navbar.tsx, /pages/Home.tsx, /pages/Careers.tsx, /pages/Schools.tsx
+11:38:15 AM [vite] (client) hmr update /components/Footer.tsx, /components/Navbar.tsx, /pages/Careers.tsx, /pages/Schools.tsx, /LanguageContext.tsx
+11:38:15 AM [vite] (client) hmr invalidate /LanguageContext.tsx Could not Fast Refresh ("useLanguage" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+11:38:15 AM [vite] (client) hmr update /App.tsx, /components/Footer.tsx, /components/Navbar.tsx, /pages/Home.tsx, /pages/Careers.tsx, /pages/Schools.tsx
+11:38:27 AM [vite] (client) hmr update /components/Footer.tsx, /components/Navbar.tsx, /pages/Careers.tsx, /pages/Schools.tsx, /LanguageContext.tsx
+11:38:27 AM [vite] (client) hmr invalidate /LanguageContext.tsx Could not Fast Refresh ("useLanguage" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+11:38:27 AM [vite] (client) hmr update /App.tsx, /components/Footer.tsx, /components/Navbar.tsx, /pages/Home.tsx, /pages/Careers.tsx, /pages/Schools.tsx
+11:38:46 AM [vite] (client) hmr update /components/Navbar.tsx
+11:38:54 AM [vite] (client) hmr update /components/Navbar.tsx
+11:38:58 AM [vite] (client) hmr update /components/Footer.tsx
+11:39:36 AM [vite] (client) hmr update /pages/Careers.tsx
+11:39:44 AM [vite] (client) hmr update /pages/Schools.tsx
+11:39:55 AM [vite] (client) hmr update /pages/Schools.tsx
+11:43:04 AM [vite] (client) hmr update /pages/Home.tsx
+11:44:22 AM [vite] (client) hmr update /pages/Home.tsx
