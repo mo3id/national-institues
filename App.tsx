@@ -11,6 +11,7 @@ const Home = lazy(() => import('./pages/Home'));
 const AIStudio = lazy(() => import('./pages/AIStudio'));
 const Careers = lazy(() => import('./pages/Careers'));
 const Schools = lazy(() => import('./pages/Schools'));
+const SchoolProfile = lazy(() => import('./pages/SchoolProfile'));
 
 const PageLoader = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
@@ -25,11 +26,12 @@ const App: React.FC = () => {
       <Router>
         <div className="flex flex-col min-h-screen">
           <Navbar />
-          <main className="flex-grow">
+          <main className="flex-grow pt-24">
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/schools" element={<Schools />} />
+                <Route path="/schools/:id" element={<SchoolProfile />} />
                 <Route path="/ai-studio" element={<AIStudio />} />
                 <Route path="/careers" element={<Careers />} />
                 <Route path="*" element={<Home />} />
