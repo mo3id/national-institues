@@ -6,7 +6,7 @@ import { useLanguage } from '../LanguageContext';
 
 const SchoolProfile: React.FC = () => {
   const { id } = useParams();
-  const { isRTL, t } = useLanguage();
+  const { isRTL, t, lang } = useLanguage();
   const school = SCHOOLS.find(s => s.id === id);
 
   if (!school) return (
@@ -26,7 +26,7 @@ const SchoolProfile: React.FC = () => {
             </div>
             <div className="text-white">
               <h1 className="text-3xl font-black">{school.name}</h1>
-              <p className="text-sm opacity-90">{school.governorate} • {school.location}</p>
+              <p className="text-sm opacity-90">{school.information?.arLocation || school.governorate} • {school.location}</p>
             </div>
           </div>
         </div>
@@ -35,54 +35,54 @@ const SchoolProfile: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 -mt-6 relative z-10 pt-5 md:pt-8 lg:pt-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="bg-white rounded-2xl p-6 shadow-md">
-            <h3 className="font-bold text-lg md:text-xl mb-4">{t?.schools?.title ?? 'School Details'}</h3>
+            <h3 className="font-bold text-lg md:text-xl mb-4">{lang === 'ar' ? 'تفاصيل المدرسة' : 'School Details'}</h3>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-blue-900 mt-1" />
                 <div>
-                  <p className="text-xs text-gray-400">العنوان</p>
-                  <p className="font-bold">شارع التعليم، الحي الأول</p>
+                  <p className="text-xs text-gray-400">{lang === 'ar' ? 'العنوان' : 'Address'}</p>
+                  <p className="font-bold">{lang === 'ar' ? 'شارع التعليم، الحي الأول' : 'Education St, First District'}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Phone className="w-5 h-5 text-blue-900 mt-1" />
                 <div>
-                  <p className="text-xs text-gray-400">الهاتف</p>
+                  <p className="text-xs text-gray-400">{lang === 'ar' ? 'الهاتف' : 'Phone'}</p>
                   <p className="font-bold">02-12345678</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Mail className="w-5 h-5 text-blue-900 mt-1" />
                 <div>
-                  <p className="text-xs text-gray-400">البريد الإلكتروني</p>
+                  <p className="text-xs text-gray-400">{lang === 'ar' ? 'البريد الإلكتروني' : 'Email'}</p>
                   <p className="font-bold">info@school{school.id}.edu.eg</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Globe className="w-5 h-5 text-blue-900 mt-1" />
                 <div>
-                  <p className="text-xs text-gray-400">الموقع الإلكتروني</p>
+                  <p className="text-xs text-gray-400">{lang === 'ar' ? 'الموقع الإلكتروني' : 'Website'}</p>
                   <p className="font-bold text-blue-700">www.school-website.com</p>
                 </div>
               </div>
             </div>
 
             <div className="mt-6">
-              <Link to="/schools" className="text-sm text-gray-600 inline-flex items-center gap-2">
+              <Link to="/schools" className={`text-sm text-gray-600 inline-flex items-center gap-2 ${lang === 'ar' && isRTL ? 'flex-row-reverse' : ''}`}>
                 <ArrowLeft className="w-4 h-4" />
-                العودة للقائمة
+                {lang === 'ar' ? 'العودة للقائمة' : 'Back to List'}
               </Link>
             </div>
           </div>
 
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-2xl p-6 shadow-md">
-              <h3 className="font-bold text-lg md:text-xl mb-4">عن المدرسة</h3>
-              <p className="text-gray-600 leading-relaxed text-sm md:text-base">هذه فقرة تجريبية لوصف المدرسة. تتميز المدرسة بتقديم تعليم عالي الجودة وتوفر بيئة تعليمية آمنة ومحفزة للطلاب. تضم المدرسة نخبة من المعلمين ذوي الخبرة والكفاءة العالية.</p>
+              <h3 className="font-bold text-lg md:text-xl mb-4">{lang === 'ar' ? 'عن المدرسة' : 'About School'}</h3>
+              <p className="text-gray-600 leading-relaxed text-sm md:text-base">{lang === 'ar' ? 'هذه فقرة تجريبية لوصف المدرسة. تتميز المدرسة بتقديم تعليم عالي الجودة وتوفر بيئة تعليمية آمنة ومحفزة للطلاب. تضم المدرسة نخبة من المعلمين ذوي الخبرة والكفاءة العالية.' : 'This is a test paragraph describing the school. Our school offers high-quality education in a safe and stimulating learning environment. We have a team of experienced and highly qualified teachers.'}</p>
             </div>
 
             <div className="bg-white rounded-2xl p-6 shadow-md">
-              <h3 className="font-bold text-lg md:text-xl mb-4">معرض الصور</h3>
+              <h3 className="font-bold text-lg md:text-xl mb-4">{lang === 'ar' ? 'معرض الصور' : 'Photo Gallery'}</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {[1,2,3,4,5,6].map(i => (
                   <div key={i} className="h-28 md:h-36 bg-gray-100 rounded-lg overflow-hidden">

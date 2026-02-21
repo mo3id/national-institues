@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Menu, Sparkles, Globe, X, Home as HomeIcon } from 'lucide-react';
+import { Search, Menu, Globe, X, Home as HomeIcon } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 import { translations } from '../translations';
 import NISLogo from './NISLogo';
@@ -20,6 +20,7 @@ const Navbar: React.FC = () => {
     { name: t.schools, path: '/schools' },
     { name: t.news, path: '/news' },
     { name: t.careers, path: '/careers' },
+    { name: lang === 'ar' ? 'شكاوي العملاء' : 'Customer Feedback', path: '/complaints' },
   ];
 
   useEffect(() => {
@@ -85,16 +86,6 @@ const Navbar: React.FC = () => {
 
           {/* Action Buttons & Utility Icons */}
           <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2 md:space-x-4' : 'space-x-2 md:space-x-4'}`}>
-            
-            <Link
-              to="/ai-studio"
-              className={`hidden lg:flex items-center space-x-2 bg-[#1e3a8a] text-white px-5 py-2 rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg hover:shadow-blue-900/20 hover:-translate-y-0.5 transition-all active:scale-95
-                ${isActive('/ai-studio') ? 'ring-2 ring-blue-400 ring-offset-2' : ''}`}
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>{t.aiStudio}</span>
-            </Link>
-
             <button
               onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
               className="flex items-center space-x-1 text-gray-400 hover:text-[#1e3a8a] font-black text-[10px] uppercase transition-all px-2 py-1 rounded-md hover:bg-gray-50"
@@ -141,14 +132,6 @@ const Navbar: React.FC = () => {
               {link.name}
             </Link>
           ))}
-          <Link
-            to="/ai-studio"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center justify-center space-x-2 bg-gradient-to-r from-[#1e3a8a] to-blue-800 text-white p-4 rounded-xl font-black text-sm uppercase tracking-widest shadow-md"
-          >
-            <Sparkles className="h-4 w-4" />
-            <span>{t.aiStudio}</span>
-          </Link>
           <div className="pt-4 border-t border-gray-100">
             <Link
               to="/complaints"
