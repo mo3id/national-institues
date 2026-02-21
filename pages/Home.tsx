@@ -86,21 +86,21 @@ const Home: React.FC = () => {
               <div className="space-y-6">
                 <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
                   <span className="h-0.5 w-12 bg-red-600"></span>
-                  <span className="text-red-600 font-bold tracking-[0.2em] uppercase text-sm">Founding Message</span>
+                  <span className="text-red-600 font-bold tracking-[0.2em] uppercase text-sm">{t?.chairman?.tag ?? 'Founding Message'}</span>
                 </div>
                 <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#1e3a8a] leading-[1.1] tracking-tight">
-                  Nurturing Leaders Since 1956
+                  {t?.chairman?.title ?? 'Nurturing Leaders Since 1956'}
                 </h2>
               </div>
 
               <div className="space-y-8">
                 <blockquote className={`text-xl md:text-2xl text-gray-600 leading-relaxed font-serif italic ${isRTL ? 'border-r-4 pr-6' : 'border-l-4 pl-6'} border-red-600 py-2`}>
-                  "Education is not the filling of a pail, but the lighting of a fire."
+                  {t?.chairman?.quote ?? '"Education is not the filling of a pail, but the lighting of a fire."'}
                 </blockquote>
 
                 <div className="space-y-1">
-                  <p className="font-black text-xl text-[#1e3a8a] uppercase tracking-widest">Dr. Ahmed El-Said</p>
-                  <p className="text-red-600 font-bold text-xs uppercase tracking-[0.2em]">Chairman of NIS</p>
+                  <p className="font-black text-xl text-[#1e3a8a] uppercase tracking-widest">{t?.chairman?.name ?? 'Dr. Ahmed El-Said'}</p>
+                  <p className="text-red-600 font-bold text-xs uppercase tracking-[0.2em]">{t?.chairman?.role ?? 'Chairman of NIS'}</p>
                 </div>
               </div>
             </div>
