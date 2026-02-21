@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../LanguageContext';
 import { SCHOOLS, GOVERNORATES, NEWS } from '../constants';
 import NISLogo from '../components/NISLogo';
+import Hero from '../components/Hero';
 
 const Home: React.FC = () => {
   const { t, isRTL, lang } = useLanguage();
@@ -54,74 +55,52 @@ const Home: React.FC = () => {
   return (
     <div className="overflow-x-hidden">
       {/* Hero Slider */}
-      <section className="relative h-[90vh] bg-blue-900 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://picsum.photos/seed/school/1920/1080')] bg-cover bg-center opacity-40 mix-blend-overlay scale-110 animate-slow-zoom" />
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-950/90 via-blue-900/60 to-transparent" />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center relative z-10">
-          <div className="max-w-3xl space-y-8 text-start animate-fade-in-up">
-            <div className={`inline-flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} bg-red-700/10 backdrop-blur-md border border-red-500/20 px-4 py-2 rounded-full`}>
-              <span className="flex h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-red-400 text-xs font-bold uppercase tracking-[0.2em]">{t.hero.badge}</span>
-            </div>
-            <h1 className="text-4xl sm:text-6xl lg:text-8xl font-black text-white leading-[1.1] tracking-tight">
-              {t.hero.title} <span className="text-red-600">.</span>
-            </h1>
-            <p className="text-xl text-blue-50/70 leading-relaxed max-w-xl font-medium">
-              {t.hero.subtitle}
-            </p>
-            <div className={`flex flex-col sm:flex-row ${isRTL ? 'sm:space-x-reverse sm:space-x-4' : 'sm:space-x-4'} space-y-4 sm:space-y-0 pt-4`}>
-              <button className="bg-red-700 hover:bg-red-800 text-white px-10 py-5 rounded-full font-bold shadow-2xl shadow-red-900/40 transition-all flex items-center justify-center space-x-3 group">
-                <span>{t.hero.ctaSearch}</span>
-                <ArrowRight className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''} group-hover:translate-x-2 transition-transform`} />
-              </button>
-              <button className="bg-blue-800/50 hover:bg-blue-700/50 backdrop-blur-md text-white border border-blue-400/20 px-10 py-5 rounded-full font-bold transition-all">
-                {t.hero.ctaAbout}
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Hero />
 
       {/* Chairman Message */}
       <section className="py-24 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`grid grid-cols-1 lg:grid-cols-2 gap-20 items-center ${isRTL ? 'lg:flex-row-reverse' : ''}`}>
+
+            {/* Image Side */}
             <div className="relative group overflow-hidden md:overflow-visible">
-              <div className="absolute -inset-4 bg-gray-100 rounded-3xl -rotate-2 group-hover:rotate-0 transition-transform duration-700" />
-              <div className="relative aspect-[4/5] overflow-hidden rounded-2xl shadow-3xl bg-gray-200">
+              <div className="absolute -inset-4 bg-gray-100 rounded-[2.5rem] -rotate-2 group-hover:rotate-0 transition-transform duration-700" />
+              <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] shadow-2xl bg-gray-200">
                 <img
-                  src="https://picsum.photos/seed/chairman/800/1000"
+                  src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070&auto=format&fit=crop"
                   alt="Chairman"
                   className="w-full h-full object-cover grayscale-0 group-hover:scale-105 transition-transform duration-1000"
                   loading="lazy"
                 />
-              </div>
-              <div className="absolute -bottom-4 -right-4 md:-bottom-8 md:-right-8 bg-blue-900 p-4 md:p-8 rounded-2xl shadow-2xl border-4 border-white animate-bounce-subtle">
-                <div className="flex flex-col items-center">
-                  <span className="text-white text-xl md:text-3xl font-black italic">100+</span>
-                  <span className="text-blue-100 text-[8px] md:text-[10px] font-bold uppercase tracking-widest">{t.chairman.years}</span>
+
+                {/* 100+ Badge */}
+                <div className={`absolute bottom-8 ${isRTL ? 'left-8' : 'right-8'} bg-[#1e3a8a] text-white p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center min-w-[120px]`}>
+                  <span className="text-4xl font-black italic">100+</span>
+                  <span className="text-xs uppercase tracking-widest opacity-80 mt-1">Years</span>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-8 text-start">
-              <div className="space-y-4">
-                <div className={`inline-flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} text-red-700 font-bold text-xs uppercase tracking-[0.3em]`}>
-                  <div className="w-10 h-[2px] bg-red-700" />
-                  <span>{t.chairman.tag}</span>
+            {/* Text Side */}
+            <div className={`space-y-10 text-start ${isRTL ? 'text-right' : ''}`}>
+              <div className="space-y-6">
+                <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
+                  <span className="h-0.5 w-12 bg-red-600"></span>
+                  <span className="text-red-600 font-bold tracking-[0.2em] uppercase text-sm">Founding Message</span>
                 </div>
-                <h2 className="text-4xl font-bold text-gray-900 tracking-tight leading-snug">
-                  {t.chairman.title}
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#1e3a8a] leading-[1.1] tracking-tight">
+                  Nurturing Leaders Since 1956
                 </h2>
               </div>
-              <div className="space-y-6">
-                <p className="text-xl text-gray-600 leading-relaxed italic border-l-4 border-red-700 pl-6 py-2">
-                  "{t.chairman.quote}"
-                </p>
-                <div className="space-y-2">
-                  <p className="font-bold text-lg text-gray-900 uppercase tracking-widest">{t.chairman.name}</p>
-                  <p className="text-red-700 font-bold text-xs uppercase tracking-widest">{t.chairman.role}</p>
+
+              <div className="space-y-8">
+                <blockquote className={`text-xl md:text-2xl text-gray-600 leading-relaxed font-serif italic ${isRTL ? 'border-r-4 pr-6' : 'border-l-4 pl-6'} border-red-600 py-2`}>
+                  "Education is not the filling of a pail, but the lighting of a fire."
+                </blockquote>
+
+                <div className="space-y-1">
+                  <p className="font-black text-xl text-[#1e3a8a] uppercase tracking-widest">Dr. Ahmed El-Said</p>
+                  <p className="text-red-600 font-bold text-xs uppercase tracking-[0.2em]">Chairman of NIS</p>
                 </div>
               </div>
             </div>
@@ -295,25 +274,25 @@ const Home: React.FC = () => {
             </div>
             <div className="flex gap-4">
               <button
-                onClick={isRTL ? nextNews : prevNews}
-                disabled={isRTL ? newsIndex >= maxNewsIndex : newsIndex === 0}
-                className={`p-4 rounded-full border border-gray-200 transition-all ${(isRTL ? newsIndex >= maxNewsIndex : newsIndex === 0) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-blue-900 hover:shadow-lg active:scale-95'}`}
+                onClick={prevNews}
+                disabled={newsIndex === 0}
+                className={`p-4 rounded-full border border-gray-200 transition-all ${newsIndex === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-blue-900 hover:shadow-lg active:scale-95'}`}
               >
-                <ChevronLeft className="h-6 w-6" />
+                <ChevronLeft className={`h-6 w-6 ${isRTL ? 'rotate-180' : ''}`} />
               </button>
               <button
-                onClick={isRTL ? prevNews : nextNews}
-                disabled={isRTL ? newsIndex === 0 : newsIndex >= maxNewsIndex}
-                className={`p-4 rounded-full border border-gray-200 transition-all ${(isRTL ? newsIndex === 0 : newsIndex >= maxNewsIndex) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-blue-900 hover:shadow-lg active:scale-95'}`}
+                onClick={nextNews}
+                disabled={newsIndex >= maxNewsIndex}
+                className={`p-4 rounded-full border border-gray-200 transition-all ${newsIndex >= maxNewsIndex ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-blue-900 hover:shadow-lg active:scale-95'}`}
               >
-                <ChevronRight className="h-6 w-6" />
+                <ChevronRight className={`h-6 w-6 ${isRTL ? 'rotate-180' : ''}`} />
               </button>
             </div>
           </div>
           <div className="relative overflow-hidden">
             <div
               className="flex transition-transform duration-700 ease-in-out"
-              style={{ transform: `translateX(${isRTL ? '+' : '-'}${newsIndex * (100 / itemsPerPage)}%)` }}
+              style={{ transform: `translateX(${isRTL ? newsIndex * (100 / itemsPerPage) : -newsIndex * (100 / itemsPerPage)}%)` }}
             >
               {NEWS.map((item) => (
                 <div key={item.id} className={`${itemsPerPage === 1 ? 'w-full' : itemsPerPage === 2 ? 'w-1/2' : 'w-1/3'} flex-shrink-0 px-4`}>
