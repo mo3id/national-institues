@@ -37,8 +37,8 @@ const Hero: React.FC = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1, // Faster stagger for snappier feel
-        delayChildren: 0.2
+        staggerChildren: 0.12,
+        delayChildren: 0.3
       }
     }
   };
@@ -46,16 +46,16 @@ const Hero: React.FC = () => {
   const textItemVariants = {
     hidden: { 
       opacity: 0, 
-      y: 20, // Reduced movement
-      x: isRTL ? 15 : -15 
+      y: 30,
+      filter: "blur(8px)"
     },
     visible: { 
       opacity: 1, 
       y: 0, 
-      x: 0,
+      filter: "blur(0px)",
       transition: { 
-        duration: 0.6, // Faster duration
-        ease: [0.22, 1, 0.36, 1] as any
+        duration: 1, 
+        ease: [0.19, 1, 0.22, 1] as any
       }
     }
   };
@@ -63,32 +63,30 @@ const Hero: React.FC = () => {
   if (slides.length === 0) return null;
 
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-black">
+    <section className="relative h-screen w-full overflow-hidden bg-[#050505]">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1, ease: "easeInOut" }}
+          initial={{ opacity: 0, scale: 1.03 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.98 }}
+          transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
           className="absolute inset-0"
         >
-          {/* Static Background Image - Removed Ken Burns */}
           <div className="absolute inset-0">
             <img
               src={slides[currentIndex].image}
               alt={slides[currentIndex].title}
-              className={`h-full w-full object-cover object-center transition-transform duration-700 ${isRTL ? 'scale-x-[-1]' : ''}`}
+              className={`h-full w-full object-cover object-center transition-transform duration-[2000ms] ${isRTL ? 'scale-x-[-1]' : ''}`}
             />
+            {/* Ultra-subtle overlay for contrast */}
+            <div className="absolute inset-0 bg-black/10" />
           </div>
-
-          {/* Removed Gradient Overlay for pure image look */}
         </motion.div>
       </AnimatePresence>
 
-      {/* Content Container - Starts from top 0 to fill viewport */}
-      <div className="relative z-20 h-full w-full max-w-[95vw] md:max-w-[90vw] mx-auto flex flex-col justify-center pt-24">
-        <div className={`w-full lg:w-[50vw] ${isRTL ? 'text-right' : 'text-left'}`}>
+      <div className="relative z-20 h-full w-full max-w-[90vw] mx-auto flex flex-col justify-center">
+        <div className={`w-full lg:w-[45vw] ${isRTL ? 'text-right' : 'text-left'}`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
@@ -96,46 +94,49 @@ const Hero: React.FC = () => {
               initial="hidden"
               animate="visible"
               exit="hidden"
-              className="space-y-6 md:space-y-8"
+              className="space-y-8"
             >
-              {/* Badge */}
-              <motion.div variants={textItemVariants}>
-                <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold uppercase tracking-[0.2em]">
+              <motion.div variants={textItemVariants} className="flex items-center gap-3">
+                <span className="w-6 h-[1px] bg-white/30" />
+                <span className="text-white/50 text-[9px] font-bold uppercase tracking-[0.5em]">
                   {slides[currentIndex].subtitle}
                 </span>
               </motion.div>
 
-              {/* Title */}
               <motion.h1 
                 variants={textItemVariants}
-                className="text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] tracking-tight drop-shadow-xl"
+                className="text-6xl md:text-7xl lg:text-[5.5rem] font-extralight text-white leading-tight tracking-tight"
               >
                 {slides[currentIndex].title}
               </motion.h1>
 
-              {/* Description */}
               <motion.p 
                 variants={textItemVariants}
-                className="text-lg md:text-xl lg:text-2xl text-white/95 max-w-xl leading-relaxed font-medium drop-shadow-lg"
+                className="text-base md:text-lg text-white/40 max-w-md leading-relaxed font-light"
               >
                 {slides[currentIndex].description}
               </motion.p>
 
-              {/* CTA Buttons */}
               <motion.div 
                 variants={textItemVariants}
-                className={`flex flex-col sm:flex-row items-center gap-4 pt-6 ${isRTL ? 'justify-end' : 'justify-start'}`}
+                className={`flex items-center gap-12 pt-6 ${isRTL ? 'flex-row-reverse' : ''}`}
               >
-                <button className="w-full sm:w-auto bg-[#991b1b] text-white px-8 py-4 rounded-full font-bold uppercase tracking-[0.1em] text-sm hover:bg-red-800 transition-all shadow-lg shadow-red-900/40 flex items-center justify-center group">
-                  <span>{t?.cta?.btnSchools ?? 'Our Schools'}</span>
-                  {isRTL ? (
-                    <ArrowLeft className="mr-3 h-5 w-5 group-hover:-translate-x-2 transition-transform" />
-                  ) : (
-                    <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-2 transition-transform" />
-                  )}
+                <button className="group relative flex items-center gap-4 text-white text-[10px] font-bold uppercase tracking-[0.4em] transition-all">
+                  <span className="relative overflow-hidden">
+                    <span className="block transition-transform duration-500 group-hover:-translate-y-full">
+                      {t?.cta?.btnSchools ?? 'Explore'}
+                    </span>
+                    <span className="absolute top-0 left-0 transition-transform duration-500 translate-y-full group-hover:translate-y-0">
+                      {t?.cta?.btnSchools ?? 'Explore'}
+                    </span>
+                  </span>
+                  <div className="w-10 h-10 flex items-center justify-center border border-white/10 rounded-full transition-all duration-500 group-hover:border-white group-hover:bg-white group-hover:text-black">
+                    {isRTL ? <ArrowLeft size={14} /> : <ArrowRight size={14} />}
+                  </div>
                 </button>
-                <button className="w-full sm:w-auto bg-white/10 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-full font-bold uppercase tracking-[0.1em] text-sm hover:bg-white hover:text-[#1e3a8a] transition-all shadow-lg">
-                  {t?.hero?.ctaAbout ?? 'About Us'}
+                
+                <button className="text-white/30 hover:text-white text-[10px] font-bold uppercase tracking-[0.4em] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-white after:transition-all hover:after:w-full">
+                  {t?.hero?.ctaAbout ?? 'About'}
                 </button>
               </motion.div>
             </motion.div>
@@ -143,37 +144,34 @@ const Hero: React.FC = () => {
         </div>
       </div>
 
-      {/* Slider Controls - Positioned at Bottom Right (as per wireframe) */}
-      <div className={`absolute bottom-12 z-30 flex items-end gap-8 ${isRTL ? 'left-6 md:left-12' : 'right-6 md:right-12'}`}>
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-4 text-white font-black tracking-widest text-sm drop-shadow-md">
-            <span className="text-white text-2xl">0{currentIndex + 1}</span>
-            <div className="w-12 h-[1px] bg-white/40 relative">
-              <motion.div 
-                className="absolute top-0 left-0 h-full bg-white"
-                initial={{ width: 0 }}
-                animate={{ width: "100%" }}
-                key={currentIndex}
-                transition={{ duration: 8, ease: "linear" }}
-              />
-            </div>
-            <span>0{slides.length}</span>
-          </div>
-          
-          <div className="flex gap-4">
+      {/* Minimalist Slide Indicators */}
+      <div className={`absolute bottom-12 z-30 flex items-center gap-8 ${isRTL ? 'left-12' : 'right-12'}`}>
+        <div className="flex gap-3">
+          {slides.map((_, i) => (
             <button 
-              onClick={handlePrev}
-              className="p-3 rounded-full border border-white/40 text-white hover:bg-white hover:text-[#1e3a8a] transition-all backdrop-blur-sm"
+              key={i}
+              onClick={() => {
+                setIsAutoPlaying(false);
+                setCurrentIndex(i);
+              }}
+              className="group py-4 px-2"
             >
-              {isRTL ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+              <div className={`h-[1px] transition-all duration-700 ${currentIndex === i ? 'w-10 bg-white' : 'w-4 bg-white/20 group-hover:w-6 group-hover:bg-white/40'}`} />
             </button>
-            <button 
-              onClick={handleNext}
-              className="p-3 rounded-full border border-white/40 text-white hover:bg-white hover:text-[#1e3a8a] transition-all backdrop-blur-sm"
+          ))}
+        </div>
+        <div className="overflow-hidden h-4">
+          <AnimatePresence mode="wait">
+            <motion.span 
+              key={currentIndex}
+              initial={{ y: 20 }}
+              animate={{ y: 0 }}
+              exit={{ y: -20 }}
+              className="block text-white/20 text-[9px] font-bold tracking-[0.3em] uppercase"
             >
-              {isRTL ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
-            </button>
-          </div>
+              0{currentIndex + 1}
+            </motion.span>
+          </AnimatePresence>
         </div>
       </div>
     </section>
