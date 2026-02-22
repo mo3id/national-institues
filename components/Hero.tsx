@@ -78,7 +78,7 @@ const Hero: React.FC = () => {
             <img
               src={slides[currentIndex].image}
               alt={slides[currentIndex].title}
-              className="h-full w-full object-cover object-center"
+              className={`h-full w-full object-cover object-center transition-transform duration-700 ${isRTL ? 'scale-x-[-1]' : ''}`}
             />
           </div>
 
@@ -88,7 +88,7 @@ const Hero: React.FC = () => {
 
       {/* Content Container - Starts from top 0 to fill viewport */}
       <div className="relative z-20 h-full w-full max-w-[95vw] md:max-w-[90vw] mx-auto flex flex-col justify-center pt-24">
-        <div className={`w-full lg:w-[85vw] xl:w-[80vw] ${isRTL ? 'text-right' : 'text-left'}`}>
+        <div className={`w-full lg:w-[50vw] ${isRTL ? 'text-right' : 'text-left'}`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
@@ -108,7 +108,7 @@ const Hero: React.FC = () => {
               {/* Title */}
               <motion.h1 
                 variants={textItemVariants}
-                className="text-6xl md:text-8xl lg:text-[7.5rem] font-black text-white leading-[1] tracking-tighter drop-shadow-2xl"
+                className="text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] tracking-tight drop-shadow-xl"
               >
                 {slides[currentIndex].title}
               </motion.h1>
@@ -116,7 +116,7 @@ const Hero: React.FC = () => {
               {/* Description */}
               <motion.p 
                 variants={textItemVariants}
-                className="text-xl md:text-2xl lg:text-3xl text-white/95 max-w-2xl leading-relaxed font-medium drop-shadow-xl"
+                className="text-lg md:text-xl lg:text-2xl text-white/95 max-w-xl leading-relaxed font-medium drop-shadow-lg"
               >
                 {slides[currentIndex].description}
               </motion.p>
@@ -124,17 +124,17 @@ const Hero: React.FC = () => {
               {/* CTA Buttons */}
               <motion.div 
                 variants={textItemVariants}
-                className={`flex flex-col sm:flex-row items-center gap-6 pt-8 ${isRTL ? 'justify-end' : 'justify-start'}`}
+                className={`flex flex-col sm:flex-row items-center gap-4 pt-6 ${isRTL ? 'justify-end' : 'justify-start'}`}
               >
-                <button className="w-full sm:w-auto bg-[#991b1b] text-white px-12 py-5 rounded-full font-black uppercase tracking-[0.15em] text-sm hover:bg-red-800 transition-all shadow-[0_8px_30px_rgba(153,27,27,0.4)] flex items-center justify-center group">
+                <button className="w-full sm:w-auto bg-[#991b1b] text-white px-8 py-4 rounded-full font-bold uppercase tracking-[0.1em] text-sm hover:bg-red-800 transition-all shadow-lg shadow-red-900/40 flex items-center justify-center group">
                   <span>{t?.cta?.btnSchools ?? 'Our Schools'}</span>
                   {isRTL ? (
-                    <ArrowLeft className="mr-4 h-5 w-5 group-hover:-translate-x-2 transition-transform" />
+                    <ArrowLeft className="mr-3 h-5 w-5 group-hover:-translate-x-2 transition-transform" />
                   ) : (
-                    <ArrowRight className="ml-4 h-5 w-5 group-hover:translate-x-2 transition-transform" />
+                    <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-2 transition-transform" />
                   )}
                 </button>
-                <button className="w-full sm:w-auto bg-white/10 backdrop-blur-md border-2 border-white/40 text-white px-12 py-5 rounded-full font-black uppercase tracking-[0.15em] text-sm hover:bg-white hover:text-[#1e3a8a] transition-all drop-shadow-lg">
+                <button className="w-full sm:w-auto bg-white/10 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-full font-bold uppercase tracking-[0.1em] text-sm hover:bg-white hover:text-[#1e3a8a] transition-all shadow-lg">
                   {t?.hero?.ctaAbout ?? 'About Us'}
                 </button>
               </motion.div>

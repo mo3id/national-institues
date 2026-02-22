@@ -34,13 +34,13 @@ const Navbar: React.FC = () => {
 
   return (
     <nav
-      className={`absolute top-0 left-0 right-0 z-[100] transition-all duration-500 ease-in-out w-full
+      className={`top-0 left-0 right-0 z-[100] transition-all duration-500 ease-in-out mx-auto w-[95vw] md:w-[80vw] rounded-b-[2rem]
         ${isScrolled
-          ? 'fixed bg-white/90 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.05)] py-3'
-          : 'bg-transparent py-6'
+          ? 'fixed bg-white/90 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] py-3 border border-gray-200/50 border-t-0'
+          : 'absolute bg-white/10 backdrop-blur-lg shadow-[0_8px_32px_rgba(0,0,0,0.1)] py-4 border border-white/20 border-t-0'
         }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           {/* Logo Section */}
           <div className="flex items-center">
