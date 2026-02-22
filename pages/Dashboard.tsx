@@ -15,6 +15,7 @@ import { ModalWrap, EditNewsForm, EditHeroForm, EditSchoolForm } from './dashboa
 import { useAuth } from '../AuthContext';
 import { useLanguage } from '../LanguageContext';
 import NISLogo from '../components/NISLogo';
+import { CustomDatePicker } from '../components/FormControls';
 
 // ─── Initial Data ─────────────────────────────────────────────────────────────
 const initNews: DashNewsItem[] = NEWS.map((n, i) => ({ ...n, published: i < 8 }));
@@ -568,7 +569,7 @@ const Dashboard: React.FC = () => {
             <div><label className="dash-label">{u.titleAr}</label><input className="dash-input" dir="rtl" value={newArt.titleAr || ''} onChange={e => setNewArt(p => ({ ...p, titleAr: e.target.value }))} /></div>
             <div><label className="dash-label">{u.summaryEn}</label><textarea className="dash-input dash-ta" value={newArt.summary || ''} onChange={e => setNewArt(p => ({ ...p, summary: e.target.value }))} /></div>
             <div><label className="dash-label">{u.summaryAr}</label><textarea className="dash-input dash-ta" dir="rtl" value={newArt.summaryAr || ''} onChange={e => setNewArt(p => ({ ...p, summaryAr: e.target.value }))} /></div>
-            <div><label className="dash-label">{u.date}</label><input className="dash-input" type="date" value={newArt.date || ''} onChange={e => setNewArt(p => ({ ...p, date: e.target.value }))} /></div>
+            <div><label className="dash-label">{u.date}</label><CustomDatePicker value={newArt.date || ''} onChange={val => setNewArt(p => ({ ...p, date: val }))} /></div>
             <div><label className="dash-label">{u.imageUrl}</label><input className="dash-input" value={newArt.image || ''} onChange={e => setNewArt(p => ({ ...p, image: e.target.value }))} placeholder="https://..." /></div>
             {newArt.image && <div className="form-full"><img src={newArt.image} alt="" className="dash-img-preview" onError={e => (e.currentTarget.style.display = 'none')} /></div>}
             <div className="form-full" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

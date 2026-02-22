@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Save, X } from 'lucide-react';
 import { DashNewsItem, HeroSlide, DashSchool, Lang, UI } from './types';
+import { CustomSelect, CustomDatePicker } from '../../components/FormControls';
+import { Filter, Calendar } from 'lucide-react';
 
 interface ModalWrapProps { title: string; onClose: () => void; children: React.ReactNode; }
 export const ModalWrap: React.FC<ModalWrapProps> = ({ title, onClose, children }) => (
@@ -40,7 +42,7 @@ export const EditNewsForm: React.FC<EditNewsProps> = ({ article, lang, onSave, o
             </div>
             <div>
                 <label className="dash-label">{u.date}</label>
-                <input className="dash-input" type="date" value={d.date} onChange={e => setD(p => ({ ...p, date: e.target.value }))} />
+                <CustomDatePicker value={d.date} onChange={val => setD(p => ({ ...p, date: val }))} />
             </div>
             <div>
                 <label className="dash-label">{u.imageUrl}</label>
@@ -120,9 +122,11 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
             </div>
             <div>
                 <label className="dash-label">{u.type}</label>
-                <select className="dash-input" value={d.type} onChange={e => setD(p => ({ ...p, type: e.target.value }))}>
-                    {['Language', 'National', 'International'].map(t => <option key={t}>{t}</option>)}
-                </select>
+                <CustomSelect
+                    value={d.type}
+                    onChange={val => setD(p => ({ ...p, type: val }))}
+                    options={['Language', 'National', 'International'].map(t => ({ value: t, label: t }))}
+                />
             </div>
             <div className="form-full">
                 <label className="dash-label">{u.logo}</label>

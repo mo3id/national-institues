@@ -6,6 +6,7 @@ import { useLanguage } from '../LanguageContext';
 import NISLogo from '../components/NISLogo';
 import PageTransition from '../components/PageTransition';
 import ScrollReveal from '../components/ScrollReveal';
+import { CustomSelect } from '../components/FormControls';
 
 const SchoolCard = React.memo(({ school, isRTL, translations: t, lang, onView }: any) => (
   <ScrollReveal>
@@ -129,29 +130,27 @@ const Schools: React.FC = () => {
                   />
                 </div>
 
-                <div className="relative">
-                  <Filter className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'right-4' : 'left-4'} h-5 w-5 text-gray-400`} />
-                  <select
-                    value={selectedGov}
-                    onChange={(e) => setSelectedGov(e.target.value)}
-                    className={`w-full ${isRTL ? 'pr-12' : 'pl-12'} py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none appearance-none font-bold text-sm`}
-                  >
-                    <option value="">{t.filterGov}</option>
-                    {GOVERNORATES.map(gov => <option key={gov.name} value={gov.name}>{gov.name}</option>)}
-                  </select>
-                </div>
+                <CustomSelect
+                  value={selectedGov}
+                  onChange={setSelectedGov}
+                  options={[
+                    { value: '', label: t.filterGov },
+                    ...GOVERNORATES.map(gov => ({ value: gov.name, label: gov.name }))
+                  ]}
+                  icon={<Filter className="h-5 w-5" />}
+                />
+              </div>
 
-                <div className="relative">
-                  <Star className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'right-4' : 'left-4'} h-5 w-5 text-gray-400`} />
-                  <select
-                    value={selectedType}
-                    onChange={(e) => setSelectedType(e.target.value)}
-                    className={`w-full ${isRTL ? 'pr-12' : 'pl-12'} py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none appearance-none font-bold text-sm`}
-                  >
-                    <option value="">{t.filterType}</option>
-                    {schoolTypes.map(type => <option key={type} value={type}>{type}</option>)}
-                  </select>
-                </div>
+              <div className="relative">
+                <CustomSelect
+                  value={selectedType}
+                  onChange={setSelectedType}
+                  options={[
+                    { value: '', label: t.filterType },
+                    ...schoolTypes.map(type => ({ value: type, label: type }))
+                  ]}
+                  icon={<Star className="h-5 w-5" />}
+                />
               </div>
             </div>
           </ScrollReveal>

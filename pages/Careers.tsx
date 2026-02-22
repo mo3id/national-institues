@@ -5,6 +5,7 @@ import { Briefcase, MapPin, Clock, ArrowRight, Upload, CheckCircle } from 'lucid
 import { useLanguage } from '../LanguageContext';
 import PageTransition from '../components/PageTransition';
 import ScrollReveal from '../components/ScrollReveal';
+import { CustomSelect } from '../components/FormControls';
 
 const Careers: React.FC = () => {
   const { lang, isRTL, t: translationsRoot } = useLanguage();
@@ -123,10 +124,15 @@ const Careers: React.FC = () => {
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">{t.jobRef}</label>
-                          <select required value={selectedJob || ''} onChange={(e) => setSelectedJob(e.target.value)} className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all font-bold text-sm text-blue-900 appearance-none cursor-pointer">
-                            <option value="">{t.selectJob}</option>
-                            {JOBS.map(j => <option key={j.id} value={j.id}>{j.title}</option>)}
-                          </select>
+                          <CustomSelect
+                            value={selectedJob || ''}
+                            onChange={setSelectedJob}
+                            options={[
+                              { value: '', label: t.selectJob },
+                              ...JOBS.map(j => ({ value: j.id, label: j.title }))
+                            ]}
+                            icon={<Briefcase className="h-4 w-4" />}
+                          />
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">{t.upload}</label>

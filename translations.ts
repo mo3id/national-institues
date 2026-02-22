@@ -170,6 +170,13 @@ export const translations = {
         "Upper Egypt"
       ],
       address: "15 Taha Hussein St, Zamalek, Cairo, Egypt"
+    },
+    calendar: {
+      months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+      days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      prev: "Previous",
+      next: "Next",
+      selectDate: "Select Date"
     }
   },
   ar: {
@@ -342,6 +349,13 @@ export const translations = {
         "صعيد مصر"
       ],
       address: "15 شارع طه حسين، الزمالك، القاهرة، مصر"
+    },
+    calendar: {
+      months: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"],
+      days: ["أحد", "إثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"],
+      prev: "السابق",
+      next: "التالي",
+      selectDate: "اختر التاريخ"
     }
   }
 };

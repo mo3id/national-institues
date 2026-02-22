@@ -7,19 +7,17 @@
 <br/><br/>
 
 # 🏛️ National Institutes Schools Portal
-
 ### *الجمعية العامة للمعاهد القومية*
 
-**The official digital portal for Egypt's largest educational network — 40+ schools, 5 governorates, 68 years of excellence.**
+**The official digital portal for Egypt's largest educational network — 40+ schools, 5 governorates, 68+ years of excellence.**
 
 <br/>
 
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-6.2-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![TailwindCSS](https://img.shields.io/badge/Tailwind%20CSS-CDN-38BDF8?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Gemini AI](https://img.shields.io/badge/Google%20Gemini-AI%20Powered-4285F4?style=flat-square&logo=google&logoColor=white)](https://ai.google.dev/)
-[![Lucide](https://img.shields.io/badge/Lucide-Icons-F56565?style=flat-square)](https://lucide.dev/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-6.2-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind%20CSS-CDN-38BDF8?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Framer Motion](https://img.shields.io/badge/Framer_Motion-Dynamic-FF69B4?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
 
 <br/>
 
@@ -29,181 +27,108 @@
 
 ## ✨ Overview
 
-The **National Institutes Schools Portal (NIS)** is a premium, bilingual (Arabic 🇪🇬 / English 🇬🇧) web application serving as the central hub for Egypt's prestigious National Institutes educational network. Built with a modern React + TypeScript stack, it delivers a seamless experience for students, parents, educators, and administrators.
+The **National Institutes Schools Portal (NIS)** is a premium, high-performance web application designed for Egypt's prestigious educational network. It blends **modern design aesthetics** with **powerful administrative tools**, serving students, parents, and educators with a seamless bilingual experience.
 
-> *"Leading Egyptian education since 1956 — a legacy of excellence, innovation, and national pride."*
-
----
-
-## 🖼️ Features
-
-| Feature | Description |
-|---|---|
-| 🌍 **Bilingual (RTL/LTR)** | Full Arabic & English support with proper right-to-left layout switching |
-| 💾 **Language Persistence** | Language preference saved via `localStorage` — survives page reloads |
-| 🗺️ **Interactive Map** | Clickable Egypt governorate map to browse schools by region |
-| 🤖 **AI Studio** | Powered by Google Gemini API for intelligent school analysis & content generation |
-| 📰 **News Carousel** | Responsive news carousel — 1 card (mobile) / 2 (tablet) / 3 (desktop) |
-| 💼 **Careers Portal** | Job listings with an integrated application form and CV upload |
-| 🏫 **Schools Directory** | Searchable & filterable directory of 40+ schools across 5 governorates |
-| 🖼️ **Photo Gallery** | Masonry-style gallery showcasing campus life |
-| 📱 **Fully Responsive** | Optimized for mobile (320px+), tablet, and desktop |
-| ⚡ **Performance** | Lazy-loaded pages with `React.Suspense` for fast initial load |
+> *"A legacy built on excellence since 1956 — nurturing the leaders of tomorrow with innovation and pride."*
 
 ---
 
-## 🏗️ Tech Stack
+## 🚀 Key Features
 
-```
-├── ⚛️  React 19           — UI framework
-├── 🔷  TypeScript 5.8     — Type-safe development
-├── ⚡  Vite 6.2           — Lightning-fast dev server & bundler
-├── 🎨  Tailwind CSS       — Utility-first styling (CDN)
-├── 🤖  Google Gemini API  — AI-powered features
-├── 🧭  React Router 7     — Client-side routing (HashRouter)
-├── 🔣  Lucide React       — Beautiful icon library
-└── 🌐  Google Fonts       — Inter (EN) + Cairo (AR) fonts
-```
+### 🎨 Premium User Experience
+*   **Bilingual & RTL-Ready**: Seamlessly toggle between Arabic 🇪🇬 and English 🇬🇧 with synchronized RTL/LTR layouts.
+*   **Glassmorphism & Micro-animations**: Stunning UI powered by Framer Motion for a "premium" feel.
+*   **Custom Scrollbars**: Branded scrollbars that match the school's identity (Blue & Red).
+*   **Responsive Masterpiece**: Perfectly fluid across mobile (`sm`), tablet (`md`), and desktop (`lg/xl`).
+
+### 🛠️ Advanced Admin Dashboard
+*   **Full Content Management**: Manage News, School profiles, and Hero sliders in real-time.
+*   **Smart Analytics**: Overview of total articles, schools, and student metrics.
+*   **Mobile-First Admin**: A completely responsive sidebar and table-to-card reflow for managing the portal on the go.
+*   **Role-Based UI**: Dedicated views for content managers and administrators.
+
+### 🌐 Informational Hub
+*   **Interactive Egypt Map**: Geographically accurate map of governorates to explore regional school networks.
+*   **News & Story Center**: Dynamic news carousel and "Full Story" detail pages with creative layouts.
+*   **Careers & Recruitment**: Integrated job board with CV upload and application tracking.
+*   **Dynamic Schools Directory**: Advanced filtering by governorate, type, and search queries.
+
+### 🤖 AI-Powered (AI Studio)
+*   **Gemini Integration**: Utilizing Google's Gemini AI for generating school insights and automated content analysis.
 
 ---
 
-## 📁 Project Structure
+## 🏗️ Technical Architecture
 
+### 🧰 Tech Stack
+```text
+├── ⚛️  React 19 (Latest)   — Component-based UI architecture
+├── 🔷  TypeScript 5.8       — Complete type safety & robust logic
+├── ⚡  Vite 6.2             — Instant HMR & optimized production bundling
+├── 🎨  Tailwind CSS (CDN)   — Rapid, utility-first styling
+├── 🎭  Framer Motion        — Orchestrating complex UI transitions
+├── 🤖  Google Gemini API    — State-of-the-art AI features
+├── 🧭  React Router 7       — Intelligent client-side navigation
+└── 🔣  Lucide React         — Premium vector-based iconography
 ```
-national-institutes/
-│
-├── 📄 index.html              # Entry HTML with TailwindCSS CDN & custom styles
-├── 📄 index.tsx               # React root mount
-├── 📄 App.tsx                 # App shell with Router, Suspense & LanguageProvider
-│
-├── 🌐 LanguageContext.tsx     # Global lang state with localStorage persistence
-├── 📝 translations.ts         # Full EN + AR translations for all UI text
-├── 📊 constants.ts            # Static data: Schools, News, Jobs, Governorates
-├── 🔧 types.ts                # TypeScript type definitions
-│
-├── 📂 pages/
-│   ├── 🏠 Home.tsx            # Landing page: Hero, Chairman, Map, News, Gallery, CTA
-│   ├── 🏫 Schools.tsx         # Searchable schools directory
-│   ├── 💼 Careers.tsx         # Job listings & application form
-│   └── 🤖 AIStudio.tsx        # Gemini-powered AI tools
-│
-├── 📂 components/
-│   ├── 🧭 Navbar.tsx          # Responsive sticky navbar with language toggle
-│   ├── 🦶 Footer.tsx          # Footer with links, regions & contact info
-│   └── 🎨 NISLogo.tsx         # SVG logo component
-│
-└── 📂 services/               # API service layer
+
+### 📁 Smart Directory Structure
+```text
+national-institues/
+├── 📂 components/      — Reusable UI logic (Navbar, Hero, ScrollReveal, NISLogo)
+├── 📂 pages/           — Feature-rich page layouts (Dashboard, NewsDetail, AIStudio, About)
+├── 📂 LanguageContext/  — Global i18n orchestration & persistence
+├── 📄 translations.ts  — Master bilingual dictionary (JSON-based)
+├── 📄 constants.ts     — Core data store (Schools, News, Jobs)
+└── 📄 App.tsx          — The central nervous system (Routing & Suspense)
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚦 Getting Started
 
-### Prerequisites
-
-- **Node.js** v18 or higher
-- A **Google Gemini API key** (for AI Studio features)
-
-### Installation
-
+### 1. 📂 Clone & Install
 ```bash
-# 1. Clone the repository
-git clone https://github.com/your-username/national-institutes.git
-cd national-institutes
-
-# 2. Install dependencies
+git clone https://github.com/mo3id/national-institues.git
+cd national-institues
 npm install
+```
 
-# 3. Configure environment variables
-# Edit the .env.local file and add your key:
-echo "GEMINI_API_KEY=your_gemini_api_key_here" > .env.local
+### 2. 🔑 Configure Keys
+Create a `.env.local` to power the AI Studio:
+```env
+VITE_GEMINI_API_KEY=your_key_here
+```
 
-# 4. Start the development server
+### 3. ⚡ Launch Development
+```bash
 npm run dev
 ```
 
-The app will be running at **http://localhost:3000** 🎉
+---
 
-### Build for Production
-
-```bash
-npm run build       # Compile TypeScript & bundle with Vite
-npm run preview     # Preview the production build locally
-```
+## 🏛️ Coverage
+Strategically empowering the future across **5 Key Governorates**:
+| 🏙️ Cairo | 🌊 Alexandria | 🏛️ Giza | 🌾 Dakahlia | 🏘️ Gharbia |
+|:---:|:---:|:---:|:---:|:---:|
+| 12 Schools | 4 Schools | 6 Schools | 3 Schools | 2 Schools |
 
 ---
 
-## 🌐 Pages & Routes
-
-| Route | Page | Description |
-|---|---|---|
-| `/` | **Home** | Hero, Chairman message, Stats map, Gallery, News, CTA |
-| `/schools` | **Schools** | Filterable directory of all NIS schools |
-| `/careers` | **Careers** | Job openings & application submission |
-| `/ai-studio` | **AI Studio** | Google Gemini-powered tools for school insights |
-
-> The app uses `HashRouter` for compatibility with static hosts.
-
----
-
-## 🌍 Internationalization (i18n)
-
-The portal supports **full bilingual operation**:
-
-- 🇬🇧 **English** — LTR layout, *Inter* font
-- 🇪🇬 **Arabic** — RTL layout, *Cairo* font
-
-Switch via the **🌐 globe icon** in the navbar. Language preference is **automatically saved** to `localStorage` and restored on every visit.
-
----
-
-## 🤖 AI Studio
-
-The **AI Studio** page harnesses the power of **Google Gemini** to provide:
-- 📊 School performance analysis
-- 📝 Auto-generated content & reports
-- 🔍 Intelligent search & recommendations
-
-> Requires a valid `GEMINI_API_KEY` in `.env.local`.
-
----
-
-## 🗺️ Schools Network
-
-Currently covering **5 governorates** across Egypt:
-
-| Governorate | Schools |
-|---|:---:|
-| 🏙️ Cairo | 12 |
-| 🌊 Alexandria | 4 |
-| 🏛️ Giza | 6 |
-| 🌾 Dakahlia | 3 |
-| 🏘️ Gharbia | 2 |
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request for any improvements.
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is proprietary software of the **General Assembly of National Institutes (الجمعية العامة للمعاهد القومية)**. All rights reserved.
+## 🔒 Security & Performance
+*   **Lazy Loading**: Pages are asynchronously loaded to prioritize the landing experience.
+*   **Protected Routes**: Administrative features (Dashboard) secured with authentication guards.
+*   **Optimized Assets**: CSS/JS minification and SVG-first graphics for lighting fast performance.
 
 ---
 
 <div align="center">
 
-Made with ❤️ for Egyptian Education
+### **National Institutes of Schools**
+*Educating the Nation. Empowering the Future.*
 
-**النهوض بالتعليم المصري منذ ١٩٥٦**
+[Explore the Portal](http://localhost:3000)
+
+**© 2024 General Assembly of National Institutes. All rights reserved.**
 
 </div>
