@@ -1,12 +1,13 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SCHOOLS, GOVERNORATES } from '../constants';
 import { Search, MapPin, Filter, User, ArrowRight, Star } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 import { translations } from '../translations';
 import NISLogo from '../components/NISLogo';
 
-const SchoolCard = React.memo(({ school, isRTL, translations: t, lang }: any) => (
+const SchoolCard = React.memo(({ school, isRTL, translations: t, lang, onView }: any) => (
   <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all group flex flex-col h-full">
     <div className="flex justify-between items-start mb-8">
       <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center p-2 border border-gray-100 group-hover:scale-110 transition-transform">
@@ -45,7 +46,7 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, lang }: any) =>
       </div>
     </div>
 
-    <button className={`mt-auto w-full py-4 bg-blue-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} group-hover:bg-red-700 transition-colors shadow-lg active:scale-95`}>
+    <button onClick={() => onView && onView(school)} className={`mt-auto w-full py-4 bg-blue-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} group-hover:bg-red-700 transition-colors shadow-lg active:scale-95`}>
       <span>{t.viewProfile}</span>
       <ArrowRight className={`h-4 w-4 ${isRTL ? 'rotate-180' : ''}`} />
     </button>
@@ -59,6 +60,7 @@ const Schools: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGov, setSelectedGov] = useState('');
   const [selectedType, setSelectedType] = useState('');
+  const navigate = useNavigate();
 
   const schoolTypes = ['National', 'International', 'Language'];
 
@@ -147,7 +149,7 @@ const Schools: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredSchools.length > 0 ? (
             filteredSchools.map((school) => (
-              <SchoolCard key={school.id} school={school} isRTL={isRTL} translations={t} lang={lang} />
+              <SchoolCard key={school.id} school={school} isRTL={isRTL} translations={t} lang={lang} onView={(s: any) => navigate(`/schools/${s.id}`)} />
             ))
           ) : (
             <div className="col-span-full py-32 text-center bg-white rounded-3xl border border-dashed border-gray-300">
