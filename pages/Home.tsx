@@ -23,7 +23,6 @@ import ScrollReveal from '../components/ScrollReveal';
 const Home: React.FC = () => {
   const { t, isRTL, lang } = useLanguage();
   const [newsIndex, setNewsIndex] = useState(0);
-  const [selectedGov, setSelectedGov] = useState<string | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState(3);
   const maxNewsIndex = Math.max(0, NEWS.length - itemsPerPage);
 
@@ -40,11 +39,6 @@ const Home: React.FC = () => {
 
   const nextNews = () => setNewsIndex(prev => Math.min(prev + 1, maxNewsIndex));
   const prevNews = () => setNewsIndex(prev => Math.max(prev - 1, 0));
-
-  const filteredSchools = useMemo(() =>
-    selectedGov ? SCHOOLS.filter(s => s.governorate === selectedGov) : [],
-    [selectedGov]
-  );
 
   const galleryImages = [
     { url: 'https://picsum.photos/seed/n1/800/800', size: 'md:col-span-2 md:row-span-2' },
@@ -114,114 +108,43 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        {/* Interactive Map & Stats */}
+        {/* Map Section Redesigned */}
         <section className="py-24 bg-white relative overflow-hidden">
           <div className="w-[90%] lg:w-[80%] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-              <div className="space-y-12">
-                <ScrollReveal>
-                  <div className="space-y-4 text-start">
-                    <h2 className="text-4xl font-bold tracking-tight">{t.stats.title}</h2>
-                    <p className="text-gray-600 text-lg leading-relaxed">{t.stats.desc}</p>
-                  </div>
-                </ScrollReveal>
 
-                <div className="grid grid-cols-2 gap-6 text-start">
-                  {[
-                    { label: t.stats.schools, value: '42', icon: NISLogo, color: 'blue' },
-                    { label: t.stats.students, value: '120k', icon: Users, color: 'green' },
-                    { label: t.stats.teachers, value: '8,500', icon: GraduationCap, color: 'purple' },
-                    { label: t.stats.governorates, value: '5', icon: MapPin, color: 'red' },
-                  ].map((stat, i) => (
-                    <ScrollReveal key={i} delay={i * 0.1}>
-                      <div className="bg-gray-50/50 p-8 rounded-2xl border border-gray-100 hover:shadow-xl hover:bg-white transition-all group text-start">
-                        <div className={`bg-${stat.color}-100 w-12 h-12 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                          {stat.icon === NISLogo ? <stat.icon className="h-8 w-8" showText={false} /> : <stat.icon className={`text-${stat.color}-600 h-6 w-6`} />}
-                        </div>
-                        <p className="text-4xl font-black text-gray-900 mb-1">{stat.value}</p>
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">{stat.label}</p>
-                      </div>
-                    </ScrollReveal>
-                  ))}
-                </div>
-              </div>
+            <div className="flex flex-col items-center text-center space-y-6 mb-16">
+              <ScrollReveal>
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-[1.2]">
+                  {lang === 'ar' ? 'بوابتك إلى' : "Your Gateway to Egypt's"} <br />
+                  {lang === 'ar' ? 'مستقبل لا نهائي' : 'Endless Inventory'}
+                </h2>
+              </ScrollReveal>
 
-              <ScrollReveal direction={isRTL ? "right" : "left"}>
-                <div className="relative bg-blue-900 rounded-3xl p-8 aspect-[4/5] flex flex-col items-center shadow-3xl overflow-hidden">
-                  <div className={`flex justify-between w-full mb-8 z-20 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <h3 className="text-white font-bold text-xl">{t.map.title}</h3>
-                    <div className="flex space-x-1">
-                      {[...Array(3)].map((_, i) => <Star key={i} className="h-3 w-3 text-red-500 fill-red-500" />)}
-                    </div>
-                  </div>
+              <ScrollReveal delay={0.1}>
+                <p className="text-slate-500 text-lg leading-relaxed max-w-2xl mx-auto">
+                  {lang === 'ar'
+                    ? 'شريكك الموثوق في التنقل عبر مشهد التعليم الواسع وتيسير رحلة أبنائك نحو التميز.'
+                    : 'Your trusted partner in navigating Egypt\'s vast educational landscape and streamlining your children\'s journey.'}
+                </p>
+              </ScrollReveal>
 
-                  {/* Egypt Map SVG - Improved Geographic Accuracy */}
-                  <div className="relative w-full flex-grow flex items-center justify-center p-4">
-                    <svg viewBox="0 0 500 500" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
-                      <path
-                        d="M 4,45 L 141,70 L 204,60 Q 254,30 304,60 L 383,60 L 412,145 L 383,235 L 312,125 L 366,260 L 412,365 L 483,510 L 0,520 L 0,45 Z"
-                        className="fill-blue-800/70 stroke-blue-500/60 stroke-[1.5]"
-                      />
-                      <path
-                        d="M 312,125 L 383,235 L 412,145 L 383,60 L 304,60 Z"
-                        className="fill-blue-800/80 stroke-blue-500/80 stroke-[1.5]"
-                      />
-                      {GOVERNORATES.map((gov, i) => {
-                        const pins = [{ cx: 215, cy: 110 }, { cx: 125, cy: 75 }, { cx: 200, cy: 125 }, { cx: 275, cy: 85 }, { cx: 225, cy: 85 }];
-                        const pin = pins[i] || { cx: 250, cy: 250 };
-                        return (
-                          <g key={i} className="cursor-pointer group/pin" onClick={() => setSelectedGov(gov.name)}>
-                            <circle cx={pin.cx} cy={pin.cy} r="25" className={`transition-all duration-300 fill-red-500/10 ${selectedGov === gov.name ? 'opacity-100' : 'opacity-0 group-hover/pin:opacity-100'}`} />
-                            <circle cx={pin.cx} cy={pin.cy} r="8" className={`transition-all duration-300 stroke-white stroke-2 ${selectedGov === gov.name ? 'fill-red-500 scale-125' : 'fill-blue-400 group-hover/pin:fill-red-400 animate-pulse'}`} />
-                            <text x={pin.cx} y={pin.cy + 25} textAnchor="middle" fontSize="10" fontWeight="bold" className="fill-white/80 pointer-events-none uppercase tracking-wide">{gov.name}</text>
-                          </g>
-                        );
-                      })}
-                    </svg>
-
-                    {selectedGov && (
-                      <div className="absolute inset-0 bg-blue-950/95 z-30 flex flex-col p-8 animate-fade-in backdrop-blur-sm shadow-2xl rounded-2xl">
-                        <div className={`flex justify-between items-center mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <div className="text-start">
-                            <h4 className="text-white text-2xl font-bold">{t.map.schoolsIn} {selectedGov}</h4>
-                            <p className="text-red-400 text-xs font-bold tracking-widest uppercase mt-1">{t.map.network}</p>
-                          </div>
-                          <button onClick={() => setSelectedGov(null)} className="p-2 text-white hover:bg-white/10 rounded-full transition-colors">
-                            <X className="h-6 w-6" />
-                          </button>
-                        </div>
-                        <div className="flex-grow overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-                          {filteredSchools.length > 0 ? (
-                            filteredSchools.map(school => (
-                              <div key={school.id} className="bg-white/10 border border-white/10 p-4 rounded-xl hover:bg-white/20 transition-all group text-start">
-                                <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
-                                  <img src={school.logo} alt="" className="w-12 h-12 rounded-lg bg-white/10 p-1 grayscale group-hover:grayscale-0" loading="lazy" />
-                                  <div className="flex-grow">
-                                    <h5 className="text-white font-bold">{school.name}</h5>
-                                    <p className={`text-white/60 text-xs flex items-center ${isRTL ? 'space-x-reverse space-x-1' : 'space-x-1'}`}>
-                                      <MapPin className="h-3 w-3" />
-                                      <span>{school.location}</span>
-                                    </p>
-                                  </div>
-                                  <Link to={`/schools`} className="p-2 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-colors">
-                                    <ArrowRight className={`h-4 w-4 ${isRTL ? 'rotate-180' : ''}`} />
-                                  </Link>
-                                </div>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="text-white/40 text-center py-20 italic">{t.map.noSchools}</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="mt-8 text-center z-20">
-                    <p className="text-white/60 text-xs font-medium uppercase tracking-[0.2em]">{t.map.instruction}</p>
-                  </div>
-                </div>
+              <ScrollReveal delay={0.2}>
+                <Link to="/schools" className="mt-4 inline-flex items-center justify-center px-8 py-3.5 rounded-full bg-[#3b82f6] text-white font-semibold text-[15px] hover:bg-[#2563eb] transition-all shadow-xl shadow-blue-500/20">
+                  {lang === 'ar' ? 'تصفح الخريطة' : 'Get a Quote'}
+                </Link>
               </ScrollReveal>
             </div>
+
+            <ScrollReveal delay={0.3}>
+              <div className="w-full flex justify-center mt-12">
+                <img
+                  src="/nano-banana-17717977008341.png"
+                  alt="Global Network"
+                  className="w-full max-w-6xl h-auto object-contain pointer-events-none mix-blend-multiply"
+                />
+              </div>
+            </ScrollReveal>
+
           </div>
         </section>
 
@@ -230,32 +153,68 @@ const Home: React.FC = () => {
           <div className="w-[90%] lg:w-[80%] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col items-center text-center mb-16 space-y-4">
               <ScrollReveal>
-                <div className={`inline-flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} text-red-700 font-bold text-xs uppercase tracking-[0.3em]`}>
+                <div className={`inline-flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} text-[#991b1b] font-bold text-xs uppercase tracking-[0.3em]`}>
                   <Camera className="h-4 w-4" />
-                  <span>{t.gallery.tag}</span>
+                  <span>{lang === 'ar' ? 'التجربة البصرية' : 'The Visual Experience'}</span>
                 </div>
               </ScrollReveal>
               <ScrollReveal delay={0.1}>
-                <h2 className="text-4xl font-bold text-gray-900">{t.gallery.title}</h2>
+                <h2 className="text-4xl lg:text-5xl font-bold text-[#1e3a8a]">{lang === 'ar' ? 'الحياة في المعاهد' : 'Life in Institutes'}</h2>
               </ScrollReveal>
               <ScrollReveal delay={0.2}>
-                <p className="text-gray-500 text-lg max-w-2xl">{t.gallery.desc}</p>
+                <p className="text-slate-500 text-lg max-w-2xl">{lang === 'ar' ? 'توثيق لحظات التميز والإبداع والبهجة عبر جميع فروعنا.' : 'Documenting moments of excellence, creativity, and joy across all our branches.'}</p>
               </ScrollReveal>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:auto-rows-[250px]">
-              {galleryImages.map((img, i) => (
-                <ScrollReveal key={i} delay={i * 0.1}>
-                  <div className={`relative overflow-hidden rounded-3xl group ${img.size}`}>
-                    <img
-                      src={img.url}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
-                      alt={`Gallery ${i}`}
-                      loading="lazy"
-                    />
-                  </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+              {/* Column 1 */}
+              <ScrollReveal delay={0.1}>
+                <div className="flex flex-col h-full">
+                  <img
+                    src="https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=600"
+                    alt="Campus"
+                    className="w-full h-full min-h-[400px] md:h-[600px] object-cover rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 hover:scale-[1.02]"
+                  />
+                </div>
+              </ScrollReveal>
+
+              {/* Column 2 */}
+              <div className="flex flex-col gap-4 lg:gap-6">
+                <ScrollReveal delay={0.2} className="h-full">
+                  <img
+                    src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600"
+                    alt="Classroom"
+                    className="w-full h-[280px] object-cover rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 hover:scale-[1.02]"
+                  />
                 </ScrollReveal>
-              ))}
+                <ScrollReveal delay={0.3} className="h-full">
+                  <img
+                    src="https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=600"
+                    alt="Library"
+                    className="w-full h-[300px] object-cover rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 hover:scale-[1.02]"
+                  />
+                </ScrollReveal>
+              </div>
+
+              {/* Column 3 */}
+              <div className="flex flex-col gap-4 lg:gap-6">
+                <ScrollReveal delay={0.4} className="h-full">
+                  <img
+                    src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600"
+                    alt="Hallway"
+                    className="w-full h-[340px] object-cover rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 hover:scale-[1.02]"
+                  />
+                </ScrollReveal>
+                <ScrollReveal delay={0.5} className="h-full">
+                  <img
+                    src="https://images.unsplash.com/photo-1531685250784-afb5c542247b?auto=format&fit=crop&w=600"
+                    alt="Lab"
+                    className="w-full h-[240px] object-cover rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 hover:scale-[1.02]"
+                  />
+                </ScrollReveal>
+              </div>
             </div>
+
           </div>
         </section>
 
@@ -333,23 +292,62 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        {/* Join the Legacy CTA */}
-        <section className="py-20 bg-blue-900 relative overflow-hidden">
-          <ScrollReveal>
-            <div className="absolute inset-0 bg-red-900/10 skew-y-3 transform translate-y-12" />
-            <div className="w-[90%] lg:w-[80%] mx-auto text-center relative z-10 px-4 space-y-8">
-              <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">{t.cta.title}</h2>
-              <p className="text-xl text-blue-100/80">{t.cta.desc}</p>
-              <div className={`flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 ${isRTL ? 'sm:space-x-reverse sm:space-x-6' : 'sm:space-x-6'}`}>
-                <Link to="/schools" className="bg-white text-blue-900 px-10 py-4 rounded-full font-bold shadow-2xl hover:bg-gray-100 transition-all">
-                  {t.cta.btnSchools}
-                </Link>
-                <Link to="/careers" className="bg-red-700 text-white px-10 py-4 rounded-full font-bold shadow-2xl hover:bg-red-800 transition-all">
-                  {t.cta.btnCareers}
-                </Link>
+        {/* Premium Newsletter CTA Section */}
+        <section className="py-24 bg-white overflow-hidden">
+          <div className="w-[90%] lg:w-[80%] mx-auto relative">
+            <ScrollReveal>
+              <div className="bg-[#1e3a8a] rounded-[2.5rem] p-10 lg:p-16 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-24 shadow-2xl relative overflow-hidden">
+
+                {/* Subtle Background Pattern */}
+                <div className="absolute inset-0 opacity-10 pointer-events-none">
+                  <svg className="h-full w-full" fill="currentColor">
+                    <pattern id="pattern-circles" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                      <circle cx="20" cy="20" r="1.5"></circle>
+                    </pattern>
+                    <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern-circles)"></rect>
+                  </svg>
+                </div>
+
+                {/* Left side: Heading and Description */}
+                <div className="w-full lg:w-[55%] text-start relative z-10 space-y-6">
+                  <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
+                    {lang === 'ar' ? 'اشترك في النشرة الإخبارية' : 'Subscribe our newsletter'}
+                  </h2>
+                  <p className="text-blue-100/70 text-sm md:text-base leading-relaxed max-w-lg">
+                    {lang === 'ar'
+                      ? 'اشترك في نشرتنا الإخبارية وكن أول من يحصل على الرؤى والتحديثات ونصائح الخبراء في مجال التطوير التعليمي وإدارة المدارس.'
+                      : 'Subscribe to our newsletter and be the first to receive insights, updates, and expert tips on educational development and school management.'}
+                  </p>
+                </div>
+
+                {/* Right side: Input and Button */}
+                <div className="w-full lg:w-[45%] text-start relative z-10">
+                  <div className="w-full space-y-4">
+                    <label className="text-blue-200 text-sm font-medium block">
+                      {lang === 'ar' ? 'ابق على اطلاع' : 'Stay up to date'}
+                    </label>
+                    <div className="flex flex-col sm:flex-row gap-3 w-full">
+                      <input
+                        type="email"
+                        placeholder={lang === 'ar' ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
+                        className={`flex-grow min-w-0 bg-[#162a63] text-white placeholder-blue-300 border border-transparent focus:border-blue-400 rounded-full px-6 py-4 focus:outline-none transition-all ${isRTL ? 'text-right' : 'text-left'}`}
+                      />
+                      <button className="bg-[#fbbf24] hover:bg-[#f59e0b] text-[#1e3a8a] font-bold rounded-full px-8 py-4 transition-colors whitespace-nowrap shadow-lg flex-shrink-0">
+                        {lang === 'ar' ? 'اشتراك' : 'Subscribe'}
+                      </button>
+                    </div>
+                    <p className="text-blue-300/60 text-xs mt-2">
+                      {lang === 'ar' ? 'باشتراكك، فإنك توافق على ' : 'By subscribing you agree to our '}
+                      <Link to="/" className="underline hover:text-white transition-colors">
+                        {lang === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}
+                      </Link>
+                    </p>
+                  </div>
+                </div>
+
               </div>
-            </div>
-          </ScrollReveal>
+            </ScrollReveal>
+          </div>
         </section>
       </div>
     </PageTransition>
@@ -357,3 +355,4 @@ const Home: React.FC = () => {
 };
 
 export default Home;
+
