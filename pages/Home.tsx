@@ -64,30 +64,59 @@ const Home: React.FC = () => {
         {/* Chairman Message */}
         <ChairmanVision />
 
-        {/* School Logos Bar */}
-        <section className="py-16 bg-gray-50 overflow-hidden border-y border-gray-100 w-full">
-          <div className="max-w-[calc(100vw-1px)]">
-            <div className={`flex animate-scroll whitespace-nowrap ${isRTL ? 'flex-row-reverse' : ''}`}>
-              {[...SCHOOLS, ...SCHOOLS, ...SCHOOLS].map((school, i) => (
-                <div key={i} className="flex flex-col items-center mx-16 opacity-40 hover:opacity-100 transition-opacity">
-                  <div className="h-20 w-20 bg-white rounded-2xl shadow-sm flex items-center justify-center p-3 mb-4 group cursor-pointer border border-transparent hover:border-red-200">
-                    <img
-                      src={school.logo}
-                      alt={school.name}
-                      className="max-h-full max-w-full grayscale group-hover:grayscale-0 transition-all"
-                      loading="lazy"
-                    />
-                  </div>
-                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{school.name}</span>
+        {/* Schools Section Redesigned */}
+        <section className="py-24 bg-white overflow-hidden w-full">
+          <div className="w-[90%] lg:w-[80%] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+
+              {/* Text Side */}
+              <div className="w-full lg:w-5/12 flex flex-col items-start text-start space-y-6">
+                <ScrollReveal>
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-light text-slate-800 leading-[1.2]">
+                    {lang === 'ar' ? 'نحظى بثقة' : 'Trusted by'} <br />
+                    <span className="font-bold text-[#1e3a8a] tracking-tight">{lang === 'ar' ? 'أفضل المدارس' : 'great brands'}</span>
+                  </h2>
+                </ScrollReveal>
+
+                <ScrollReveal delay={0.1}>
+                  <p className="text-slate-500 text-lg leading-relaxed max-w-md">
+                    {lang === 'ar'
+                      ? 'تضم شبكة المعاهد القومية نخبة من المدارس العريقة التي تتشارك نفس الرؤية في تقديم تعليم متميز وبناء أجيال المستقبل.'
+                      : 'The full monty the wireless bog-standard bevvy lurgy David, mufty Oxford blatant A bit of how\'s your father.'}
+                  </p>
+                </ScrollReveal>
+
+                <ScrollReveal delay={0.2}>
+                  <Link to="/schools" className="mt-4 inline-flex items-center justify-center px-8 py-3.5 rounded-full bg-[#5a67d8] text-white font-semibold text-[15px] hover:bg-[#434190] hover:-translate-y-1 transition-all shadow-xl shadow-indigo-500/20">
+                    {lang === 'ar' ? 'عرض المدارس' : 'More Customers'}
+                  </Link>
+                </ScrollReveal>
+              </div>
+
+              {/* Logos Grid */}
+              <div className="w-full lg:w-7/12">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12 items-center justify-items-center">
+                  {[...Array(12)].map((_, i) => (
+                    <ScrollReveal key={i} delay={0.05 * (i % 4)}>
+                      <div className="flex items-center justify-center cursor-pointer opacity-70 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300">
+                        <img
+                          src="/image copy.png"
+                          alt={`Partner Brand ${i + 1}`}
+                          className="max-w-[180px] max-h-[60px] object-contain"
+                        />
+                      </div>
+                    </ScrollReveal>
+                  ))}
                 </div>
-              ))}
+              </div>
+
             </div>
           </div>
         </section>
 
         {/* Interactive Map & Stats */}
         <section className="py-24 bg-white relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-[90%] lg:w-[80%] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
               <div className="space-y-12">
                 <ScrollReveal>
@@ -198,7 +227,7 @@ const Home: React.FC = () => {
 
         {/* Gallery Section */}
         <section className="py-24 bg-white overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-[90%] lg:w-[80%] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col items-center text-center mb-16 space-y-4">
               <ScrollReveal>
                 <div className={`inline-flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} text-red-700 font-bold text-xs uppercase tracking-[0.3em]`}>
@@ -232,7 +261,7 @@ const Home: React.FC = () => {
 
         {/* Latest News Carousel */}
         <section className="py-24 bg-gray-50 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-[90%] lg:w-[80%] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row justify-between items-end mb-16 space-y-8 md:space-y-0">
               <div className={`space-y-4 ${isRTL ? 'text-start' : 'text-start'} w-full md:w-auto`}>
                 <ScrollReveal>
@@ -308,7 +337,7 @@ const Home: React.FC = () => {
         <section className="py-20 bg-blue-900 relative overflow-hidden">
           <ScrollReveal>
             <div className="absolute inset-0 bg-red-900/10 skew-y-3 transform translate-y-12" />
-            <div className="max-w-4xl mx-auto text-center relative z-10 px-4 space-y-8">
+            <div className="w-[90%] lg:w-[80%] mx-auto text-center relative z-10 px-4 space-y-8">
               <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">{t.cta.title}</h2>
               <p className="text-xl text-blue-100/80">{t.cta.desc}</p>
               <div className={`flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 ${isRTL ? 'sm:space-x-reverse sm:space-x-6' : 'sm:space-x-6'}`}>

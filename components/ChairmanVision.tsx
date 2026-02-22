@@ -21,7 +21,7 @@ const ChairmanVision: React.FC = () => {
             ref={containerRef}
             className="py-24 bg-white overflow-hidden"
         >
-            <div className="container mx-auto px-6 lg:px-12">
+            <div className="w-[90%] lg:w-[80%] mx-auto px-6 lg:px-12">
                 <div className={`flex flex-col lg:flex-row items-center gap-16 lg:gap-24 ${isRTL ? 'lg:flex-row-reverse' : ''}`}>
 
                     {/* Image Column */}
