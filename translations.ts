@@ -151,26 +151,30 @@ export const translations = {
     },
     footer: {
       description: "The largest educational organization in Egypt, overseeing excellence in national and international schooling for over 60 years.",
-      navTitle: "Navigation",
-      regionsTitle: "Regions",
-      infoTitle: "Official Info",
-      copyright: "© 2024 National Institutes of Schools.",
+      productTitle: "Schools",
+      resourcesTitle: "Resources",
+      companyTitle: "Network",
+      copyright: "© 2024 National Institutes of Schools. All rights reserved.",
       privacy: "Privacy Policy",
-      terms: "Terms of Use",
-      sitemap: "Sitemap",
-      links: [
+      terms: "Terms of Service",
+      cookies: "Cookies Settings",
+      productLinks: [
         "Admission Process",
-        "Student Portal",
-        "Teacher's Hub",
-        "Financial Aid",
-        "Alumni Network"
+        "School Finder",
+        "Academic Calendar",
+        "Student Portal"
       ],
-      regions: [
-        "Cairo Schools",
-        "Alexandria Schools",
-        "Delta Region",
-        "Giza Region",
-        "Upper Egypt"
+      resourceLinks: [
+        "Documentation",
+        "Help Center",
+        "Teacher Hub",
+        "Support"
+      ],
+      companyLinks: [
+        "About Us",
+        "Careers",
+        "Contact",
+        "Partners"
       ],
       address: "15 Taha Hussein St, Zamalek, Cairo, Egypt"
     },
@@ -333,26 +337,30 @@ export const translations = {
     },
     footer: {
       description: "أكبر مؤسسة تعليمية في مصر، تشرف على التميز في التعليم القومي والدولي لأكثر من 60 عامًا.",
-      navTitle: "التنقل",
-      regionsTitle: "المناطق",
-      infoTitle: "معلومات رسمية",
-      copyright: "© 2024 الجمعية العامة للمعاهد القومية.",
+      productTitle: "المدارس",
+      resourcesTitle: "الموارد",
+      companyTitle: "الشبكة",
+      copyright: "© 2024 الجمعية العامة للمعاهد القومية. جميع الحقوق محفوظة.",
       privacy: "سياسة الخصوصية",
-      terms: "شروط الاستخدام",
-      sitemap: "خريطة الموقع",
-      links: [
+      terms: "شروط الخدمة",
+      cookies: "إعدادات الكوكيز",
+      productLinks: [
         "عملية التقديم",
-        "بوابة الطلاب",
-        "مركز المعلمين",
-        "المساعدات المالية",
-        "شبكة الخريجين"
+        "البحث عن مدرسة",
+        "التقويم الأكاديمي",
+        "بوابة الطلاب"
       ],
-      regions: [
-        "مدارس القاهرة",
-        "مدارس الإسكندرية",
-        "منطقة الدلتا",
-        "منطقة الجيزة",
-        "صعيد مصر"
+      resourceLinks: [
+        "الوثائق",
+        "مركز المساعدة",
+        "مركز المعلم",
+        "الدعم الفني"
+      ],
+      companyLinks: [
+        "من نحن",
+        "الوظائف",
+        "اتصل بنا",
+        "الشركاء"
       ],
       address: "15 شارع طه حسين، الزمالك، القاهرة، مصر"
     },

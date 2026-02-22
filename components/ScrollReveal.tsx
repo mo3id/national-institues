@@ -7,13 +7,15 @@ interface ScrollRevealProps {
     width?: "fit-content" | "100%";
     delay?: number;
     direction?: "up" | "down" | "left" | "right";
+    className?: string;
 }
 
 const ScrollReveal: React.FC<ScrollRevealProps> = ({
     children,
     width = "100%",
     delay = 0,
-    direction = "up"
+    direction = "up",
+    className = ""
 }) => {
     const getInitialProps = () => {
         switch (direction) {
@@ -26,7 +28,7 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
     };
 
     return (
-        <div style={{ position: "relative", width }}>
+        <div className={className} style={{ position: "relative", width }}>
             <motion.div
                 variants={{
                     hidden: getInitialProps(),

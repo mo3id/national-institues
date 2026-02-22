@@ -292,59 +292,45 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        {/* Premium Newsletter CTA Section */}
+        {/* Premium CTA Section */}
         <section className="py-24 bg-white overflow-hidden">
-          <div className="w-[90%] lg:w-[80%] mx-auto relative">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <ScrollReveal>
-              <div className="bg-[#1e3a8a] rounded-[2.5rem] p-10 lg:p-16 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-24 shadow-2xl relative overflow-hidden">
-
-                {/* Subtle Background Pattern */}
-                <div className="absolute inset-0 opacity-10 pointer-events-none">
-                  <svg className="h-full w-full" fill="currentColor">
-                    <pattern id="pattern-circles" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-                      <circle cx="20" cy="20" r="1.5"></circle>
-                    </pattern>
-                    <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern-circles)"></rect>
-                  </svg>
-                </div>
-
-                {/* Left side: Heading and Description */}
-                <div className="w-full lg:w-[55%] text-start relative z-10 space-y-6">
-                  <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
-                    {lang === 'ar' ? 'اشترك في النشرة الإخبارية' : 'Subscribe our newsletter'}
-                  </h2>
-                  <p className="text-blue-100/70 text-sm md:text-base leading-relaxed max-w-lg">
-                    {lang === 'ar'
-                      ? 'اشترك في نشرتنا الإخبارية وكن أول من يحصل على الرؤى والتحديثات ونصائح الخبراء في مجال التطوير التعليمي وإدارة المدارس.'
-                      : 'Subscribe to our newsletter and be the first to receive insights, updates, and expert tips on educational development and school management.'}
-                  </p>
-                </div>
-
-                {/* Right side: Input and Button */}
-                <div className="w-full lg:w-[45%] text-start relative z-10">
-                  <div className="w-full space-y-4">
-                    <label className="text-blue-200 text-sm font-medium block">
-                      {lang === 'ar' ? 'ابق على اطلاع' : 'Stay up to date'}
-                    </label>
-                    <div className="flex flex-col sm:flex-row gap-3 w-full">
-                      <input
-                        type="email"
-                        placeholder={lang === 'ar' ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
-                        className={`flex-grow min-w-0 bg-[#162a63] text-white placeholder-blue-300 border border-transparent focus:border-blue-400 rounded-full px-6 py-4 focus:outline-none transition-all ${isRTL ? 'text-right' : 'text-left'}`}
-                      />
-                      <button className="bg-[#fbbf24] hover:bg-[#f59e0b] text-[#1e3a8a] font-bold rounded-full px-8 py-4 transition-colors whitespace-nowrap shadow-lg flex-shrink-0">
-                        {lang === 'ar' ? 'اشتراك' : 'Subscribe'}
-                      </button>
-                    </div>
-                    <p className="text-blue-300/60 text-xs mt-2">
-                      {lang === 'ar' ? 'باشتراكك، فإنك توافق على ' : 'By subscribing you agree to our '}
-                      <Link to="/" className="underline hover:text-white transition-colors">
-                        {lang === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}
-                      </Link>
-                    </p>
+              <div className="bg-black rounded-[3rem] p-12 md:p-20 flex flex-col items-center text-center shadow-2xl relative overflow-hidden">
+                {/* Logo Icon */}
+                <div className="mb-8">
+                  <div className="bg-white p-4 rounded-2xl">
+                    <NISLogo className="h-12 w-12" showText={false} />
                   </div>
                 </div>
 
+                {/* Content */}
+                <div className="max-w-2xl space-y-6 relative z-10">
+                  <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
+                    {lang === 'ar' ? 'جاهز لتطوير مستقبلك التعليمي؟' : 'Ready to transform your educational future?'}
+                  </h2>
+                  <p className="text-gray-400 text-lg md:text-xl leading-relaxed">
+                    {lang === 'ar'
+                      ? 'انضم إلى آلاف الطلاب الذين يستفيدون من التميز التعليمي في مدارس المعاهد القومية.'
+                      : 'Join thousands of students who are benefiting from educational excellence in National Institutes of Schools.'}
+                  </p>
+                  
+                  <div className="pt-8">
+                    <button className="bg-white hover:bg-gray-100 text-black font-bold rounded-full px-10 py-4 transition-all transform hover:scale-105 shadow-xl">
+                      {lang === 'ar' ? 'ابدأ الآن مجاناً' : 'Start for free'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Subtle Background Pattern */}
+                <div className="absolute inset-0 opacity-5 pointer-events-none">
+                  <svg className="h-full w-full" fill="currentColor">
+                    <pattern id="pattern-dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                      <circle cx="20" cy="20" r="1.5" fill="white"></circle>
+                    </pattern>
+                    <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern-dots)"></rect>
+                  </svg>
+                </div>
               </div>
             </ScrollReveal>
           </div>
