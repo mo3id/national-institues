@@ -32,10 +32,10 @@ const SchoolProfile: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 -mt-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 -mt-6 relative z-10 pt-5 md:pt-8 lg:pt-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="bg-white rounded-2xl p-6 shadow-md">
-            <h3 className="font-bold text-lg mb-4">{t?.schools?.title ?? 'School Details'}</h3>
+            <h3 className="font-bold text-lg md:text-xl mb-4">{t?.schools?.title ?? 'School Details'}</h3>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-blue-900 mt-1" />
@@ -77,15 +77,15 @@ const SchoolProfile: React.FC = () => {
 
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-2xl p-6 shadow-md">
-              <h3 className="font-bold text-lg mb-4">عن المدرسة</h3>
-              <p className="text-gray-600 leading-relaxed">هذه فقرة تجريبية لوصف المدرسة. تتميز المدرسة بتقديم تعليم عالي الجودة وتوفر بيئة تعليمية آمنة ومحفزة للطلاب. تضم المدرسة نخبة من المعلمين ذوي الخبرة والكفاءة العالية.</p>
+              <h3 className="font-bold text-lg md:text-xl mb-4">عن المدرسة</h3>
+              <p className="text-gray-600 leading-relaxed text-sm md:text-base">هذه فقرة تجريبية لوصف المدرسة. تتميز المدرسة بتقديم تعليم عالي الجودة وتوفر بيئة تعليمية آمنة ومحفزة للطلاب. تضم المدرسة نخبة من المعلمين ذوي الخبرة والكفاءة العالية.</p>
             </div>
 
             <div className="bg-white rounded-2xl p-6 shadow-md">
-              <h3 className="font-bold text-lg mb-4">معرض الصور</h3>
+              <h3 className="font-bold text-lg md:text-xl mb-4">معرض الصور</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {[1,2,3,4,5,6].map(i => (
-                  <div key={i} className="h-28 bg-gray-100 rounded-lg overflow-hidden">
+                  <div key={i} className="h-28 md:h-36 bg-gray-100 rounded-lg overflow-hidden">
                     <img src={`https://picsum.photos/seed/${school.id}-${i}/400/300`} alt="gallery" className="w-full h-full object-cover" />
                   </div>
                 ))}
