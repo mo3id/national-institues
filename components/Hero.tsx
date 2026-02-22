@@ -63,8 +63,8 @@ const Hero: React.FC = () => {
       {/* Lighter Overlay */}
       <div
         className={`absolute inset-0 z-10 ${isRTL
-          ? 'bg-gradient-to-l from-white/80 via-white/50 to-transparent dark:from-[#0F172A]/40 dark:via-[#0F172A]/20 dark:to-transparent'
-          : 'bg-gradient-to-r from-white/80 via-white/50 to-transparent dark:from-[#0F172A]/40 dark:via-[#0F172A]/20 dark:to-transparent'
+          ? 'bg-gradient-to-l from-white/80 via-white/50 to-transparent dark:from-[#0F172A]/60 dark:via-[#0F172A]/0 dark:to-transparent'
+          : 'bg-gradient-to-r from-white/80 via-white/50 to-transparent dark:from-[#0F172A]/60 dark:via-[#0F172A]/0 dark:to-transparent'
           }`}
       />
 
