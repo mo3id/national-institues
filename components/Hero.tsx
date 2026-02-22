@@ -220,7 +220,7 @@ const Hero: React.FC = () => {
             </div>
 
             {/* Navigation Buttons */}
-            <div className={`absolute top-1/2 -translate-y-1/2 flex flex-col gap-3 ${isRTL ? 'left-4 lg:-left-8' : 'right-4 lg:-right-8'} z-20`}>
+            <div className={`absolute top-1/2 -translate-y-1/2 flex flex-col gap-3 ${isRTL ? 'left-4 md:left-6' : 'right-4 md:right-6'} z-20`}>
               <button
                 onClick={handlePrev}
                 className="w-12 h-12 md:w-14 md:h-14 bg-white text-[#1e3a8a] rounded-full shadow-lg flex items-center justify-center hover:bg-[#1e3a8a] hover:text-white transition-all hover:scale-110 group"
