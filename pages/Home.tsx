@@ -16,6 +16,7 @@ import { useLanguage } from '../LanguageContext';
 import { SCHOOLS, GOVERNORATES, NEWS } from '../constants';
 import NISLogo from '../components/NISLogo';
 import Hero from '../components/Hero';
+import ChairmanVision from '../components/ChairmanVision';
 import PageTransition from '../components/PageTransition';
 import ScrollReveal from '../components/ScrollReveal';
 
@@ -61,61 +62,7 @@ const Home: React.FC = () => {
         <Hero />
 
         {/* Chairman Message */}
-        <section className="py-24 bg-white relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <ScrollReveal>
-              <div className={`grid grid-cols-1 lg:grid-cols-2 gap-20 items-center ${isRTL ? 'lg:flex-row-reverse' : ''}`}>
-
-                {/* Image Side */}
-                <div className="relative group overflow-hidden md:overflow-visible">
-                  <div className="absolute -inset-4 bg-gray-100 rounded-[2.5rem] -rotate-2 group-hover:rotate-0 transition-transform duration-700" />
-                  <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] shadow-2xl bg-gray-200">
-                    <img
-                      src="https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=2070&auto=format&fit=crop"
-                      alt="Chairman"
-                      className="w-full h-full object-cover grayscale-0 group-hover:scale-105 transition-transform duration-1000"
-                      loading="lazy"
-                    />
-
-                    {/* 100+ Badge */}
-                    <div className={`absolute bottom-8 ${isRTL ? 'left-8' : 'right-8'} bg-[#1e3a8a] text-white p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center min-w-[120px]`}>
-                      <span className="text-4xl font-black italic">100+</span>
-                      <span className="text-xs uppercase tracking-widest opacity-80 mt-1">{lang === 'ar' ? 'عام' : 'Years'}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Text Side */}
-                <div className={`space-y-10 text-start ${isRTL ? 'text-right' : ''}`}>
-                  <div className="space-y-6">
-                    <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
-                      <span className="h-0.5 w-12 bg-red-600"></span>
-                      <span className="text-red-600 font-bold tracking-[0.2em] uppercase text-sm">{t.chairman.tag}</span>
-                    </div>
-                    <ScrollReveal direction={isRTL ? "left" : "right"}>
-                      <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#1e3a8a] leading-[1.1] tracking-tight">
-                        {t.chairman.title}
-                      </h2>
-                    </ScrollReveal>
-                  </div>
-
-                  <div className="space-y-8">
-                    <ScrollReveal delay={0.2}>
-                      <blockquote className={`text-xl md:text-2xl text-gray-600 leading-relaxed font-serif italic ${isRTL ? 'border-r-4 pr-6' : 'border-l-4 pl-6'} border-red-600 py-2`}>
-                        "{t.chairman.quote}"
-                      </blockquote>
-                    </ScrollReveal>
-
-                    <div className="space-y-1">
-                      <p className="font-black text-xl text-[#1e3a8a] uppercase tracking-widest">{t.chairman.name}</p>
-                      <p className="text-red-600 font-bold text-xs uppercase tracking-[0.2em]">{t.chairman.role}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ScrollReveal>
-          </div>
-        </section>
+        <ChairmanVision />
 
         {/* School Logos Bar */}
         <section className="py-16 bg-gray-50 overflow-hidden border-y border-gray-100 w-full">

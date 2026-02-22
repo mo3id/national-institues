@@ -12,68 +12,72 @@ const Navbar: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="container mx-auto px-6 py-4 flex items-center justify-between relative z-[100]">
-      {/* Left side: Login and Contact */}
-      <div className={`flex items-center gap-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <Link
-          to="/login"
-          className="flex items-center gap-2 border border-slate-200 dark:border-slate-700 px-6 py-2.5 rounded-[10px] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-sm font-medium text-[#1e3a8a] dark:text-slate-100"
-        >
-          <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>person</span>
-          {lang === 'ar' ? 'تسجيل الدخول' : 'Login'}
-        </Link>
-        <div className={`hidden md:flex items-center gap-2 text-slate-600 dark:text-slate-400 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <span className="text-sm font-medium" dir="ltr">012 - 3456 7890</span>
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>call</span>
-        </div>
+    <nav className={`absolute top-[10px] left-[10px] right-[10px] py-6 px-10 flex items-center justify-between z-[100] transition-all duration-300 rounded-t-[20px] ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
 
-        {/* Language & Menu Toggle for Mobile */}
+      {/* Start side: Actions & Menu together */}
+      <div className={`flex items-center gap-8 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+        {/* Actions (Language & Login) */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
-            className="text-sm font-bold text-[#1e3a8a] dark:text-slate-300 hover:text-[#991b1b] transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white hover:text-[#1e3a8a] transition-all group"
+            title={lang === 'en' ? 'عربي' : 'English'}
           >
-            {lang === 'en' ? 'عربي' : 'EN'}
+            <span className="material-symbols-outlined text-[18px]">language</span>
           </button>
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden text-[#1e3a8a] dark:text-slate-300"
+
+          <Link
+            to="/login"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-[#991b1b] hover:border-[#991b1b] transition-all group"
+            title={lang === 'ar' ? 'دخول' : 'Login'}
           >
-            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>
-              {mobileMenuOpen ? 'close' : 'menu'}
-            </span>
-          </button>
+            <span className="material-symbols-outlined text-[18px]">login</span>
+          </Link>
+        </div>
+
+        {/* Navigation Links - Now next to icons */}
+        <div className={`hidden lg:flex items-center gap-6 text-[13px] font-bold ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+          <Link to="/" className={`group flex items-center gap-1.5 transition-colors ${isActive('/') ? 'text-[#991b1b]' : 'text-white hover:text-white/80'}`}>
+            <span className="material-symbols-outlined text-[18px]">home</span>
+            <span>{t?.home ?? 'الرئيسية'}</span>
+          </Link>
+          <Link to="/schools" className={`group flex items-center gap-1.5 transition-colors ${isActive('/schools') ? 'text-[#991b1b]' : 'text-white hover:text-white/80'}`}>
+            <span className="material-symbols-outlined text-[18px]">school</span>
+            <span>{t?.schools ?? 'مدارسنا'}</span>
+          </Link>
+          <div className="group cursor-pointer flex items-center gap-1.5 text-white hover:text-white/80 transition-colors">
+            <span className="material-symbols-outlined text-[18px]">design_services</span>
+            <span>{lang === 'ar' ? 'الخدمات' : 'Services'}</span>
+          </div>
+          <Link to="/about" className={`group flex items-center gap-1.5 transition-colors ${isActive('/about') ? 'text-[#991b1b]' : 'text-white hover:text-white/80'}`}>
+            <span className="material-symbols-outlined text-[18px]">info</span>
+            <span>{t?.about ?? 'من نحن'}</span>
+          </Link>
+          <Link to="/complaints" className={`group flex items-center gap-1.5 transition-colors ${isActive('/complaints') ? 'text-[#991b1b]' : 'text-white hover:text-white/80'}`}>
+            <span className="material-symbols-outlined text-[18px]">forum</span>
+            <span>{translationsRoot?.nav?.feedback ?? 'تواصل معنا'}</span>
+          </Link>
+          <Link to="/news" className={`group flex items-center gap-1.5 transition-colors ${isActive('/news') ? 'text-[#991b1b]' : 'text-white hover:text-white/80'}`}>
+            <span className="material-symbols-outlined text-[18px]">article</span>
+            <span>{t?.news ?? 'المدونة'}</span>
+          </Link>
         </div>
       </div>
 
-      {/* Middle side: Navigation Links */}
-      <div className={`hidden lg:flex items-center gap-8 text-sm font-medium text-[#1e3a8a] dark:text-slate-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <Link to="/" className={`transition-colors font-bold ${isActive('/') ? 'text-[#991b1b]' : 'hover:text-[#991b1b]'}`}>
-          {t?.home ?? 'الرئيسية'}
-        </Link>
-        <Link to="/schools" className={`relative group cursor-pointer flex items-center gap-1 font-bold transition-colors ${isActive('/schools') ? 'text-[#991b1b]' : 'hover:text-[#991b1b]'}`}>
-          <span>{t?.schools ?? 'مدارسنا'}</span>
-          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>expand_more</span>
-        </Link>
-        <div className="relative group cursor-pointer flex items-center gap-1 font-bold hover:text-[#991b1b] transition-colors">
-          <span>{lang === 'ar' ? 'الخدمات' : 'Services'}</span>
-          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>expand_more</span>
-        </div>
-        <Link to="/about" className={`transition-colors font-bold ${isActive('/about') ? 'text-[#991b1b]' : 'hover:text-[#991b1b]'}`}>
-          {t?.about ?? 'من نحن'}
-        </Link>
-        <Link to="/complaints" className={`transition-colors font-bold ${isActive('/complaints') ? 'text-[#991b1b]' : 'hover:text-[#991b1b]'}`}>
-          {translationsRoot?.nav?.feedback ?? 'تواصل معنا'}
-        </Link>
-        <Link to="/news" className={`transition-colors font-bold ${isActive('/news') ? 'text-[#991b1b]' : 'hover:text-[#991b1b]'}`}>
-          {t?.news ?? 'المدونة'}
-        </Link>
-      </div>
-
-      {/* Right side: Logo */}
+      {/* Far side: Logo */}
       <Link to="/" className="flex items-center shrink-0">
-        <img src="/Layer 1.png" alt="National Institutes" className="h-16 md:h-20 object-contain drop-shadow-sm" />
+        <img src="/Layer 1.png" alt="National Institutes" className="h-7 md:h-9 lg:h-11 object-contain brightness-0 invert" />
       </Link>
+
+      {/* Mobile Toggle inside the links container Logic */}
+      <button
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        className="lg:hidden w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white transition-all"
+      >
+        <span className="material-symbols-outlined text-[20px]">
+          {mobileMenuOpen ? 'close' : 'menu'}
+        </span>
+      </button>
 
       {/* Mobile Menu Dropdown */}
       <AnimatePresence>
@@ -82,23 +86,32 @@ const Navbar: React.FC = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute top-[85px] left-4 right-4 bg-white dark:bg-slate-800 shadow-2xl rounded-[10px] p-6 flex flex-col gap-4 border border-slate-100 dark:border-slate-700 lg:hidden"
+            className="absolute top-[90px] left-4 right-4 bg-white/95 backdrop-blur-lg shadow-2xl rounded-2xl p-6 flex flex-col gap-4 border border-slate-100 lg:hidden overflow-hidden"
           >
-            <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-[#1e3a8a] dark:text-slate-100 font-bold">
-              {t?.home ?? 'الرئيسية'}
-            </Link>
-            <Link to="/schools" onClick={() => setMobileMenuOpen(false)} className="text-[#1e3a8a] dark:text-slate-100 font-bold">
-              {t?.schools ?? 'مدارسنا'}
-            </Link>
-            <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="text-[#1e3a8a] dark:text-slate-100 font-bold">
-              {t?.about ?? 'من نحن'}
-            </Link>
-            <Link to="/complaints" onClick={() => setMobileMenuOpen(false)} className="text-[#1e3a8a] dark:text-slate-100 font-bold">
-              {translationsRoot?.nav?.feedback ?? 'تواصل معنا'}
-            </Link>
-            <Link to="/news" onClick={() => setMobileMenuOpen(false)} className="text-[#1e3a8a] dark:text-slate-100 font-bold">
-              {t?.news ?? 'المدونة'}
-            </Link>
+            <div className="flex flex-col gap-1">
+              {[
+                { to: '/', label: t?.home ?? 'الرئيسية', icon: 'home' },
+                { to: '/schools', label: t?.schools ?? 'مدارسنا', icon: 'school' },
+                { to: '/about', label: t?.about ?? 'من نحن', icon: 'info' },
+                { to: '/complaints', label: translationsRoot?.nav?.feedback ?? 'تواصل معنا', icon: 'forum' },
+                { to: '/news', label: t?.news ?? 'المدونة', icon: 'article' }
+              ].map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-4 py-3 rounded-xl font-bold flex items-center gap-3 ${isActive(link.to) ? 'bg-[#991b1b]/10 text-[#991b1b]' : 'text-[#1e3a8a] hover:bg-slate-50'}`}
+                >
+                  <span className="material-symbols-outlined">{link.icon}</span>
+                  <span className="flex-1">{link.label}</span>
+                </Link>
+              ))}
+            </div>
+            <div className="h-[1px] bg-slate-100 my-2" />
+            <div className="flex items-center gap-3 px-4">
+              <span className="material-symbols-outlined text-slate-500">call</span>
+              <span className="text-sm font-bold text-slate-700" dir="ltr">012 - 3456 7890</span>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
