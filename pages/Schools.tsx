@@ -6,7 +6,7 @@ import { useLanguage } from '../LanguageContext';
 import { translations } from '../translations';
 import NISLogo from '../components/NISLogo';
 
-const SchoolCard = React.memo(({ school, isRTL, translations: t, lang, onView }: any) => (
+const SchoolCard = React.memo(({ school, isRTL, translations: t, lang }: any) => (
   <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all group flex flex-col h-full">
     <div className="flex justify-between items-start mb-8">
       <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center p-2 border border-gray-100 group-hover:scale-110 transition-transform">
@@ -38,41 +38,6 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, lang, onView }:
         <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center border border-gray-200">
           <User className="h-5 w-5 text-gray-400" />
         </div>
-        {/* School Details Modal */}
-        {selectedSchool && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black/40" onClick={closeModal} />
-            <div className={`relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-4 p-6 z-10`}>
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-4">
-                  <img src={selectedSchool.logo} alt={selectedSchool.name} className="w-20 h-20 rounded-lg object-cover" />
-                  <div>
-                    <h3 className="text-2xl font-black text-gray-900">{selectedSchool.name}</h3>
-                    <p className="text-sm text-gray-500">{selectedSchool.type} • {selectedSchool.governorate}, {selectedSchool.location}</p>
-                  </div>
-                </div>
-                <button onClick={closeModal} className="p-2 rounded-full hover:bg-gray-100">
-                  <X className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <p className="text-xs text-gray-400 uppercase font-bold">{t.principal}</p>
-                  <p className="text-lg font-bold text-gray-900 mt-2">{selectedSchool.principal}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-400 uppercase font-bold">{t.filterGov}</p>
-                  <p className="text-lg font-bold text-gray-900 mt-2">{selectedSchool.governorate}</p>
-                </div>
-              </div>
-
-              <div className="mt-6 flex justify-end">
-                <button onClick={closeModal} className="px-6 py-3 bg-blue-900 text-white rounded-2xl font-bold">{t.viewProfile}</button>
-              </div>
-            </div>
-          </div>
-        )}
         <div>
           <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-none">{t.principal}</p>
           <p className="text-sm font-bold text-gray-800 mt-1">{school.principal}</p>
@@ -80,7 +45,7 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, lang, onView }:
       </div>
     </div>
 
-    <button onClick={() => onView && onView(school)} className={`mt-auto w-full py-4 bg-blue-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} group-hover:bg-red-700 transition-colors shadow-lg active:scale-95`}>
+    <button className={`mt-auto w-full py-4 bg-blue-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} group-hover:bg-red-700 transition-colors shadow-lg active:scale-95`}>
       <span>{t.viewProfile}</span>
       <ArrowRight className={`h-4 w-4 ${isRTL ? 'rotate-180' : ''}`} />
     </button>
@@ -106,14 +71,6 @@ const Schools: React.FC = () => {
       return matchesSearch && matchesGov && matchesType;
     });
   }, [searchQuery, selectedGov, selectedType]);
-
-  const [selectedSchool, setSelectedSchool] = useState<any | null>(null);
-
-  const handleViewProfile = (school: any) => {
-    setSelectedSchool(school);
-  };
-
-  const closeModal = () => setSelectedSchool(null);
 
   const clearFilters = useCallback(() => {
     setSearchQuery('');
@@ -190,7 +147,7 @@ const Schools: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredSchools.length > 0 ? (
             filteredSchools.map((school) => (
-              <SchoolCard key={school.id} school={school} isRTL={isRTL} translations={t} lang={lang} onView={handleViewProfile} />
+              <SchoolCard key={school.id} school={school} isRTL={isRTL} translations={t} lang={lang} />
             ))
           ) : (
             <div className="col-span-full py-32 text-center bg-white rounded-3xl border border-dashed border-gray-300">
