@@ -14,6 +14,7 @@ import {
 import { ModalWrap, EditNewsForm, EditHeroForm, EditSchoolForm } from './dashboard-components/Modals';
 import { useAuth } from '../AuthContext';
 import { useLanguage } from '../LanguageContext';
+import NISLogo from '../components/NISLogo';
 
 // ─── Initial Data ─────────────────────────────────────────────────────────────
 const initNews: DashNewsItem[] = NEWS.map((n, i) => ({ ...n, published: i < 8 }));
@@ -277,8 +278,8 @@ const Dashboard: React.FC = () => {
       {/* Sidebar */}
       <aside className={`dash-sidebar ${collapsed ? 'collapsed' : ''}`}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '20px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <div style={{ width: 38, height: 38, background: 'linear-gradient(135deg,#ef4444,#dc2626)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <GraduationCap style={{ width: 20, height: 20, color: 'white' }} />
+          <div style={{ width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'var(--surface)', borderRadius: 12, padding: 4 }}>
+            <NISLogo className="h-full w-full" showText={false} />
           </div>
           {!collapsed && <div><p style={{ color: 'white', fontWeight: 800, fontSize: 14, lineHeight: 1.2 }}>NIS Admin</p><p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11 }}>Content Manager</p></div>}
         </div>
