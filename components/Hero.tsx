@@ -46,8 +46,13 @@ const Hero: React.FC = () => {
               transform: isRTL ? 'scaleX(-1)' : 'none'
             }}
           />
-          {/* Subtle vignette for better text readability */}
-          <div className="absolute inset-0 bg-black/40" />
+          {/* Gradient overlay: Darker on text side, lighter on character side */}
+          <div
+            className={`absolute inset-0 z-10 ${isRTL
+              ? 'bg-gradient-to-l from-black/60 via-black/10 to-transparent'
+              : 'bg-gradient-to-r from-black/60 via-black/10 to-transparent'
+              }`}
+          />
         </div>
       ))}
 
