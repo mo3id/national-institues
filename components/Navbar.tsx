@@ -109,7 +109,6 @@ const Navbar: React.FC = () => {
               whileTap={{ scale: 0.9 }}
               className="p-2.5 text-gray-400 hover:text-[#1e3a8a] transition-all rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100"
             >
-              <Search className="h-5 w-5" />
             </motion.button>
 
             <Link
