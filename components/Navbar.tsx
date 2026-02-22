@@ -20,7 +20,6 @@ const Navbar: React.FC = () => {
     { name: t.schools, path: '/schools' },
     { name: t.news, path: '/news' },
     { name: t.careers, path: '/careers' },
-    { name: lang === 'ar' ? 'شكاوي العملاء' : 'Customer Feedback', path: '/complaints' },
   ];
 
   useEffect(() => {
