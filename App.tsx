@@ -19,6 +19,7 @@ const Careers = lazy(() => import('./pages/Careers'));
 const Schools = lazy(() => import('./pages/Schools'));
 const SchoolProfile = lazy(() => import('./pages/SchoolProfile'));
 const News = lazy(() => import('./pages/News'));
+const NewsDetail = lazy(() => import('./pages/NewsDetail'));
 const Complaints = lazy(() => import('./pages/Complaints'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Login = lazy(() => import('./pages/Login'));
@@ -68,6 +69,7 @@ const App: React.FC = () => {
                           <Route path="/" element={<Home />} />
                           <Route path="/about" element={<About />} />
                           <Route path="/news" element={<News />} />
+                          <Route path="/news/:id" element={<NewsDetail />} />
                           <Route path="/schools" element={<Schools />} />
                           <Route path="/schools/:id" element={<SchoolProfile />} />
                           <Route path="/ai-studio" element={<AIStudio />} />

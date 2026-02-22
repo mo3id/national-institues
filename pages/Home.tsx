@@ -344,10 +344,10 @@ const Home: React.FC = () => {
                         <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-6">
                           {lang === 'ar' ? item.summaryAr : item.summary}
                         </p>
-                        <button className={`mt-auto text-blue-900 font-bold text-xs uppercase tracking-widest flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} pt-4 group-hover:translate-x-1 transition-transform`}>
+                        <Link to={`/news/${item.id}`} className={`mt-auto text-blue-900 font-bold text-xs uppercase tracking-widest flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} pt-4 group-hover:translate-x-1 transition-transform`}>
                           <span>{t.news.readMore}</span>
                           <ArrowRight className={`h-4 w-4 text-red-600 ${isRTL ? 'rotate-180' : ''}`} />
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   </div>

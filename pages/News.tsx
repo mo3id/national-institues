@@ -62,9 +62,9 @@ const News: React.FC = () => {
                   <h2 className="text-2xl font-black text-gray-900 mb-4 group-hover:text-blue-900 transition-colors">{lang === 'ar' ? featured.titleAr : featured.title}</h2>
                   <p className="text-gray-600 mb-6">{lang === 'ar' ? featured.summaryAr : featured.summary}</p>
                   <div className="flex items-center gap-4">
-                    <Link to="#" className="inline-flex items-center px-6 py-3 bg-blue-900 text-white rounded-full font-black uppercase tracking-widest hover:bg-blue-800 transition-colors shadow-lg active:scale-95">
+                    <Link to={`/news/${featured.id}`} className="inline-flex items-center px-6 py-3 bg-blue-900 text-white rounded-full font-black uppercase tracking-widest hover:bg-blue-800 transition-colors shadow-lg active:scale-95">
                       {t.news.readMore}
-                      <ArrowRight className="h-4 w-4 ml-2" />
+                      <ArrowRight className={`h-4 w-4 ml-2 ${isRTL ? 'rotate-180' : ''}`} />
                     </Link>
                     <span className="text-sm text-gray-500 flex items-center gap-2"><Calendar className="h-4 w-4" />{featured.date}</span>
                   </div>
@@ -85,9 +85,9 @@ const News: React.FC = () => {
                     <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-red-700 transition-colors">{lang === 'ar' ? item.titleAr : item.title}</h3>
                     <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">{lang === 'ar' ? item.summaryAr : item.summary}</p>
                     <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
-                      <Link to="#" className="text-blue-900 font-bold text-xs uppercase tracking-widest inline-flex items-center gap-2 group-hover:translate-x-1 transition-transform">
+                      <Link to={`/news/${item.id}`} className="text-blue-900 font-bold text-xs uppercase tracking-widest inline-flex items-center gap-2 group-hover:translate-x-1 transition-transform">
                         {t.news.readMore}
-                        <ArrowRight className="h-3.5 w-3.5 text-red-600" />
+                        <ArrowRight className={`h-3.5 w-3.5 text-red-600 ${isRTL ? 'rotate-180' : ''}`} />
                       </Link>
                       <span className="text-[10px] text-gray-400 font-medium">{new Date(item.date).toLocaleDateString()}</span>
                     </div>
