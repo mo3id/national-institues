@@ -34,22 +34,25 @@ export const translations = {
       ctaSearch: "Find a School",
       ctaAbout: "Explore Courses",
       certified: "Certified Institute",
-      since: "Since 1950",
+      since: "Since 1956",
       slides: [
         {
-          title: "Nurturing Global Leaders",
+          title: "Empowering Future Innovators",
           subtitle: "Legacy of Excellence",
-          description: "Empowering the next generation with world-class education and values that transcend borders."
+          description: "Providing world-class education that fosters creativity, leadership, and a lifelong passion for learning.",
+          image: "/imgs/nano-banana-1771765349835.png"
         },
         {
-          title: "Innovation in Education",
-          subtitle: "Future Ready",
-          description: "Integrating cutting-edge technology and AI to create personalized learning experiences for every student."
+          title: "Shaping Tomorrow's Leaders",
+          subtitle: "Academic Brilliance",
+          description: "Our comprehensive curriculum and dedicated faculty prepare students to excel in a globalized world.",
+          image: "/imgs/nano-banana-1771766058296.png"
         },
         {
-          title: "Community & Culture",
-          subtitle: "Building Character",
-          description: "Fostering a vibrant community where diversity is celebrated and character is built through shared experiences."
+          title: "A Tradition of Excellence",
+          subtitle: "Since 1956",
+          description: "Over six decades of educational innovation, building character and academic success in every student.",
+          image: "/imgs/nano-banana-1771765349835.png"
         }
       ]
     },
@@ -216,19 +219,22 @@ export const translations = {
       since: "منذ عام ١٩٥٠",
       slides: [
         {
-          title: "رعاية قادة المستقبل",
+          title: "تمكين مبتكري المستقبل",
           subtitle: "إرث من التميز",
-          description: "تمكين الجيل القادم بتعليم عالمي المستوى وقيم تتجاوز الحدود."
+          description: "توفير تعليم عالمي المستوى يعزز الإبداع والقيادة والشغف الدائم بالتعلم.",
+          image: "/imgs/nano-banana-1771765349835.png"
         },
         {
-          title: "الابتكار في التعليم",
-          subtitle: "جاهزون للمستقبل",
-          description: "دمج أحدث التقنيات والذكاء الاصطناعي لإنشاء تجارب تعليمية مخصصة لكل طالب."
+          title: "تشكيل قادة الغد",
+          subtitle: "التفوق الأكاديمي",
+          description: "مناهجنا الشاملة وأعضاء هيئة التدريس المتفانون يعدون الطلاب للتميز في عالم تحكمه العولمة.",
+          image: "/imgs/nano-banana-1771766058296.png"
         },
         {
-          title: "المجتمع والثقافة",
-          subtitle: "بناء الشخصية",
-          description: "تعزيز مجتمع حيوي حيث يتم الاحتفاء بالتنوع وبناء الشخصية من خلال التجارب المشتركة."
+          title: "تقليد من التميز",
+          subtitle: "منذ عام ١٩٥٦",
+          description: "أكثر من ستة عقود من الابتكار التعليمي، وبناء الشخصية والنجاح الأكاديمي لكل طالب.",
+          image: "/imgs/nano-banana-1771765349835.png"
         }
       ]
     },

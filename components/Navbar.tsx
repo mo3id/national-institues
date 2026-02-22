@@ -34,10 +34,10 @@ const Navbar: React.FC = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500
+      className={`absolute top-0 left-0 right-0 z-[100] transition-all duration-500 ease-in-out w-full
         ${isScrolled
-          ? 'bg-white/80 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.05)] py-2 border-b border-gray-100/50'
-          : 'bg-white py-5 border-b border-gray-100'
+          ? 'fixed bg-white/90 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.05)] py-3'
+          : 'bg-transparent py-6'
         }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -60,10 +60,10 @@ const Navbar: React.FC = () => {
                 />
               </motion.div>
               <div className="flex flex-col">
-                <span className={`font-black text-[#1e3a8a] tracking-tight leading-none transition-all duration-500 ${isScrolled ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'}`}>
+                <span className={`font-black tracking-tight leading-none transition-all duration-500 ${isScrolled ? 'text-xl md:text-2xl text-[#1e3a8a]' : 'text-xl md:text-2xl text-white drop-shadow-md'}`}>
                   {lang === 'ar' ? 'المعاهد القومية' : 'NIS'}
                 </span>
-                <span className={`text-[#991b1b] font-black uppercase tracking-[0.2em] transition-all duration-500 ${isScrolled ? 'text-[6px] md:text-[8px] opacity-0' : 'text-[8px] md:text-[10px] opacity-100 mt-1'}`}>
+                <span className={`font-black uppercase tracking-[0.2em] transition-all duration-500 ${isScrolled ? 'text-[8px] md:text-[10px] opacity-100 text-[#991b1b] mt-1' : 'text-[8px] md:text-[10px] opacity-100 mt-1 text-white/90 drop-shadow-md'}`}>
                   {lang === 'ar' ? 'الجمعية العامة للمعاهد القومية' : 'Excellence in Education'}
                 </span>
               </div>
@@ -76,17 +76,12 @@ const Navbar: React.FC = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`relative px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 group flex items-center gap-2
-                  ${isActive(link.path) ? 'text-[#1e3a8a]' : 'text-gray-400 hover:text-[#1e3a8a]'}`}
+                className={`relative px-4 py-2 text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-300 group flex items-center gap-2 rounded-full
+                  ${isActive(link.path) 
+                    ? (isScrolled ? 'bg-blue-50 text-[#1e3a8a]' : 'bg-white/20 backdrop-blur-md text-white border border-white/30') 
+                    : (isScrolled ? 'text-gray-600 hover:text-[#1e3a8a] hover:bg-gray-50' : 'text-white/80 hover:text-white hover:bg-white/10 drop-shadow-sm')}`}
               >
-                {isActive(link.path) && (
-                  <motion.span
-                    layoutId="nav-pill"
-                    className="absolute inset-0 bg-blue-50 rounded-full -z-10"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                {link.path === '/' && <HomeIcon className="h-3.5 w-3.5" />}
+                {link.path === '/' && <HomeIcon className="h-4 w-4" />}
                 <span>{link.name}</span>
               </Link>
             ))}
@@ -95,25 +90,24 @@ const Navbar: React.FC = () => {
           {/* Action Buttons & Utility Icons */}
           <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2 md:space-x-4' : 'space-x-2 md:space-x-4'}`}>
             <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
-              className="flex items-center gap-2 text-gray-500 hover:text-[#1e3a8a] font-black text-[10px] uppercase transition-all px-3 py-2 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100"
+              className={`flex items-center gap-2 font-black text-[11px] uppercase transition-all px-4 py-2.5 rounded-full border 
+                ${isScrolled 
+                  ? 'text-[#1e3a8a] bg-white border-gray-200 hover:bg-gray-50 shadow-sm' 
+                  : 'text-white hover:bg-white/10 border-white/30 backdrop-blur-md shadow-lg shadow-black/10'}`}
             >
               <Globe className="h-4 w-4" />
               <span className="hidden sm:inline">{lang === 'en' ? 'عربي' : 'EN'}</span>
             </motion.button>
 
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="p-2.5 text-gray-400 hover:text-[#1e3a8a] transition-all rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100"
-            >
-            </motion.button>
-
             <Link
               to="/complaints"
-              className="hidden lg:flex items-center bg-[#991b1b] text-white px-6 py-2.5 rounded-xl hover:bg-red-800 transition-all uppercase tracking-[0.2em] text-[10px] font-black shadow-lg shadow-red-900/10 active:scale-95"
+              className={`hidden lg:flex items-center px-8 py-2.5 rounded-full transition-all uppercase tracking-[0.15em] text-[11px] font-black shadow-lg active:scale-95
+                ${isScrolled 
+                  ? 'bg-[#1e3a8a] text-white hover:bg-blue-900 shadow-blue-900/20' 
+                  : 'bg-white text-[#1e3a8a] hover:bg-gray-50 shadow-black/20'}`}
             >
               <span>{t.feedback}</span>
             </Link>
@@ -122,7 +116,8 @@ const Navbar: React.FC = () => {
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-gray-500 hover:text-[#1e3a8a] transition-colors rounded-xl hover:bg-gray-50"
+              className={`lg:hidden p-2 transition-colors rounded-xl 
+                ${isScrolled ? 'text-gray-500 hover:text-[#1e3a8a] hover:bg-gray-50' : 'text-white hover:bg-white/10'}`}
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </motion.button>

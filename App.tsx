@@ -9,7 +9,7 @@ import { LanguageProvider } from './LanguageContext';
 import { Loader2 } from 'lucide-react';
 
 import { AuthProvider, useAuth } from './AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 // Lazy load pages for performance
 const Home = lazy(() => import('./pages/Home'));
@@ -37,6 +37,21 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+  
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className={`flex-grow ${isHome ? '' : 'pt-24'}`}>
+        {children}
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -61,26 +76,22 @@ const App: React.FC = () => {
 
                 {/* Main site routes */}
                 <Route path="/*" element={
-                  <div className="flex flex-col min-h-screen">
-                    <Navbar />
-                    <main className="flex-grow pt-24">
-                      <Suspense fallback={<PageLoader />}>
-                        <Routes>
-                          <Route path="/" element={<Home />} />
-                          <Route path="/about" element={<About />} />
-                          <Route path="/news" element={<News />} />
-                          <Route path="/news/:id" element={<NewsDetail />} />
-                          <Route path="/schools" element={<Schools />} />
-                          <Route path="/schools/:id" element={<SchoolProfile />} />
-                          <Route path="/ai-studio" element={<AIStudio />} />
-                          <Route path="/careers" element={<Careers />} />
-                          <Route path="/complaints" element={<Complaints />} />
-                          <Route path="*" element={<Home />} />
-                        </Routes>
-                      </Suspense>
-                    </main>
-                    <Footer />
-                  </div>
+                  <MainLayout>
+                    <Suspense fallback={<PageLoader />}>
+                      <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/about" element={<About />} />
+                        <Route path="/news" element={<News />} />
+                        <Route path="/news/:id" element={<NewsDetail />} />
+                        <Route path="/schools" element={<Schools />} />
+                        <Route path="/schools/:id" element={<SchoolProfile />} />
+                        <Route path="/ai-studio" element={<AIStudio />} />
+                        <Route path="/careers" element={<Careers />} />
+                        <Route path="/complaints" element={<Complaints />} />
+                        <Route path="*" element={<Home />} />
+                      </Routes>
+                    </Suspense>
+                  </MainLayout>
                 } />
               </Routes>
             </AnimatePresence>
