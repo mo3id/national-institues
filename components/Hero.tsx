@@ -8,7 +8,7 @@ const Hero: React.FC = () => {
 
   const slides = [
     {
-      image: '/nano-banana-1771775040523.png',
+      image: '/Generated Image February 22, 2026 - 9_43PM (1).jpeg',
       title: lang === 'ar' ? (
         <>نصنع قادة المستقبل في <br /><span className="text-[#991b1b]">٤٠ مدرسة رائدة</span></>
       ) : (
@@ -17,17 +17,6 @@ const Hero: React.FC = () => {
       description: lang === 'ar'
         ? 'نحن لسنا مجرد مجموعة تعليمية، نحن مجتمع متكامل يسعى للابتكار والتميز الأكاديمي. اكتشف بيئة تعليمية تلهم الإبداع وتنمي المهارات.'
         : 'We are more than just an educational group; we are an integrated community striving for innovation and academic excellence. Discover a learning environment that inspires creativity and develops skills.'
-    },
-    {
-      image: '/nano-banana-1771777944339.png',
-      title: lang === 'ar' ? (
-        <>تعليم متميز يواكب <br /><span className="text-[#1e3a8a]">عصر التكنولوجيا</span></>
-      ) : (
-        <>Outstanding Education for the <br /><span className="text-[#1e3a8a]">Technology Era</span></>
-      ),
-      description: lang === 'ar'
-        ? 'نستخدم أحدث التقنيات وأفضل المناهج لتزويد أبنائنا بالمعرفة التي يحتاجونها للنجاح في المستقبل المتغير بشكل مستمر.'
-        : 'We use the latest technologies and best curricula to equip our students with the knowledge they need to succeed in an ever-changing future.'
     }
   ];
 
@@ -57,25 +46,20 @@ const Hero: React.FC = () => {
               transform: isRTL ? 'scaleX(-1)' : 'none'
             }}
           />
+          {/* Subtle vignette for better text readability */}
+          <div className="absolute inset-0 bg-black/40" />
         </div>
       ))}
 
-      {/* Lighter Overlay */}
-      <div
-        className={`absolute inset-0 z-10 ${isRTL
-          ? 'bg-gradient-to-l from-white/80 via-white/50 to-transparent dark:from-[#0F172A]/60 dark:via-[#0F172A]/0 dark:to-transparent'
-          : 'bg-gradient-to-r from-white/80 via-white/50 to-transparent dark:from-[#0F172A]/60 dark:via-[#0F172A]/0 dark:to-transparent'
-          }`}
-      />
 
       {/* Main Content */}
       <div className="container mx-auto px-6 md:px-12 py-20 relative z-20">
         <div className={`max-w-3xl animate-fade-up ${isRTL ? 'text-right ml-auto' : 'text-left mr-auto'}`}>
-          <h1 key={`title-${currentIndex}`} className="text-5xl lg:text-7xl font-extrabold text-[#1e3a8a] dark:text-white leading-[1.2] mb-8 animate-fade-in">
+          <h1 key={`title-${currentIndex}`} className="text-5xl lg:text-7xl font-extrabold text-white leading-[1.2] mb-8 animate-fade-in text-start">
             {currentSlide.title}
           </h1>
 
-          <p key={`desc-${currentIndex}`} className="text-lg lg:text-xl text-white/90 max-w-2xl mb-12 leading-relaxed font-medium font-['Cairo'] animate-fade-in drop-shadow-lg text-start" style={{ animationDelay: '0.1s' }}>
+          <p key={`desc-${currentIndex}`} className="text-lg lg:text-xl text-white/90 max-w-2xl mb-12 leading-relaxed font-medium font-['Cairo'] animate-fade-in text-start" style={{ animationDelay: '0.1s' }}>
             {currentSlide.description}
           </p>
 
@@ -85,7 +69,7 @@ const Hero: React.FC = () => {
               <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_forward</span>
             </button>
             <button className="flex items-center gap-4 group">
-              <div className="bg-white/10 backdrop-blur-lg p-3 rounded-full text-white border border-white/20 group-hover:bg-white group-hover:text-[#1e3a8a] transition-all duration-300 flex items-center justify-center">
+              <div className="bg-white/10 backdrop-blur-md p-3 rounded-full text-white border border-white/20 group-hover:bg-white group-hover:text-[#1e3a8a] transition-all duration-300 flex items-center justify-center">
                 <span className="material-symbols-outlined text-[20px]">
                   {isRTL ? 'arrow_back' : 'arrow_outward'}
                 </span>
