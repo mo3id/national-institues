@@ -179,13 +179,42 @@ const CSS = `
   
   .glow-dot { width: 10px; height: 10px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981; animation: pulse2 2s infinite; }
   @keyframes pulse2 { 0%,100%{opacity: 1; transform: scale(1)} 50%{opacity: 0.5; transform: scale(1.4)} }
+
+  @media (max-width: 1024px) {
+    .dash-sidebar { transform: translateX(0); z-index: 100; box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
+    .dash-root.rtl .dash-sidebar { transform: translateX(0); box-shadow: -4px 0 24px rgba(0,0,0,0.5); }
+    .dash-sidebar.collapsed { transform: translateX(-100%); width: 260px; box-shadow: none; }
+    .dash-root.rtl .dash-sidebar.collapsed { transform: translateX(100%); width: 260px; box-shadow: none; }
+    .dash-main { margin-left: 0 !important; margin-right: 0 !important; }
+    .dash-main.collapsed { margin-left: 0 !important; margin-right: 0 !important; }
+    .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
+  }
+  @media (max-width: 768px) {
+    .dash-topbar { padding: 0 16px; height: 68px; }
+    .dash-content { padding: 20px 16px; }
+    .stat-card { padding: 16px; gap: 12px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .row-header { display: none; }
+    .news-row { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: 16px; margin-bottom: 12px; }
+    .news-row img { width: 100% !important; height: 180px !important; }
+    .news-row > div:nth-child(2) p { white-space: normal; }
+    .dash-modal-header, .dash-modal-body { padding: 20px; }
+    .hero-card > div:last-child { flex-direction: column; align-items: flex-start; }
+    .hero-card p { max-width: 100% !important; }
+    .dash-btn { padding: 12px 16px; flex: 1; justify-content: center; }
+    .dash-form-actions { flex-direction: column; }
+    .dash-form-actions .dash-btn { width: 100%; }
+    .sm-show { display: none !important; }
+    .toggle-pill button { padding: 6px 10px; font-size: 11px; }
+  }
 `;
 
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
 const Dashboard: React.FC = () => {
   const { logout } = useAuth();
   const [section, setSection] = useState<Section>('overview');
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => typeof window !== 'undefined' && window.innerWidth < 1024);
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('dash-theme') as Theme) || 'light');
   const { lang, setLang } = useLanguage();
   const [newsList, setNewsList] = useState<DashNewsItem[]>(initNews);
@@ -243,6 +272,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className={`dash-root ${theme === 'dark' ? 'dark' : ''} ${isRTL ? 'rtl' : ''}`}>
       <style>{CSS}</style>
+      <div className={`sidebar-overlay ${!collapsed ? 'active' : ''}`} onClick={() => setCollapsed(true)} />
 
       {/* Sidebar */}
       <aside className={`dash-sidebar ${collapsed ? 'collapsed' : ''}`}>
@@ -255,7 +285,7 @@ const Dashboard: React.FC = () => {
         <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
           {!collapsed && <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '0 20px', marginBottom: 6 }}>{u.overview}</p>}
           {navItems.filter(n => n.id !== 'settings').map(item => (
-            <div key={item.id} className={`nav-item ${section === item.id ? 'active' : ''}`} onClick={() => setSection(item.id)}>
+            <div key={item.id} className={`nav-item ${section === item.id ? 'active' : ''}`} onClick={() => { setSection(item.id); if (window.innerWidth < 1024) setCollapsed(true); }}>
               <item.icon style={{ width: 18, height: 18, flexShrink: 0 }} />
               {!collapsed && <span style={{ fontSize: 13 }}>{u[item.id as keyof typeof u] as string}</span>}
               {!collapsed && section === item.id && <ChevronRight style={{ width: 14, height: 14, marginInlineStart: 'auto', opacity: 0.5, transform: isRTL ? 'scaleX(-1)' : 'none' }} />}
@@ -263,7 +293,7 @@ const Dashboard: React.FC = () => {
           ))}
         </nav>
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', padding: 8 }}>
-          <div className={`nav-item ${section === 'settings' ? 'active' : ''}`} onClick={() => setSection('settings')}>
+          <div className={`nav-item ${section === 'settings' ? 'active' : ''}`} onClick={() => { setSection('settings'); if (window.innerWidth < 1024) setCollapsed(true); }}>
             <Settings style={{ width: 18, height: 18, flexShrink: 0 }} />{!collapsed && <span style={{ fontSize: 13 }}>{u.settings}</span>}
           </div>
           <div className="nav-item" onClick={logout}><LogOut style={{ width: 18, height: 18, flexShrink: 0 }} />{!collapsed && <span style={{ fontSize: 13 }}>{u.logout}</span>}</div>
@@ -299,7 +329,7 @@ const Dashboard: React.FC = () => {
               <div style={{ width: 34, height: 34, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <span style={{ color: 'white', fontSize: 12, fontWeight: 800 }}>AD</span>
               </div>
-              <div style={{ display: 'none' }} className="sm-show">
+              <div className="sm-show" style={{ display: 'flex', flexDirection: 'column' }}>
                 <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', lineHeight: 1.2 }}>{profile.name}</p>
                 <p style={{ fontSize: 11, color: 'var(--text2)' }}>Super Admin</p>
               </div>
