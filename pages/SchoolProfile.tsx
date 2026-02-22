@@ -17,11 +17,11 @@ const SchoolProfile: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="relative h-56 bg-cover bg-center" style={{backgroundImage: `url(https://picsum.photos/seed/cover${school.id}/1600/400)`}}>
+      <div className="relative h-72 md:h-96 bg-cover bg-center" style={{backgroundImage: `url(https://picsum.photos/seed/cover${school.id}/1600/400)`}}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent" />
         <div className="max-w-7xl mx-auto px-4 h-full flex items-end pb-6">
           <div className="flex items-center gap-6">
-            <div className="w-28 h-28 bg-white rounded-lg p-2 shadow-lg overflow-hidden">
+            <div className="w-32 h-32 bg-white rounded-lg p-3 shadow-lg overflow-hidden">
               <img src={school.logo} alt={school.name} className="w-full h-full object-cover" />
             </div>
             <div className="text-white">
@@ -32,7 +32,7 @@ const SchoolProfile: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 -mt-12 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 -mt-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="bg-white rounded-2xl p-6 shadow-md">
             <h3 className="font-bold text-lg mb-4">{t?.schools?.title ?? 'School Details'}</h3>
