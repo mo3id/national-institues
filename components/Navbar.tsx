@@ -45,31 +45,30 @@ const Navbar: React.FC = () => {
             exit={{ y: -20, opacity: 0 }}
             className="fixed top-[10px] left-[10px] right-[10px] z-[100] py-6 px-10 flex items-center justify-between bg-transparent rounded-[20px]"
           >
-            {/* ACTIONS & LINKS */}
-            <div className="flex items-center gap-8">
-              <div className="hidden lg:flex items-center gap-6 text-[13px] font-bold">
-                {menuLinks.map((link) => (
-                  <Link key={link.to} to={link.to} className={`group flex items-center gap-1.5 transition-colors whitespace-nowrap ${isActive(link.to) ? 'text-[#991b1b]' : 'text-white hover:text-white/80'}`}>
-                    <span className="material-symbols-outlined text-[18px]">{link.icon}</span>
-                    <span>{link.label}</span>
-                  </Link>
-                ))}
-              </div>
+            {/* LANGUAGE & LOGIN - Far edge */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white hover:text-[#1e3a8a] transition-all"
+              >
+                <span className="material-symbols-outlined text-[18px]">language</span>
+              </button>
+              <Link
+                to="/login"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-[#991b1b] hover:border-[#991b1b] transition-all"
+              >
+                <span className="material-symbols-outlined text-[18px]">login</span>
+              </Link>
+            </div>
 
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white hover:text-[#1e3a8a] transition-all"
-                >
-                  <span className="material-symbols-outlined text-[18px]">language</span>
-                </button>
-                <Link
-                  to="/login"
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-[#991b1b] hover:border-[#991b1b] transition-all"
-                >
-                  <span className="material-symbols-outlined text-[18px]">login</span>
+            {/* NAV LINKS - Middle */}
+            <div className="hidden lg:flex items-center gap-2 text-[13px] font-bold">
+              {menuLinks.map((link) => (
+                <Link key={link.to} to={link.to} className={`group flex items-center gap-1.5 transition-all whitespace-nowrap px-4 py-2 rounded-full ${isActive(link.to) ? 'bg-white/15 backdrop-blur-md text-white border border-white/20' : 'text-white hover:text-white/80'}`}>
+                  <span className="material-symbols-outlined text-[18px]">{link.icon}</span>
+                  <span>{link.label}</span>
                 </Link>
-              </div>
+              ))}
             </div>
 
             {/* LOGO */}

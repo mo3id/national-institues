@@ -19,7 +19,7 @@ const Hero: React.FC = () => {
         : 'We are more than just an educational group; we are an integrated community striving for innovation and academic excellence. Discover a learning environment that inspires creativity and develops skills.'
     },
     {
-      image: '/nano-banana-1771791317878.png',
+      image: '/nano-banana-1771792169108.png',
       title: lang === 'ar' ? (
         <>نبتكر اليوم لنبني غداً <br /><span className="text-[#991b1b]">أفضل لأبنائنا</span></>
       ) : (
