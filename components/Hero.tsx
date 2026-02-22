@@ -1,174 +1,142 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, ArrowRight, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../LanguageContext';
+import { Link } from 'react-router-dom';
 
 const Hero: React.FC = () => {
-  const { isRTL, t, lang } = useLanguage();
+  const { lang, isRTL } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  const slides = useMemo(() => {
-    return t?.hero?.slides || [];
-  }, [t]);
+  const images = [
+    '/imgs/nano-banana-1771765349835.png',
+    '/imgs/nano-banana-1771766058296.png'
+  ];
 
   useEffect(() => {
-    if (!isAutoPlaying || slides.length === 0) return;
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % slides.length);
+      setCurrentIndex((prev) => (prev + 1) % images.length);
     }, 8000);
     return () => clearInterval(timer);
-  }, [isAutoPlaying, slides.length]);
-
-  const handleNext = () => {
-    setIsAutoPlaying(false);
-    setCurrentIndex((prev) => (prev + 1) % slides.length);
-  };
-
-  const handlePrev = () => {
-    setIsAutoPlaying(false);
-    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
-  };
-
-  // Removed kenBurnsVariants to stop background animation
-
-  const textContainerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.12,
-        delayChildren: 0.3
-      }
-    }
-  };
-
-  const textItemVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: 30,
-      filter: "blur(8px)"
-    },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      filter: "blur(0px)",
-      transition: { 
-        duration: 1, 
-        ease: [0.19, 1, 0.22, 1] as any
-      }
-    }
-  };
-
-  if (slides.length === 0) return null;
+  }, [images.length]);
 
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-[#050505]">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentIndex}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 1.05 }}
-          transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
-          className="absolute inset-0"
-        >
-          <div className="absolute inset-0">
-            <img
-              src={slides[currentIndex].image}
-              alt={slides[currentIndex].title}
-              className={`h-full w-full object-cover object-center ${isRTL ? 'scale-x-[-1]' : ''}`}
-            />
-            {/* Refined gradient overlay for better text contrast without losing the cinematic feel */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent z-10" />
-            <div className="absolute inset-0 bg-black/20 z-10" />
-          </div>
-        </motion.div>
-      </AnimatePresence>
+    <main className="mx-[10px] rounded-[10px] overflow-hidden relative min-h-[calc(100vh-120px)] flex items-center shadow-sm">
 
-      <div className="relative z-20 h-full w-full max-w-[90vw] mx-auto flex flex-col justify-center">
-        <div className={`w-full lg:w-[45vw] ${isRTL ? 'text-right' : 'text-left'}`}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentIndex}
-              variants={textContainerVariants}
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              className="space-y-8"
-            >
-              {/* Elegant Subtitle */}
-              <motion.div variants={textItemVariants} className="flex items-center gap-4">
-                <span className="w-10 h-[1px] bg-red-600" />
-                <span className="text-white text-[11px] font-bold uppercase tracking-[0.4em] drop-shadow-md text-red-50">
-                  {slides[currentIndex].subtitle}
-                </span>
-              </motion.div>
+      {/* Background Images */}
+      {images.map((img, index) => (
+        <div
+          key={index}
+          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out z-0 ${index === currentIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+          style={{ backgroundImage: `url('${img}')` }}
+        />
+      ))}
 
-              <motion.h1 
-                variants={textItemVariants}
-                className="text-5xl md:text-7xl lg:text-[6rem] font-black text-white leading-[1.05] tracking-tight drop-shadow-2xl"
-              >
-                {slides[currentIndex].title}
-              </motion.h1>
+      {/* Overlay */}
+      <div
+        className={`absolute inset-0 z-10 ${isRTL
+          ? 'bg-gradient-to-l from-white/90 via-white/70 to-white/10 dark:from-[#0F172A]/90 dark:via-[#0F172A]/70 dark:to-[#0F172A]/20'
+          : 'bg-gradient-to-r from-white/90 via-white/70 to-white/10 dark:from-[#0F172A]/90 dark:via-[#0F172A]/70 dark:to-[#0F172A]/20'
+          }`}
+      />
 
-              <motion.p 
-                variants={textItemVariants}
-                className="text-lg md:text-xl text-white/90 max-w-lg leading-relaxed font-medium drop-shadow-lg"
-              >
-                {slides[currentIndex].description}
-              </motion.p>
+      {/* Main Content */}
+      <div className="container mx-auto px-6 md:px-12 py-20 relative z-20">
+        <div className={`max-w-3xl ${isRTL ? 'text-right ml-auto' : 'text-left mr-auto'}`}>
+          <h1 className="text-5xl lg:text-7xl font-extrabold text-slate-900 dark:text-white leading-[1.2] mb-8">
+            نصنع قادة المستقبل في <br />
+            <span className="text-[#F26522]">٤٠ مدرسة رائدة</span>
+          </h1>
 
-              {/* CTA Buttons */}
-              <motion.div 
-                variants={textItemVariants}
-                className={`flex flex-col sm:flex-row items-center gap-5 pt-8 ${isRTL ? 'justify-end' : 'justify-start'}`}
-              >
-                <button className="w-full sm:w-auto flex items-center justify-center gap-3 bg-[#1e3a8a] text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-[11px] transition-all duration-300 hover:bg-[#162a63] hover:-translate-y-1 shadow-lg shadow-blue-900/30">
-                  <span>{t?.cta?.btnSchools ?? 'Find a School Near You'}</span>
-                  {isRTL ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
-                </button>
-                
-                <button className="w-full sm:w-auto flex items-center justify-center bg-white text-[#1e3a8a] px-8 py-4 rounded-full font-bold uppercase tracking-widest text-[11px] transition-all duration-300 hover:bg-gray-50 shadow-lg border border-gray-100">
-                  <span>{t?.hero?.ctaAbout ?? 'Explore Courses'}</span>
-                </button>
-              </motion.div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
+          <p className="text-xl lg:text-2xl text-slate-700 dark:text-slate-200 max-w-2xl mb-12 leading-relaxed font-medium">
+            نحن لسنا مجرد مجموعة تعليمية، نحن مجتمع متكامل يسعى للابتكار والتميز الأكاديمي. اكتشف بيئة تعليمية تلهم الإبداع وتنمي المهارات.
+          </p>
 
-      {/* Minimalist Slide Indicators */}
-      <div className={`absolute bottom-12 z-30 flex items-center gap-8 ${isRTL ? 'left-12' : 'right-12'}`}>
-        <div className="flex gap-3">
-          {slides.map((_, i) => (
-            <button 
-              key={i}
-              onClick={() => {
-                setIsAutoPlaying(false);
-                setCurrentIndex(i);
-              }}
-              className="group py-4 px-2"
-            >
-              <div className={`h-[2px] transition-all duration-700 ${currentIndex === i ? 'w-12 bg-white' : 'w-6 bg-white/40 group-hover:w-8 group-hover:bg-white/60'}`} />
+          <div className={`flex flex-wrap items-center gap-6 mb-20 ${isRTL ? 'justify-start' : ''}`}>
+            <button className="bg-[#F26522] text-white px-12 py-5 rounded-full font-bold text-xl hover:shadow-2xl hover:shadow-[#F26522]/40 transition-all flex items-center gap-3">
+              انضم إلينا الآن
             </button>
-          ))}
-        </div>
-        <div className="overflow-hidden h-4">
-          <AnimatePresence mode="wait">
-            <motion.span 
-              key={currentIndex}
-              initial={{ y: 20 }}
-              animate={{ y: 0 }}
-              exit={{ y: -20 }}
-              className="block text-white/80 text-[10px] font-black tracking-[0.3em] uppercase drop-shadow-md"
-            >
-              0{currentIndex + 1}
-            </motion.span>
-          </AnimatePresence>
+            <button className="flex items-center gap-4 group">
+              <div className="bg-[#1E293B] p-4 rounded-2xl text-white group-hover:bg-slate-700 transition-colors shadow-lg flex items-center justify-center">
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>
+                  arrow_outward
+                </span>
+              </div>
+              <span className="font-bold text-lg text-slate-800 dark:text-slate-100">استكشف برامجنا</span>
+            </button>
+          </div>
+
+          <div className="pt-8 border-t border-slate-200/50 dark:border-slate-700/50">
+            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-8">نخبة مدارسنا الرائدة</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-y-8 gap-x-12">
+              <div className="flex items-center gap-3 group">
+                <span className="material-symbols-outlined text-[#F26522] text-2xl group-hover:scale-110 transition-transform">school</span>
+                <span className="font-bold text-slate-800 dark:text-slate-300 text-lg">مدارس القمة الأهلية</span>
+              </div>
+              <div className="flex items-center gap-3 group">
+                <span className="material-symbols-outlined text-[#F26522] text-2xl group-hover:scale-110 transition-transform">auto_awesome</span>
+                <span className="font-bold text-slate-800 dark:text-slate-300 text-lg">أكاديمية الإبداع الدولية</span>
+              </div>
+              <div className="flex items-center gap-3 group">
+                <span className="material-symbols-outlined text-[#F26522] text-2xl group-hover:scale-110 transition-transform">psychology</span>
+                <span className="font-bold text-slate-800 dark:text-slate-300 text-lg">مدرسة منار العلم</span>
+              </div>
+              <div className="flex items-center gap-3 group">
+                <span className="material-symbols-outlined text-[#F26522] text-2xl group-hover:scale-110 transition-transform">public</span>
+                <span className="font-bold text-slate-800 dark:text-slate-300 text-lg">مدارس الأفق العالمية</span>
+              </div>
+              <div className="flex items-center gap-3 group">
+                <span className="material-symbols-outlined text-[#F26522] text-2xl group-hover:scale-110 transition-transform">workspace_premium</span>
+                <span className="font-bold text-slate-800 dark:text-slate-300 text-lg">أكاديمية الرواد</span>
+              </div>
+              <div className="flex items-center gap-3 group">
+                <span className="material-symbols-outlined text-[#F26522] text-2xl group-hover:scale-110 transition-transform">diversity_3</span>
+                <span className="font-bold text-slate-800 dark:text-slate-300 text-lg">مدارس التضامن</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </section>
+
+      {/* Side Pagination */}
+      <div className={`absolute top-1/2 -translate-y-1/2 flex flex-col gap-5 z-20 ${isRTL ? 'left-12' : 'right-12'}`}>
+        {images.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setCurrentIndex(idx)}
+            className={`transition-all duration-300 rounded-full ${currentIndex === idx
+              ? 'w-2.5 h-10 bg-[#F26522] shadow-lg shadow-[#F26522]/30'
+              : 'w-2.5 h-2.5 bg-slate-400/50 dark:bg-slate-600 hover:bg-[#F26522]'
+              }`}
+          ></button>
+        ))}
+      </div>
+
+      {/* Bottom Slider Controls */}
+      <div className={`absolute bottom-10 flex items-center gap-6 z-20 ${isRTL ? 'left-12' : 'right-12'}`}>
+        <span className="text-sm font-bold text-slate-600 dark:text-slate-400">
+          اكتشف المزيد من قصص نجاحنا
+        </span>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setCurrentIndex((prev) => (prev + 1) % images.length)}
+            className="w-12 h-12 rounded-full border border-slate-300 dark:border-slate-600 flex items-center justify-center hover:bg-white dark:hover:bg-slate-800 transition-all hover:scale-110 text-slate-600 dark:text-slate-400"
+          >
+            <span className="material-symbols-outlined">
+              {isRTL ? 'chevron_right' : 'chevron_left'}
+            </span>
+          </button>
+          <button
+            onClick={() => setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)}
+            className="w-12 h-12 rounded-full border border-slate-300 dark:border-slate-600 flex items-center justify-center hover:bg-white dark:hover:bg-slate-800 transition-all hover:scale-110 text-slate-600 dark:text-slate-400"
+          >
+            <span className="material-symbols-outlined">
+              {isRTL ? 'chevron_left' : 'chevron_right'}
+            </span>
+          </button>
+        </div>
+      </div>
+
+    </main>
   );
 };
 
