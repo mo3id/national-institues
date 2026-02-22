@@ -67,9 +67,9 @@ const Hero: React.FC = () => {
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
-          initial={{ opacity: 0, scale: 1.03 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.98 }}
+          exit={{ opacity: 0, scale: 1.05 }}
           transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
           className="absolute inset-0"
         >
@@ -77,10 +77,11 @@ const Hero: React.FC = () => {
             <img
               src={slides[currentIndex].image}
               alt={slides[currentIndex].title}
-              className={`h-full w-full object-cover object-center transition-transform duration-[2000ms] ${isRTL ? 'scale-x-[-1]' : ''}`}
+              className={`h-full w-full object-cover object-center ${isRTL ? 'scale-x-[-1]' : ''}`}
             />
-            {/* Ultra-subtle overlay for contrast */}
-            <div className="absolute inset-0 bg-black/10" />
+            {/* Refined gradient overlay for better text contrast without losing the cinematic feel */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent z-10" />
+            <div className="absolute inset-0 bg-black/20 z-10" />
           </div>
         </motion.div>
       </AnimatePresence>
@@ -96,47 +97,40 @@ const Hero: React.FC = () => {
               exit="hidden"
               className="space-y-8"
             >
-              <motion.div variants={textItemVariants} className="flex items-center gap-3">
-                <span className="w-6 h-[1px] bg-white/30" />
-                <span className="text-white/50 text-[9px] font-bold uppercase tracking-[0.5em]">
+              {/* Elegant Subtitle */}
+              <motion.div variants={textItemVariants} className="flex items-center gap-4">
+                <span className="w-10 h-[1px] bg-red-600" />
+                <span className="text-white text-[11px] font-bold uppercase tracking-[0.4em] drop-shadow-md text-red-50">
                   {slides[currentIndex].subtitle}
                 </span>
               </motion.div>
 
               <motion.h1 
                 variants={textItemVariants}
-                className="text-6xl md:text-7xl lg:text-[5.5rem] font-extralight text-white leading-tight tracking-tight"
+                className="text-5xl md:text-7xl lg:text-[6rem] font-black text-white leading-[1.05] tracking-tight drop-shadow-2xl"
               >
                 {slides[currentIndex].title}
               </motion.h1>
 
               <motion.p 
                 variants={textItemVariants}
-                className="text-base md:text-lg text-white/40 max-w-md leading-relaxed font-light"
+                className="text-lg md:text-xl text-white/90 max-w-lg leading-relaxed font-medium drop-shadow-lg"
               >
                 {slides[currentIndex].description}
               </motion.p>
 
+              {/* CTA Buttons */}
               <motion.div 
                 variants={textItemVariants}
-                className={`flex items-center gap-12 pt-6 ${isRTL ? 'flex-row-reverse' : ''}`}
+                className={`flex flex-col sm:flex-row items-center gap-5 pt-8 ${isRTL ? 'justify-end' : 'justify-start'}`}
               >
-                <button className="group relative flex items-center gap-4 text-white text-[10px] font-bold uppercase tracking-[0.4em] transition-all">
-                  <span className="relative overflow-hidden">
-                    <span className="block transition-transform duration-500 group-hover:-translate-y-full">
-                      {t?.cta?.btnSchools ?? 'Explore'}
-                    </span>
-                    <span className="absolute top-0 left-0 transition-transform duration-500 translate-y-full group-hover:translate-y-0">
-                      {t?.cta?.btnSchools ?? 'Explore'}
-                    </span>
-                  </span>
-                  <div className="w-10 h-10 flex items-center justify-center border border-white/10 rounded-full transition-all duration-500 group-hover:border-white group-hover:bg-white group-hover:text-black">
-                    {isRTL ? <ArrowLeft size={14} /> : <ArrowRight size={14} />}
-                  </div>
+                <button className="w-full sm:w-auto flex items-center justify-center gap-3 bg-[#1e3a8a] text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-[11px] transition-all duration-300 hover:bg-[#162a63] hover:-translate-y-1 shadow-lg shadow-blue-900/30">
+                  <span>{t?.cta?.btnSchools ?? 'Find a School Near You'}</span>
+                  {isRTL ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
                 </button>
                 
-                <button className="text-white/30 hover:text-white text-[10px] font-bold uppercase tracking-[0.4em] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[1px] after:bg-white after:transition-all hover:after:w-full">
-                  {t?.hero?.ctaAbout ?? 'About'}
+                <button className="w-full sm:w-auto flex items-center justify-center bg-white text-[#1e3a8a] px-8 py-4 rounded-full font-bold uppercase tracking-widest text-[11px] transition-all duration-300 hover:bg-gray-50 shadow-lg border border-gray-100">
+                  <span>{t?.hero?.ctaAbout ?? 'Explore Courses'}</span>
                 </button>
               </motion.div>
             </motion.div>
@@ -156,7 +150,7 @@ const Hero: React.FC = () => {
               }}
               className="group py-4 px-2"
             >
-              <div className={`h-[1px] transition-all duration-700 ${currentIndex === i ? 'w-10 bg-white' : 'w-4 bg-white/20 group-hover:w-6 group-hover:bg-white/40'}`} />
+              <div className={`h-[2px] transition-all duration-700 ${currentIndex === i ? 'w-12 bg-white' : 'w-6 bg-white/40 group-hover:w-8 group-hover:bg-white/60'}`} />
             </button>
           ))}
         </div>
@@ -167,7 +161,7 @@ const Hero: React.FC = () => {
               initial={{ y: 20 }}
               animate={{ y: 0 }}
               exit={{ y: -20 }}
-              className="block text-white/20 text-[9px] font-bold tracking-[0.3em] uppercase"
+              className="block text-white/80 text-[10px] font-black tracking-[0.3em] uppercase drop-shadow-md"
             >
               0{currentIndex + 1}
             </motion.span>
