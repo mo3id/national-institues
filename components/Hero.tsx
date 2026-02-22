@@ -17,6 +17,17 @@ const Hero: React.FC = () => {
       description: lang === 'ar'
         ? 'نحن لسنا مجرد مجموعة تعليمية، نحن مجتمع متكامل يسعى للابتكار والتميز الأكاديمي. اكتشف بيئة تعليمية تلهم الإبداع وتنمي المهارات.'
         : 'We are more than just an educational group; we are an integrated community striving for innovation and academic excellence. Discover a learning environment that inspires creativity and develops skills.'
+    },
+    {
+      image: '/nano-banana-1771791317878.png',
+      title: lang === 'ar' ? (
+        <>نبتكر اليوم لنبني غداً <br /><span className="text-[#991b1b]">أفضل لأبنائنا</span></>
+      ) : (
+        <>Innovating Today to Build a <br /><span className="text-[#991b1b]">Better Future for Our Children</span></>
+      ),
+      description: lang === 'ar'
+        ? 'مناهج تعليمية متطورة تواكب العصر، تهدف إلى تنمية مهارات التفكير النقدي والإبداع لدى الطلاب منذ الصغر.'
+        : 'Advanced educational curricula that keep pace with the times, aiming to develop critical thinking and creativity skills in students from a young age.'
     }
   ];
 
@@ -58,9 +69,9 @@ const Hero: React.FC = () => {
 
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 md:px-12 py-20 relative z-20">
-        <div className={`max-w-3xl animate-fade-up ${isRTL ? 'text-right ml-auto' : 'text-left mr-auto'}`}>
-          <h1 key={`title-${currentIndex}`} className="text-5xl lg:text-7xl font-extrabold text-white leading-[1.2] mb-8 animate-fade-in text-start">
+      <div className="container mx-auto px-6 md:px-12 py-20 relative z-20" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`max-w-3xl animate-fade-up ${isRTL ? 'ml-auto' : 'mr-auto'}`}>
+          <h1 key={`title-${currentIndex}`} className="text-5xl lg:text-7xl font-extrabold text-white leading-[1.4] mb-8 animate-fade-in text-start">
             {currentSlide.title}
           </h1>
 
@@ -68,10 +79,10 @@ const Hero: React.FC = () => {
             {currentSlide.description}
           </p>
 
-          <div className={`flex flex-wrap items-center gap-6 ${isRTL ? 'justify-end' : 'justify-start'}`}>
+          <div className="flex flex-wrap items-center gap-6 justify-start">
             <button className="bg-[#991b1b] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-[#991b1b] transition-all duration-300 flex items-center gap-3 group">
               {lang === 'ar' ? 'انضم إلينا الآن' : 'Join Us Now'}
-              <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_forward</span>
+              <span className={`material-symbols-outlined transition-transform ${isRTL ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`}>arrow_forward</span>
             </button>
             <button className="flex items-center gap-4 group">
               <div className="bg-white/10 backdrop-blur-md p-3 rounded-full text-white border border-white/20 group-hover:bg-white group-hover:text-[#1e3a8a] transition-all duration-300 flex items-center justify-center">

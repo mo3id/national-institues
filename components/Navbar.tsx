@@ -9,13 +9,16 @@ const Navbar: React.FC = () => {
   const t = translationsRoot.nav;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isPastHero, setIsPastHero] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      const scrollY = window.scrollY;
+      setScrolled(scrollY > 50);
+      setIsPastHero(scrollY > window.innerHeight - 150);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -40,10 +43,19 @@ const Navbar: React.FC = () => {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className={`fixed top-[10px] left-[10px] right-[10px] z-[100] py-6 px-10 flex items-center justify-between bg-transparent rounded-[20px] ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
+            className="fixed top-[10px] left-[10px] right-[10px] z-[100] py-6 px-10 flex items-center justify-between bg-transparent rounded-[20px]"
           >
-            {/* Start side: Actions & Links */}
-            <div className={`flex items-center gap-8 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+            {/* ACTIONS & LINKS */}
+            <div className="flex items-center gap-8">
+              <div className="hidden lg:flex items-center gap-6 text-[13px] font-bold">
+                {menuLinks.map((link) => (
+                  <Link key={link.to} to={link.to} className={`group flex items-center gap-1.5 transition-colors whitespace-nowrap ${isActive(link.to) ? 'text-[#991b1b]' : 'text-white hover:text-white/80'}`}>
+                    <span className="material-symbols-outlined text-[18px]">{link.icon}</span>
+                    <span>{link.label}</span>
+                  </Link>
+                ))}
+              </div>
+
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
@@ -58,18 +70,9 @@ const Navbar: React.FC = () => {
                   <span className="material-symbols-outlined text-[18px]">login</span>
                 </Link>
               </div>
-
-              <div className={`hidden lg:flex items-center gap-6 text-[13px] font-bold ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                {menuLinks.map((link) => (
-                  <Link key={link.to} to={link.to} className={`group flex items-center gap-1.5 transition-colors whitespace-nowrap ${isActive(link.to) ? 'text-[#991b1b]' : 'text-white hover:text-white/80'}`}>
-                    <span className="material-symbols-outlined text-[18px]">{link.icon}</span>
-                    <span>{link.label}</span>
-                  </Link>
-                ))}
-              </div>
             </div>
 
-            {/* Logo */}
+            {/* LOGO */}
             <Link to="/" className="flex items-center shrink-0">
               <img src="/Layer 1.png" alt="National Institutes" className="h-7 md:h-9 lg:h-11 object-contain" />
             </Link>
@@ -89,13 +92,16 @@ const Navbar: React.FC = () => {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className={`fixed top-[10px] left-[10px] right-[10px] z-[100] py-4 px-10 flex items-center justify-between bg-transparent ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
+            className="fixed top-[10px] left-[10px] right-[10px] z-[100] py-4 px-10 flex items-center justify-between"
           >
-            {/* Menu Button Side (Start side) */}
+            {/* MENU BUTTON */}
             <motion.button
               onClick={() => setDrawerOpen(true)}
               whileHover="hover"
-              className="relative flex items-center bg-white/10 backdrop-blur-md border border-white/20 text-white p-2 px-3 rounded-full hover:bg-white hover:text-[#1e3a8a] transition-all duration-300 group"
+              className={`relative flex items-center transition-all duration-500 border rounded-full group ${isPastHero
+                ? 'bg-[#1e3a8a] border-[#1e3a8a] text-white shadow-xl p-2.5 px-4'
+                : 'bg-white/10 backdrop-blur-md border-white/20 text-white p-2 px-3'
+                }`}
             >
               {/* Burger Icon */}
               <span className="material-symbols-outlined text-[24px] group-hover:rotate-180 transition-transform duration-500">
@@ -105,8 +111,8 @@ const Navbar: React.FC = () => {
               {/* Animated Text on Hover */}
               <motion.div
                 variants={{
-                  initial: { width: 0, opacity: 0, marginLeft: 0, marginRight: 0 },
-                  hover: { width: 'auto', opacity: 1, marginLeft: isRTL ? 0 : 8, marginRight: isRTL ? 8 : 0 }
+                  initial: { width: 0, opacity: 0, marginInlineStart: 0 },
+                  hover: { width: 'auto', opacity: 1, marginInlineStart: 8 }
                 }}
                 className="overflow-hidden whitespace-nowrap font-bold text-[11px] uppercase tracking-wider"
               >
@@ -114,7 +120,7 @@ const Navbar: React.FC = () => {
               </motion.div>
             </motion.button>
 
-            {/* Logo Side (Far side) */}
+            {/* LOGO */}
             <Link to="/" className="flex items-center shrink-0">
               <img src="/Layer 1.png" alt="National Institutes" className="h-7 md:h-9 object-contain" />
             </Link>
@@ -166,7 +172,7 @@ const Navbar: React.FC = () => {
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className={`fixed top-0 bottom-0 ${isRTL ? 'left-0' : 'right-0'} w-full max-w-sm bg-white shadow-2xl z-[300] flex flex-col p-12`}
             >
-              <div className={`flex items-center justify-between mb-16 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className="flex items-center justify-between mb-16">
                 <img src="/Layer 1.png" alt="Logo" className="h-10 object-contain" />
                 <button
                   onClick={() => setDrawerOpen(false)}
@@ -176,7 +182,7 @@ const Navbar: React.FC = () => {
                 </button>
               </div>
 
-              <div className={`flex flex-col gap-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+              <div className="flex flex-col gap-2">
                 <span className="text-slate-400 text-[10px] uppercase tracking-[0.2em] font-black mb-4 block">
                   {lang === 'ar' ? 'القائمة الرئيسية' : 'Main Menu'}
                 </span>
@@ -200,12 +206,12 @@ const Navbar: React.FC = () => {
               </div>
 
               <div className="mt-auto pt-12 border-t border-slate-100">
-                <div className={`flex flex-col gap-6 ${isRTL ? 'items-end' : 'items-start'}`}>
-                  <div className={`flex flex-col ${isRTL ? 'items-end text-right' : 'items-start text-left'}`}>
+                <div className="flex flex-col gap-6">
+                  <div className="flex flex-col">
                     <span className="text-slate-400 text-[10px] uppercase font-bold tracking-widest mb-1">{lang === 'ar' ? 'اتصل بنا' : 'Contact Us'}</span>
                     <span className="text-[#1e3a8a] font-black text-lg">012-3456-7890</span>
                   </div>
-                  <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-[#1e3a8a]/5 flex items-center justify-center text-[#1e3a8a] hover:bg-[#1e3a8a] hover:text-white transition-all cursor-pointer">
                       <span className="material-symbols-outlined text-[20px]">share</span>
                     </div>
