@@ -10,6 +10,23 @@ export const translations = {
       aiStudio: "AI Studio",
       feedback: "Feedback"
     },
+    aboutPage: {
+      title: "Our Story",
+      subtitle: "Pioneering Education Since 1956",
+      historyTitle: "A Legacy Built on Excellence",
+      historyDesc: "For over six decades, the National Institutes has been at the forefront of educational innovation in Egypt. What began as a singular vision to provide quality education has blossomed into a nationwide network of excellence, shaping the minds and hearts of generations of Egyptian leaders.",
+      missionTitle: "Our Mission",
+      missionDesc: "To cultivate a community of lifelong learners, empowering them with the robust knowledge, vital skills, and strong moral compass required to thrive and lead in a rapidly evolving globalized world.",
+      visionTitle: "Our Vision",
+      visionDesc: "To be the premier educational institution in the Middle East, recognized internationally for academic rigor, unwavering commitment to character development, and cultivating tomorrow's brilliant innovators.",
+      valuesTitle: "Core Values",
+      values: [
+        { title: "Excellence", desc: "Striving for the highest standards in all academic and extracurricular endeavors." },
+        { title: "Innovation", desc: "Embracing bleeding-edge methodologies and technologies to enhance modern learning." },
+        { title: "Integrity", desc: "Acting with uncompromising honesty, transparency, and personal accountability." },
+        { title: "Inclusivity", desc: "Fostering a welcoming, safe, and nurturing environment for students of all diverse backgrounds." }
+      ]
+    },
     hero: {
       badge: "Legacy of Excellence",
       title: "Nurturing Global Leaders",
@@ -164,6 +181,23 @@ export const translations = {
       about: "عن المعاهد",
       aiStudio: "استوديو الذكاء الاصطناعي",
       feedback: "الاقتراحات والشكاوى"
+    },
+    aboutPage: {
+      title: "قصتنا",
+      subtitle: "رواد التعليم منذ عام ١٩٥٦",
+      historyTitle: "إرث مبني على التميز",
+      historyDesc: "لأكثر من ستة عقود، كانت المعاهد القومية في طليعة الابتكار التعليمي في مصر. ما بدأ كرؤية فريدة لتوفير تعليم عالي الجودة تطور إلى شبكة وطنية من التميز، تشكل عقول وقلوب أجيال من القادة المصريين.",
+      missionTitle: "رسالتنا",
+      missionDesc: "تنمية مجتمع من المتعلمين مدى الحياة، وتمكينهم بالمعرفة القوية والمهارات الحيوية والبوصلة الأخلاقية الصلبة اللازمة للازدهار والقيادة في عالم سريع التطور تحكمه العولمة.",
+      visionTitle: "رؤيتنا",
+      visionDesc: "أن نكون المؤسسة التعليمية الرائدة في الشرق الأوسط، المعترف بها دوليًا للصرامة الأكاديمية والالتزام الراسخ بتنمية الشخصية ورعاية المبتكرين اللامعين للغد.",
+      valuesTitle: "قيمنا الأساسية",
+      values: [
+        { title: "التميز", desc: "السعي للوصول إلى أعلى المعايير في جميع المساعي الأكاديمية واللامنهجية." },
+        { title: "الابتكار", desc: "تبني أحدث المنهجيات والتقنيات لتعزيز التعلم الحديث." },
+        { title: "النزاهة", desc: "التصرف بصدق وشفافية ومساءلة شخصية لا هوادة فيها." },
+        { title: "الشمولية", desc: "تعزيز بيئة ترحيبية وآمنة وراعية للطلاب من جميع الخلفيات المتنوعة." }
+      ]
     },
     hero: {
       badge: "إرث من التميز",

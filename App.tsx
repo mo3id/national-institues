@@ -13,6 +13,7 @@ import { Navigate } from 'react-router-dom';
 
 // Lazy load pages for performance
 const Home = lazy(() => import('./pages/Home'));
+const About = lazy(() => import('./pages/About'));
 const AIStudio = lazy(() => import('./pages/AIStudio'));
 const Careers = lazy(() => import('./pages/Careers'));
 const Schools = lazy(() => import('./pages/Schools'));
@@ -65,6 +66,7 @@ const App: React.FC = () => {
                       <Suspense fallback={<PageLoader />}>
                         <Routes>
                           <Route path="/" element={<Home />} />
+                          <Route path="/about" element={<About />} />
                           <Route path="/news" element={<News />} />
                           <Route path="/schools" element={<Schools />} />
                           <Route path="/schools/:id" element={<SchoolProfile />} />
