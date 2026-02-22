@@ -1,185 +1,251 @@
 import React, { useState, useEffect } from 'react';
 import {
-    LayoutDashboard, Newspaper, School, Image, Info, Settings,
-    Plus, Pencil, Trash2, Eye, EyeOff, Save, X,
-    Users, GraduationCap, MapPin, Bell, LogOut, Search,
-    TrendingUp, CheckCircle, AlertCircle, Menu, Moon, Sun,
-    Globe, ChevronRight
+  LayoutDashboard, Newspaper, School, Image, Info, Settings,
+  Plus, Pencil, Trash2, Eye, EyeOff, Save, X,
+  Users, GraduationCap, MapPin, Bell, LogOut, Search,
+  TrendingUp, CheckCircle, AlertCircle, Menu, Moon, Sun,
+  Globe, ChevronRight
 } from 'lucide-react';
 import { NEWS, SCHOOLS } from '../constants';
 import {
-    Section, Theme, Lang, DashNewsItem, DashSchool, HeroSlide, AboutData, AdminProfile,
-    UI, HERO_IMAGES
+  Section, Theme, Lang, DashNewsItem, DashSchool, HeroSlide, AboutData, AdminProfile,
+  UI, HERO_IMAGES
 } from './dashboard-components/types';
 import { ModalWrap, EditNewsForm, EditHeroForm, EditSchoolForm } from './dashboard-components/Modals';
 import { useAuth } from '../AuthContext';
+import { useLanguage } from '../LanguageContext';
 
 // ─── Initial Data ─────────────────────────────────────────────────────────────
 const initNews: DashNewsItem[] = NEWS.map((n, i) => ({ ...n, published: i < 8 }));
 const initSchools: DashSchool[] = SCHOOLS.map(s => ({ ...s }));
 const initHero: HeroSlide[] = [
-    { id: 1, title: 'Nurturing Global Leaders', subtitle: 'Legacy of Excellence', description: 'Empowering the next generation with world-class education and values.', image: HERO_IMAGES[0] },
-    { id: 2, title: 'Innovation in Education', subtitle: 'Future Ready', description: 'Integrating cutting-edge technology and AI to create personalized learning.', image: HERO_IMAGES[1] },
-    { id: 3, title: 'Community & Culture', subtitle: 'Building Character', description: 'Fostering a vibrant community where diversity is celebrated.', image: HERO_IMAGES[2] },
+  { id: 1, title: 'Nurturing Global Leaders', subtitle: 'Legacy of Excellence', description: 'Empowering the next generation with world-class education and values.', image: HERO_IMAGES[0] },
+  { id: 2, title: 'Innovation in Education', subtitle: 'Future Ready', description: 'Integrating cutting-edge technology and AI to create personalized learning.', image: HERO_IMAGES[1] },
+  { id: 3, title: 'Community & Culture', subtitle: 'Building Character', description: 'Fostering a vibrant community where diversity is celebrated.', image: HERO_IMAGES[2] },
 ];
 const initAbout: AboutData = {
-    quote: 'Education is not the filling of a pail, but the lighting of a fire.',
-    name: 'Dr. Ahmed El-Said', role: 'Chairman of NIS',
-    desc: 'Welcome to the National Institutes. We are a community dedicated to academic rigor and character building.',
-    points: ['National Curriculum', 'International Standards', 'Holistic Growth', 'Ethical Leadership'],
+  quote: 'Education is not the filling of a pail, but the lighting of a fire.',
+  name: 'Dr. Ahmed El-Said', role: 'Chairman of NIS',
+  desc: 'Welcome to the National Institutes. We are a community dedicated to academic rigor and character building.',
+  points: ['National Curriculum', 'International Standards', 'Holistic Growth', 'Ethical Leadership'],
 };
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cairo:wght@400;600;700;800&display=swap');
-  .dash-root { --bg:#f0f4ff; --surface:#ffffff; --surface2:#f8faff; --border:#e2e8f0; --text:#0f172a; --text2:#64748b; --accent:#4f46e5; --accent2:#818cf8; --sidebar:#1e1b4b; --sidebar2:#312e81; --danger:#ef4444; --success:#10b981; --warn:#f59e0b; }
-  .dash-root.dark { --bg:#0f0f1a; --surface:#1a1a2e; --surface2:#16213e; --border:#2d2d4e; --text:#f1f5f9; --text2:#94a3b8; --accent:#818cf8; --accent2:#a5b4fc; --sidebar:#0d0d1f; --sidebar2:#1a1a35; }
-  .dash-root { min-height:100vh; background:var(--bg); font-family:'Inter',sans-serif; display:flex; color:var(--text); transition:background 0.3s,color 0.3s; }
-  .dash-root.rtl { direction:rtl; font-family:'Cairo',sans-serif; }
-  .dash-sidebar { width:260px; background:linear-gradient(160deg,var(--sidebar) 0%,var(--sidebar2) 100%); display:flex; flex-direction:column; position:fixed; top:0; bottom:0; left:0; z-index:100; overflow:hidden; transition:width 0.3s,left 0.3s,right 0.3s; border-right:1px solid rgba(255,255,255,0.05); }
-  .dash-root.rtl .dash-sidebar { left:auto; right:0; border-right:none; border-left:1px solid rgba(255,255,255,0.05); }
-  .dash-sidebar.collapsed { width:72px; }
-  .dash-main { flex:1; margin-left:260px; display:flex; flex-direction:column; min-height:100vh; transition:margin 0.3s; }
-  .dash-root.rtl .dash-main { margin-left:0; margin-right:260px; }
-  .dash-main.collapsed { margin-left:72px; }
-  .dash-root.rtl .dash-main.collapsed { margin-left:0; margin-right:72px; }
-  .dash-topbar { background:var(--surface); border-bottom:1px solid var(--border); padding:0 24px; height:64px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; backdrop-filter:blur(12px); }
-  .dash-content { padding:28px 24px; flex:1; }
-  .dash-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; transition:box-shadow 0.2s,transform 0.2s; }
-  .dash-card:hover { box-shadow:0 8px 32px rgba(79,70,229,0.08); }
-  .nav-item { display:flex; align-items:center; gap:12px; padding:11px 18px; border-radius:12px; cursor:pointer; transition:all 0.2s; color:rgba(255,255,255,0.6); white-space:nowrap; overflow:hidden; margin:2px 10px; position:relative; }
-  .nav-item:hover { background:rgba(255,255,255,0.08); color:white; }
-  .nav-item.active { background:linear-gradient(135deg,rgba(99,102,241,0.4),rgba(139,92,246,0.25)); color:white; font-weight:700; }
-  .nav-item.active::before { content:''; position:absolute; left:0; top:25%; bottom:25%; width:3px; background:linear-gradient(180deg,#818cf8,#c084fc); border-radius:0 4px 4px 0; }
-  .dash-root.rtl .nav-item.active::before { left:auto; right:0; border-radius:4px 0 0 4px; }
-  .dash-btn { display:inline-flex; align-items:center; gap:7px; padding:9px 18px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; border:none; white-space:nowrap; }
-  .dash-btn-primary { background:linear-gradient(135deg,#4f46e5,#7c3aed); color:white; box-shadow:0 4px 14px rgba(79,70,229,0.3); }
-  .dash-btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(79,70,229,0.4); }
-  .dash-btn-danger { background:#fee2e2; color:#dc2626; }
-  .dash-btn-danger:hover { background:#fecaca; }
-  .dash-btn-ghost { background:var(--surface2); color:var(--text2); border:1px solid var(--border); }
-  .dash-btn-ghost:hover { background:var(--border); color:var(--text); }
-  .dash-input { width:100%; border:1.5px solid var(--border); border-radius:10px; padding:10px 14px; font-size:14px; outline:none; transition:border-color 0.2s,box-shadow 0.2s; background:var(--surface); color:var(--text); }
-  .dash-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,70,229,0.12); }
-  .dash-ta { resize:vertical; min-height:80px; }
-  .dash-label { display:block; font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; }
-  .dash-img-preview { width:100%; height:140px; object-fit:cover; border-radius:12px; }
-  .dash-cb { width:16px; height:16px; accent-color:var(--accent); cursor:pointer; }
-  .dash-cb-label { font-size:14px; font-weight:600; color:var(--text); cursor:pointer; }
-  .dash-form-actions { display:flex; gap:10px; padding-top:8px; }
-  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=Cairo:wght@400;600;700;800&display=swap');
+  .dash-root { 
+    --bg: #f8fafc; 
+    --surface: #ffffff; 
+    --surface2: #f1f5f9; 
+    --border: #e2e8f0; 
+    --text: #0f172a; 
+    --text2: #64748b; 
+    --accent: #4f46e5; 
+    --accent2: #6366f1; 
+    --sidebar: #0b0f19; 
+    --sidebar2: #151b2b; 
+    --danger: #ef4444; 
+    --success: #10b981; 
+    --warn: #f59e0b; 
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-md: 0 8px 30px rgba(0,0,0,0.06);
+    --shadow-lg: 0 20px 40px rgba(0,0,0,0.08);
+  }
+  .dash-root.dark { 
+    --bg: #0b0f19; 
+    --surface: #13192b; 
+    --surface2: #1e253c; 
+    --border: #283046; 
+    --text: #f8fafc; 
+    --text2: #94a3b8; 
+    --accent: #6366f1; 
+    --accent-hover: #818cf8;
+    --sidebar: #070a10; 
+    --sidebar2: #0b101a; 
+    --shadow-sm: 0 4px 12px rgba(0,0,0,0.3);
+    --shadow-md: 0 10px 40px rgba(0,0,0,0.4);
+    --shadow-lg: 0 24px 60px rgba(0,0,0,0.5);
+  }
+  .dash-root { min-height: 100vh; background: var(--bg); font-family: 'Outfit', 'Inter', sans-serif; display: flex; color: var(--text); transition: background 0.4s ease, color 0.4s ease; }
+  .dash-root.rtl { direction: rtl; font-family: 'Cairo', sans-serif; }
+  .dash-sidebar { width: 260px; background: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar2) 100%); display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0; z-index: 100; overflow: hidden; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s, right 0.3s; border-right: 1px solid rgba(255,255,255,0.03); box-shadow: 4px 0 24px rgba(0,0,0,0.1); }
+  .dash-root.rtl .dash-sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid rgba(255,255,255,0.03); box-shadow: -4px 0 24px rgba(0,0,0,0.1); }
+  .dash-sidebar.collapsed { width: 72px; }
+  .dash-main { flex: 1; margin-left: 260px; display: flex; flex-direction: column; min-height: 100vh; transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .dash-root.rtl .dash-main { margin-left: 0; margin-right: 260px; }
+  .dash-main.collapsed { margin-left: 72px; }
+  .dash-root.rtl .dash-main.collapsed { margin-left: 0; margin-right: 72px; }
+  .dash-topbar { background: rgba(var(--surface-rgb, 255, 255, 255), 0.8); border-bottom: 1px solid var(--border); padding: 0 24px; height: 68px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background-color: var(--surface); transition: background 0.3s; }
+  .dash-root.dark .dash-topbar { background-color: rgba(19, 25, 43, 0.75); }
+  .dash-content { padding: 32px 28px; flex: 1; max-width: 1600px; margin: 0 auto; width: 100%; }
+  
+  .dash-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-sm); transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease; }
+  .dash-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: rgba(99, 102, 241, 0.2); }
+  
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 12px; cursor: pointer; transition: all 0.25s ease; color: rgba(255,255,255,0.5); white-space: nowrap; overflow: hidden; margin: 4px 12px; position: relative; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.9); transform: translateX(4px); }
+  .dash-root.rtl .nav-item:hover { transform: translateX(-4px); }
+  .nav-item.active { background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.05)); color: #fff; font-weight: 700; transform: translateX(4px); }
+  .dash-root.rtl .nav-item.active { transform: translateX(-4px); }
+  .nav-item.active::before { content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 4px; background: linear-gradient(180deg, #818cf8, #c084fc); border-radius: 0 4px 4px 0; box-shadow: 2px 0 8px rgba(129, 140, 248, 0.5); }
+  .dash-root.rtl .nav-item.active::before { left: auto; right: 0; border-radius: 4px 0 0 4px; box-shadow: -2px 0 8px rgba(129, 140, 248, 0.5); }
+  
+  .dash-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); border: none; white-space: nowrap; letter-spacing: 0.02em; }
+  .dash-btn-primary { background: linear-gradient(135deg, var(--accent), #7c3aed); color: white; box-shadow: 0 4px 14px rgba(79,70,229,0.3); position: relative; overflow: hidden; }
+  .dash-btn-primary::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent); transform: translateX(-100%); transition: 0.5s; }
+  .dash-btn-primary:hover::after { transform: translateX(100%); }
+  .dash-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(79,70,229,0.4); }
+  .dash-btn-primary:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(79,70,229,0.3); }
+  
+  .dash-btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+  .dash-btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
+  .dash-btn-ghost { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+  .dash-btn-ghost:hover { background: var(--border); color: var(--text); transform: translateY(-1px); }
+  
+  .dash-input { width: 100%; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 16px; font-size: 14px; outline: none; transition: all 0.25s ease; background: var(--surface2); color: var(--text); font-family: inherit; }
+  .dash-input:hover { border-color: rgba(99, 102, 241, 0.4); }
+  .dash-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(79,70,229,0.1); background: var(--surface); }
+  
+  .dash-ta { resize: vertical; min-height: 100px; line-height: 1.5; }
+  .dash-label { display: block; font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+  .dash-img-preview { width: 100%; height: 160px; object-fit: cover; border-radius: 14px; box-shadow: var(--shadow-sm); }
+  .dash-cb { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; border-radius: 4px; }
+  .dash-cb-label { font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; user-select: none; }
+  .dash-form-actions { display: flex; gap: 12px; padding-top: 12px; }
+  
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
   .form-col { }
-  .form-full { grid-column:1/-1; }
-  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:22px; display:flex; align-items:flex-start; gap:16px; transition:all 0.2s; overflow:hidden; position:relative; }
-  .stat-card::after { content:''; position:absolute; inset:0; opacity:0.04; }
-  .stat-card:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(79,70,229,0.1); }
-  .stat-icon { width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .row-header { display:grid; grid-template-columns:56px 1fr 115px 110px 110px; align-items:center; gap:12px; padding:12px 20px; background:var(--surface2); border-bottom:1px solid var(--border); }
-  .news-row { display:grid; grid-template-columns:56px 1fr 115px 110px 110px; align-items:center; gap:12px; padding:13px 20px; border-bottom:1px solid var(--border); transition:background 0.15s; }
-  .news-row:last-child { border-bottom:none; }
-  .news-row:hover { background:var(--surface2); }
-  .dash-badge { display:inline-flex; align-items:center; gap:4px; padding:4px 11px; border-radius:999px; font-size:11px; font-weight:700; }
-  .badge-green { background:#dcfce7; color:#15803d; }
-  .badge-gray { background:var(--surface2); color:var(--text2); border:1px solid var(--border); }
-  .dash-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(6px); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; animation:fadeIn 0.2s ease; }
-  .dash-modal { background:var(--surface); border:1px solid var(--border); border-radius:22px; width:100%; max-width:600px; max-height:90vh; overflow-y:auto; box-shadow:0 30px 80px rgba(0,0,0,0.3); animation:slideUp2 0.25s ease; }
-  .dash-modal-header { display:flex; align-items:center; justify-content:space-between; padding:22px 24px; border-bottom:1px solid var(--border); }
-  .dash-modal-title { font-size:17px; font-weight:800; color:var(--text); }
-  .dash-modal-body { padding:24px; }
-  .dash-icon-btn { padding:8px; border-radius:10px; border:none; background:transparent; color:var(--text2); cursor:pointer; transition:all 0.15s; display:flex; align-items:center; justify-content:center; }
-  .dash-icon-btn:hover { background:var(--surface2); color:var(--text); }
-  .school-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:14px; }
-  .school-card { background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:18px; display:flex; align-items:center; gap:14px; transition:all 0.2s; cursor:default; }
-  .school-card:hover { border-color:var(--accent); box-shadow:0 6px 20px rgba(79,70,229,0.1); transform:translateY(-1px); }
-  .hero-card { background:var(--surface); border:1.5px solid var(--border); border-radius:18px; overflow:hidden; transition:all 0.2s; }
-  .hero-card:hover { border-color:var(--accent2); box-shadow:0 8px 24px rgba(79,70,229,0.1); }
-  .toast { position:fixed; bottom:28px; right:28px; z-index:300; padding:14px 20px; border-radius:14px; font-size:14px; font-weight:600; display:flex; align-items:center; gap:10px; box-shadow:0 8px 30px rgba(0,0,0,0.2); animation:slideUp2 0.3s ease; }
-  .dash-root.rtl .toast { right:auto; left:28px; }
-  .toast-success { background:linear-gradient(135deg,#4f46e5,#7c3aed); color:white; }
-  .toast-error { background:linear-gradient(135deg,#dc2626,#b91c1c); color:white; }
-  .toggle-pill { display:flex; align-items:center; gap:0; background:var(--surface2); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
-  .toggle-pill button { padding:8px 16px; font-size:13px; font-weight:600; border:none; cursor:pointer; background:transparent; color:var(--text2); transition:all 0.15s; }
-  .toggle-pill button.active { background:linear-gradient(135deg,#4f46e5,#7c3aed); color:white; }
-  .switch { position:relative; display:inline-block; width:44px; height:24px; }
-  .switch input { opacity:0; width:0; height:0; }
-  .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:var(--border); border-radius:999px; transition:.3s; }
-  .slider:before { position:absolute; content:""; height:18px; width:18px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.3s; }
-  input:checked + .slider { background:linear-gradient(135deg,#4f46e5,#7c3aed); }
-  input:checked + .slider:before { transform:translateX(20px); }
-  .section-enter { animation:fadeSlide 0.25s ease; }
-  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-  @keyframes slideUp2 { from{transform:translateY(16px);opacity:0} to{transform:translateY(0);opacity:1} }
-  @keyframes fadeSlide { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-  .glow-dot { width:8px; height:8px; border-radius:50%; background:#10b981; box-shadow:0 0 6px #10b981; animation:pulse2 2s infinite; }
-  @keyframes pulse2 { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
+  .form-full { grid-column: 1/-1; }
+  
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 24px; display: flex; align-items: flex-start; gap: 18px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; position: relative; box-shadow: var(--shadow-sm); }
+  .stat-card::before { content: ''; position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .dash-root.dark .stat-card::before { background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); }
+  .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--accent); }
+  .stat-card:hover::before { opacity: 1; }
+  .stat-icon { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: inset 0 2px 4px rgba(255,255,255,0.3); }
+  .dash-root.dark .stat-icon { box-shadow: inset 0 2px 4px rgba(255,255,255,0.05); }
+  
+  .row-header { display: grid; grid-template-columns: 56px 1fr 115px 110px 110px; align-items: center; gap: 16px; padding: 14px 24px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 12px; border-radius: 20px 20px 0 0; }
+  .news-row { display: grid; grid-template-columns: 56px 1fr 115px 110px 110px; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); transition: all 0.2s ease; cursor: default; }
+  .news-row:last-child { border-bottom: none; }
+  .news-row:hover { background: var(--surface2); }
+  
+  .dash-badge { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; transition: all 0.2s; }
+  .badge-green { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+  .dash-root.dark .badge-green { background: rgba(16, 185, 129, 0.1); color: #34d399; }
+  .badge-gray { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+  
+  .dash-modal-overlay { position: fixed; inset: 0; background: rgba(11, 15, 25, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .dash-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .dash-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 24px 28px; border-bottom: 1px solid var(--border); background: var(--surface2); position: sticky; top: 0; z-index: 10; border-radius: 24px 24px 0 0; }
+  .dash-modal-title { font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: -0.01em; }
+  .dash-modal-body { padding: 28px; }
+  
+  .dash-icon-btn { padding: 10px; border-radius: 12px; border: none; background: transparent; color: var(--text2); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; }
+  .dash-icon-btn:hover { background: var(--surface2); color: var(--text); transform: scale(1.05); }
+  .dash-icon-btn:active { transform: scale(0.95); }
+  
+  .school-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .school-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 20px; display: flex; align-items: center; gap: 16px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: default; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; }
+  .school-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-3px); }
+  
+  .hero-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; transition: all 0.3s ease; box-shadow: var(--shadow-sm); }
+  .hero-card:hover { border-color: var(--accent2); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  
+  .toast { position: fixed; bottom: 32px; right: 32px; z-index: 300; padding: 16px 24px; border-radius: 16px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: slideUpToast 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .dash-root.rtl .toast { right: auto; left: 32px; }
+  .toast-success { background: linear-gradient(135deg, #10b981, #059669); color: white; border: 1px solid rgba(255,255,255,0.1); }
+  .toast-error { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: 1px solid rgba(255,255,255,0.1); }
+  
+  .toggle-pill { display: flex; align-items: center; gap: 2px; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 4px; }
+  .toggle-pill button { padding: 8px 16px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; background: transparent; color: var(--text2); transition: all 0.2s; border-radius: 8px; }
+  .toggle-pill button:hover:not(.active) { color: var(--text); background: rgba(0,0,0,0.03); }
+  .dash-root.dark .toggle-pill button:hover:not(.active) { background: rgba(255,255,255,0.05); }
+  .toggle-pill button.active { background: var(--surface); color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .dash-root.dark .toggle-pill button.active { background: var(--surface); color: var(--text); }
+  
+  .switch { position: relative; display: inline-block; width: 48px; height: 28px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; transition: .3s; }
+  .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background: var(--text2); border-radius: 50%; transition: .3s cubic-bezier(0.4, 0, 0.2, 1); }
+  input:checked + .slider { background: linear-gradient(135deg, var(--accent), #7c3aed); border-color: transparent; }
+  input:checked + .slider:before { transform: translateX(20px); background: white; }
+  
+  .section-enter { animation: fadeSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes fadeIn { from{opacity: 0} to{opacity: 1} }
+  @keyframes scaleUp { from{transform: scale(0.95); opacity: 0} to{transform: scale(1); opacity: 1} }
+  @keyframes slideUpToast { from{transform: translateY(20px) scale(0.9); opacity: 0} to{transform: translateY(0) scale(1); opacity: 1} }
+  @keyframes fadeSlide { from{opacity: 0; transform: translateY(15px)} to{opacity: 1; transform: translateY(0)} }
+  
+  .glow-dot { width: 10px; height: 10px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981; animation: pulse2 2s infinite; }
+  @keyframes pulse2 { 0%,100%{opacity: 1; transform: scale(1)} 50%{opacity: 0.5; transform: scale(1.4)} }
 `;
 
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
 const Dashboard: React.FC = () => {
-    const { logout } = useAuth();
-    const [section, setSection] = useState<Section>('overview');
-    const [collapsed, setCollapsed] = useState(false);
-    const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('dash-theme') as Theme) || 'light');
-    const [lang, setLang] = useState<Lang>(() => (localStorage.getItem('dash-lang') as Lang) || 'en');
-    const [newsList, setNewsList] = useState<DashNewsItem[]>(initNews);
-    const [schools, setSchools] = useState<DashSchool[]>(initSchools);
-    const [hero, setHero] = useState<HeroSlide[]>(initHero);
-    const [about, setAbout] = useState<AboutData>(initAbout);
-    const [profile, setProfile] = useState<AdminProfile>({ name: 'Admin', email: 'admin@nis.edu.eg' });
-    const [editNewsId, setEditNewsId] = useState<string | null>(null);
-    const [addNewsOpen, setAddNewsOpen] = useState(false);
-    const [editHeroId, setEditHeroId] = useState<number | null>(null);
-    const [editSchoolId, setEditSchoolId] = useState<string | null>(null);
-    const [editAbout, setEditAbout] = useState(false);
-    const [newsSearch, setNewsSearch] = useState('');
-    const [schoolSearch, setSchoolSearch] = useState('');
-    const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
-    const [newArt, setNewArt] = useState<Partial<DashNewsItem>>({ title: '', titleAr: '', summary: '', summaryAr: '', date: '', image: '', published: true });
-    const [profileDraft, setProfileDraft] = useState({ ...profile });
+  const { logout } = useAuth();
+  const [section, setSection] = useState<Section>('overview');
+  const [collapsed, setCollapsed] = useState(false);
+  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('dash-theme') as Theme) || 'light');
+  const { lang, setLang } = useLanguage();
+  const [newsList, setNewsList] = useState<DashNewsItem[]>(initNews);
+  const [schools, setSchools] = useState<DashSchool[]>(initSchools);
+  const [hero, setHero] = useState<HeroSlide[]>(initHero);
+  const [about, setAbout] = useState<AboutData>(initAbout);
+  const [profile, setProfile] = useState<AdminProfile>({ name: 'Admin', email: 'admin@nis.edu.eg' });
+  const [editNewsId, setEditNewsId] = useState<string | null>(null);
+  const [addNewsOpen, setAddNewsOpen] = useState(false);
+  const [editHeroId, setEditHeroId] = useState<number | null>(null);
+  const [editSchoolId, setEditSchoolId] = useState<string | null>(null);
+  const [editAbout, setEditAbout] = useState(false);
+  const [newsSearch, setNewsSearch] = useState('');
+  const [schoolSearch, setSchoolSearch] = useState('');
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const [newArt, setNewArt] = useState<Partial<DashNewsItem>>({ title: '', titleAr: '', summary: '', summaryAr: '', date: '', image: '', published: true });
+  const [profileDraft, setProfileDraft] = useState({ ...profile });
 
-    const u = UI[lang];
-    const isRTL = lang === 'ar';
+  const u = UI[lang];
+  const isRTL = lang === 'ar';
 
-    useEffect(() => {
-        localStorage.setItem('dash-theme', theme);
-        localStorage.setItem('dash-lang', lang);
-    }, [theme, lang]);
+  useEffect(() => {
+    localStorage.setItem('dash-theme', theme);
+  }, [theme]);
 
-    const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
-        setToast({ msg, type });
-        setTimeout(() => setToast(null), 3000);
-    };
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
-    // Handlers
-    const togglePublish = (id: string) => { setNewsList(p => p.map(n => n.id === id ? { ...n, published: !n.published } : n)); showToast(u.articleSaved); };
-    const deleteNews = (id: string) => { setNewsList(p => p.filter(n => n.id !== id)); showToast(u.articleDeleted, 'error'); };
-    const saveNews = (a: DashNewsItem) => { setNewsList(p => p.map(n => n.id === a.id ? a : n)); setEditNewsId(null); showToast(u.articleSaved); };
-    const addNews = () => {
-        if (!newArt.title || !newArt.date) return showToast(u.required, 'error');
-        setNewsList(p => [{ id: String(Date.now()), title: newArt.title!, titleAr: newArt.titleAr || '', summary: newArt.summary || '', summaryAr: newArt.summaryAr || '', date: newArt.date!, image: newArt.image || `https://picsum.photos/seed/${Date.now()}/800/600`, published: newArt.published ?? true }, ...p]);
-        setAddNewsOpen(false);
-        setNewArt({ title: '', titleAr: '', summary: '', summaryAr: '', date: '', image: '', published: true });
-        showToast(u.articleAdded);
-    };
-    const saveHero = (s: HeroSlide) => { setHero(p => p.map(h => h.id === s.id ? s : h)); setEditHeroId(null); showToast(u.slideSaved); };
-    const saveSchool = (s: DashSchool) => { setSchools(p => p.map(sc => sc.id === s.id ? s : sc)); setEditSchoolId(null); showToast(u.schoolSaved); };
+  // Handlers
+  const togglePublish = (id: string) => { setNewsList(p => p.map(n => n.id === id ? { ...n, published: !n.published } : n)); showToast(u.articleSaved); };
+  const deleteNews = (id: string) => { setNewsList(p => p.filter(n => n.id !== id)); showToast(u.articleDeleted, 'error'); };
+  const saveNews = (a: DashNewsItem) => { setNewsList(p => p.map(n => n.id === a.id ? a : n)); setEditNewsId(null); showToast(u.articleSaved); };
+  const addNews = () => {
+    if (!newArt.title || !newArt.date) return showToast(u.required, 'error');
+    setNewsList(p => [{ id: String(Date.now()), title: newArt.title!, titleAr: newArt.titleAr || '', summary: newArt.summary || '', summaryAr: newArt.summaryAr || '', date: newArt.date!, image: newArt.image || `https://picsum.photos/seed/${Date.now()}/800/600`, published: newArt.published ?? true }, ...p]);
+    setAddNewsOpen(false);
+    setNewArt({ title: '', titleAr: '', summary: '', summaryAr: '', date: '', image: '', published: true });
+    showToast(u.articleAdded);
+  };
+  const saveHero = (s: HeroSlide) => { setHero(p => p.map(h => h.id === s.id ? s : h)); setEditHeroId(null); showToast(u.slideSaved); };
+  const saveSchool = (s: DashSchool) => { setSchools(p => p.map(sc => sc.id === s.id ? s : sc)); setEditSchoolId(null); showToast(u.schoolSaved); };
 
-    const filtered = newsList.filter(n => n.title.toLowerCase().includes(newsSearch.toLowerCase()) || n.titleAr.includes(newsSearch));
-    const filteredSchools = schools.filter(s => s.name.toLowerCase().includes(schoolSearch.toLowerCase()) || s.governorate.toLowerCase().includes(schoolSearch.toLowerCase()));
-    const publishedCount = newsList.filter(n => n.published).length;
+  const filtered = newsList.filter(n => n.title.toLowerCase().includes(newsSearch.toLowerCase()) || n.titleAr.includes(newsSearch));
+  const filteredSchools = schools.filter(s => s.name.toLowerCase().includes(schoolSearch.toLowerCase()) || s.governorate.toLowerCase().includes(schoolSearch.toLowerCase()));
+  const publishedCount = newsList.filter(n => n.published).length;
 
-    const navItems: { id: Section; icon: React.ElementType }[] = [
-        { id: 'overview', icon: LayoutDashboard }, { id: 'news', icon: Newspaper },
-        { id: 'schools', icon: School }, { id: 'hero', icon: Image },
-        { id: 'about', icon: Info }, { id: 'settings', icon: Settings },
-    ];
+  const navItems: { id: Section; icon: React.ElementType }[] = [
+    { id: 'overview', icon: LayoutDashboard }, { id: 'news', icon: Newspaper },
+    { id: 'schools', icon: School }, { id: 'hero', icon: Image },
+    { id: 'about', icon: Info }, { id: 'settings', icon: Settings },
+  ];
 
-    return (
-        <div className={`dash-root \${theme === 'dark' ? 'dark' : ''} \${isRTL ? 'rtl' : ''}`}>
+  return (
+    <div className={`dash-root ${theme === 'dark' ? 'dark' : ''} ${isRTL ? 'rtl' : ''}`}>
       <style>{CSS}</style>
 
       {/* Sidebar */}
-      <aside className={`dash-sidebar \${collapsed ? 'collapsed' : ''}`}>
+      <aside className={`dash-sidebar ${collapsed ? 'collapsed' : ''}`}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '20px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ width: 38, height: 38, background: 'linear-gradient(135deg,#ef4444,#dc2626)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <GraduationCap style={{ width: 20, height: 20, color: 'white' }} />
@@ -189,15 +255,15 @@ const Dashboard: React.FC = () => {
         <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
           {!collapsed && <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '0 20px', marginBottom: 6 }}>{u.overview}</p>}
           {navItems.filter(n => n.id !== 'settings').map(item => (
-            <div key={item.id} className={`nav-item \${section === item.id ? 'active' : ''}`} onClick={() => setSection(item.id)}>
+            <div key={item.id} className={`nav-item ${section === item.id ? 'active' : ''}`} onClick={() => setSection(item.id)}>
               <item.icon style={{ width: 18, height: 18, flexShrink: 0 }} />
               {!collapsed && <span style={{ fontSize: 13 }}>{u[item.id as keyof typeof u] as string}</span>}
-              {!collapsed && section === item.id && <ChevronRight style={{ width: 14, height: 14, marginLeft: 'auto', opacity: 0.5 }} />}
+              {!collapsed && section === item.id && <ChevronRight style={{ width: 14, height: 14, marginInlineStart: 'auto', opacity: 0.5, transform: isRTL ? 'scaleX(-1)' : 'none' }} />}
             </div>
           ))}
         </nav>
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', padding: 8 }}>
-          <div className={`nav-item \${section === 'settings' ? 'active' : ''}`} onClick={() => setSection('settings')}>
+          <div className={`nav-item ${section === 'settings' ? 'active' : ''}`} onClick={() => setSection('settings')}>
             <Settings style={{ width: 18, height: 18, flexShrink: 0 }} />{!collapsed && <span style={{ fontSize: 13 }}>{u.settings}</span>}
           </div>
           <div className="nav-item" onClick={logout}><LogOut style={{ width: 18, height: 18, flexShrink: 0 }} />{!collapsed && <span style={{ fontSize: 13 }}>{u.logout}</span>}</div>
@@ -205,7 +271,7 @@ const Dashboard: React.FC = () => {
       </aside>
 
       {/* Main */}
-      <div className={`dash-main \${collapsed ? 'collapsed' : ''}`}>
+      <div className={`dash-main ${collapsed ? 'collapsed' : ''}`}>
         {/* Topbar */}
         <header className="dash-topbar">
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -285,7 +351,7 @@ const Dashboard: React.FC = () => {
                       <p style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{n.title}</p>
                       <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2 }}>{n.date}</p>
                     </div>
-                    <span className={`dash-badge \${n.published ? 'badge-green' : 'badge-gray'}`}>{n.published ? u.published : u.draft}</span>
+                    <span className={`dash-badge ${n.published ? 'badge-green' : 'badge-gray'}`}>{n.published ? u.published : u.draft}</span>
                   </div>
                 ))}
               </div>
@@ -318,7 +384,7 @@ const Dashboard: React.FC = () => {
                       <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{n.titleAr}</p>
                     </div>
                     <p style={{ fontSize: 13, color: 'var(--text2)' }}>{n.date}</p>
-                    <button className={`dash-badge \${n.published ? 'badge-green' : 'badge-gray'}`} style={{ cursor: 'pointer', border: 'none' }} onClick={() => togglePublish(n.id)}>{n.published ? u.published : u.draft}</button>
+                    <button className={`dash-badge ${n.published ? 'badge-green' : 'badge-gray'}`} style={{ cursor: 'pointer', border: 'none' }} onClick={() => togglePublish(n.id)}>{n.published ? u.published : u.draft}</button>
                     <div style={{ display: 'flex', gap: 4 }}>
                       <button className="dash-icon-btn" title={u.edit} onClick={() => setEditNewsId(n.id)}><Pencil style={{ width: 15, height: 15, color: 'var(--accent)' }} /></button>
                       <button className="dash-icon-btn" title={n.published ? 'Unpublish' : 'Publish'} onClick={() => togglePublish(n.id)}>{n.published ? <EyeOff style={{ width: 15, height: 15 }} /> : <Eye style={{ width: 15, height: 15 }} />}</button>
@@ -393,7 +459,7 @@ const Dashboard: React.FC = () => {
               </div>
               {!editAbout ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {[{ l: u.chairmanName, v: about.name }, { l: u.role, v: about.role }, { l: u.quote, v: `"\${about.quote}"` }, { l: u.description, v: about.desc }].map(({ l, v }) => (
+                  {[{ l: u.chairmanName, v: about.name }, { l: u.role, v: about.role }, { l: u.quote, v: `"${about.quote}"` }, { l: u.description, v: about.desc }].map(({ l, v }) => (
                     <div key={l} className="dash-card" style={{ padding: 18 }}><p className="dash-label">{l}</p><p style={{ color: 'var(--text)', fontSize: 14, lineHeight: 1.6 }}>{v}</p></div>
                   ))}
                   <div className="dash-card" style={{ padding: 18 }}><p className="dash-label">{u.keyPoints}</p><div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>{about.points.map((p, i) => <span key={i} style={{ padding: '4px 14px', borderRadius: 999, background: 'rgba(79,70,229,0.1)', color: 'var(--accent)', fontSize: 13, fontWeight: 600 }}>{p}</span>)}</div></div>
@@ -486,13 +552,13 @@ const Dashboard: React.FC = () => {
         </ModalWrap>
       )}
 
-      {editHeroId !== null && (() => { const s = hero.find(h => h.id === editHeroId); return s ? <ModalWrap title={`\${u.edit} — \${u.hero} \${s.id}`} onClose={() => setEditHeroId(null)}><EditHeroForm slide={s} lang={lang} onSave={saveHero} onCancel={() => setEditHeroId(null)} /></ModalWrap> : null; })()}
+      {editHeroId !== null && (() => { const s = hero.find(h => h.id === editHeroId); return s ? <ModalWrap title={`${u.edit} — ${u.hero} ${s.id}`} onClose={() => setEditHeroId(null)}><EditHeroForm slide={s} lang={lang} onSave={saveHero} onCancel={() => setEditHeroId(null)} /></ModalWrap> : null; })()}
 
-      {editSchoolId && (() => { const s = schools.find(sc => sc.id === editSchoolId); return s ? <ModalWrap title={`\${u.edit} — \${s.name}`} onClose={() => setEditSchoolId(null)}><EditSchoolForm school={s} lang={lang} onSave={saveSchool} onCancel={() => setEditSchoolId(null)} /></ModalWrap> : null; })()}
+      {editSchoolId && (() => { const s = schools.find(sc => sc.id === editSchoolId); return s ? <ModalWrap title={`${u.edit} — ${s.name}`} onClose={() => setEditSchoolId(null)}><EditSchoolForm school={s} lang={lang} onSave={saveSchool} onCancel={() => setEditSchoolId(null)} /></ModalWrap> : null; })()}
 
       {/* Toast */}
       {toast && (
-        <div className={`toast \${toast.type === 'success' ? 'toast-success' : 'toast-error'}`}>
+        <div className={`toast ${toast.type === 'success' ? 'toast-success' : 'toast-error'}`}>
           {toast.type === 'success' ? <CheckCircle style={{ width: 16, height: 16 }} /> : <AlertCircle style={{ width: 16, height: 16 }} />}
           {toast.msg}
         </div>

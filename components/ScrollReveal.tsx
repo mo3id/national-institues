@@ -26,7 +26,7 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
     };
 
     return (
-        <div style={{ position: "relative", width, overflow: "hidden" }}>
+        <div style={{ position: "relative", width }}>
             <motion.div
                 variants={{
                     hidden: getInitialProps(),
