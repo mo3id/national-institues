@@ -10,7 +10,7 @@ const defaultSlides = [
     title: "Nurturing Global Leaders",
     subtitle: "Legacy of Excellence",
     description: "Empowering the next generation with world-class education and values that transcend borders.",
-    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop", // A group of diverse students looking bright/collaborative
     fallbackImage: "https://placehold.co/800x1000/1e3a8a/white?text=Education+Excellence",
     stats: { students: "25k+", experts: "50+", support: "24/7" }
   },
@@ -19,7 +19,7 @@ const defaultSlides = [
     title: "Innovation in Education",
     subtitle: "Future Ready",
     description: "Integrating cutting-edge technology and AI to create personalized learning experiences for every student.",
-    image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=2070&auto=format&fit=crop",
+    image: "https://picsum.photos/seed/n6/800/800", // modern tech setup
     fallbackImage: "https://placehold.co/800x1000/1e3a8a/white?text=Innovation",
     stats: { students: "28k+", experts: "65+", support: "24/7" }
   },
@@ -28,7 +28,7 @@ const defaultSlides = [
     title: "Community & Culture",
     subtitle: "Building Character",
     description: "Fostering a vibrant community where diversity is celebrated and character is built through shared experiences.",
-    image: "https://images.unsplash.com/photo-1544531696-9348411883aa?q=80&w=2069&auto=format&fit=crop",
+    image: "https://picsum.photos/seed/news6/800/600", // large community group laughing/engaged
     fallbackImage: "https://placehold.co/800x1000/1e3a8a/white?text=Community",
     stats: { students: "30k+", experts: "80+", support: "24/7" }
   }
@@ -40,15 +40,16 @@ const Hero: React.FC = () => {
   const [direction, setDirection] = useState(0); // 1 for down (next), -1 for up (prev)
   const [imgError, setImgError] = useState<{ [key: number]: boolean }>({});
 
-  // Build slides using translations (override first slide with translated hero content)
+  // Build slides using translations
   const slides = useMemo(() => {
-    const s = defaultSlides.map(sl => ({ ...sl }));
-    if (t && t.hero) {
-      s[0].title = t.hero.title || s[0].title;
-      s[0].subtitle = t.hero.badge || s[0].subtitle;
-      s[0].description = t.hero.subtitle || s[0].description;
-    }
-    return s;
+    if (!t?.hero?.slides) return defaultSlides;
+    return t.hero.slides.map((slide: any, index: number) => ({
+      ...slide,
+      id: index + 1,
+      image: defaultSlides[index]?.image || defaultSlides[0].image,
+      fallbackImage: defaultSlides[index]?.fallbackImage || defaultSlides[0].fallbackImage,
+      stats: defaultSlides[index]?.stats || defaultSlides[0].stats
+    }));
   }, [t, lang]);
 
   // Auto-play functionality
@@ -56,10 +57,10 @@ const Hero: React.FC = () => {
     const timer = setInterval(() => {
       setDirection(1);
       setCurrentIndex((prev) => (prev + 1) % slides.length);
-    }, 5000);
+    }, 6000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [slides.length]);
 
   const handleNext = () => {
     setDirection(1);
@@ -87,7 +88,7 @@ const Hero: React.FC = () => {
       opacity: 1,
       scale: 1,
       transition: {
-        y: { type: "spring", stiffness: 300, damping: 30 },
+        y: { type: "spring" as const, stiffness: 300, damping: 30 },
         opacity: { duration: 0.2 },
         scale: { duration: 0.5 }
       }
@@ -97,7 +98,7 @@ const Hero: React.FC = () => {
       opacity: 0,
       scale: 0.9,
       transition: {
-        y: { type: "spring", stiffness: 300, damping: 30 },
+        y: { type: "spring" as const, stiffness: 300, damping: 30 },
         opacity: { duration: 0.2 },
         scale: { duration: 0.5 }
       }
@@ -109,7 +110,7 @@ const Hero: React.FC = () => {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: "easeOut", delay: 0.2 }
+      transition: { duration: 0.5, ease: "easeOut" as const, delay: 0.2 }
     }
   };
 
@@ -158,11 +159,11 @@ const Hero: React.FC = () => {
                 {/* Buttons */}
                 <div className={`flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4`}>
                   <button className="w-full sm:w-auto bg-[#991b1b] text-white px-8 py-4 rounded-xl font-bold hover:bg-red-800 transition-colors shadow-lg shadow-red-900/20 flex items-center justify-center space-x-2 group">
-                    <span>{(t && t.cta && t.cta.btnSchools) ? t.cta.btnSchools : 'Register Now'}</span>
+                    <span>{t?.cta?.btnSchools ?? 'Register Now'}</span>
                     <ChevronRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''} group-hover:translate-x-1 transition-transform`} />
                   </button>
                   <button className="w-full sm:w-auto bg-transparent border-2 border-[#1e3a8a] text-[#1e3a8a] px-8 py-4 rounded-xl font-bold hover:bg-[#1e3a8a] hover:text-white transition-all">
-                    {(t && t.hero && t.hero.ctaAbout) ? t.hero.ctaAbout : 'Explore Courses'}
+                    {t?.hero?.ctaAbout ?? 'Explore Courses'}
                   </button>
                 </div>
 
@@ -247,8 +248,8 @@ const Hero: React.FC = () => {
                 <CheckCircle className="w-6 h-6 text-green-600" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[#1e3a8a] font-bold text-sm">Certified Institute</span>
-                <span className="text-xs text-gray-500">Since 1950</span>
+                <span className="text-[#1e3a8a] font-bold text-sm">{t?.hero?.certified ?? 'Certified Institute'}</span>
+                <span className="text-xs text-gray-500">{t?.hero?.since ?? 'Since 1950'}</span>
               </div>
             </motion.div>
           </div>

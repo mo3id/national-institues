@@ -15,7 +15,26 @@ export const translations = {
       title: "Nurturing Global Leaders",
       subtitle: "Leading Egyptian education since 1956 with a network of 40+ schools across 5 governorates.",
       ctaSearch: "Find a School",
-      ctaAbout: "Our Legacy"
+      ctaAbout: "Explore Courses",
+      certified: "Certified Institute",
+      since: "Since 1950",
+      slides: [
+        {
+          title: "Nurturing Global Leaders",
+          subtitle: "Legacy of Excellence",
+          description: "Empowering the next generation with world-class education and values that transcend borders."
+        },
+        {
+          title: "Innovation in Education",
+          subtitle: "Future Ready",
+          description: "Integrating cutting-edge technology and AI to create personalized learning experiences for every student."
+        },
+        {
+          title: "Community & Culture",
+          subtitle: "Building Character",
+          description: "Fostering a vibrant community where diversity is celebrated and character is built through shared experiences."
+        }
+      ]
     },
     chairman: {
       tag: "Founding Message",
@@ -46,7 +65,29 @@ export const translations = {
       tag: "Media Center",
       title: "Latest Updates",
       desc: "Daily highlights from across our school network.",
-      readMore: "Read Full Story"
+      readMore: "Read Full Story",
+      searchPlaceholder: "Search news..."
+    },
+    complaints: {
+      title: "Customer Complaints & Feedback",
+      subtitle: "We value your feedback. Share your concerns, suggestions, or inquiries with us.",
+      successTitle: "Sent Successfully!",
+      successDesc: "Thank you for your feedback. We will review your message soon.",
+      fullName: "Full Name",
+      phone: "Phone Number",
+      email: "Email Address",
+      messageType: "Message Type",
+      school: "Related School",
+      message: "Message Text",
+      submit: "Send Message",
+      placeholders: {
+        name: "Enter your full name",
+        phone: "Enter your phone number",
+        email: "Enter your email",
+        school: "Select a school",
+        message: "Write your message here..."
+      },
+      types: ['Complaint', 'Suggestion', 'Inquiry', 'Thanks']
     },
     gallery: {
       tag: "Visual Experience",
@@ -129,7 +170,26 @@ export const translations = {
       title: "رعاية قادة المستقبل",
       subtitle: "نقود التعليم المصري منذ عام ١٩٥٦ عبر شبكة تضم أكثر من ٤٠ مدرسة في ٥ محافظات.",
       ctaSearch: "ابحث عن مدرسة",
-      ctaAbout: "عن المعاهد"
+      ctaAbout: "استكشف الدورات",
+      certified: "معهد معتمد",
+      since: "منذ عام ١٩٥٠",
+      slides: [
+        {
+          title: "رعاية قادة المستقبل",
+          subtitle: "إرث من التميز",
+          description: "تمكين الجيل القادم بتعليم عالمي المستوى وقيم تتجاوز الحدود."
+        },
+        {
+          title: "الابتكار في التعليم",
+          subtitle: "جاهزون للمستقبل",
+          description: "دمج أحدث التقنيات والذكاء الاصطناعي لإنشاء تجارب تعليمية مخصصة لكل طالب."
+        },
+        {
+          title: "المجتمع والثقافة",
+          subtitle: "بناء الشخصية",
+          description: "تعزيز مجتمع حيوي حيث يتم الاحتفاء بالتنوع وبناء الشخصية من خلال التجارب المشتركة."
+        }
+      ]
     },
     chairman: {
       tag: "رسالة التأسيس",
@@ -160,7 +220,29 @@ export const translations = {
       tag: "المركز الإعلامي",
       title: "آخر التحديثات",
       desc: "أبرز الأحداث اليومية من جميع أنحاء شبكة مدارسنا.",
-      readMore: "اقرأ القصة الكاملة"
+      readMore: "اقرأ القصة الكاملة",
+      searchPlaceholder: "ابحث في الأخبار..."
+    },
+    complaints: {
+      title: "شكاوى ومقترحات العملاء",
+      subtitle: "نحن نهتم برأيك وندعوك لمشاركة أي استفسارات أو شكاوى أو اقتراحات.",
+      successTitle: "تم الإرسال بنجاح!",
+      successDesc: "شكراً لك على تعليقك. سيتم مراجعة رسالتك قريباً.",
+      fullName: "الاسم الثلاثي",
+      phone: "رقم الهاتف",
+      email: "البريد الإلكتروني",
+      messageType: "نوع الرسالة",
+      school: "المدرسة المعنية",
+      message: "نص الرسالة",
+      submit: "إرسال الرسالة",
+      placeholders: {
+        name: "أدخل اسمك الكامل",
+        phone: "أدخل رقم هاتفك",
+        email: "أدخل بريدك الإلكتروني",
+        school: "اختر المدرسة",
+        message: "اكتب رسالتك هنا..."
+      },
+      types: ['شكوى', 'اقتراح', 'استفسار', 'شكر']
     },
     gallery: {
       tag: "التجربة البصرية",

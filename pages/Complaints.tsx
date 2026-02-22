@@ -1,7 +1,10 @@
+
 import React, { useState } from 'react';
 import { useLanguage } from '../LanguageContext';
 import { SCHOOLS } from '../constants';
-import { Send } from 'lucide-react';
+import { Send, CheckCircle } from 'lucide-react';
+import PageTransition from '../components/PageTransition';
+import ScrollReveal from '../components/ScrollReveal';
 
 const Complaints: React.FC = () => {
   const { lang, isRTL, t } = useLanguage();
@@ -27,166 +30,178 @@ const Complaints: React.FC = () => {
     setTimeout(() => setSubmitted(false), 5000);
   };
 
-  const messageTypes = lang === 'ar' 
-    ? ['شكوى', 'اقتراح', 'استفسار', 'شكر']
-    : ['Complaint', 'Suggestion', 'Inquiry', 'Thanks'];
+  const messageTypes = t.complaints.types;
 
   return (
-    <div className="overflow-x-hidden">
-      {/* Header */}
-      <section className="bg-gradient-to-r from-red-700 to-red-600 text-white py-24">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-black mb-4">
-            {lang === 'ar' ? 'شكاوي وتقييمات العملاء' : 'Customer Complaints & Feedback'}
-          </h1>
-          <p className="text-red-100/80 text-lg max-w-2xl mx-auto">
-            {lang === 'ar' 
-              ? 'نحن نهتم برأيك وندعوك لمشاركة أي استفسارات أو شكاوى أو اقتراحات'
-              : 'We value your feedback. Share your concerns, suggestions, or inquiries with us.'
-            }
-          </p>
-        </div>
-      </section>
-
-      {/* Form Section */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12">
-            {submitted ? (
-              <div className="text-center py-12 space-y-4">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                  <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <h3 className={`text-2xl font-black text-gray-900 ${isRTL ? 'text-right' : ''}`}>
-                  {lang === 'ar' ? 'تم الإرسال بنجاح!' : 'Sent Successfully!'}
-                </h3>
-                <p className={`text-gray-600 ${isRTL ? 'text-right' : ''}`}>
-                  {lang === 'ar' 
-                    ? 'شكراً لك على تعليقك. سيتم مراجعة رسالتك قريباً.'
-                    : 'Thank you for your feedback. We will review your message soon.'
-                  }
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Full Name & Phone */}
-                <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${isRTL ? 'text-right' : ''}`}>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      {lang === 'ar' ? 'الاسم الثلاثي' : 'Full Name'}
-                    </label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      required
-                      className={`w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-600 transition ${isRTL ? 'text-right' : ''}`}
-                      placeholder={lang === 'ar' ? 'أدخل اسمك الكامل' : 'Enter your full name'}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      {lang === 'ar' ? 'رقم الهاتف' : 'Phone Number'}
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      required
-                      className={`w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-600 transition ${isRTL ? 'text-right' : ''}`}
-                      placeholder={lang === 'ar' ? 'أدخل رقم هاتفك' : 'Enter your phone number'}
-                    />
-                  </div>
-                </div>
-
-                {/* Email */}
-                <div className={`${isRTL ? 'text-right' : ''}`}>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    {lang === 'ar' ? 'البريد الإلكتروني' : 'Email Address'}
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className={`w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-600 transition ${isRTL ? 'text-right' : ''}`}
-                    placeholder={lang === 'ar' ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
-                  />
-                </div>
-
-                {/* Message Type & School */}
-                <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${isRTL ? 'text-right' : ''}`}>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      {lang === 'ar' ? 'نوع الرسالة' : 'Message Type'}
-                    </label>
-                    <select
-                      name="messageType"
-                      value={formData.messageType}
-                      onChange={handleChange}
-                      className={`w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-600 transition ${isRTL ? 'text-right' : ''}`}
-                    >
-                      {messageTypes.map(type => (
-                        <option key={type} value={type}>{type}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      {lang === 'ar' ? 'المدرسة المعنية' : 'Related School'}
-                    </label>
-                    <select
-                      name="school"
-                      value={formData.school}
-                      onChange={handleChange}
-                      required
-                      className={`w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-600 transition ${isRTL ? 'text-right' : ''}`}
-                    >
-                      <option value="">{lang === 'ar' ? 'اختر المدرسة' : 'Select a school'}</option>
-                      {SCHOOLS.map(school => (
-                        <option key={school.id} value={school.name}>
-                          {school.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Message */}
-                <div className={`${isRTL ? 'text-right' : ''}`}>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    {lang === 'ar' ? 'نص الرسالة' : 'Message Text'}
-                  </label>
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    required
-                    rows={6}
-                    className={`w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-600 transition resize-none ${isRTL ? 'text-right' : ''}`}
-                    placeholder={lang === 'ar' ? 'اكتب رسالتك هنا...' : 'Write your message here...'}
-                  />
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  className="w-full bg-red-700 hover:bg-red-800 text-white font-black py-4 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest text-sm"
-                >
-                  <Send className="h-5 w-5" />
-                  {lang === 'ar' ? 'إرسال الرسالة' : 'Send Message'}
-                </button>
-              </form>
-            )}
+    <PageTransition>
+      <div className="overflow-x-hidden">
+        {/* Header */}
+        <section className="bg-gradient-to-r from-red-700 to-[#991b1b] text-white py-32 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent" />
           </div>
-        </div>
-      </section>
-    </div>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <ScrollReveal direction="down">
+              <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tight">
+                {t.complaints.title}
+              </h1>
+            </ScrollReveal>
+            <ScrollReveal delay={0.1}>
+              <p className="text-red-100/80 text-lg md:text-xl max-w-2xl mx-auto font-medium">
+                {t.complaints.subtitle}
+              </p>
+            </ScrollReveal>
+          </div>
+        </section>
+
+        {/* Form Section */}
+        <section className="py-24 bg-gray-50 relative">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20">
+            <ScrollReveal direction="up" delay={0.2}>
+              <div className="bg-white rounded-[2.5rem] shadow-2xl p-8 md:p-14 border border-gray-100 overflow-hidden relative">
+                <div className={`absolute top-0 ${isRTL ? 'left-0' : 'right-0'} w-32 h-32 bg-red-50 rounded-bl-[5rem] -z-0`} />
+
+                {submitted ? (
+                  <div className="text-center py-16 space-y-6 relative z-10 animate-fade-in text-start">
+                    <div className="flex justify-center">
+                      <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center animate-bounce">
+                        <CheckCircle className="h-12 w-12 text-green-600" />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className={`text-3xl font-black text-gray-900 mb-2 uppercase tracking-tight`}>
+                        {t.complaints.successTitle}
+                      </h3>
+                      <p className={`text-gray-500 font-medium text-lg`}>
+                        {t.complaints.successDesc}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
+                    <div className="text-start">
+                      <h3 className="text-2xl font-black text-red-700 uppercase tracking-tight">Send a Message</h3>
+                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">We value your feedback and concerns</p>
+                    </div>
+
+                    {/* Full Name & Phone */}
+                    <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 text-start`}>
+                      <div className="space-y-2">
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                          {t.complaints.fullName}
+                        </label>
+                        <input
+                          type="text"
+                          name="fullName"
+                          value={formData.fullName}
+                          onChange={handleChange}
+                          required
+                          className={`w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50 focus:outline-none focus:ring-4 focus:ring-red-100 focus:border-red-600 transition-all font-medium text-blue-900`}
+                          placeholder={t.complaints.placeholders.name}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                          {t.complaints.phone}
+                        </label>
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          required
+                          className={`w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50 focus:outline-none focus:ring-4 focus:ring-red-100 focus:border-red-600 transition-all font-medium text-blue-900`}
+                          placeholder={t.complaints.placeholders.phone}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Email */}
+                    <div className="text-start space-y-2">
+                      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                        {t.complaints.email}
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        className={`w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50 focus:outline-none focus:ring-4 focus:ring-red-100 focus:border-red-600 transition-all font-medium text-blue-900`}
+                        placeholder={t.complaints.placeholders.email}
+                      />
+                    </div>
+
+                    {/* Message Type & School */}
+                    <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 text-start`}>
+                      <div className="space-y-2">
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                          {t.complaints.messageType}
+                        </label>
+                        <select
+                          name="messageType"
+                          value={formData.messageType}
+                          onChange={handleChange}
+                          className={`w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50 focus:outline-none focus:ring-4 focus:ring-red-100 focus:border-red-600 transition-all font-bold text-sm text-blue-900 appearance-none cursor-pointer`}
+                        >
+                          {messageTypes.map((type: string) => (
+                            <option key={type} value={type}>{type}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                          {t.complaints.school}
+                        </label>
+                        <select
+                          name="school"
+                          value={formData.school}
+                          onChange={handleChange}
+                          required
+                          className={`w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50 focus:outline-none focus:ring-4 focus:ring-red-100 focus:border-red-600 transition-all font-bold text-sm text-blue-900 appearance-none cursor-pointer`}
+                        >
+                          <option value="">{t.complaints.placeholders.school}</option>
+                          {SCHOOLS.map(school => (
+                            <option key={school.id} value={school.name}>
+                              {school.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Message */}
+                    <div className="text-start space-y-2">
+                      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">
+                        {t.complaints.message}
+                      </label>
+                      <textarea
+                        name="message"
+                        value={formData.message}
+                        onChange={handleChange}
+                        required
+                        rows={6}
+                        className={`w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50 focus:outline-none focus:ring-4 focus:ring-red-100 focus:border-red-600 transition-all resize-none font-medium text-blue-900`}
+                        placeholder={t.complaints.placeholders.message}
+                      />
+                    </div>
+
+                    {/* Submit Button */}
+                    <button
+                      type="submit"
+                      className="w-full bg-red-700 hover:bg-red-800 text-white font-black py-5 rounded-2xl transition-all shadow-xl shadow-red-900/20 active:scale-95 flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs"
+                    >
+                      <Send className="h-5 w-5" />
+                      {t.complaints.submit}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </ScrollReveal>
+          </div>
+        </section>
+      </div>
+    </PageTransition>
   );
 };
 
