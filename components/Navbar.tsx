@@ -73,7 +73,7 @@ const Navbar: React.FC = () => {
 
             {/* LOGO */}
             <Link to="/" className="flex items-center shrink-0">
-              <img src="/Layer 1.png" alt="National Institutes" className="h-7 md:h-9 lg:h-11 object-contain" />
+              <img src="/Layer 1.png" alt="National Institutes" className="h-9 md:h-11 lg:h-14 object-contain" />
             </Link>
 
             {/* Mobile Toggle */}
@@ -121,7 +121,7 @@ const Navbar: React.FC = () => {
 
             {/* LOGO */}
             <Link to="/" className="flex items-center shrink-0">
-              <img src="/Layer 1.png" alt="National Institutes" className="h-7 md:h-9 object-contain" />
+              <img src="/Layer 1.png" alt="National Institutes" className="h-9 md:h-11 object-contain" />
             </Link>
           </motion.nav>
         )}

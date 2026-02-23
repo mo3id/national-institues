@@ -48,10 +48,11 @@ export const CustomSelect: React.FC<SelectProps> = ({ value, onChange, options, 
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 8, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className={`absolute z-[100] w-full mt-2 bg-white/95 backdrop-blur-md border border-gray-100 rounded-2xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto custom-scrollbar`}
+                        exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute top-full left-0 right-0 z-[100] mt-1 bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden max-h-60 overflow-y-auto"
                     >
                         {options.map((opt) => (
                             <button
@@ -61,7 +62,7 @@ export const CustomSelect: React.FC<SelectProps> = ({ value, onChange, options, 
                                     onChange(opt.value);
                                     setIsOpen(false);
                                 }}
-                                className={`w-full px-5 py-3.5 text-sm font-semibold hover:bg-blue-50 transition-colors flex items-center justify-between ${value === opt.value ? 'text-blue-600 bg-blue-50/50' : 'text-gray-700'} ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
+                                className={`w-full px-4 py-3 text-sm font-medium hover:bg-blue-50 transition-colors flex items-center justify-between ${value === opt.value ? 'text-blue-600 bg-blue-50/50' : 'text-gray-700'} ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
                             >
                                 <span>{opt.label}</span>
                                 {value === opt.value && <div className="h-2 w-2 bg-blue-600 rounded-full" />}

@@ -40,11 +40,12 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const isSchools = location.pathname === '/schools';
   
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className={`flex-grow ${isHome ? '' : 'pt-24'}`}>
+      <main className={`flex-grow ${(isHome || isSchools) ? '' : 'pt-24'}`}>
         {children}
       </main>
       <Footer />
