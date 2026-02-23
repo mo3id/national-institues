@@ -45,7 +45,7 @@ export const NEWS: NewsItem[] = [
     date: '2024-03-15',
     summary: 'Over 5,000 students participated in our multi-governorate sports festival held at the Olympic Center.',
     summaryAr: 'شارك أكثر من ٥٠٠٠ طالب في مهرجاننا الرياضي الذي أقيم في المركز الأوليمبي.',
-    image: 'https://picsum.photos/seed/news1/800/600'
+    image: 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: '2',
@@ -54,7 +54,7 @@ export const NEWS: NewsItem[] = [
     date: '2024-03-12',
     summary: 'Victoria College inaugurates state-of-the-art STEM laboratories to enhance practical learning.',
     summaryAr: 'كلية فيكتوريا تفتتح مختبرات STEM الحديثة لتعزيز التعلم العملي.',
-    image: 'https://picsum.photos/seed/news2/800/600'
+    image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: '3',
@@ -63,7 +63,7 @@ export const NEWS: NewsItem[] = [
     date: '2024-03-10',
     summary: 'Celebrating our rich heritage through the annual NIS calligraphy championship for middle schoolers.',
     summaryAr: 'الاحتفال بتراثنا الغني من خلال بطولة الخط السنوية لطلاب المرحلة الإعدادية.',
-    image: 'https://picsum.photos/seed/news3/800/600'
+    image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: '4',
@@ -72,7 +72,7 @@ export const NEWS: NewsItem[] = [
     date: '2024-03-08',
     summary: 'Recognizing the dedication of our 8,500+ educators at the annual NIS Cairo summit.',
     summaryAr: 'تكريم جهود أكثر من ٨٥٠٠ معلم في قمة المعاهد القومية السنوية بالقاهرة.',
-    image: 'https://picsum.photos/seed/news4/800/600'
+    image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: '5',
@@ -81,7 +81,7 @@ export const NEWS: NewsItem[] = [
     date: '2024-03-05',
     summary: 'The Giza National School robotics team secured 3rd place in the international FIRST LEGO League.',
     summaryAr: 'حقق فريق الروبوتات بمدرسة الجيزة القومية المركز الثالث في مسابقة FIRST LEGO League الدولية.',
-    image: 'https://picsum.photos/seed/news5/800/600'
+    image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: '6',
@@ -90,7 +90,7 @@ export const NEWS: NewsItem[] = [
     date: '2024-03-01',
     summary: 'Diverse summer programs ranging from coding to art are now available across all NIS campuses.',
     summaryAr: 'برامج صيفية متنوعة تتراوح من البرمجة إلى الفنون متاحة الآن في جميع فروعنا.',
-    image: 'https://picsum.photos/seed/news6/800/600'
+    image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: '7',
@@ -99,7 +99,7 @@ export const NEWS: NewsItem[] = [
     date: '2024-02-25',
     summary: 'Honoring our students who achieved world-highest scores in the Cambridge IGCSE examinations.',
     summaryAr: 'تكريم طلابنا الذين حققوا أعلى الدرجات العالمية في امتحانات كامبريدج IGCSE.',
-    image: 'https://picsum.photos/seed/news7/800/600'
+    image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: '8',
@@ -108,7 +108,7 @@ export const NEWS: NewsItem[] = [
     date: '2024-02-20',
     summary: 'NIS Mansoura launches the first solar-powered primary school section in the Delta region.',
     summaryAr: 'المعاهد القومية بالمنصورة تطلق أول قسم ابتدائي يعمل بالطاقة الشمسية في منطقة الدلتا.',
-    image: 'https://picsum.photos/seed/news8/800/600'
+    image: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: '9',
@@ -117,7 +117,7 @@ export const NEWS: NewsItem[] = [
     date: '2024-02-15',
     summary: 'The final showdown of the inter-school chess championship takes place in Maadi this weekend.',
     summaryAr: 'المواجهة النهائية لبطولة الشطرنج بين المدارس تقام في المعادي هذا الأسبوع.',
-    image: 'https://picsum.photos/seed/news9/800/600'
+    image: 'https://images.unsplash.com/photo-1529699211952-734e80c4d42b?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: '10',
@@ -126,7 +126,7 @@ export const NEWS: NewsItem[] = [
     date: '2024-02-10',
     summary: 'Students from 40+ schools joined forces to plant 10,000 trees across 5 governorates.',
     summaryAr: 'تعاون طلاب من أكثر من ٤٠ مدرسة لزراعة ١٠,٠٠٠ شجرة في ٥ محافظات.',
-    image: 'https://picsum.photos/seed/news10/800/600'
+    image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: '11',
@@ -135,7 +135,7 @@ export const NEWS: NewsItem[] = [
     date: '2024-02-05',
     summary: 'All NIS classrooms are now equipped with interactive smart boards and high-speed fiber optics.',
     summaryAr: 'تم تجهيز جميع فصولنا بسبورات ذكية تفاعلية وألياف ضوئية عالية السرعة.',
-    image: 'https://picsum.photos/seed/news11/800/600'
+    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: '12',
@@ -144,7 +144,7 @@ export const NEWS: NewsItem[] = [
     date: '2024-02-01',
     summary: 'A showcase of Egyptian talent at the Cairo Opera House featuring our NIS symphony orchestra.',
     summaryAr: 'عرض للمواهب المصرية في دار الأوبرا المصرية يضم أوركسترا السيمفوني للمعاهد القومية.',
-    image: 'https://picsum.photos/seed/news12/800/600'
+    image: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&w=800&q=80'
   },
 ];
 
