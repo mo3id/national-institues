@@ -21,12 +21,12 @@ const Careers: React.FC = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-gray-50">
-        <div className="bg-blue-900 py-32 text-white text-center relative overflow-hidden">
+        <section className="m-[10px] rounded-[20px] relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-blue-900 text-white text-center">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute -top-24 -left-24 w-96 h-96 bg-white rounded-full blur-3xl" />
             <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-red-600 rounded-full blur-3xl" />
           </div>
-          <div className="max-w-3xl mx-auto px-4 relative z-10">
+          <div className="max-w-3xl mx-auto px-4 relative z-10 py-20">
             <ScrollReveal direction="down">
               <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tight">{t.title}</h1>
             </ScrollReveal>
@@ -34,9 +34,8 @@ const Careers: React.FC = () => {
               <p className="text-lg md:text-2xl text-blue-100/80 font-medium">{t.subtitle}</p>
             </ScrollReveal>
           </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 -mt-12 mb-24 relative z-20">
+        </section>
+        <div className="max-w-7xl mx-auto px-4 mt-12 mb-24 relative z-20">
           <div className={`grid grid-cols-1 lg:grid-cols-3 gap-12`}>
             {/* Job Listings */}
             <div className="lg:col-span-2 space-y-8">

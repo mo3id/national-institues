@@ -11,20 +11,20 @@ import { CustomSelect } from '../components/FormControls';
 const SchoolCard = React.memo(({ school, isRTL, translations: t, lang, onView }: any) => (
   <ScrollReveal>
     <div className="bg-white rounded-[24px] border border-gray-100/60 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] overflow-hidden transition-all duration-300 group flex flex-col h-full relative p-2">
-      
+
       {/* Background Cover Image with margin */}
       <div className="relative h-40 w-full rounded-[20px] overflow-hidden bg-gray-50">
-        <img 
-          src="/nano-banana-1771806527783.png" 
-          alt="Cover" 
+        <img
+          src="/nano-banana-1771806527783.png"
+          alt="Cover"
           className="w-full h-full object-cover"
         />
         {/* Type Badge on cover */}
         <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'}`}>
           <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border border-white/20 shadow-sm
             ${school.type === 'International' ? 'bg-purple-500/80 text-white' :
-            school.type === 'Language' ? 'bg-blue-500/80 text-white' :
-              'bg-emerald-500/80 text-white'
+              school.type === 'Language' ? 'bg-blue-500/80 text-white' :
+                'bg-emerald-500/80 text-white'
             }`}>
             {school.type}
           </span>
@@ -81,16 +81,16 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, lang, onView }:
             </div>
             <span className="text-[12px] font-medium text-gray-400">{lang === 'ar' ? 'التقييم' : 'rating'}</span>
           </div>
-          
+
           <div className="w-[1px] h-6 bg-gray-100"></div>
-          
+
           <div className="text-center flex-1">
             <div className="text-[15px] font-bold text-gray-900 mb-0.5">2.5k+</div>
             <span className="text-[12px] font-medium text-gray-400">{lang === 'ar' ? 'طالب' : 'students'}</span>
           </div>
-          
+
           <div className="w-[1px] h-6 bg-gray-100"></div>
-          
+
           <div className="text-center flex-1">
             <div className="text-[15px] font-bold text-gray-900 mb-0.5">1995</div>
             <span className="text-[12px] font-medium text-gray-400">{lang === 'ar' ? 'تأسست' : 'founded'}</span>
@@ -98,8 +98,8 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, lang, onView }:
         </div>
 
         {/* Action Button */}
-        <button 
-          onClick={() => onView && onView(school)} 
+        <button
+          onClick={() => onView && onView(school)}
           className="mt-auto w-full py-[14px] bg-[#0f1115] text-white rounded-[16px] font-semibold text-[15px] hover:bg-black transition-colors"
         >
           {t.viewProfile}
@@ -191,7 +191,7 @@ const Schools: React.FC = () => {
                     onChange={setSelectedGov}
                     options={[
                       { value: '', label: t.filterGov },
-                      ...GOVERNORATES.map(gov => ({ value: gov.name, label: gov.name }))
+                      ...GOVERNORATES.map(gov => ({ value: gov.name, label: lang === 'ar' && (gov as any).nameAr ? (gov as any).nameAr : gov.name }))
                     ]}
                     icon={<MapPin className="h-4 w-4" />}
                   />
@@ -230,7 +230,7 @@ const Schools: React.FC = () => {
                 </div>
               </div>
             </div>
-            
+
             {(searchQuery || selectedGov || selectedType) && (
               <button
                 onClick={clearFilters}

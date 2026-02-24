@@ -15,7 +15,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 const Home = lazy(() => import('./pages/Home'));
 const About = lazy(() => import('./pages/About'));
 const AIStudio = lazy(() => import('./pages/AIStudio'));
-const Careers = lazy(() => import('./pages/Careers'));
+const Jobs = lazy(() => import('./pages/Jobs'));
 const Schools = lazy(() => import('./pages/Schools'));
 const SchoolProfile = lazy(() => import('./pages/SchoolProfile'));
 const News = lazy(() => import('./pages/News'));
@@ -39,13 +39,16 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  const isHome = location.pathname === '/';
-  const isSchools = location.pathname === '/schools';
-  
+  const noPadPaths = ['/', '/login', '/about', '/complaints', '/dashboard'];
+  const isNoPadding = noPadPaths.includes(location.pathname) ||
+    location.pathname.startsWith('/schools') ||
+    location.pathname.startsWith('/careers') ||
+    location.pathname.startsWith('/news');
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-[#fafcff]">
       <Navbar />
-      <main className={`flex-grow ${(isHome || isSchools) ? '' : 'pt-24'}`}>
+      <main className={`flex-grow ${isNoPadding ? '' : 'pt-24'}`}>
         {children}
       </main>
       <Footer />
@@ -87,7 +90,7 @@ const App: React.FC = () => {
                         <Route path="/schools" element={<Schools />} />
                         <Route path="/schools/:id" element={<SchoolProfile />} />
                         <Route path="/ai-studio" element={<AIStudio />} />
-                        <Route path="/careers" element={<Careers />} />
+                        <Route path="/careers" element={<Jobs />} />
                         <Route path="/complaints" element={<Complaints />} />
                         <Route path="*" element={<Home />} />
                       </Routes>

@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import {
   Users,
   GraduationCap,
@@ -27,6 +28,13 @@ const Home: React.FC = () => {
   const [newsIndex, setNewsIndex] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(3);
   const maxNewsIndex = Math.max(0, NEWS.length - itemsPerPage);
+
+  const ctaRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ctaRef,
+    offset: ["start end", "center center"]
+  });
+  const ctaScale = useTransform(scrollYProgress, [0, 1], [0.8, 1]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -141,11 +149,11 @@ const Home: React.FC = () => {
             </div>
 
             <ScrollReveal delay={0.3}>
-              <div className="w-full flex justify-center mt-12">
+              <div className="w-full flex justify-center mt-8 md:mt-12 overflow-visible md:overflow-visible">
                 <img
                   src="/nano-banana-17717977008341.png"
                   alt="Global Network"
-                  className="w-full max-w-6xl h-auto object-contain pointer-events-none mix-blend-multiply"
+                  className="w-full max-w-6xl h-auto object-contain pointer-events-none mix-blend-multiply transform scale-[1.7] md:scale-100"
                 />
               </div>
             </ScrollReveal>
@@ -237,8 +245,8 @@ const Home: React.FC = () => {
         </section>
 
         {/* Premium CTA Section */}
-        <section className="py-24 bg-white overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <section ref={ctaRef} className="py-24 bg-white overflow-hidden">
+          <motion.div style={{ scale: ctaScale }} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <ScrollReveal>
               <div className="bg-[#0f172a] rounded-[3rem] p-12 md:p-20 flex flex-col items-center text-center shadow-[0_0_100px_rgba(30,64,175,0.3)] relative overflow-hidden border border-white/5">
                 {/* Logo Icon */}
@@ -258,7 +266,7 @@ const Home: React.FC = () => {
                       ? 'انضم إلى آلاف الطلاب الذين يستفيدون من التميز التعليمي في مدارس المعاهد القومية.'
                       : 'Join thousands of students who are benefiting from educational excellence in National Institutes of Schools.'}
                   </p>
-                  
+
                   <div className="pt-8">
                     <button className="bg-white hover:bg-blue-50 text-blue-900 font-bold rounded-full px-12 py-5 transition-all transform hover:scale-105 shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:shadow-white/20 active:scale-95">
                       {lang === 'ar' ? 'ابدأ الآن مجاناً' : 'Start for free'}
@@ -270,12 +278,12 @@ const Home: React.FC = () => {
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
                   {/* Base Deep Blue */}
                   <div className="absolute inset-0 bg-[#0f172a]" />
-                  
+
                   {/* Radial Spotlight */}
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#1e40af_0%,transparent_70%)] opacity-50" />
 
                   {/* Masked Grid */}
-                  <div 
+                  <div
                     className="absolute inset-0 opacity-[0.15]"
                     style={{
                       backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`,
@@ -289,12 +297,11 @@ const Home: React.FC = () => {
                   <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 rounded-full blur-[120px]" />
                   <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/20 rounded-full blur-[120px]" />
 
-                  {/* Grain Texture */}
                   <div className="absolute inset-0 opacity-[0.02] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
                 </div>
               </div>
             </ScrollReveal>
-          </div>
+          </motion.div>
         </section>
       </div>
     </PageTransition>

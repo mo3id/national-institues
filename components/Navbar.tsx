@@ -28,6 +28,7 @@ const Navbar: React.FC = () => {
     { to: '/', label: t?.home ?? 'الرئيسية', icon: 'home' },
     { to: '/schools', label: t?.schools ?? 'مدارسنا', icon: 'school' },
     { to: '/about', label: t?.about ?? 'من نحن', icon: 'info' },
+    { to: '/careers', label: lang === 'ar' ? 'الوظائف' : 'Careers', icon: 'work' },
     { to: '/complaints', label: translationsRoot?.nav?.feedback ?? 'تواصل معنا', icon: 'forum' },
     { to: '/news', label: t?.news ?? 'المدونة', icon: 'article' }
   ];
@@ -49,13 +50,13 @@ const Navbar: React.FC = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white hover:text-[#1e3a8a] transition-all"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md transform-gpu border border-white/30 text-white hover:bg-white hover:text-[#1e3a8a] transition-all"
               >
                 <span className="material-symbols-outlined text-[18px]">language</span>
               </button>
               <Link
                 to="/login"
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-[#991b1b] hover:border-[#991b1b] transition-all"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md transform-gpu border border-white/30 text-white hover:bg-[#991b1b] hover:border-[#991b1b] transition-all"
               >
                 <span className="material-symbols-outlined text-[18px]">login</span>
               </Link>
@@ -64,7 +65,7 @@ const Navbar: React.FC = () => {
             {/* NAV LINKS - Middle */}
             <div className="hidden lg:flex items-center gap-2 text-[13px] font-bold">
               {menuLinks.map((link) => (
-                <Link key={link.to} to={link.to} className={`group flex items-center gap-1.5 transition-all whitespace-nowrap px-4 py-2 rounded-full ${isActive(link.to) ? 'bg-white/15 backdrop-blur-md text-white border border-white/20' : 'text-white hover:text-white/80'}`}>
+                <Link key={link.to} to={link.to} className={`group flex items-center gap-1.5 transition-all whitespace-nowrap px-4 py-2 rounded-full transform-gpu ${isActive(link.to) ? 'bg-white/15 backdrop-blur-md text-white border border-white/20' : 'text-white hover:text-white/80'}`}>
                   <span className="material-symbols-outlined text-[18px]">{link.icon}</span>
                   <span>{link.label}</span>
                 </Link>
@@ -79,7 +80,7 @@ const Navbar: React.FC = () => {
             {/* Mobile Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white transition-all shadow-lg"
+              className="lg:hidden w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md transform-gpu border border-white/30 text-white transition-all shadow-lg"
             >
               <span className="material-symbols-outlined text-[20px]">{mobileMenuOpen ? 'close' : 'menu'}</span>
             </button>
@@ -99,7 +100,7 @@ const Navbar: React.FC = () => {
               whileHover="hover"
               className={`relative flex items-center transition-all duration-500 border rounded-full group ${isPastHero
                 ? 'bg-[#1e3a8a] border-[#1e3a8a] text-white shadow-xl p-2.5 px-4'
-                : 'bg-white/10 backdrop-blur-md border-white/20 text-white p-2 px-3'
+                : 'bg-[#1e3a8a] border-[#1e3a8a] text-white shadow-lg p-2 px-3'
                 }`}
             >
               {/* Burger Icon */}
@@ -134,7 +135,7 @@ const Navbar: React.FC = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed top-[90px] left-[26px] right-[26px] bg-white/95 backdrop-blur-lg shadow-2xl rounded-2xl p-6 flex flex-col gap-4 border border-slate-100 lg:hidden z-[110]"
+            className="fixed top-[90px] left-[26px] right-[26px] bg-white/95 backdrop-blur-lg transform-gpu shadow-2xl rounded-2xl p-6 flex flex-col gap-4 border border-slate-100 lg:hidden z-[110]"
           >
             <div className="flex flex-col gap-1">
               {menuLinks.map((link) => (
@@ -162,7 +163,7 @@ const Navbar: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setDrawerOpen(false)}
-              className="fixed inset-0 bg-[#0f172a]/80 backdrop-blur-sm z-[200]"
+              className="fixed inset-0 bg-[#0f172a]/80 backdrop-blur-sm transform-gpu z-[200]"
             />
             <motion.div
               initial={{ x: isRTL ? '-100%' : '100%' }}

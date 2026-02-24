@@ -2,8 +2,11 @@
 export interface School {
   id: string;
   name: string;
+  nameAr: string;
   location: string;
+  locationAr: string;
   governorate: string;
+  governorateAr: string;
   principal: string;
   logo: string;
   type: 'National' | 'International' | 'Language';
@@ -22,10 +25,15 @@ export interface NewsItem {
 export interface JobVacancy {
   id: string;
   title: string;
+  titleAr: string;
   department: string;
+  departmentAr: string;
   location: string;
+  locationAr: string;
   type: string;
+  typeAr: string;
   description: string;
+  descriptionAr: string;
 }
 
 export enum ThinkingLevel {
