@@ -78,10 +78,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 subtitleAr: 'إرث من التميز',
                 description: 'Empowering the next generation with world-class education and values.',
                 descriptionAr: 'تمكين الجيل القادم من خلال تعليم وقيم ذات مستوى عالمي.',
-                image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1600&q=80'
+                image: '/nano-banana-1771792169108.png'
             },
-            { id: 2, title: 'Excellence in Education', titleAr: 'التميز في التعليم', subtitle: 'Leading National Institutes in Egypt', subtitleAr: 'المعاهد القومية الرائدة في مصر', description: 'Empowering future generations with knowledge and values.', descriptionAr: 'تمكين أجيال المستقبل بالمعرفة والقيم.', image: 'https://images.unsplash.com/photo-1523050853064-dbad3500d009?auto=format&fit=crop&w=1920&q=80' },
-            { id: 3, title: 'Modern Learning', titleAr: 'تعلم حديث', subtitle: 'Advanced Curriculum & Facilities', subtitleAr: 'مناهج ومرافق متطورة', description: 'Preparing students for a globalized world.', descriptionAr: 'إعداد الطلاب لعالم معولم.', image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1920&q=80' },
+            { id: 2, title: 'Excellence in Education', titleAr: 'التميز في التعليم', subtitle: 'Leading National Institutes in Egypt', subtitleAr: 'المعاهد القومية الرائدة في مصر', description: 'Empowering future generations with knowledge and values.', descriptionAr: 'تمكين أجيال المستقبل بالمعرفة والقيم.', image: '/nano-banana-1771778144311.png' },
+            { id: 3, title: 'Modern Learning', titleAr: 'تعلم حديث', subtitle: 'Advanced Curriculum & Facilities', subtitleAr: 'مناهج ومرافق متطورة', description: 'Preparing students for a globalized world.', descriptionAr: 'إعداد الطلاب لعالم معولم.', image: '/nano-banana-1771806330134.png' },
         ],
         aboutData: {
             // Home page section
