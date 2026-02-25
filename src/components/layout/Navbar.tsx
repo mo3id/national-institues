@@ -39,7 +39,7 @@ const Navbar: React.FC = () => {
             className="fixed top-[10px] left-[10px] right-[10px] z-[100] py-6 px-10 flex items-center justify-between bg-transparent rounded-[20px]"
           >
             {/* LANGUAGE & LOGIN - Far edge */}
-            <div className="flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-3">
               <button
                 onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
                 className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md transform-gpu border border-white/30 text-white hover:bg-white hover:text-[#1e3a8a] transition-all"
@@ -142,6 +142,27 @@ const Navbar: React.FC = () => {
                 </Link>
               ))}
             </div>
+
+            <div className="flex items-center gap-3 mt-2 pt-4 border-t border-slate-100">
+              <button
+                onClick={() => {
+                  setLang(lang === 'en' ? 'ar' : 'en');
+                  setMobileMenuOpen(false);
+                }}
+                className="flex flex-1 items-center justify-center gap-2 py-3 rounded-xl bg-slate-50 text-[#1e3a8a] font-bold hover:bg-slate-100 transition-all border border-slate-200"
+              >
+                <span className="material-symbols-outlined text-[20px]">language</span>
+                <span>{lang === 'en' ? 'العربية' : 'English'}</span>
+              </button>
+              <Link
+                to="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex flex-1 items-center justify-center gap-2 py-3 rounded-xl bg-[#1e3a8a] text-white font-bold hover:bg-[#1e3a8a]/90 transition-all shadow-lg shadow-blue-900/20"
+              >
+                <span className="material-symbols-outlined text-[20px]">login</span>
+                <span>{lang === 'ar' ? 'تسجيل الدخول' : 'Login'}</span>
+              </Link>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -199,6 +220,27 @@ const Navbar: React.FC = () => {
 
               <div className="mt-auto pt-12 border-t border-slate-100">
                 <div className="flex flex-col gap-6">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        setLang(lang === 'en' ? 'ar' : 'en');
+                        setDrawerOpen(false);
+                      }}
+                      className="flex flex-1 items-center justify-center gap-2 py-3.5 rounded-2xl bg-slate-50 text-[#1e3a8a] font-bold hover:bg-slate-100 transition-all border border-slate-200"
+                    >
+                      <span className="material-symbols-outlined text-[22px]">language</span>
+                      <span>{lang === 'en' ? 'العربية' : 'English'}</span>
+                    </button>
+                    <Link
+                      to="/login"
+                      onClick={() => setDrawerOpen(false)}
+                      className="flex flex-1 items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#1e3a8a] text-white font-bold hover:bg-[#1e3a8a]/90 transition-all shadow-lg shadow-blue-900/20"
+                    >
+                      <span className="material-symbols-outlined text-[22px]">login</span>
+                      <span>{lang === 'ar' ? 'تسجيل الدخول' : 'Login'}</span>
+                    </Link>
+                  </div>
+
                   <div className="flex flex-col">
                     <span className="text-slate-400 text-[10px] uppercase font-bold tracking-widest mb-1">{t.contactUs}</span>
                     <span className="text-[#1e3a8a] font-black text-lg">012-3456-7890</span>

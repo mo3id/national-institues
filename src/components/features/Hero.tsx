@@ -28,64 +28,106 @@ const Hero: React.FC = () => {
   const currentSlide = slides[currentIndex];
 
   return (
-    <main className="m-[10px] rounded-[20px] relative h-[calc(100vh-20px)] flex items-center overflow-hidden">
+    <main className="m-[10px] rounded-[20px] relative lg:h-[calc(100vh-20px)] lg:min-h-0 flex flex-col lg:flex-row lg:items-center overflow-hidden bg-white lg:bg-transparent pb-4 lg:pb-0">
 
       {/* Background Images */}
       {slides.map((slide, index) => (
         <div
           key={index}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out z-0 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute inset-x-2 top-2 h-[48vh] lg:inset-0 lg:top-0 lg:h-full transition-opacity duration-1000 ease-in-out z-0 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
         >
           {/* Inner div to apply flip without animating it */}
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center rounded-[24px] lg:rounded-none"
             style={{
               backgroundImage: `url('${slide.image}')`,
               transform: isRTL ? 'scaleX(-1)' : 'none'
             }}
           />
-          {/* Gradient overlay: Darker on text side, lighter on character side */}
+          {/* Gradient overlay: Darker on text side (Desktop only) */}
           <div
-            className={`absolute inset-0 z-10 ${isRTL
+            className={`hidden lg:block absolute inset-0 z-10 ${isRTL
               ? 'bg-gradient-to-l from-black/60 via-black/10 to-transparent'
               : 'bg-gradient-to-r from-black/60 via-black/10 to-transparent'
               }`}
           />
+          {/* Mobile Image Gradient (top) to make Navbar visible */}
+          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 to-transparent lg:hidden z-10 pointer-events-none rounded-t-[24px]" />
+          {/* Mobile Image Gradient (bottom) for over-image text */}
+          <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/90 via-black/40 to-transparent lg:hidden z-10 pointer-events-none rounded-b-[24px]" />
         </div>
       ))}
 
-
       {/* Main Content */}
-      <div className="container mx-auto px-6 md:px-12 py-20 relative z-20" dir={isRTL ? 'rtl' : 'ltr'}>
-        <div className={`max-w-3xl animate-fade-up ${isRTL ? 'ml-auto' : 'mr-auto'}`}>
-          <h1 key={`title-${currentIndex}`} className="text-5xl lg:text-7xl font-extrabold text-white leading-[1.4] mb-8 animate-fade-in text-start">
-            {currentSlide.title}
-          </h1>
+      <div className="container mx-auto px-6 md:px-12 py-2 lg:py-20 relative z-20 flex-1 flex flex-col justify-start lg:justify-center" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`w-full max-w-3xl flex flex-col lg:block h-full animate-fade-up ${isRTL ? 'lg:ml-auto' : 'lg:mr-auto'}`}>
 
-          <p key={`desc-${currentIndex}`} className="text-lg lg:text-xl text-white/90 max-w-2xl mb-12 leading-relaxed font-medium font-['Cairo'] animate-fade-in text-start" style={{ animationDelay: '0.1s' }}>
-            {currentSlide.description}
-          </p>
+          {/* Text Container: overlays the image on mobile */}
+          <div className="h-[48vh] lg:h-auto flex flex-col justify-end lg:justify-start pb-8 lg:pb-0">
+            <h1 key={`title-${currentIndex}`} className="text-3xl sm:text-4xl lg:text-7xl font-extrabold text-white leading-[1.3] mb-3 lg:mb-8 animate-fade-in text-start drop-shadow-lg">
+              {currentSlide.title}
+            </h1>
 
-          <div className="flex flex-wrap items-center gap-6 justify-start">
-            <button className="bg-[#991b1b] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-[#991b1b] transition-all duration-300 flex items-center gap-3 group">
+            {/* removed font-['Cairo'] and increased size by ~4px: text-[20px] and lg:text-[24px] */}
+            <p key={`desc-${currentIndex}`} className="text-[20px] lg:text-[24px] text-white/95 max-w-2xl mb-2 lg:mb-12 leading-relaxed font-medium animate-fade-in text-start drop-shadow-md" style={{ animationDelay: '0.1s' }}>
+              {currentSlide.description}
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 lg:gap-6 justify-start mt-6 lg:mt-0">
+            <button className="bg-[#991b1b] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#7f1616] lg:hover:bg-white lg:hover:text-[#991b1b] transition-all duration-300 flex items-center justify-center gap-3 group">
               {t.joinNow}
-              <span className={`material-symbols-outlined transition-transform ${isRTL ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`}>arrow_forward</span>
+              <span className={`material-symbols-outlined transition-transform ${isRTL ? 'rotate-180 sm:group-hover:-translate-x-1' : 'sm:group-hover:translate-x-1'}`}>arrow_forward</span>
             </button>
-            <button className="flex items-center gap-4 group">
-              <div className="bg-white/10 backdrop-blur-md p-3 rounded-full text-white border border-white/20 group-hover:bg-white group-hover:text-[#1e3a8a] transition-all duration-300 flex items-center justify-center">
+            <button className="flex items-center justify-center gap-4 group px-6 py-4 rounded-full bg-slate-50 border border-slate-200 lg:border-none lg:bg-transparent lg:p-0">
+              <div className="hidden lg:flex bg-white/10 backdrop-blur-md p-3 rounded-full text-white border border-white/20 group-hover:bg-white group-hover:text-[#1e3a8a] transition-all duration-300 items-center justify-center">
                 <span className="material-symbols-outlined text-[20px]">
                   {isRTL ? 'arrow_back' : 'arrow_outward'}
                 </span>
               </div>
-              <span className="font-bold text-lg text-white group-hover:text-[#991b1b] transition-colors">{t.explorePrograms}</span>
+              <span className="font-bold text-lg text-slate-900 lg:text-white group-hover:text-[#991b1b] transition-colors">{t.explorePrograms}</span>
             </button>
           </div>
+
+          {/* Mobile Slider Controls - Horizontal under the content */}
+          <div className="lg:hidden w-full pt-8 pb-4 flex items-center justify-between relative z-20" dir="ltr">
+            <div className="flex gap-2">
+              {slides.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentIndex(idx)}
+                  className={`h-1.5 transition-all duration-500 rounded-full ${currentIndex === idx ? 'w-6 bg-[#991b1b]' : 'w-2 bg-slate-200'}`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setCurrentIndex((prev) => (prev + 1) % slides.length)}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-[#991b1b] text-white active:scale-95 transition-all shadow-[0_5px_15px_rgba(153,27,27,0.2)]"
+                aria-label="Next slide"
+              >
+                <span className="material-symbols-outlined text-xl">
+                  chevron_right
+                </span>
+              </button>
+              <button
+                onClick={() => setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length)}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 active:scale-95 transition-all"
+                aria-label="Previous slide"
+              >
+                <span className="material-symbols-outlined text-xl">
+                  chevron_left
+                </span>
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      {/* Modern Slider Controls - Right Side Vertical Stack */}
-      <div className={`absolute z-30 flex flex-col items-center gap-6 bottom-12 ${isRTL ? 'left-12' : 'right-12'}`}>
-
+      {/* Modern Slider Controls - Desktop (Right Side Vertical Stack) */}
+      <div className={`hidden lg:flex absolute z-30 flex-col items-center gap-6 bottom-12 ${isRTL ? 'left-12' : 'right-12'}`}>
         {/* Progress & Pagination (Vertical) */}
         <div className="flex flex-col items-center gap-4">
           <div className="flex flex-col items-center justify-center text-white font-bold mb-2">
@@ -130,7 +172,6 @@ const Hero: React.FC = () => {
             </span>
           </button>
         </div>
-
       </div>
 
     </main>

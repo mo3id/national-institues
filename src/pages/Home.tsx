@@ -1,5 +1,4 @@
-import React, { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import React from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -20,7 +19,7 @@ import { useNewsCarousel } from '@/hooks/useNewsCarousel';
 const Home: React.FC = () => {
   const { t, isRTL, lang } = useLanguage();
   const { data: siteData } = useSiteData();
-  const NEWS_DATA = (siteData.news || []).filter(n => n.published);
+  const NEWS_DATA = (siteData.news || []).filter(n => n.published !== false);
   const h = siteData.homeData || {
     trustedTitle: 'Trusted by Generations of',
     trustedTitleAr: 'أجيال تثق في',
@@ -56,13 +55,6 @@ const Home: React.FC = () => {
     goTo: setNewsIndex
   } = useNewsCarousel(NEWS_DATA.length);
 
-  const ctaRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ctaRef,
-    offset: ["start end", "center center"]
-  });
-  const ctaScale = useTransform(scrollYProgress, [0, 1], [0.8, 1]);
-
   return (
     <PageTransition>
       <div className="overflow-x-hidden">
@@ -75,7 +67,7 @@ const Home: React.FC = () => {
             <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
               <div className="w-full lg:w-5/12 flex flex-col items-start text-start space-y-6">
                 <ScrollReveal>
-                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-light text-slate-800 leading-[1.2]">
+                  <h2 className="text-3xl md:text-5xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-light text-slate-800 leading-[1.3] lg:leading-[1.2]">
                     {lang === 'ar' ? h.trustedTitleAr : h.trustedTitle} <br />
                     <span className="font-bold text-[#1e3a8a] tracking-tight">{lang === 'ar' ? h.trustedHighlightAr : h.trustedHighlight}</span>
                   </h2>
@@ -120,7 +112,7 @@ const Home: React.FC = () => {
           <div className="w-[90%] lg:w-[80%] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col items-center text-center space-y-6 mb-16">
               <ScrollReveal>
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-[1.2]">
+                <h2 className="text-3xl md:text-5xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold tracking-tight text-slate-900 leading-[1.3] lg:leading-[1.2]">
                   {lang === 'ar' ? h.gatewayTitleAr : h.gatewayTitle} <br />
                   {lang === 'ar' ? h.gatewayHighlightAr : h.gatewayHighlight}
                 </h2>
@@ -233,8 +225,8 @@ const Home: React.FC = () => {
         </section>
 
         {/* Premium CTA Section */}
-        <section ref={ctaRef} className="py-24 bg-white overflow-hidden">
-          <motion.div style={{ scale: ctaScale }} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <section className="py-24 bg-white overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <ScrollReveal>
               <div className="bg-[#0f172a] rounded-[3rem] p-12 md:p-20 flex flex-col items-center text-center shadow-[0_0_100px_rgba(30,64,175,0.3)] relative overflow-hidden border border-white/5">
                 <div className="mb-8">
@@ -276,7 +268,7 @@ const Home: React.FC = () => {
                 </div>
               </div>
             </ScrollReveal>
-          </motion.div>
+          </div>
         </section>
       </div>
     </PageTransition>

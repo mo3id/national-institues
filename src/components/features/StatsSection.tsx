@@ -32,12 +32,12 @@ const StatsSection: React.FC = () => {
           </h2>
         </ScrollReveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-16 lg:gap-x-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-16 lg:gap-x-4 xl:gap-x-12">
           {stats.map((stat, index) => (
             <ScrollReveal key={index} delay={index * 0.1}>
               <div className="flex flex-col items-center relative group">
                 <div className="relative mb-4 flex items-center justify-center">
-                  <span className="text-[64px] lg:text-[80px] font-black text-[#1e293b] leading-none tracking-tighter z-10">
+                  <span className="text-[64px] lg:text-[52px] xl:text-[72px] 2xl:text-[80px] font-black text-[#1e293b] leading-none tracking-tighter z-10">
                     {stat.number}
                   </span>
                   <div

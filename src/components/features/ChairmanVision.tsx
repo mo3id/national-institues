@@ -31,7 +31,7 @@ const ChairmanVision: React.FC = () => {
                             animate={isInView ? { opacity: 1, y: 0 } : {}}
                             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                         >
-                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-normal text-[#1a1a1a] leading-[1.2] lg:leading-[1.15] tracking-tight">
+                            <h2 className="text-3xl md:text-5xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-normal text-[#1a1a1a] leading-[1.3] lg:leading-[1.2] tracking-tight">
                                 <span className="font-bold">{name}</span> {description}
                             </h2>
                         </motion.div>
@@ -47,7 +47,7 @@ const ChairmanVision: React.FC = () => {
                                 "
                             </div>
 
-                            <p className="text-slate-600 italic text-xl md:text-2xl lg:text-3xl leading-relaxed max-w-2xl relative z-10 font-light">
+                            <p className="text-slate-600 italic text-xl md:text-2xl lg:text-xl xl:text-2xl 2xl:text-3xl leading-relaxed max-w-2xl relative z-10 font-light">
                                 {quote}
                             </p>
 

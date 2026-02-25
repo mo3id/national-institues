@@ -13,7 +13,7 @@ const News: React.FC = () => {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const activeNews = (siteData.news || []).filter(n => n.published);
+    const activeNews = (siteData.news || []).filter(n => n.published !== false);
     if (!q) return activeNews;
     return activeNews.filter(n => (n.title + (n.titleAr || '') + (n.summary || '') + (n.summaryAr || '')).toLowerCase().includes(q));
   }, [query, siteData.news]);
