@@ -19,7 +19,7 @@ const ChairmanVision: React.FC = () => {
     return (
         <section
             ref={containerRef}
-            className="pt-48 bg-white overflow-hidden"
+            className="pt-14 lg:pt-48 bg-white overflow-hidden"
         >
             <div className="w-[90%] lg:w-[85%] mx-auto px-6 lg:px-12">
                 <div className={`flex flex-col lg:flex-row items-start justify-between gap-12 lg:gap-20 ${isRTL ? 'lg:flex-row-reverse' : ''}`}>
@@ -70,7 +70,7 @@ const ChairmanVision: React.FC = () => {
                         initial={{ opacity: 0, x: isRTL ? -40 : 40 }}
                         animate={isInView ? { opacity: 1, x: 0 } : {}}
                         transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-                        className="w-full lg:w-[40%]"
+                        className="w-full max-w-[280px] sm:max-w-[340px] md:max-w-[400px] mx-auto lg:max-w-none lg:w-[40%]"
                     >
                         <div className="relative aspect-[3/4] flex items-start justify-center overflow-hidden">
                             <img

@@ -67,37 +67,50 @@ const About: React.FC = () => {
                     </div>
                 </section>
                 {/* Story Section */}
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 relative z-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative z-20">
                     <ScrollReveal>
-                        <div className="bg-white rounded-[40px] p-8 md:p-16 lg:p-20 shadow-[0_20px_70px_-15px_rgba(0,0,0,0.1)] border border-slate-100 grid lg:grid-cols-2 gap-16 items-center">
-                            <div className={`space-y-10 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                <div className="inline-block px-4 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-black uppercase tracking-[0.2em]">
-                                    {t.journeyBadge}
+                        <div className={`flex flex-col lg:flex-row items-center gap-16 lg:gap-24 ${isRTL ? 'lg:flex-row-reverse' : ''}`}>
+
+                            {/* Text Column */}
+                            <div className={`w-full lg:w-1/2 space-y-8 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/80 border border-slate-200">
+                                    <div className="w-2 h-2 rounded-full bg-[#1e3a8a] animate-pulse"></div>
+                                    <span className="text-xs font-bold text-slate-800 uppercase tracking-widest">{t.journeyBadge}</span>
                                 </div>
-                                <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.1]">
+
+                                <h2 className="text-4xl md:text-5xl lg:text-6xl font-light text-slate-900 leading-[1.2] tracking-tight">
                                     {storyTitle}
                                 </h2>
-                                <p className="text-xl text-slate-500 leading-relaxed font-medium">
+
+                                <p className="text-lg md:text-xl text-slate-500 leading-relaxed font-light">
                                     {storyDesc}
                                 </p>
 
-                                <div className={`flex items-center gap-8 pt-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                    <div className="flex -space-x-5 space-x-reverse">
-                                        <div className="w-14 h-14 rounded-full border-4 border-white overflow-hidden shadow-lg"><img className="w-full h-full object-cover" src="https://picsum.photos/seed/s1/200" alt="Student" /></div>
-                                        <div className="w-14 h-14 rounded-full border-4 border-white overflow-hidden shadow-lg"><img className="w-full h-full object-cover" src="https://picsum.photos/seed/s2/200" alt="Student" /></div>
-                                        <div className="w-14 h-14 rounded-full border-4 border-white overflow-hidden shadow-lg"><img className="w-full h-full object-cover" src="https://picsum.photos/seed/s3/200" alt="Student" /></div>
-                                    </div>
-                                    <div className={`space-y-1 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                        <span className="block text-2xl font-black text-[#1e3a8a]">40+</span>
-                                        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">{translationsRoot.stats.schools}</p>
+                                <div className="pt-6 border-t border-slate-100">
+                                    <div className={`flex items-center gap-6 pt-4 ${isRTL ? 'flex-row-reverse justify-end' : 'justify-start'}`}>
+                                        <div className="w-16 h-16 rounded-3xl bg-blue-50 flex items-center justify-center text-[#1e3a8a] shadow-sm transform -rotate-3">
+                                            <Award className="w-8 h-8" />
+                                        </div>
+                                        <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
+                                            <span className="text-4xl font-black text-slate-900">40+</span>
+                                            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">{translationsRoot.stats.schools}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="relative grid grid-cols-2 gap-6 h-[400px] md:h-[500px]">
-                                <img src="https://picsum.photos/seed/ab1/600/800" className="rounded-[32px] object-cover h-[90%] w-full shadow-2xl border-4 border-white" alt="Graduation" />
-                                <img src="https://picsum.photos/seed/ab2/600/800" className="rounded-[32px] object-cover h-[90%] w-full mt-[10%] shadow-2xl border-4 border-white" alt="Classroom" />
+                            {/* Image Column */}
+                            <div className="w-full lg:w-1/2">
+                                <div className="relative aspect-[4/3] lg:aspect-[4/5] rounded-[40px] overflow-hidden group shadow-2xl">
+                                    <img
+                                        src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80"
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-in-out"
+                                        alt="Our Story"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                                </div>
                             </div>
+
                         </div>
                     </ScrollReveal>
                 </div>

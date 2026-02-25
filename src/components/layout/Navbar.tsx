@@ -38,21 +38,10 @@ const Navbar: React.FC = () => {
             exit={{ y: -20, opacity: 0 }}
             className="fixed top-[10px] left-[10px] right-[10px] z-[100] py-6 px-10 flex items-center justify-between bg-transparent rounded-[20px]"
           >
-            {/* LANGUAGE & LOGIN - Far edge */}
-            <div className="hidden lg:flex items-center gap-3">
-              <button
-                onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md transform-gpu border border-white/30 text-white hover:bg-white hover:text-[#1e3a8a] transition-all"
-              >
-                <span className="material-symbols-outlined text-[18px]">language</span>
-              </button>
-              <Link
-                to="/login"
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md transform-gpu border border-white/30 text-white hover:bg-[#991b1b] hover:border-[#991b1b] transition-all"
-              >
-                <span className="material-symbols-outlined text-[18px]">login</span>
-              </Link>
-            </div>
+            {/* LOGO */}
+            <Link to="/" className="flex items-center shrink-0">
+              <img src="/Layer 1.png" alt="National Institutes" className="h-9 md:h-11 lg:h-14 object-contain" />
+            </Link>
 
             {/* NAV LINKS - Middle */}
             <div className="hidden lg:flex items-center gap-2 text-[13px] font-bold">
@@ -64,18 +53,32 @@ const Navbar: React.FC = () => {
               ))}
             </div>
 
-            {/* LOGO */}
-            <Link to="/" className="flex items-center shrink-0">
-              <img src="/Layer 1.png" alt="National Institutes" className="h-9 md:h-11 lg:h-14 object-contain" />
-            </Link>
+            {/* Actions (Lang/Login + Mobile Toggle) */}
+            <div className="flex items-center gap-3">
+              {/* LANGUAGE & LOGIN - Hidden on Mobile */}
+              <div className="hidden lg:flex items-center gap-3">
+                <button
+                  onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md transform-gpu border border-white/30 text-white hover:bg-white hover:text-[#1e3a8a] transition-all"
+                >
+                  <span className="material-symbols-outlined text-[18px]">language</span>
+                </button>
+                <Link
+                  to="/login"
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md transform-gpu border border-white/30 text-white hover:bg-[#991b1b] hover:border-[#991b1b] transition-all"
+                >
+                  <span className="material-symbols-outlined text-[18px]">login</span>
+                </Link>
+              </div>
 
-            {/* Mobile Toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md transform-gpu border border-white/30 text-white transition-all shadow-lg"
-            >
-              <span className="material-symbols-outlined text-[20px]">{mobileMenuOpen ? 'close' : 'menu'}</span>
-            </button>
+              {/* Mobile Toggle */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="lg:hidden w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md transform-gpu border border-white/30 text-white transition-all shadow-lg"
+              >
+                <span className="material-symbols-outlined text-[20px]">{mobileMenuOpen ? 'close' : 'menu'}</span>
+              </button>
+            </div>
           </motion.nav>
         ) : (
           /* REFINED MINIMAL NAVBAR (Scrolled State) */
@@ -86,6 +89,11 @@ const Navbar: React.FC = () => {
             exit={{ y: -20, opacity: 0 }}
             className="fixed top-[10px] left-[10px] right-[10px] z-[100] py-4 px-10 flex items-center justify-between"
           >
+            {/* LOGO */}
+            <Link to="/" className="flex items-center shrink-0">
+              <img src="/Layer 1.png" alt="National Institutes" className="h-9 md:h-11 object-contain" />
+            </Link>
+
             {/* MENU BUTTON */}
             <motion.button
               onClick={() => setDrawerOpen(true)}
@@ -111,11 +119,6 @@ const Navbar: React.FC = () => {
                 <span>{t.menu}</span>
               </motion.div>
             </motion.button>
-
-            {/* LOGO */}
-            <Link to="/" className="flex items-center shrink-0">
-              <img src="/Layer 1.png" alt="National Institutes" className="h-9 md:h-11 object-contain" />
-            </Link>
           </motion.nav>
         )}
       </AnimatePresence>
