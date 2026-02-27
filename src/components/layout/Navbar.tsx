@@ -21,8 +21,9 @@ const Navbar: React.FC = () => {
     { to: '/schools', label: t.schools, icon: 'school' },
     { to: '/about', label: t.about, icon: 'info' },
     { to: '/careers', label: t.careers, icon: 'work' },
-    { to: '/complaints', label: t.feedback, icon: 'forum' },
-    { to: '/news', label: t.news, icon: 'article' }
+    { to: '/complaints', label: t.feedback || (lang === 'ar' ? 'الشكاوى' : 'Complaints'), icon: 'forum' },
+    { to: '/contact', label: lang === 'ar' ? 'اتصل بنا' : 'Contact Us', icon: 'call' },
+    { to: '/news', label: t.news || (lang === 'ar' ? 'الأخبار' : 'News'), icon: 'article' }
   ];
 
   return (

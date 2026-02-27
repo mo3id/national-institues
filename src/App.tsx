@@ -5,6 +5,7 @@ import { AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import ScrollToTop from '@/components/common/ScrollToTop';
+import FloatingLoginButton from '@/components/common/FloatingLoginButton';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { Loader2 } from 'lucide-react';
 
@@ -24,6 +25,7 @@ const NewsDetail = lazy(() => import('./pages/NewsDetail'));
 const Complaints = lazy(() => import('./pages/Complaints'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Login = lazy(() => import('./pages/Login'));
+const ContactUs = lazy(() => import('./pages/ContactUs'));
 
 const PageLoader = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
@@ -53,6 +55,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {children}
       </main>
       <Footer />
+      <FloatingLoginButton />
     </div>
   );
 };
@@ -94,6 +97,7 @@ const App: React.FC = () => {
                           <Route path="/ai-studio" element={<AIStudio />} />
                           <Route path="/careers" element={<Jobs />} />
                           <Route path="/complaints" element={<Complaints />} />
+                          <Route path="/contact" element={<ContactUs />} />
                           <Route path="*" element={<Home />} />
                         </Routes>
                       </Suspense>

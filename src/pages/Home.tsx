@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -20,7 +20,7 @@ const Home: React.FC = () => {
   const { t, isRTL, lang } = useLanguage();
   const { data: siteData } = useSiteData();
   const NEWS_DATA = (siteData.news || []).filter(n => n.published !== false);
-  const h = siteData.homeData || {
+  const defaultHomeData = {
     trustedTitle: 'Trusted by Generations of',
     trustedTitleAr: 'أجيال تثق في',
     trustedHighlight: 'Egyptian Families',
@@ -35,8 +35,8 @@ const Home: React.FC = () => {
     gatewayHighlightAr: 'التميز التعليمي',
     gatewayDesc: 'Join thousands of students across Egypt in our network of specialized national institutes.',
     gatewayDescAr: 'انضم إلى آلاف الطلاب في جميع أنحاء مصر في شبكة معاهدنا القومية المتخصصة.',
-    gatewayCTA: 'View Map',
-    gatewayCTAAr: 'عرض الخريطة',
+    gatewayCTA: 'View Schools',
+    gatewayCTAAr: 'عرض المدارس',
     mapImage: '/nano-banana-17717977008341.png',
     ctaTitle: 'Join the NIS Family Today',
     ctaTitleAr: 'انضم لعائلة المعاهد القومية اليوم',
@@ -45,6 +45,31 @@ const Home: React.FC = () => {
     ctaButton: 'Register Interest',
     ctaButtonAr: 'سجل اهتمامك'
   };
+
+  const h = { ...defaultHomeData, ...(siteData.homeData || {}) };
+
+  // Get all school logos that exist
+  const schoolLogos = (siteData.schools || [])
+    .filter(s => s.logo)
+    .map(s => ({ id: s.id, name: s.name, logo: s.logo }));
+
+  // Chunk logos into arrays of 12
+  const chunkSize = 12;
+  const logoChunks = [];
+  for (let i = 0; i < schoolLogos.length; i += chunkSize) {
+    logoChunks.push(schoolLogos.slice(i, i + chunkSize));
+  }
+
+  const [activeChunk, setActiveChunk] = useState(0);
+
+  useEffect(() => {
+    if (logoChunks.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveChunk((prev) => (prev + 1) % logoChunks.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [logoChunks.length]);
+
 
   const {
     index: newsIndex,
@@ -86,20 +111,39 @@ const Home: React.FC = () => {
                 </ScrollReveal>
               </div>
 
-              <div className="w-full lg:w-7/12">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12 items-center justify-items-center">
-                  {(siteData.partners || []).map((partner, i) => (
-                    <ScrollReveal key={partner.id} delay={0.05 * (i % 4)}>
-                      <div className="flex items-center justify-center cursor-pointer opacity-70 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300">
-                        <img
-                          src={partner.logo}
-                          alt={partner.name}
-                          className="max-w-[180px] max-h-[60px] object-contain"
-                        />
+              <div className="w-full lg:w-7/12 relative">
+                <div className="overflow-hidden">
+                  <div className="flex transition-transform duration-700 ease-in-out" style={{ transform: `translateX(${isRTL ? activeChunk * 100 : -activeChunk * 100}%)` }}>
+                    {logoChunks.map((chunk, i) => (
+                      <div key={`chunk-${i}`} className="w-full flex-shrink-0">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12 items-center justify-items-center">
+                          {chunk.map((school) => (
+                            <div key={school.id} className="flex items-center justify-center cursor-pointer opacity-70 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300">
+                              <img
+                                src={school.logo}
+                                alt={school.name}
+                                className="max-w-[140px] max-h-[70px] object-contain"
+                                title={school.name}
+                              />
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </ScrollReveal>
-                  ))}
+                    ))}
+                  </div>
                 </div>
+
+                {logoChunks.length > 1 && (
+                  <div className="flex justify-center gap-3 mt-12">
+                    {logoChunks.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActiveChunk(i)}
+                        className={`h-2 rounded-full transition-all duration-300 ${activeChunk === i ? 'w-8 bg-[#1e3a8a]' : 'w-2 bg-slate-200'}`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -229,13 +273,13 @@ const Home: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <ScrollReveal>
               <div className="bg-[#0f172a] rounded-[3rem] p-12 md:p-20 flex flex-col items-center text-center shadow-[0_0_100px_rgba(30,64,175,0.3)] relative overflow-hidden border border-white/5">
-                <div className="mb-8">
-                  <div className="bg-white p-4 rounded-2xl">
+                <div className="mb-8 relative z-10">
+                  <div className="bg-white p-4 rounded-2xl inline-block">
                     <NISLogo className="h-12 w-12" showText={false} />
                   </div>
                 </div>
 
-                <div className="max-w-2xl space-y-6 relative z-10">
+                <div className="max-w-2xl space-y-6 relative z-10" id="join-us">
                   <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
                     {lang === 'ar' ? h.ctaTitleAr : h.ctaTitle}
                   </h2>

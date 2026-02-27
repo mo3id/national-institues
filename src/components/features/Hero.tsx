@@ -74,19 +74,19 @@ const Hero: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 lg:gap-6 justify-start mt-6 lg:mt-0">
-            <button className="bg-[#991b1b] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#7f1616] lg:hover:bg-white lg:hover:text-[#991b1b] transition-all duration-300 flex items-center justify-center gap-3 group">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 lg:gap-6 justify-start mt-6 lg:mt-0 relative z-30">
+            <a href="/#join-us" className="bg-[#991b1b] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#7f1616] lg:hover:bg-white lg:hover:text-[#991b1b] transition-all duration-300 flex items-center justify-center gap-3 group shadow-xl">
               {t.joinNow}
               <span className={`material-symbols-outlined transition-transform ${isRTL ? 'rotate-180 sm:group-hover:-translate-x-1' : 'sm:group-hover:translate-x-1'}`}>arrow_forward</span>
-            </button>
-            <button className="flex items-center justify-center gap-4 group px-6 py-4 rounded-full bg-slate-50 border border-slate-200 lg:border-none lg:bg-transparent lg:p-0">
-              <div className="hidden lg:flex bg-white/10 backdrop-blur-md p-3 rounded-full text-white border border-white/20 group-hover:bg-white group-hover:text-[#1e3a8a] transition-all duration-300 items-center justify-center">
+            </a>
+            <a href="/about" className="flex items-center justify-center gap-4 group px-6 py-4 rounded-full bg-slate-50 border border-slate-200 lg:border-none lg:bg-transparent lg:p-0 shadow-xl lg:shadow-none">
+              <div className="hidden lg:flex bg-white/10 backdrop-blur-md p-3 rounded-full text-white border border-white/20 group-hover:bg-white group-hover:text-[#1e3a8a] transition-all duration-300 items-center justify-center shadow-lg">
                 <span className="material-symbols-outlined text-[20px]">
                   {isRTL ? 'arrow_back' : 'arrow_outward'}
                 </span>
               </div>
-              <span className="font-bold text-lg text-slate-900 lg:text-white group-hover:text-[#991b1b] transition-colors">{t.explorePrograms}</span>
-            </button>
+              <span className="font-bold text-lg text-slate-900 lg:text-white group-hover:text-[#991b1b] transition-colors drop-shadow-md">{t.explorePrograms}</span>
+            </a>
           </div>
 
           {/* Mobile Slider Controls - Horizontal under the content */}

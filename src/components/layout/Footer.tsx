@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Twitter, Instagram, Linkedin, Github } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import NISLogo from '../common/NISLogo';
 import { useLanguage } from '@/context/LanguageContext';
 import ScrollReveal from '../common/ScrollReveal';
@@ -83,13 +84,19 @@ const Footer: React.FC = () => {
                 <div className="text-start">
                   <h4 className="font-bold text-[20px] md:text-[26px] mb-10">{t.companyTitle}</h4>
                   <ul className="space-y-6">
-                    {t.companyLinks.map((link, idx) => (
-                      <li key={idx}>
-                        <a href="#" className="text-gray-500 hover:text-black text-[16px] md:text-[20px] transition-colors">
-                          {link}
-                        </a>
-                      </li>
-                    ))}
+                    {t.companyLinks.map((link, idx) => {
+                      let to = '#';
+                      if (idx === 0) to = '/about';
+                      if (idx === 1) to = '/careers';
+                      if (idx === 2) to = '/contact';
+                      return (
+                        <li key={idx}>
+                          <Link to={to} className="text-gray-500 hover:text-black text-[16px] md:text-[20px] transition-colors">
+                            {link}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               </ScrollReveal>

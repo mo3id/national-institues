@@ -31,7 +31,7 @@ const ChairmanVision: React.FC = () => {
                             animate={isInView ? { opacity: 1, y: 0 } : {}}
                             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                         >
-                            <h2 className="text-3xl md:text-5xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-normal text-[#1a1a1a] leading-[1.3] lg:leading-[1.2] tracking-tight">
+                            <h2 className="text-2xl md:text-4xl lg:text-4xl xl:text-5xl font-normal text-[#1a1a1a] leading-[1.4] lg:leading-[1.3] tracking-tight">
                                 <span className="font-bold">{name}</span> {description}
                             </h2>
                         </motion.div>
@@ -67,17 +67,22 @@ const ChairmanVision: React.FC = () => {
 
                     {/* Image Column */}
                     <motion.div
-                        initial={{ opacity: 0, x: isRTL ? -40 : 40 }}
-                        animate={isInView ? { opacity: 1, x: 0 } : {}}
-                        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-                        className="w-full max-w-[280px] sm:max-w-[340px] md:max-w-[400px] mx-auto lg:max-w-none lg:w-[40%]"
+                        initial={{ opacity: 0, x: isRTL ? -30 : 30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        className="w-full lg:w-[45%] flex justify-center lg:justify-end"
                     >
-                        <div className="relative aspect-[3/4] flex items-start justify-center overflow-hidden">
-                            <img
-                                src={chairman.chairmanImage || "/nano-banana-1771804789212.png"}
-                                alt={name}
-                                className="w-full h-full object-contain object-top grayscale"
-                            />
+                        <div className="relative w-full max-w-[320px] lg:max-w-[400px]">
+                            {/* Decorative Background Elements (Removed shadow/ring) */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[110%] bg-blue-50/50 rounded-full blur-2xl -z-10" />
+
+                            <div className="relative aspect-square">
+                                <img
+                                    src="/chairman.png"
+                                    alt={name}
+                                    className="w-full h-full object-cover rounded-full"
+                                />
+                            </div>
                         </div>
                     </motion.div>
 
