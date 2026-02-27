@@ -56,7 +56,7 @@ const NewsDetail: React.FC = () => {
                         </ScrollReveal>
 
                         {/* Meta */}
-                        <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse justify-start' : 'justify-start'}`}>
+                        <div className={`flex items-center gap-4 justify-start`}>
                             <span className="flex items-center gap-2 font-bold bg-[#991b1b] px-4 py-1.5 rounded-lg text-white text-sm shadow-lg">
                                 <Calendar className="w-4 h-4" />
                                 {new Date(newsItem.date).toLocaleDateString()}

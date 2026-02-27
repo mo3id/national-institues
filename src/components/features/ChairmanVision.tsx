@@ -19,10 +19,10 @@ const ChairmanVision: React.FC = () => {
     return (
         <section
             ref={containerRef}
-            className="pt-14 lg:pt-48 bg-white overflow-hidden"
+            className="py-14 lg:py-24 bg-white overflow-hidden flex items-center min-h-[50vh]"
         >
             <div className="w-[90%] lg:w-[85%] mx-auto px-6 lg:px-12">
-                <div className={`flex flex-col lg:flex-row items-start justify-between gap-12 lg:gap-20 ${isRTL ? 'lg:flex-row-reverse' : ''}`}>
+                <div className={`flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20 ${isRTL ? 'lg:flex-row-reverse' : ''}`}>
 
                     {/* Text Column */}
                     <div className={`w-full lg:w-[55%] space-y-12 ${isRTL ? 'text-right' : 'text-left'}`}>

@@ -43,20 +43,20 @@ const ContactUs: React.FC = () => {
         <PageTransition>
             <div className="bg-slate-50 min-h-screen pb-16">
 
-                {/* Hero Section */}
-                <section className="m-[10px] rounded-[20px] relative min-h-[40vh] flex items-center justify-center overflow-hidden bg-[#1e3a8a]">
-                    <div
-                        className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay"
-                        style={{ backgroundImage: "url('/nano-banana-17717977008341.png')" }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1e3a8a] via-[#1e3a8a]/40 to-transparent"></div>
-
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center py-20">
-                        <ScrollReveal>
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.05] drop-shadow-2xl">
+                {/* Unified Hero Header */}
+                <section className="m-[10px] rounded-[20px] relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-[#0f172a]">
+                    <div className="absolute inset-0 z-0">
+                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
+                        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#991b1b]/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
+                    </div>
+                    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 py-20 flex flex-col items-center">
+                        <ScrollReveal direction="down">
+                            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 tracking-tight text-white leading-tight drop-shadow-lg">
                                 {title}
                             </h1>
-                            <p className="text-xl text-blue-100 font-medium mt-6 max-w-2xl mx-auto">
+                        </ScrollReveal>
+                        <ScrollReveal delay={0.1}>
+                            <p className="text-blue-100/80 text-lg md:text-xl max-w-2xl mx-auto font-medium">
                                 {subtitle}
                             </p>
                         </ScrollReveal>

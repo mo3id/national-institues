@@ -46,33 +46,23 @@ const Jobs: React.FC = () => {
     return (
         <PageTransition>
             <div className="min-h-screen bg-[#fafcff]">
-                {/* Unified Hero Section */}
-                <section className="m-[10px] rounded-[20px] relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-[#0f172a]">
-                    {/* Background Elements */}
-                    <div className="absolute inset-0 z-0 text-start">
+                {/* Unified Hero Header */}
+                <section className="m-[10px] rounded-[20px] relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-[#0f172a]">
+                    <div className="absolute inset-0 z-0">
                         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
-                        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-600/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
-                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center opacity-20 mix-blend-overlay" />
-                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f172a]/80 to-[#0f172a]" />
+                        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#991b1b]/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
                     </div>
-
-                    <div className="max-w-7xl mx-auto px-4 relative z-10 w-full py-20">
-                        <div className={`flex flex-col ${isRTL ? 'items-start text-right' : 'items-start text-left'} max-w-3xl`}>
-                            <ScrollReveal direction="up" delay={0.1}>
-                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-blue-300 font-semibold text-sm mb-6 shadow-lg">
-                                    <Briefcase className="w-4 h-4" />
-                                    <span>{t.joinTeam}</span>
-                                </div>
-                            </ScrollReveal>
-                            <ScrollReveal direction="up" delay={0.2}>
-                                <h1 className="text-4xl md:text-5xl lg:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight">
-                                    {t.title}
-                                </h1>
-                                <p className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-2xl bg-black/20 p-4 rounded-2xl backdrop-blur-sm border border-white/10">
-                                    {t.subtitle}
-                                </p>
-                            </ScrollReveal>
-                        </div>
+                    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 py-20">
+                        <ScrollReveal direction="down">
+                            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 tracking-tight text-white leading-tight drop-shadow-lg">
+                                {t.title}
+                            </h1>
+                        </ScrollReveal>
+                        <ScrollReveal delay={0.1}>
+                            <p className="text-blue-100/80 text-lg md:text-xl max-w-2xl mx-auto font-medium">
+                                {t.subtitle}
+                            </p>
+                        </ScrollReveal>
                     </div>
                 </section>
 

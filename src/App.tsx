@@ -28,9 +28,15 @@ const Login = lazy(() => import('./pages/Login'));
 const ContactUs = lazy(() => import('./pages/ContactUs'));
 
 const PageLoader = () => (
-  <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-    <Loader2 className="h-10 w-10 text-blue-900 animate-spin" />
-    <span className="text-blue-900 font-bold uppercase tracking-widest text-xs">Loading Excellence...</span>
+  <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#fafcff]">
+    <div className="relative w-32 h-32 flex items-center justify-center mb-6">
+      <img src="/Layer 1.png" alt="Loading" className="w-full h-auto object-contain animate-pulse" />
+    </div>
+    <div className="flex gap-2" dir="ltr">
+      <div className="w-3 h-3 rounded-full bg-[#1e3a8a] animate-bounce" style={{ animationDelay: '0s' }} />
+      <div className="w-3 h-3 rounded-full bg-[#1e3a8a] animate-bounce" style={{ animationDelay: '0.2s' }} />
+      <div className="w-3 h-3 rounded-full bg-[#991b1b] animate-bounce" style={{ animationDelay: '0.4s' }} />
+    </div>
   </div>
 );
 
@@ -42,7 +48,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  const noPadPaths = ['/', '/login', '/about', '/complaints', '/dashboard'];
+  const noPadPaths = ['/', '/login', '/about', '/complaints', '/dashboard', '/contact'];
   const isNoPadding = noPadPaths.includes(location.pathname) ||
     location.pathname.startsWith('/schools') ||
     location.pathname.startsWith('/careers') ||

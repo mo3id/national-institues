@@ -226,7 +226,7 @@ const Home: React.FC = () => {
                 >
                   {NEWS_DATA.map((item) => (
                     <div key={item.id} className={`${itemsPerPage === 1 ? 'w-full' : itemsPerPage === 2 ? 'w-1/2' : 'w-1/3'} flex-shrink-0 px-4 mb-8`}>
-                      <div className="bg-white group flex flex-col h-full text-start p-2 transition-all duration-500 rounded-xl">
+                      <Link to={`/news/${item.id}`} className="block bg-white group flex flex-col h-full text-start p-2 transition-all duration-500 rounded-xl hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-900/5 pb-4">
                         <div className="relative aspect-[4/3] overflow-hidden mb-6 rounded-lg">
                           <img
                             src={item.image}
@@ -239,17 +239,17 @@ const Home: React.FC = () => {
                           <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">
                             {lang === 'ar' ? 'تحديث' : 'Update'}
                           </span>
-                          <h3 className="text-lg font-bold text-gray-900 leading-snug group-hover:text-gray-700 transition-colors line-clamp-2">
+                          <h3 className="text-lg font-bold text-gray-900 leading-snug transition-colors line-clamp-2">
                             {lang === 'ar' ? item.titleAr : item.title}
                           </h3>
-                          <Link to={`/news/${item.id}`} className="mt-4 inline-flex items-center text-sm font-semibold text-gray-900 group/link">
+                          <span className="mt-auto inline-flex items-center w-fit px-5 py-2.5 bg-slate-50 text-slate-700 rounded-xl text-sm font-semibold transition-all duration-300 group-hover:bg-[#1e3a8a] group-hover:text-white">
                             <span className="pb-0.5">
                               {lang === 'ar' ? 'اقرأ المزيد' : 'Read More'}
                             </span>
-                            <ArrowRight className={`ml-1 h-4 w-4 transition-transform group-hover/link:translate-x-1 ${isRTL ? 'rotate-180 ml-0 mr-1 group-hover/link:-translate-x-1' : ''}`} />
-                          </Link>
+                            <ArrowRight className={`ml-1 h-4 w-4 transition-transform ${isRTL ? 'rotate-180 ml-0 mr-1 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
+                          </span>
                         </div>
-                      </div>
+                      </Link>
                     </div>
                   ))}
                 </div>
@@ -288,9 +288,9 @@ const Home: React.FC = () => {
                   </p>
 
                   <div className="pt-8">
-                    <button className="bg-white hover:bg-blue-50 text-blue-900 font-bold rounded-full px-12 py-5 transition-all transform hover:scale-105 shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:shadow-white/20 active:scale-95">
+                    <Link to="/contact" className="inline-block bg-white hover:bg-blue-50 text-blue-900 font-bold rounded-full px-12 py-5 transition-all transform hover:scale-105 shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:shadow-white/20 active:scale-95">
                       {lang === 'ar' ? h.ctaButtonAr : h.ctaButton}
-                    </button>
+                    </Link>
                   </div>
                 </div>
 

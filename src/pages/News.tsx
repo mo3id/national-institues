@@ -23,47 +23,30 @@ const News: React.FC = () => {
   return (
     <PageTransition>
       <div className="overflow-x-hidden">
-        {/* Unified Hero Header with Custom AI Image */}
-        <section className="m-[10px] rounded-[20px] relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-[#0f172a]">
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay"
-            style={{ backgroundImage: "url('/news_list_hero.png')" }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/20 to-transparent" />
-
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full py-20">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-              <ScrollReveal direction="right" width="fit-content">
-                <div className={`text-center md:text-start ${isRTL ? 'md:text-right' : 'md:text-left'}`}>
-                  <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-white mb-4 drop-shadow-2xl">
-                    {t.news.title}
-                  </h1>
-                  <p className="text-white/70 text-lg md:text-xl font-medium max-w-xl">
-                    {t.news.desc}
-                  </p>
-                </div>
-              </ScrollReveal>
-              <ScrollReveal direction="left" width="fit-content">
-                <div className="w-full md:w-[450px]">
-                  <div className="relative group">
-                    <input
-                      value={query}
-                      onChange={e => setQuery(e.target.value)}
-                      placeholder={t.news.searchPlaceholder}
-                      className={`w-full py-4 px-14 rounded-2xl text-base bg-white/10 backdrop-blur-xl border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-4 focus:ring-white/10 focus:bg-white/20 transition-all shadow-2xl ${isRTL ? 'text-right' : 'text-left'}`}
-                    />
-                    <Search className={`absolute top-1/2 -translate-y-1/2 h-5 w-5 text-white/50 group-focus-within:text-white transition-colors ${isRTL ? 'right-5' : 'left-5'}`} />
-                  </div>
-                </div>
-              </ScrollReveal>
-            </div>
+        {/* Unified Hero Header */}
+        <section className="m-[10px] rounded-[20px] relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-[#0f172a]">
+          <div className="absolute inset-0 z-0">
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#991b1b]/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
+          </div>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 py-20 flex flex-col items-center">
+            <ScrollReveal direction="down">
+              <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 tracking-tight text-white leading-tight drop-shadow-lg">
+                {t.news.title}
+              </h1>
+            </ScrollReveal>
+            <ScrollReveal delay={0.1}>
+              <p className="text-blue-100/80 text-lg md:text-xl max-w-2xl mx-auto font-medium">
+                {t.news.desc}
+              </p>
+            </ScrollReveal>
           </div>
         </section>
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-20">
           {featured && (
             <ScrollReveal direction="up">
-              <article className="bg-white rounded-[40px] shadow-[0_15px_50px_-12px_rgb(0,0,0,0.08)] border border-slate-100/50 overflow-hidden grid grid-cols-1 lg:grid-cols-2 mb-24 group transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgb(0,0,0,0.12)]">
+              <Link to={`/news/${featured.id}`} className="bg-white rounded-[40px] shadow-[0_15px_50px_-12px_rgb(0,0,0,0.08)] border border-slate-100/50 overflow-hidden grid grid-cols-1 lg:grid-cols-2 mb-24 group transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgb(0,0,0,0.12)] hover:-translate-y-1">
                 <div className="relative h-80 lg:h-[500px] overflow-hidden">
                   <img src={featured.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={featured.title} />
                   <div className={`absolute top-8 ${isRTL ? 'right-8' : 'left-8'} bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold text-slate-700 shadow-xl flex items-center gap-2 border border-white/20`}>
@@ -82,20 +65,20 @@ const News: React.FC = () => {
                     {lang === 'ar' ? featured.summaryAr : featured.summary}
                   </p>
                   <div className={`flex items-center ${isRTL ? 'justify-end' : 'justify-start'}`}>
-                    <Link to={`/news/${featured.id}`} className={`inline-flex items-center px-10 py-4.5 bg-[#1e3a8a] text-white rounded-2xl text-base font-bold hover:bg-black transition-all shadow-xl shadow-blue-900/10 hover:-translate-y-1 active:scale-95 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <span className={`inline-flex items-center px-10 py-[18px] bg-slate-50 text-[#1e3a8a] rounded-2xl text-base font-bold transition-all duration-300 group-hover:bg-[#1e3a8a] group-hover:text-white group-hover:shadow-xl group-hover:shadow-blue-900/20 group-hover:-translate-y-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <span>{t.news.readMore}</span>
-                      <ArrowRight className={`h-5 w-5 ${isRTL ? 'rotate-180 mr-3' : 'ml-3'}`} />
-                    </Link>
+                      <ArrowRight className={`h-5 w-5 transition-transform ${isRTL ? 'rotate-180 mr-3 group-hover:-translate-x-2' : 'ml-3 group-hover:translate-x-2'}`} />
+                    </span>
                   </div>
                 </div>
-              </article>
+              </Link>
             </ScrollReveal>
           )}
 
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {filtered.filter(i => i.id !== featured?.id).slice(0, 12).map((item, i) => (
               <ScrollReveal key={item.id} delay={(i % 3) * 0.1} className="h-full">
-                <article className="bg-white rounded-[24px] border border-gray-100/60 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] overflow-hidden transition-all duration-300 group flex flex-col h-full relative p-2">
+                <Link to={`/news/${item.id}`} className="block bg-white rounded-[24px] border border-gray-100/60 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 overflow-hidden transition-all duration-300 group flex flex-col h-full relative p-2">
 
                   {/* Image with container margin like SchoolCard */}
                   <div className="relative h-48 w-full rounded-[20px] overflow-hidden bg-gray-50">
@@ -138,15 +121,14 @@ const News: React.FC = () => {
                     </p>
 
                     {/* Full Width Button like SchoolCard */}
-                    <Link
-                      to={`/news/${item.id}`}
-                      className="mt-auto w-full py-[14px] bg-[#0f1115] text-white rounded-[16px] font-semibold text-[15px] hover:bg-black transition-all flex items-center justify-center gap-2 group/btn"
+                    <span
+                      className="mt-auto w-full py-[14px] bg-slate-50 text-slate-700 rounded-[16px] font-semibold text-[15px] transition-all duration-300 flex items-center justify-center gap-2 group-hover:bg-[#1e3a8a] group-hover:text-white group-hover:shadow-lg group-hover:-translate-y-1"
                     >
                       <span>{t.news.readMore}</span>
-                      <ArrowRight className={`h-4 w-4 transition-transform group-hover/btn:translate-x-1 ${isRTL ? 'rotate-180 group-hover/btn:-translate-x-1' : ''}`} />
-                    </Link>
+                      <ArrowRight className={`h-4 w-4 transition-transform ${isRTL ? 'rotate-180 group-hover:-translate-x-2' : 'group-hover:translate-x-2'}`} />
+                    </span>
                   </div>
-                </article>
+                </Link>
               </ScrollReveal>
             ))}
           </section>
