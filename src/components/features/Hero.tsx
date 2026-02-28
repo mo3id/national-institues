@@ -28,20 +28,22 @@ const Hero: React.FC = () => {
   const currentSlide = slides[currentIndex];
 
   return (
-    <main className="m-[10px] rounded-[20px] relative lg:h-[calc(100vh-20px)] lg:min-h-0 flex flex-col lg:flex-row lg:items-center overflow-hidden bg-white lg:bg-transparent pb-4 lg:pb-0">
+    <main className="m-[10px] rounded-[20px] relative lg:h-[calc(100dvh-20px)] lg:min-h-0 flex flex-col lg:flex-row lg:items-center overflow-hidden bg-white lg:bg-transparent pb-4 lg:pb-0">
 
       {/* Background Images */}
       {slides.map((slide, index) => (
         <div
           key={index}
-          className={`absolute inset-x-2 top-2 h-[48vh] lg:inset-0 lg:top-0 lg:h-full transition-opacity duration-1000 ease-in-out z-0 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute inset-x-2 top-2 h-[48dvh] lg:inset-0 lg:top-0 lg:h-full transition-opacity duration-1000 ease-in-out z-0 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
         >
           {/* Inner div to apply flip without animating it */}
           <div
-            className="absolute inset-0 bg-cover bg-center rounded-[24px] lg:rounded-none"
+            className="absolute inset-0 bg-cover bg-center rounded-[24px] lg:rounded-none transform-gpu"
             style={{
               backgroundImage: `url('${slide.image}')`,
-              transform: isRTL ? 'scaleX(-1)' : 'none'
+              transform: isRTL ? 'scaleX(-1) translateZ(0)' : 'translateZ(0)',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden'
             }}
           />
           {/* Gradient overlay: Darker on text side (Desktop only) */}
@@ -63,7 +65,7 @@ const Hero: React.FC = () => {
         <div className={`w-full max-w-3xl flex flex-col lg:block h-full animate-fade-up ${isRTL ? 'lg:ml-auto' : 'lg:mr-auto'}`}>
 
           {/* Text Container: overlays the image on mobile */}
-          <div className="h-[48vh] lg:h-auto flex flex-col justify-end lg:justify-start pb-8 lg:pb-0">
+          <div className="h-[48dvh] lg:h-auto flex flex-col justify-end lg:justify-start pb-8 lg:pb-0">
             <h1 key={`title-${currentIndex}`} className="text-3xl sm:text-4xl lg:text-7xl font-extrabold text-white leading-[1.3] mb-3 lg:mb-8 animate-fade-in text-start drop-shadow-lg">
               {currentSlide.title}
             </h1>

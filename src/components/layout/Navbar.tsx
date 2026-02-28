@@ -18,12 +18,12 @@ const Navbar: React.FC = () => {
 
   const menuLinks = [
     { to: '/', label: t.home, icon: 'home' },
-    { to: '/schools', label: t.schools, icon: 'school' },
     { to: '/about', label: t.about, icon: 'info' },
+    { to: '/schools', label: t.schools, icon: 'school' },
+    { to: '/news', label: t.news || (lang === 'ar' ? 'الأخبار' : 'News'), icon: 'article' },
     { to: '/careers', label: t.careers, icon: 'work' },
     { to: '/complaints', label: t.feedback || (lang === 'ar' ? 'الشكاوى' : 'Complaints'), icon: 'forum' },
-    { to: '/contact', label: lang === 'ar' ? 'اتصل بنا' : 'Contact Us', icon: 'call' },
-    { to: '/news', label: t.news || (lang === 'ar' ? 'الأخبار' : 'News'), icon: 'article' }
+    { to: '/contact', label: lang === 'ar' ? 'اتصل بنا' : 'Contact Us', icon: 'call' }
   ];
 
   return (
@@ -187,9 +187,9 @@ const Navbar: React.FC = () => {
               animate={{ x: 0 }}
               exit={{ x: isRTL ? '-100%' : '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className={`fixed top-0 bottom-0 ${isRTL ? 'left-0' : 'right-0'} w-full max-w-sm bg-white shadow-2xl z-[300] flex flex-col p-12`}
+              className={`fixed top-0 bottom-0 ${isRTL ? 'left-0' : 'right-0'} w-full max-w-sm bg-white shadow-2xl z-[300] flex flex-col p-6 md:p-12 overflow-y-auto overflow-x-hidden`}
             >
-              <div className="flex items-center justify-between mb-16">
+              <div className="flex items-center justify-between mb-8 md:mb-16 shrink-0">
                 <img src="/Layer 1.png" alt="Logo" className="h-10 object-contain" />
                 <button
                   onClick={() => setDrawerOpen(false)}
@@ -213,7 +213,7 @@ const Navbar: React.FC = () => {
                     <Link
                       to={link.to}
                       onClick={() => setDrawerOpen(false)}
-                      className={`group flex items-center gap-5 py-4 px-6 rounded-2xl transition-all duration-300 ${isActive(link.to) ? 'bg-[#1e3a8a] text-white' : 'text-[#1e3a8a] hover:bg-slate-50'}`}
+                      className={`group flex items-center gap-4 py-3 px-4 md:px-6 md:py-4 rounded-2xl transition-all duration-300 ${isActive(link.to) ? 'bg-[#1e3a8a] text-white' : 'text-[#1e3a8a] hover:bg-slate-50'}`}
                     >
                       <span className={`material-symbols-outlined text-[24px] transition-transform duration-500 group-hover:scale-125 ${isActive(link.to) ? 'text-white' : 'text-[#991b1b]'}`}>{link.icon}</span>
                       <span className="text-xl font-bold">{link.label}</span>
@@ -222,8 +222,8 @@ const Navbar: React.FC = () => {
                 ))}
               </div>
 
-              <div className="mt-auto pt-12 border-t border-slate-100">
-                <div className="flex flex-col gap-6">
+              <div className="mt-8 md:mt-auto pt-6 md:pt-12 border-t border-slate-100 shrink-0">
+                <div className="flex flex-col gap-4 md:gap-6">
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => {

@@ -53,8 +53,15 @@ const Home: React.FC = () => {
     .filter(s => s.logo)
     .map(s => ({ id: s.id, name: s.name, logo: s.logo }));
 
-  // Chunk logos into arrays of 12
-  const chunkSize = 12;
+  // Chunk logos into arrays of 12 (or 6 on mobile)
+  const [chunkSize, setChunkSize] = useState(typeof window !== 'undefined' && window.innerWidth < 768 ? 6 : 12);
+
+  useEffect(() => {
+    const handleResize = () => setChunkSize(window.innerWidth < 768 ? 6 : 12);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const logoChunks = [];
   for (let i = 0; i < schoolLogos.length; i += chunkSize) {
     logoChunks.push(schoolLogos.slice(i, i + chunkSize));
