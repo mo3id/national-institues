@@ -14,6 +14,17 @@ const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  // Keep full nav on mobile regardless of scroll
+  const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' && window.innerWidth < 1024);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const showFullNav = !scrolled || isMobile;
+
   const isActive = (path: string) => location.pathname === path;
 
   const menuLinks = [
@@ -30,14 +41,14 @@ const Navbar: React.FC = () => {
     <>
       {/* High-level container for all Navbar states */}
       <AnimatePresence mode="wait">
-        {!scrolled ? (
-          /* FULL NAVBAR (Initial State) */
+        {showFullNav ? (
+          /* FULL NAVBAR & MOBILE NAVBAR (Static) */
           <motion.nav
             key="full-nav"
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="fixed top-[10px] left-[10px] right-[10px] z-[100] py-6 px-10 flex items-center justify-between bg-transparent rounded-[20px]"
+            className="fixed top-[10px] left-[10px] right-[10px] z-[100] py-4 lg:py-6 px-6 lg:px-10 flex items-center justify-between rounded-[20px] transition-all duration-300 bg-transparent"
           >
             {/* LOGO */}
             <Link to="/" className="flex items-center shrink-0">
@@ -75,7 +86,7 @@ const Navbar: React.FC = () => {
               {/* Mobile Toggle */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md transform-gpu border border-white/30 text-white transition-all shadow-lg"
+                className={`lg:hidden w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-md transform-gpu transition-all shadow-lg ${scrolled ? 'bg-[#1e3a8a] text-white border-none' : 'bg-white/20 border-white/30 border text-white'}`}
               >
                 <span className="material-symbols-outlined text-[20px]">{mobileMenuOpen ? 'close' : 'menu'}</span>
               </button>
@@ -126,7 +137,7 @@ const Navbar: React.FC = () => {
 
       {/* Standard Mobile Menu Dropdown (Only for full nav state/mobile) */}
       <AnimatePresence>
-        {mobileMenuOpen && !scrolled && (
+        {mobileMenuOpen && showFullNav && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -164,7 +175,7 @@ const Navbar: React.FC = () => {
                 className="flex flex-1 items-center justify-center gap-2 py-3 rounded-xl bg-[#1e3a8a] text-white font-bold hover:bg-[#1e3a8a]/90 transition-all shadow-lg shadow-blue-900/20"
               >
                 <span className="material-symbols-outlined text-[20px]">login</span>
-                <span>{lang === 'ar' ? 'تسجيل الدخول' : 'Login'}</span>
+                <span>{lang === 'ar' ? 'التسجيل' : 'Login'}</span>
               </Link>
             </div>
           </motion.div>
@@ -241,7 +252,7 @@ const Navbar: React.FC = () => {
                       className="flex flex-1 items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#1e3a8a] text-white font-bold hover:bg-[#1e3a8a]/90 transition-all shadow-lg shadow-blue-900/20"
                     >
                       <span className="material-symbols-outlined text-[22px]">login</span>
-                      <span>{lang === 'ar' ? 'تسجيل الدخول' : 'Login'}</span>
+                      <span>{lang === 'ar' ? 'التسجيل' : 'Login'}</span>
                     </Link>
                   </div>
 
