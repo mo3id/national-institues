@@ -184,30 +184,26 @@ export const en = {
     footer: {
         networkName: "NIS Network",
         description: "The largest educational organization in Egypt, overseeing excellence in national and international schooling for over 60 years.",
-        productTitle: "Schools",
-        resourcesTitle: "Resources",
-        companyTitle: "Network",
+        productTitle: "Quick Links",
+        resourcesTitle: "Services",
+        companyTitle: "Connect With Us",
         copyright: "© 2024 National Institutes of Schools. All rights reserved.",
         privacy: "Privacy Policy",
         terms: "Terms of Service",
         cookies: "Cookies Settings",
         productLinks: [
-            "Admission Process",
-            "School Finder",
-            "Academic Calendar",
-            "Student Portal"
+            { label: "Home", path: "/" },
+            { label: "About Us", path: "/about" },
+            { label: "Our Schools", path: "/schools" },
+            { label: "News", path: "/news" }
         ],
         resourceLinks: [
-            "Documentation",
-            "Help Center",
-            "Teacher Hub",
-            "Support"
+            { label: "Careers", path: "/careers" },
+            { label: "Complaints & Feedback", path: "/complaints" }
         ],
         companyLinks: [
-            "About Us",
-            "Careers",
-            "Contact",
-            "Partners"
+            { label: "Contact Us", path: "/contact" },
+            { label: "Admin Login", path: "/login" }
         ],
         address: "15 Taha Hussein St, Zamalek, Cairo, Egypt"
     },

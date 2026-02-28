@@ -184,30 +184,26 @@ export const ar = {
     footer: {
         networkName: "المعاهد القومية",
         description: "أكبر مؤسسة تعليمية في مصر، تشرف على التميز في التعليم القومي والدولي لأكثر من 60 عامًا.",
-        productTitle: "المدارس",
-        resourcesTitle: "الموارد",
-        companyTitle: "الشبكة",
+        productTitle: "روابط سريعة",
+        resourcesTitle: "الخدمات",
+        companyTitle: "تواصل معنا",
         copyright: "© 2024 الجمعية العامة للمعاهد القومية. جميع الحقوق محفوظة.",
         privacy: "سياسة الخصوصية",
         terms: "شروط الخدمة",
         cookies: "إعدادات الكوكيز",
         productLinks: [
-            "عملية التقديم",
-            "البحث عن مدرسة",
-            "التقويم الأكاديمي",
-            "بوابة الطلاب"
+            { label: "الرئيسية", path: "/" },
+            { label: "عن المعاهد", path: "/about" },
+            { label: "مدارسنا", path: "/schools" },
+            { label: "الأخبار", path: "/news" }
         ],
         resourceLinks: [
-            "الوثائق",
-            "مركز المساعدة",
-            "مركز المعلم",
-            "الدعم الفني"
+            { label: "الوظائف", path: "/careers" },
+            { label: "الاقتراحات والشكاوى", path: "/complaints" }
         ],
         companyLinks: [
-            "من نحن",
-            "الوظائف",
-            "اتصل بنا",
-            "الشركاء"
+            { label: "اتصل بنا", path: "/contact" },
+            { label: "تسجيل الدخول", path: "/login" }
         ],
         address: "15 شارع طه حسين، الزمالك، القاهرة، مصر"
     },

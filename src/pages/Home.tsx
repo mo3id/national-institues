@@ -97,7 +97,7 @@ const Home: React.FC = () => {
         <section className="pt-24 pb-24 bg-white overflow-hidden w-full">
           <div className="w-[90%] lg:w-[80%] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
-              <div className="w-full lg:w-5/12 flex flex-col items-start text-start space-y-6">
+              <div className="w-full lg:w-5/12 flex flex-col items-center lg:items-start text-center lg:text-start space-y-6">
                 <ScrollReveal>
                   <h2 className="text-3xl md:text-5xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-light text-slate-800 leading-[1.3] lg:leading-[1.2]">
                     {lang === 'ar' ? h.trustedTitleAr : h.trustedTitle} <br />

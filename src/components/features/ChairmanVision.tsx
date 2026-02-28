@@ -25,7 +25,7 @@ const ChairmanVision: React.FC = () => {
                 <div className={`flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20 ${isRTL ? 'lg:flex-row-reverse' : ''}`}>
 
                     {/* Text Column */}
-                    <div className={`w-full lg:w-[55%] space-y-12 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    <div className={`w-full lg:w-[55%] space-y-12 flex flex-col items-center text-center lg:items-start ${isRTL ? 'lg:text-right' : 'lg:text-left'}`}>
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -51,9 +51,9 @@ const ChairmanVision: React.FC = () => {
                                 {quote}
                             </p>
 
-                            <div className="mt-10 flex items-center gap-4">
-                                <div className="h-px w-12 bg-[#1e3a8a]/20"></div>
-                                <div className="flex flex-col">
+                            <div className="mt-10 flex flex-col items-center lg:flex-row lg:items-center justify-center lg:justify-start gap-4">
+                                <div className="h-px w-12 bg-[#1e3a8a]/20 hidden lg:block"></div>
+                                <div className="flex flex-col items-center lg:items-start text-center lg:text-start">
                                     <span className="text-[#1e3a8a] text-sm font-bold uppercase tracking-[0.2em]">
                                         {lang === 'ar' ? 'رؤية القيادة' : 'Leadership Vision'}
                                     </span>
