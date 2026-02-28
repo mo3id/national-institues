@@ -48,7 +48,7 @@ const Navbar: React.FC = () => {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="fixed top-[10px] left-[10px] right-[10px] z-[100] py-4 lg:py-6 px-6 lg:px-10 flex items-center justify-between rounded-[20px] transition-all duration-300 bg-transparent"
+            className="fixed top-[10px] left-[10px] right-[10px] z-[100] py-4 lg:py-6 px-6 lg:px-10 flex items-center justify-between rounded-[20px] bg-transparent"
           >
             {/* LOGO */}
             <Link to="/" className="flex items-center shrink-0">
