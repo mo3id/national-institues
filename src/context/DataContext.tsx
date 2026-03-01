@@ -9,6 +9,8 @@ interface SiteData {
     jobs: JobVacancy[];
     heroSlides: any[];
     aboutData: any;
+    complaints: any[];
+    contactMessages: any[];
     stats: {
         journeyInNumbers: string;
         journeyInNumbersAr: string;
@@ -69,6 +71,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         schools: SCHOOLS,
         news: NEWS,
         jobs: JOBS,
+        complaints: [],
+        contactMessages: [],
         heroSlides: [
             {
                 id: 1,
@@ -185,7 +189,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     const merged = { ...prev, ...parsed };
 
                     // Crucial: Ensure all required arrays are present to prevent .map() crashes
-                    const arrayKeys: (keyof SiteData)[] = ['schools', 'news', 'jobs', 'heroSlides', 'partners', 'galleryImages'];
+                    const arrayKeys: (keyof SiteData)[] = ['schools', 'news', 'jobs', 'heroSlides', 'partners', 'galleryImages', 'complaints', 'contactMessages'];
                     arrayKeys.forEach(key => {
                         if (!Array.isArray(merged[key])) {
                             (merged as any)[key] = prev[key];
@@ -220,7 +224,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     const parsed = JSON.parse(e.newValue);
                     setData(prev => {
                         const merged = { ...prev, ...parsed };
-                        const arrayKeys: (keyof SiteData)[] = ['schools', 'news', 'jobs', 'heroSlides', 'partners', 'galleryImages'];
+                        const arrayKeys: (keyof SiteData)[] = ['schools', 'news', 'jobs', 'heroSlides', 'partners', 'galleryImages', 'complaints', 'contactMessages'];
                         arrayKeys.forEach(key => {
                             if (!Array.isArray(merged[key])) (merged as any)[key] = prev[key];
                         });

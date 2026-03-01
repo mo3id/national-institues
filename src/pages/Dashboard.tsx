@@ -4,7 +4,7 @@ import {
   Plus, Pencil, Trash2, Eye, EyeOff, Save, X,
   Users, Home as HomeIcon, GraduationCap, MapPin, Bell, LogOut, Search,
   TrendingUp, CheckCircle, AlertCircle, Menu, Moon, Sun,
-  Globe, ChevronRight, Briefcase
+  Globe, ChevronRight, Briefcase, MessageSquare, Mail, Filter, ChevronDown
 } from 'lucide-react';
 import { NEWS, SCHOOLS } from '@/constants';
 import {
@@ -261,12 +261,14 @@ const Dashboard: React.FC = () => {
   const [section, setSection] = useState<Section>('overview');
   const [collapsed, setCollapsed] = useState(() => typeof window !== 'undefined' && window.innerWidth < 1024);
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('dash-theme') as Theme) || 'light');
-  const { lang, setLang } = useLanguage();
+  const { lang, setLang, t: translationsRoot } = useLanguage();
 
   const [newsList, setNewsList] = useState<DashNewsItem[]>([]);
   const [schools, setSchools] = useState<DashSchool[]>([]);
   const [jobs, setJobs] = useState<DashJob[]>([]);
   const [hero, setHero] = useState<HeroSlide[]>([]);
+  const [complaints, setComplaints] = useState<any[]>([]);
+  const [contactMessages, setContactMessages] = useState<any[]>([]);
   const [about, setAbout] = useState<AboutData>({
     ...(siteData.aboutData || {}),
     points: siteData.aboutData?.points || [],
@@ -280,6 +282,8 @@ const Dashboard: React.FC = () => {
       setNewsList(prepareNews(siteData.news || []));
       setSchools((siteData.schools || []).map(s => ({ ...s })));
       setJobs((siteData.jobs || []).map(j => ({ ...j })));
+      setComplaints(siteData.complaints || []);
+      setContactMessages(siteData.contactMessages || []);
       setHero(siteData.heroSlides || []);
       setAbout({
         ...(siteData.aboutData || {}),
@@ -303,6 +307,8 @@ const Dashboard: React.FC = () => {
   const [newsSearch, setNewsSearch] = useState('');
   const [schoolSearch, setSchoolSearch] = useState('');
   const [jobSearch, setJobSearch] = useState('');
+  const [complaintsSearch, setComplaintsSearch] = useState('');
+  const [complaintsFilterType, setComplaintsFilterType] = useState('All');
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   const [newArt, setNewArt] = useState<Partial<DashNewsItem>>({ title: '', titleAr: '', summary: '', summaryAr: '', date: '', image: '', published: true });
   const [newJob, setNewJob] = useState<Partial<DashJob>>({ title: '', titleAr: '', department: '', departmentAr: '', location: '', locationAr: '', type: '', typeAr: '', description: '', descriptionAr: '' });
@@ -437,6 +443,14 @@ const Dashboard: React.FC = () => {
   const filtered = newsList.filter(n => n.title.toLowerCase().includes(newsSearch.toLowerCase()) || n.titleAr.includes(newsSearch));
   const filteredSchools = schools.filter(s => s.name.toLowerCase().includes(schoolSearch.toLowerCase()) || s.governorate.toLowerCase().includes(schoolSearch.toLowerCase()));
   const filteredJobs = jobs.filter(j => j.title.toLowerCase().includes(jobSearch.toLowerCase()) || j.titleAr.includes(jobSearch) || j.department.toLowerCase().includes(jobSearch.toLowerCase()));
+
+  const filteredComplaints = complaints.filter(c => {
+    const term = complaintsSearch.toLowerCase();
+    const matchesSearch = c.fullName?.toLowerCase().includes(term) || c.phone?.toLowerCase().includes(term) || c.school?.toLowerCase().includes(term);
+    const matchesType = complaintsFilterType === 'All' || c.messageType === complaintsFilterType;
+    return matchesSearch && matchesType;
+  });
+
   const publishedCount = newsList.filter(n => n.published).length;
 
   const navItems: { id: Section; label: string; icon: React.ElementType }[] = [
@@ -449,6 +463,8 @@ const Dashboard: React.FC = () => {
     { id: 'institute', label: u.institute, icon: Info },
     { id: 'home', label: u.home, icon: HomeIcon },
     { id: 'forms', label: u.forms, icon: Bell },
+    { id: 'complaints', label: u.complaints, icon: MessageSquare },
+    { id: 'contactMessages', label: u.contactMessages, icon: Mail },
     { id: 'settings', label: u.settings, icon: Settings },
   ];
 
@@ -641,59 +657,44 @@ const Dashboard: React.FC = () => {
             </div>
           )}
 
-          {/* ── Hero ── */}
+          {/* ── Jobs ── */}
           {section === 'jobs' && (
-            <section className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">{u.jobs}</h2>
-                <button onClick={() => setAddJobOpen(true)} className="px-4 py-2 bg-[#1e3a8a] text-white rounded-lg flex items-center gap-2">
-                  <Plus size={18} /> {u.addJob}
-                </button>
+            <div className="section-enter">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.jobs}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.jobsManage}</p></div>
+                <button className="dash-btn dash-btn-primary" onClick={() => setAddJobOpen(true)}><Plus style={{ width: 15, height: 15 }} />{u.addJob}</button>
               </div>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input
-                  type="text"
-                  placeholder={u.search}
-                  className={`w-full ${isRTL ? 'pr-10' : 'pl-10'} py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#1e3a8a]/20 outline-none`}
-                  value={jobSearch}
-                  onChange={(e) => setJobSearch(e.target.value)}
-                />
+              <div style={{ position: 'relative', marginBottom: 18, maxWidth: 320 }}>
+                <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 14, right: isRTL ? 14 : 'auto', top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: 'var(--text2)' }} />
+                <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={jobSearch} onChange={e => setJobSearch(e.target.value)} />
               </div>
-              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50 border-b border-slate-200">
+              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
+                <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
+                  <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
-                      <th className={`px-6 py-4 text-sm font-semibold ${isRTL ? 'text-right' : ''}`}>{u.title}</th>
-                      <th className={`px-6 py-4 text-sm font-semibold ${isRTL ? 'text-right' : ''}`}>{u.department}</th>
-                      <th className={`px-6 py-4 text-sm font-semibold ${isRTL ? 'text-right' : ''}`}>{u.location}</th>
-                      <th className={`px-6 py-4 text-sm font-semibold ${isRTL ? 'text-right' : ''}`}>{u.actions}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.title}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.department}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.location}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.actions}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredJobs.map(job => (
-                      <tr key={job.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className={`font-medium ${isRTL ? 'text-right' : ''}`}>{lang === 'ar' ? job.titleAr : job.title}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className={`text-slate-500 ${isRTL ? 'text-right' : ''}`}>{lang === 'ar' ? job.departmentAr : job.department}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className={`text-slate-500 ${isRTL ? 'text-right' : ''}`}>{lang === 'ar' ? job.locationAr : job.location}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <button onClick={() => setEditJobId(job.id)} className="p-2 text-slate-400 hover:text-[#1e3a8a] hover:bg-[#1e3a8a]/5 rounded-lg transition-all"><Pencil size={18} /></button>
-                            <button onClick={() => deleteJob(job.id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"><Trash2 size={18} /></button>
-                          </div>
+                  <tbody>
+                    {filteredJobs.map((job, i) => (
+                      <tr key={job.id} style={{ borderBottom: i === filteredJobs.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{lang === 'ar' ? job.titleAr : job.title}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{lang === 'ar' ? job.departmentAr : job.department}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{lang === 'ar' ? job.locationAr : job.location}</td>
+                        <td style={{ padding: '16px 24px', display: 'flex', gap: 4 }}>
+                          <button className="dash-icon-btn" onClick={() => setEditJobId(job.id)} title={u.edit}><Pencil style={{ width: 15, height: 15, color: 'var(--accent)' }} /></button>
+                          <button className="dash-icon-btn" onClick={() => deleteJob(job.id)} title={u.delete}><Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} /></button>
                         </td>
                       </tr>
                     ))}
+                    {filteredJobs.length === 0 && <tr><td colSpan={4} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><Briefcase style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></td></tr>}
                   </tbody>
                 </table>
               </div>
-            </section>
+            </div>
           )}
 
           {section === 'hero' && (
@@ -963,6 +964,127 @@ const Dashboard: React.FC = () => {
                     <div><label className="dash-label">الوصف (عربي)</label><textarea className="dash-input" dir="rtl" value={siteData.formSettings?.jobFormDescAr} onChange={e => updateData('formSettings', { ...siteData.formSettings, jobFormDescAr: e.target.value })} /></div>
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Complaints ── */}
+          {section === 'complaints' && (
+            <div className="section-enter">
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
+                <div>
+                  <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <MessageSquare style={{ width: 24, height: 24, color: 'var(--accent)' }} />
+                    {u.complaints}
+                  </h2>
+                  <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 4 }}>{u.complaintsManage}</p>
+                </div>
+                <div style={{ display: 'flex', gap: 0, alignItems: 'stretch', flexWrap: 'nowrap', flex: 1, justifyContent: 'flex-end', minWidth: 280 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface2)', borderRadius: 16, border: '1px solid var(--border)', boxShadow: '0 2px 4px rgba(0,0,0,0.02)', padding: '4px 8px', width: '100%', maxWidth: 450 }}>
+                    <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center' }}>
+                      <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 12, right: isRTL ? 12 : 'auto', top: '50%', transform: 'translateY(-50%)', width: 16, height: 16, color: 'var(--text2)' }} />
+                      <input
+                        style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', padding: '8px 12px', paddingLeft: isRTL ? 12 : 36, paddingRight: isRTL ? 36 : 12, fontSize: 13, color: 'var(--text)' }}
+                        placeholder={u.search}
+                        value={complaintsSearch}
+                        onChange={e => setComplaintsSearch(e.target.value)}
+                      />
+                    </div>
+                    <div style={{ width: 1, height: 20, background: 'var(--border)', margin: '0 8px' }}></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, position: 'relative' }}>
+                      <Filter style={{ width: 14, height: 14, color: 'var(--text2)' }} />
+                      <select
+                        style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 13, color: 'var(--text)', cursor: 'pointer', WebkitAppearance: 'none', width: 130, paddingRight: isRTL ? 0 : 20, paddingLeft: isRTL ? 20 : 0, fontWeight: 500 }}
+                        value={complaintsFilterType}
+                        onChange={e => setComplaintsFilterType(e.target.value)}
+                      >
+                        <option value="All">{lang === 'ar' ? 'جميع الأنواع' : 'All Types'}</option>
+                        {(translationsRoot?.complaints?.types || []).map((type: string) => (
+                          <option key={type} value={type}>{type}</option>
+                        ))}
+                      </select>
+                      <ChevronDown style={{ width: 14, height: 14, color: 'var(--text2)', position: 'absolute', pointerEvents: 'none', right: isRTL ? 'auto' : 0, left: isRTL ? 0 : 'auto' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
+                <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
+                  <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
+                    <tr>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.senderName}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.phone}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.school}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.messageType}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.message}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredComplaints.length > 0 ? filteredComplaints.map((c, i) => (
+                      <tr key={i} style={{ borderBottom: i === filteredComplaints.length - 1 ? 'none' : '1px solid var(--border)' }}>
+                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{c.fullName}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }} dir="ltr">{c.phone}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{c.school}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}><span style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--surface2)', fontSize: 11, fontWeight: 700 }}>{c.messageType}</span></td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, maxWidth: 300 }}>
+                          <p style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={c.message}>{c.message}</p>
+                          <p style={{ fontSize: 11, color: 'var(--accent)', marginTop: 4 }}>{c.email}</p>
+                        </td>
+                      </tr>
+                    )) : (
+                      <tr>
+                        <td colSpan={5} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}>
+                          <MessageSquare style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} />
+                          <p style={{ fontWeight: 600 }}>{u.noResults}</p>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* ── Contact Messages ── */}
+          {section === 'contactMessages' && (
+            <div className="section-enter">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.contactMessages}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.contactMessagesManage}</p></div>
+              </div>
+
+              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
+                <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
+                  <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
+                    <tr>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.senderName}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.email}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.subject}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.message}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.date}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {contactMessages.length > 0 ? contactMessages.map((c, i) => (
+                      <tr key={i} style={{ borderBottom: i === contactMessages.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{c.fullName}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{c.email}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{c.subject}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, maxWidth: 300 }}>
+                          <p style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={c.message}>{c.message}</p>
+                        </td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 12, fontWeight: 600 }}>{c.date}</td>
+                      </tr>
+                    )) : (
+                      <tr>
+                        <td colSpan={5} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}>
+                          <Mail style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} />
+                          <p style={{ fontWeight: 600 }}>{u.noResults}</p>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}

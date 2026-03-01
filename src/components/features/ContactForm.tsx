@@ -1,18 +1,43 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useSiteData } from '@/context/DataContext';
 import { Send, CheckCircle2 } from 'lucide-react';
 
 const ContactForm: React.FC = () => {
     const { lang, isRTL } = useLanguage();
+    const { data: siteData, updateData } = useSiteData();
     const [submitting, setSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
+
+    // Add form state
+    const [formData, setFormData] = useState({
+        fullName: '',
+        email: '',
+        subject: '',
+        message: ''
+    });
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
         setTimeout(() => {
+            const newComplaint = {
+                id: String(Date.now()),
+                date: new Date().toISOString().split('T')[0],
+                fullName: formData.fullName,
+                email: formData.email,
+                subject: formData.subject,
+                message: formData.message
+            };
+            updateData('contactMessages', [newComplaint, ...(siteData.contactMessages || [])]);
+
             setSubmitting(false);
             setSuccess(true);
+            setFormData({ fullName: '', email: '', subject: '', message: '' });
             setTimeout(() => setSuccess(false), 3000);
         }, 1500);
     };
@@ -26,6 +51,9 @@ const ContactForm: React.FC = () => {
                     </label>
                     <input
                         type="text"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleChange}
                         required
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                         placeholder={lang === 'ar' ? 'أدخل اسمك بالكامل' : 'Enter your full name'}
@@ -37,6 +65,9 @@ const ContactForm: React.FC = () => {
                     </label>
                     <input
                         type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
                         required
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                         placeholder={lang === 'ar' ? 'أدخل بريدك الإلكتروني' : 'Enter your email address'}
@@ -50,6 +81,9 @@ const ContactForm: React.FC = () => {
                 </label>
                 <input
                     type="text"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
                     required
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     placeholder={lang === 'ar' ? 'موضوع رسالتك' : 'Subject of your message'}
@@ -62,6 +96,9 @@ const ContactForm: React.FC = () => {
                 </label>
                 <textarea
                     required
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
                     rows={5}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none"
                     placeholder={lang === 'ar' ? 'اكتب رسالتك هنا...' : 'Write your message here...'}

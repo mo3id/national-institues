@@ -10,7 +10,7 @@ import ScrollReveal from '@/components/common/ScrollReveal';
 const Complaints: React.FC = () => {
   const { lang, isRTL, t: translationsRoot } = useLanguage();
   const t = translationsRoot;
-  const { data: siteData } = useSiteData();
+  const { data: siteData, updateData } = useSiteData();
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
@@ -29,6 +29,14 @@ const Complaints: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
+
+    const newComplaint = {
+      ...formData,
+      id: String(Date.now()),
+      date: new Date().toISOString().split('T')[0]
+    };
+    updateData('complaints', [newComplaint, ...(siteData.complaints || [])]);
+
     setFormData({ fullName: '', phone: '', email: '', messageType: (t?.complaints?.types || [])[0] || '', school: '', message: '' });
     setTimeout(() => setSubmitted(false), 5000);
   };

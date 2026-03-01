@@ -1,4 +1,4 @@
-export type Section = 'overview' | 'news' | 'schools' | 'jobs' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'settings';
+export type Section = 'overview' | 'news' | 'schools' | 'jobs' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'complaints' | 'contactMessages' | 'settings';
 export type Theme = 'light' | 'dark';
 export type Lang = 'en' | 'ar';
 
@@ -146,6 +146,17 @@ export const UI: Record<Lang, Record<string, string>> = {
         mainImage: 'Primary Image',
         gallery: 'Photo Gallery',
         addImage: 'Add Image',
+        complaints: 'Complaints',
+        complaintsManage: 'View and manage submitted complaints',
+        senderName: 'Sender Name',
+        phone: 'Phone',
+        email: 'Email',
+        school: 'School',
+        messageType: 'Message Type',
+        message: 'Message',
+        contactMessages: 'Contact Messages',
+        contactMessagesManage: 'View messages from contact forms',
+        subject: 'Subject',
     },
     ar: {
         overview: 'نظرة عامة', news: 'الأخبار', schools: 'المدارس', jobs: 'الوظائف الشاغرة',
@@ -207,6 +218,17 @@ export const UI: Record<Lang, Record<string, string>> = {
         mainImage: 'الصورة الرئيسية',
         gallery: 'معرض الصور',
         addImage: 'إضافة صورة',
+        complaints: 'الشكاوى',
+        complaintsManage: 'عرض وإدارة الشكاوى المقدمة',
+        senderName: 'اسم المرسل',
+        phone: 'الهاتف',
+        email: 'البريد الإلكتروني',
+        school: 'المدرسة',
+        messageType: 'نوع الرسالة',
+        message: 'الرسالة',
+        contactMessages: 'رسائل التواصل',
+        contactMessagesManage: 'عرض رسائل نماذج التواصل',
+        subject: 'الموضوع',
     }
 };
 
