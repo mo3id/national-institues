@@ -1,6 +1,6 @@
 
 import React, { Suspense, lazy } from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -26,7 +26,7 @@ const Complaints = lazy(() => import('./pages/Complaints'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Login = lazy(() => import('./pages/Login'));
 const ContactUs = lazy(() => import('./pages/ContactUs'));
-
+import ErrorPage from './components/common/ErrorPage';
 const PageLoader = () => (
   <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#fafcff]">
     <div className="relative w-32 h-32 flex items-center justify-center mb-6">
@@ -104,7 +104,7 @@ const App: React.FC = () => {
                           <Route path="/careers" element={<Jobs />} />
                           <Route path="/complaints" element={<Complaints />} />
                           <Route path="/contact" element={<ContactUs />} />
-                          <Route path="*" element={<Home />} />
+                          <Route path="*" element={<ErrorPage />} />
                         </Routes>
                       </Suspense>
                     </MainLayout>
