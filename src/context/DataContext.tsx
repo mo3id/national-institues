@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDataStore, SiteData, DEFAULT_SITE_DATA } from '@/store/useDataStore';
-import { fetchSiteData } from '@/services/api';
+import { fetchSiteData, updateCategory } from '@/services/api';
 import ErrorPage from '@/components/common/ErrorPage';
 
 interface DataContextType {
@@ -59,10 +59,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // A generic mutation helper for updating specific data categories (this would normally be several specific endpoints)
     const updateMutation = useMutation({
         mutationFn: async ({ category, newData }: { category: keyof SiteData, newData: any }) => {
-            // Ideally, here you'll post to your API. e.g.:
-            // await apiClient.post('?action=update_category', { category, newData });
-
-            // For now, since PHP backend just returns what's given, we mock success.
+            // Post to backend instead of mocking
+            await updateCategory(category, newData);
             return { category, newData };
         },
         onSuccess: (res) => {

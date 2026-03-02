@@ -51,6 +51,7 @@ try {
                 'schools' => $schools,
                 'news' => $news,
                 'jobs' => $jobs,
+                'jobApplications' => $settings['jobApplications'] ?? [],
                 'heroSlides' => $settings['heroSlides'] ?? [],
                 'aboutData' => $settings['aboutData'] ?? new stdClass(),
                 'complaints' => $settings['complaints'] ?? [],
@@ -65,18 +66,78 @@ try {
             echo json_encode(["status" => "success", "data" => $response]);
             break;
 
+        case 'update_category':
+            $input = json_decode(file_get_contents('php://input'), true);
+            $category = $input['category'] ?? '';
+            $newData = $input['newData'] ?? [];
+            if (!$category) throw new Exception("Category required");
+
+            if ($category === 'schools') {
+                $pdo->exec("DELETE FROM schools");
+                $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                foreach ($newData as $s) {
+                    $stmt->execute([$s['id'], $s['name'], $s['nameAr'], $s['location'], $s['locationAr'], $s['governorate'], $s['governorateAr'], $s['principal'], $s['principalAr'] ?? '', $s['logo'], $s['type'], $s['mainImage'] ?? '', json_encode($s['gallery'] ?? [])]);
+                }
+            } elseif ($category === 'news') {
+                $pdo->exec("DELETE FROM news");
+                $stmt = $pdo->prepare("INSERT INTO news (id, title, titleAr, date, summary, summaryAr, image, published) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                foreach ($newData as $n) {
+                    $stmt->execute([$n['id'], $n['title'], $n['titleAr'], $n['date'], $n['summary'], $n['summaryAr'], $n['image'], $n['published'] ? 1 : 0]);
+                }
+            } elseif ($category === 'jobs') {
+                $pdo->exec("DELETE FROM jobs");
+                $stmt = $pdo->prepare("INSERT INTO jobs (id, title, titleAr, department, departmentAr, location, locationAr, type, typeAr, description, descriptionAr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                foreach ($newData as $j) {
+                    $stmt->execute([$j['id'], $j['title'], $j['titleAr'], $j['department'], $j['departmentAr'], $j['location'], $j['locationAr'], $j['type'], $j['typeAr'], $j['description'], $j['descriptionAr']]);
+                }
+            } else {
+                // Save JSON for other components: heroSlides, aboutData, jobApplications, complaints, contactMessages...
+                $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES (?, ?)");
+                $stmt->execute([$category, json_encode($newData)]);
+            }
+            echo json_encode(["status" => "success", "message" => "Updated successfully.", "category" => $category]);
+            break;
+
         case 'add_complaint':
             $input = json_decode(file_get_contents('php://input'), true);
-            // Example sanitization and prepared statement
-            $name = htmlspecialchars(strip_tags($input['name'] ?? ''));
-            // ... (In a real scenario, insert into a complaints table)
-            // For now, updating JSON settings for simplicity, though a table is better
-            echo json_encode(["status" => "success", "message" => "Complaint added successfully."]);
+            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'complaints'");
+            $row = $stmt->fetch();
+            $complaints = $row ? json_decode($row['setting_value'], true) : [];
+            $input['id'] = uniqid();
+            $input['createdAt'] = date('c');
+            $input['status'] = 'Pending';
+            $complaints[] = $input;
+            $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('complaints', ?)");
+            $stmt->execute([json_encode($complaints)]);
+            echo json_encode(["status" => "success", "message" => "Complaint added successfully.", "data" => $input]);
             break;
 
         case 'add_contact_message':
-             // implementation for contact
-             echo json_encode(["status" => "success", "message" => "Message sent successfully."]);
+             $input = json_decode(file_get_contents('php://input'), true);
+             $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'contactMessages'");
+             $row = $stmt->fetch();
+             $messages = $row ? json_decode($row['setting_value'], true) : [];
+             $input['id'] = uniqid();
+             $input['createdAt'] = date('c');
+             $input['status'] = 'Pending';
+             $messages[] = $input;
+             $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('contactMessages', ?)");
+             $stmt->execute([json_encode($messages)]);
+             echo json_encode(["status" => "success", "message" => "Message sent successfully.", "data" => $input]);
+             break;
+
+        case 'add_job_application':
+             $input = json_decode(file_get_contents('php://input'), true);
+             $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'jobApplications'");
+             $row = $stmt->fetch();
+             $applications = $row ? json_decode($row['setting_value'], true) : [];
+             $input['id'] = uniqid();
+             $input['appliedAt'] = date('c');
+             $input['status'] = 'Pending';
+             $applications[] = $input;
+             $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('jobApplications', ?)");
+             $stmt->execute([json_encode($applications)]);
+             echo json_encode(["status" => "success", "message" => "Application submitted successfully.", "data" => $input]);
              break;
 
         default:

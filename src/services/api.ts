@@ -53,3 +53,9 @@ export const submitContactMessage = async (contactData: Record<string, any>): Pr
     if (data.status !== 'success') throw new Error(data.message || 'Failed to submit message');
     return data;
 };
+
+export const updateCategory = async (category: string, newData: any): Promise<ApiResponse> => {
+    const { data } = await apiClient.post<ApiResponse>('?action=update_category', { category, newData });
+    if (data.status !== 'success') throw new Error(data.message || `Failed to update ${category}`);
+    return data;
+};
