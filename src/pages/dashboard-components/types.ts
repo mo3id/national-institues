@@ -1,4 +1,4 @@
-export type Section = 'overview' | 'news' | 'schools' | 'jobs' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'complaints' | 'contactMessages' | 'settings';
+export type Section = 'overview' | 'news' | 'schools' | 'jobs' | 'recruitment' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'complaints' | 'contactMessages' | 'settings';
 export type Theme = 'light' | 'dark';
 export type Lang = 'en' | 'ar';
 
@@ -41,6 +41,23 @@ export interface DashJob {
     typeAr: string;
     description: string;
     descriptionAr: string;
+    image?: string; // optional cover image (base64 or URL)
+}
+
+export interface DashJobApplication {
+    id: string;
+    jobId: string;
+    jobTitle: string;
+    fullName: string;
+    email: string;
+    phone: string;
+    experience?: string;
+    coverLetter?: string;
+    cvName: string;
+    cvData: string;
+    appliedAt: string;
+    status: 'Pending' | 'Interview' | 'Rejected' | 'Hired' | 'On Hold';
+    notes?: string;
 }
 
 export interface HeroSlide {
@@ -116,10 +133,15 @@ export const UI: Record<Lang, Record<string, string>> = {
         articleSaved: 'Article saved successfully', articleDeleted: 'Article deleted',
         articleAdded: 'New article added!', slideSaved: 'Hero slide saved',
         aboutSaved: 'About section saved!', schoolSaved: 'School saved!',
-        required: 'Title and date are required',
+        required: 'Please fill all required fields',
         jobSaved: 'Job saved successfully',
         jobDeleted: 'Job deleted',
         jobAdded: 'New vacancy added!',
+        jobImage: 'Job Image',
+        uploadImage: 'Upload Image',
+        previewImage: 'Preview Image',
+        dragDrop: 'Drag & drop or click here',
+        previewCV: 'Preview CV',
         homeUpdated: 'Home page updated',
         home: 'Home Page',
         homeManage: 'Manage homepage sections and partners',
@@ -157,6 +179,27 @@ export const UI: Record<Lang, Record<string, string>> = {
         contactMessages: 'Contact Messages',
         contactMessagesManage: 'View messages from contact forms',
         subject: 'Subject',
+        recruitmentPortal: 'Recruitment Portal',
+        applicants: 'Applicants',
+        applicantsManage: 'View and manage job applications',
+        applicationDate: 'Application Date',
+        cv: 'CV',
+        notes: 'Notes',
+        feedback: 'Feedback',
+        pending: 'Pending',
+        inprogress: 'In Progress',
+        responded: 'Responded',
+        interview: 'Interview',
+        rejected: 'Rejected',
+        hired: 'Hired',
+        onHold: 'On Hold',
+        viewJob: 'View Job',
+        backToJobs: 'Back to Jobs',
+        changeStatus: 'Change Status',
+        addNote: 'Add Note',
+        downloadCV: 'Download CV',
+        close: 'Close',
+        print: 'Print',
     },
     ar: {
         overview: 'نظرة عامة', news: 'الأخبار', schools: 'المدارس', jobs: 'الوظائف الشاغرة',
@@ -190,10 +233,15 @@ export const UI: Record<Lang, Record<string, string>> = {
         articleSaved: 'تم حفظ المقال بنجاح', articleDeleted: 'تم حذف المقال',
         articleAdded: 'تمت إضافة مقال جديد!', slideSaved: 'تم حفظ الشريحة',
         aboutSaved: 'تم حفظ قسم التعريف!', schoolSaved: 'تم حفظ المدرسة!',
-        required: 'العنوان والتاريخ مطلوبان',
+        required: 'الرجاء ملء جميع الحقول المطلوبة',
         jobSaved: 'تم حفظ الوظيفة بنجاح',
         jobDeleted: 'تم حذف الوظيفة',
         jobAdded: 'تمت إضافة وظيفة جديدة!',
+        jobImage: 'صورة الوظيفة',
+        uploadImage: 'رفع صورة',
+        previewImage: 'معاينة الصورة',
+        dragDrop: 'اسحب وأفلت أو انقر هنا',
+        previewCV: 'معاينة السيرة الذاتية',
         homeUpdated: 'تم تحديث الصفحة الرئيسية',
         chairman: 'كلمة الرئيس',
         chairmanManage: 'إدارة صورة واقتباس الرئيس',
@@ -229,6 +277,27 @@ export const UI: Record<Lang, Record<string, string>> = {
         contactMessages: 'رسائل التواصل',
         contactMessagesManage: 'عرض رسائل نماذج التواصل',
         subject: 'الموضوع',
+        recruitmentPortal: 'بوابة التوظيف',
+        applicants: 'المتقدمون',
+        applicantsManage: 'عرض وإدارة طلبات التوظيف',
+        applicationDate: 'تاريخ التقديم',
+        cv: 'السيرة الذاتية',
+        notes: 'ملاحظات',
+        feedback: 'ملاحظات',
+        pending: 'قيد الانتظار',
+        inprogress: 'قيد المعالجة',
+        responded: 'تم الرد',
+        interview: 'مقابلة',
+        rejected: 'مرفوض',
+        hired: 'مقبول',
+        onHold: 'قيد الانتظار',
+        viewJob: 'عرض الوظيفة',
+        backToJobs: 'العودة إلى الوظائف',
+        changeStatus: 'تغيير الحالة',
+        addNote: 'إضافة ملاحظة',
+        downloadCV: 'تحميل السيرة الذاتية',
+        close: 'إغلاق',
+        print: 'طباعة',
     }
 };
 

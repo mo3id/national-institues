@@ -67,5 +67,6 @@ export const getDashJobSchema = () => z.object({
     locationAr: z.string().min(2, { message: 'Arabic location is required' }),
     type: z.string().min(1, { message: 'Type is required' }),
     description: z.string().min(10, { message: 'Description is required' }),
-    descriptionAr: z.string().min(10, { message: 'Arabic description is required' })
+    descriptionAr: z.string().min(10, { message: 'Arabic description is required' }),
+    image: z.string().min(1, { message: 'Image is required' }).optional()
 });

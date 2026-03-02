@@ -5,10 +5,11 @@ import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
 import { Briefcase, MapPin, Building2, Clock, ArrowRight, ArrowLeft, X, UploadCloud, CheckCircle2 } from 'lucide-react';
 import { getJobApplicationSchema } from '@/utils/validations';
+import type { JobApplication } from '@/types';
 
 const Jobs: React.FC = () => {
     const { lang, isRTL, t: translationsRoot } = useLanguage();
-    const { data: siteData } = useSiteData();
+    const { data: siteData, updateData } = useSiteData();
     const t = translationsRoot.careers;
     const JOBS_DATA = siteData.jobs;
     const [filter, setFilter] = useState<string>(t.allDepts);
@@ -27,7 +28,15 @@ const Jobs: React.FC = () => {
         if (errors[e.target.name]) setErrors(prev => ({ ...prev, [e.target.name]: '' }));
     };
 
-    const handleApply = (e: React.FormEvent) => {
+    const toBase64 = (file: File): Promise<string> =>
+        new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = err => reject(err);
+        });
+
+    const handleApply = async (e: React.FormEvent) => {
         e.preventDefault();
         const res = getJobApplicationSchema(lang).safeParse({ ...formData, file: selectedFile, job: selectedJob?.title || '' });
         if (!res.success) {
@@ -37,6 +46,27 @@ const Jobs: React.FC = () => {
             return;
         }
         setErrors({});
+
+        // build application object
+        const cvData = selectedFile ? await toBase64(selectedFile) : '';
+        const newApp: JobApplication = {
+            id: String(Date.now()),
+            jobId: selectedJob?.id || '',
+            jobTitle: lang === 'ar' ? selectedJob?.titleAr || '' : selectedJob?.title || '',
+            fullName: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            experience: formData.experience,
+            coverLetter: formData.coverLetter,
+            cvName: selectedFile?.name || '',
+            cvData,
+            appliedAt: new Date().toISOString(),
+            status: 'Pending',
+            notes: ''
+        };
+        const updatedApps = [...(siteData.jobApplications || []), newApp];
+        updateData('jobApplications', updatedApps);
+
         setIsSubmitted(true);
     };
 
@@ -122,7 +152,7 @@ const Jobs: React.FC = () => {
                                         {/* Background Cover Image with margin */}
                                         <div className="relative h-40 w-full rounded-[20px] overflow-hidden bg-gray-50 mb-6">
                                             <img
-                                                src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80"
+                                                src={job.image || "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80"}
                                                 alt="Cover"
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                             />

@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { SCHOOLS, NEWS, JOBS } from '@/constants';
-import { School, NewsItem, JobVacancy } from '@/types';
+import { School, NewsItem, JobVacancy, JobApplication } from '@/types';
 
 export interface SiteData {
     schools: School[];
     news: NewsItem[];
     jobs: JobVacancy[];
+    jobApplications: JobApplication[];
     heroSlides: any[];
     aboutData: any;
     complaints: any[];
@@ -60,6 +61,7 @@ export const DEFAULT_SITE_DATA: SiteData = {
     schools: SCHOOLS || [],
     news: NEWS || [],
     jobs: JOBS || [],
+    jobApplications: [],
     complaints: [],
     contactMessages: [],
     heroSlides: [

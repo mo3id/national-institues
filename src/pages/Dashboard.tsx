@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { NEWS, SCHOOLS } from '@/constants';
 import {
-  Section, Theme, Lang, DashNewsItem, DashSchool, DashJob, HeroSlide, AboutData, AdminProfile,
+  Section, Theme, Lang, DashNewsItem, DashSchool, DashJob, DashJobApplication, HeroSlide, AboutData, AdminProfile,
   UI, HERO_IMAGES
 } from './dashboard-components/types';
 import { ModalWrap, EditNewsForm, EditHeroForm, EditSchoolForm, EditJobForm } from './dashboard-components/Modals';
@@ -69,8 +69,9 @@ const CSS = `
     --text2: #64748b; 
     --accent: #4f46e5; 
     --accent2: #6366f1; 
-    --sidebar: #0b0f19; 
-    --sidebar2: #151b2b; 
+    /* sidebar in light mode should match surface colors */
+    --sidebar: var(--surface); 
+    --sidebar2: var(--surface2); 
     --danger: #ef4444; 
     --success: #10b981; 
     --warn: #f59e0b; 
@@ -126,11 +127,18 @@ const CSS = `
   .dash-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-sm); transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease; }
   .dash-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: rgba(99, 102, 241, 0.2); }
   
-  .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 12px; cursor: pointer; transition: all 0.25s ease; color: rgba(255,255,255,0.5); white-space: nowrap; overflow: hidden; margin: 4px 12px; position: relative; }
-  .nav-item:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.9); transform: translateX(4px); }
+  /* navigation item colors adapt to theme */
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 12px; cursor: pointer; transition: all 0.25s ease; color: var(--text2); white-space: nowrap; overflow: hidden; margin: 4px 12px; position: relative; }
+  .dash-root.dark .nav-item { color: rgba(255,255,255,0.5); }
+
+  .nav-item:hover { background: rgba(0,0,0,0.05); color: var(--text); transform: translateX(4px); }
+  .dash-root.dark .nav-item:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.9); }
   .dash-root.rtl .nav-item:hover { transform: translateX(-4px); }
-  .nav-item.active { background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.05)); color: #fff; font-weight: 700; transform: translateX(4px); }
+
+  .nav-item.active { background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.05)); color: var(--text); font-weight: 700; transform: translateX(4px); }
+  .dash-root.dark .nav-item.active { color: #fff; }
   .dash-root.rtl .nav-item.active { transform: translateX(-4px); }
+
   .nav-item.active::before { content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 4px; background: linear-gradient(180deg, #818cf8, #c084fc); border-radius: 0 4px 4px 0; box-shadow: 2px 0 8px rgba(129, 140, 248, 0.5); }
   .dash-root.rtl .nav-item.active::before { left: auto; right: 0; border-radius: 4px 0 0 4px; box-shadow: -2px 0 8px rgba(129, 140, 248, 0.5); }
   
@@ -266,6 +274,7 @@ const Dashboard: React.FC = () => {
   const [newsList, setNewsList] = useState<DashNewsItem[]>([]);
   const [schools, setSchools] = useState<DashSchool[]>([]);
   const [jobs, setJobs] = useState<DashJob[]>([]);
+  const [applications, setApplications] = useState<DashJobApplication[]>([]);
   const [hero, setHero] = useState<HeroSlide[]>([]);
   const [complaints, setComplaints] = useState<any[]>([]);
   const [contactMessages, setContactMessages] = useState<any[]>([]);
@@ -282,6 +291,7 @@ const Dashboard: React.FC = () => {
       setNewsList(prepareNews(siteData.news || []));
       setSchools((siteData.schools || []).map(s => ({ ...s })));
       setJobs((siteData.jobs || []).map(j => ({ ...j })));
+      setApplications((siteData.jobApplications || []).map(a => ({ ...a })));
       setComplaints(siteData.complaints || []);
       setContactMessages(siteData.contactMessages || []);
       setHero(siteData.heroSlides || []);
@@ -302,6 +312,14 @@ const Dashboard: React.FC = () => {
   const [editSchoolId, setEditSchoolId] = useState<string | null>(null);
   const [editJobId, setEditJobId] = useState<string | null>(null);
   const [addJobOpen, setAddJobOpen] = useState(false);
+  const [selectedRecruitmentJobId, setSelectedRecruitmentJobId] = useState<string | null>(null);
+  const [selectedApplicant, setSelectedApplicant] = useState<DashJobApplication | null>(null);
+  const [applicantModalOpen, setApplicantModalOpen] = useState(false);
+
+  const [selectedComplaint, setSelectedComplaint] = useState<any | null>(null);
+  const [complaintModalOpen, setComplaintModalOpen] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<any | null>(null);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
   const [editAbout, setEditAbout] = useState(false);
   const [editHome, setEditHome] = useState(false);
   const [newsSearch, setNewsSearch] = useState('');
@@ -311,7 +329,7 @@ const Dashboard: React.FC = () => {
   const [complaintsFilterType, setComplaintsFilterType] = useState('All');
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   const [newArt, setNewArt] = useState<Partial<DashNewsItem>>({ title: '', titleAr: '', summary: '', summaryAr: '', date: '', image: '', published: true });
-  const [newJob, setNewJob] = useState<Partial<DashJob>>({ title: '', titleAr: '', department: '', departmentAr: '', location: '', locationAr: '', type: '', typeAr: '', description: '', descriptionAr: '' });
+  const [newJob, setNewJob] = useState<Partial<DashJob>>({ title: '', titleAr: '', department: '', departmentAr: '', location: '', locationAr: '', type: '', typeAr: '', description: '', descriptionAr: '', image: '' });
   const [profileDraft, setProfileDraft] = useState({ ...profile });
   const [addSchoolOpen, setAddSchoolOpen] = useState(false);
   const [newSchool, setNewSchool] = useState<Partial<DashSchool>>({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [] });
@@ -417,13 +435,14 @@ const Dashboard: React.FC = () => {
       type: newJob.type || '',
       typeAr: newJob.typeAr || '',
       description: newJob.description || '',
-      descriptionAr: newJob.descriptionAr || ''
+      descriptionAr: newJob.descriptionAr || '',
+      image: newJob.image || ''
     };
     const updated = [newEntry, ...jobs];
     setJobs(updated);
     updateData('jobs', updated);
     setAddJobOpen(false);
-    setNewJob({ title: '', titleAr: '', department: '', departmentAr: '', location: '', locationAr: '', type: '', typeAr: '', description: '', descriptionAr: '' });
+    setNewJob({ title: '', titleAr: '', department: '', departmentAr: '', location: '', locationAr: '', type: '', typeAr: '', description: '', descriptionAr: '', image: '' });
     showToast(u.jobAdded);
   };
 
@@ -443,6 +462,7 @@ const Dashboard: React.FC = () => {
   const filtered = newsList.filter(n => n.title.toLowerCase().includes(newsSearch.toLowerCase()) || n.titleAr.includes(newsSearch));
   const filteredSchools = schools.filter(s => s.name.toLowerCase().includes(schoolSearch.toLowerCase()) || s.governorate.toLowerCase().includes(schoolSearch.toLowerCase()));
   const filteredJobs = jobs.filter(j => j.title.toLowerCase().includes(jobSearch.toLowerCase()) || j.titleAr.includes(jobSearch) || j.department.toLowerCase().includes(jobSearch.toLowerCase()));
+  const filteredApplications = selectedRecruitmentJobId ? applications.filter(a => a.jobId === selectedRecruitmentJobId) : [];
 
   const filteredComplaints = complaints.filter(c => {
     const term = complaintsSearch.toLowerCase();
@@ -458,6 +478,7 @@ const Dashboard: React.FC = () => {
     { id: 'news', label: u.news, icon: Newspaper },
     { id: 'schools', label: u.schools, icon: School },
     { id: 'jobs', label: u.jobs, icon: Briefcase },
+    { id: 'recruitment', label: u.recruitmentPortal, icon: Briefcase },
     { id: 'hero', label: u.hero, icon: Image },
     { id: 'chairman', label: u.chairman, icon: Users },
     { id: 'institute', label: u.institute, icon: Info },
@@ -479,7 +500,7 @@ const Dashboard: React.FC = () => {
           <div style={{ width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'var(--surface)', borderRadius: 12, padding: 4 }}>
             <NISLogo className="h-full w-full" showText={false} />
           </div>
-          {!collapsed && <div><p style={{ color: 'white', fontWeight: 800, fontSize: 14, lineHeight: 1.2 }}>NIS Admin</p><p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11 }}>Content Manager</p></div>}
+          {!collapsed && <div><p style={{ color: 'var(--text)', fontWeight: 800, fontSize: 14, lineHeight: 1.2 }}>NIS Admin</p><p style={{ color: 'var(--text2)', fontSize: 11 }}>Content Manager</p></div>}
         </div>
         <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
           {!collapsed && <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '0 20px', marginBottom: 6 }}>{u.overview}</p>}
@@ -694,6 +715,119 @@ const Dashboard: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {/* ── Recruitment Portal ── */}
+          {section === 'recruitment' && (
+            <div className="section-enter">
+              {/* if no job selected show list */}
+              {!selectedRecruitmentJobId ? (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                    <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.recruitmentPortal}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.applicantsManage}</p></div>
+                  </div>
+                  <div style={{ position: 'relative', marginBottom: 18, maxWidth: 320 }}>
+                    <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 14, right: isRTL ? 14 : 'auto', top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: 'var(--text2)' }} />
+                    <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={jobSearch} onChange={e => setJobSearch(e.target.value)} />
+                  </div>
+                  <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
+                    <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
+                      <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
+                        <tr>
+                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.title}</th>
+                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.department}</th>
+                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.location}</th>
+                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.actions}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredJobs.map((job, i) => (
+                          <tr key={job.id} style={{ cursor: 'pointer', borderBottom: i === filteredJobs.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onClick={() => setSelectedRecruitmentJobId(job.id)} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                            <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
+                              {job.image && <img src={job.image} alt="thumb" style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6 }} />}
+                              <span>{lang === 'ar' ? job.titleAr : job.title}</span>
+                            </td>
+                            <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{lang === 'ar' ? job.departmentAr : job.department}</td>
+                            <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{lang === 'ar' ? job.locationAr : job.location}</td>
+                            <td style={{ padding: '16px 24px', color: 'var(--accent)', fontSize: 13 }}>{u.viewJob}</td>
+                          </tr>
+                        ))}
+                        {filteredJobs.length === 0 && <tr><td colSpan={4} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><Briefcase style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></td></tr>}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <button className="dash-btn dash-btn-ghost" onClick={() => setSelectedRecruitmentJobId(null)} style={{ marginBottom: 16 }}><ArrowLeft style={{ width: 14, height: 14 }} /> {u.backToJobs}</button>
+                  <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
+                    <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
+                      <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
+                        <tr>
+                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.applicants}</th>
+                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.applicationDate}</th>
+                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.phone}</th>
+                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.status}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredApplications.map((app, i) => (
+                          <tr key={app.id} style={{ cursor: 'pointer', borderBottom: i === filteredApplications.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onClick={() => { setSelectedApplicant(app); setApplicantModalOpen(true); }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                            <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{app.fullName}</td>
+                            <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{new Date(app.appliedAt).toLocaleDateString()}</td>
+                            <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }} dir="ltr">{app.phone}</td>
+                            <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}><span style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--surface2)', fontSize: 11, fontWeight: 700 }}>{u[app.status.toLowerCase() as keyof typeof u] || app.status}</span></td>
+                          </tr>
+                        ))}
+                        {filteredApplications.length === 0 && <tr><td colSpan={4} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><Briefcase style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></td></tr>}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+
+              {/* applicant detail modal */}
+              {applicantModalOpen && selectedApplicant && (
+                <ModalWrap title={u.applicants} onClose={() => setApplicantModalOpen(false)}>
+                  <div className="space-y-4">
+                    <p><strong>{u.applicants}:</strong> {selectedApplicant.fullName}</p>
+                    <p><strong>{u.email}:</strong> {selectedApplicant.email}</p>
+                    <p><strong>{u.phone}:</strong> {selectedApplicant.phone}</p>
+                    <p><strong>{u.applicationDate}:</strong> {new Date(selectedApplicant.appliedAt).toLocaleString()}</p>
+                    <p><strong>{u.cv}:</strong> <a href={selectedApplicant.cvData} download={selectedApplicant.cvName}>{u.downloadCV}</a></p>
+                    {selectedApplicant.cvData && (
+                      <div className="mt-2">
+                        <p className="dash-label">{u.previewCV}</p>
+                        <iframe src={selectedApplicant.cvData} width="100%" height="400px" className="border" title="cv preview" />
+                      </div>
+                    )}
+                    <div>
+                      <label className="dash-label">{u.status}</label>
+                      <select className="dash-input" value={selectedApplicant.status} onChange={e => setSelectedApplicant(a => a ? { ...a, status: e.target.value as any } : null)}>
+                        {['Pending','Interview','Rejected','Hired','On Hold'].map(st => (
+                          <option key={st} value={st}>{u[st.toLowerCase() as keyof typeof u] || st}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="dash-label">{u.notes}</label>
+                      <textarea className="dash-input dash-ta" value={selectedApplicant.notes || ''} onChange={e => setSelectedApplicant(a => a ? { ...a, notes: e.target.value } : null)} />
+                    </div>
+                    <div className="dash-form-actions">
+                      <button className="dash-btn dash-btn-primary" onClick={() => {
+                        if (!selectedApplicant) return;
+                        const updated = applications.map(a => a.id === selectedApplicant.id ? selectedApplicant : a);
+                        setApplications(updated);
+                        updateData('jobApplications', updated);
+                        setApplicantModalOpen(false);
+                        showToast(u.feedback+' saved');
+                      }}>{u.save}</button>
+                      <button className="dash-btn dash-btn-ghost" onClick={() => setApplicantModalOpen(false)}>{u.cancel}</button>
+                    </div>
+                  </div>
+                </ModalWrap>
+              )}
             </div>
           )}
 
@@ -1018,11 +1152,12 @@ const Dashboard: React.FC = () => {
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.school}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.messageType}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.message}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.status}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredComplaints.length > 0 ? filteredComplaints.map((c, i) => (
-                      <tr key={i} style={{ borderBottom: i === filteredComplaints.length - 1 ? 'none' : '1px solid var(--border)' }}>
+                      <tr key={i} style={{ cursor: 'pointer', borderBottom: i === filteredComplaints.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onClick={() => { setSelectedComplaint(c); setComplaintModalOpen(true); }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
                         <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{c.fullName}</td>
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }} dir="ltr">{c.phone}</td>
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{c.school}</td>
@@ -1066,7 +1201,7 @@ const Dashboard: React.FC = () => {
                   </thead>
                   <tbody>
                     {contactMessages.length > 0 ? contactMessages.map((c, i) => (
-                      <tr key={i} style={{ borderBottom: i === contactMessages.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                      <tr key={i} style={{ cursor: 'pointer', borderBottom: i === contactMessages.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onClick={() => { setSelectedContact(c); setContactModalOpen(true); }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
                         <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{c.fullName}</td>
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{c.email}</td>
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{c.subject}</td>
@@ -1165,6 +1300,57 @@ const Dashboard: React.FC = () => {
       {editJobId && (
         <ModalWrap title={lang === 'ar' ? 'تعديل الوظيفة' : 'Edit Vacancy'} onClose={() => setEditJobId(null)}>
           <EditJobForm job={jobs.find(j => j.id === editJobId)!} lang={lang} onSave={saveJob} onCancel={() => setEditJobId(null)} />
+        </ModalWrap>
+      )}
+
+      {/* complaint detail modal */}
+      {complaintModalOpen && selectedComplaint && (
+        <ModalWrap title={lang === 'ar' ? 'تفاصيل الشكوى' : 'Complaint Details'} onClose={() => setComplaintModalOpen(false)}>
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+            <p><strong>{u.senderName}:</strong> {selectedComplaint.fullName}</p>
+            <p><strong>{u.phone}:</strong> {selectedComplaint.phone}</p>
+            <p><strong>{u.school}:</strong> {selectedComplaint.school}</p>
+            <p><strong>{u.messageType}:</strong> {selectedComplaint.messageType}</p>
+            <p><strong>{u.message}:</strong></p>
+            <p>{selectedComplaint.message}</p>
+            <div>
+              <label className="dash-label">{u.status}</label>
+              <select className="dash-input" value={selectedComplaint.status || 'Pending'} onChange={e => setSelectedComplaint(c => c ? { ...c, status: e.target.value } : null)}>
+                {['Pending','In Progress','Responded'].map(st => (
+                  <option key={st} value={st}>{u[st.toLowerCase().replace(/ /g,'') as keyof typeof u] || st}</option>
+                ))}
+              </select>
+            </div>
+            <div className="dash-form-actions">
+              <button className="dash-btn dash-btn-primary" onClick={() => {
+                if (!selectedComplaint) return;
+                const updated = complaints.map(c => c === selectedComplaint ? selectedComplaint : c);
+                setComplaints(updated);
+                updateData('complaints', updated);
+                setComplaintModalOpen(false);
+                showToast(u.status+' updated');
+              }}>{u.save}</button>
+              <button className="dash-btn dash-btn-ghost" onClick={() => setComplaintModalOpen(false)}>{u.close || u.cancel}</button>
+            </div>
+          </div>
+        </ModalWrap>
+      )}
+
+      {/* contact message detail modal */}
+      {contactModalOpen && selectedContact && (
+        <ModalWrap title={lang === 'ar' ? 'تفاصيل الرسالة' : 'Message Details'} onClose={() => setContactModalOpen(false)}>
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+            <p><strong>{u.senderName}:</strong> {selectedContact.fullName}</p>
+            <p><strong>{u.email}:</strong> {selectedContact.email}</p>
+            <p><strong>{u.subject}:</strong> {selectedContact.subject}</p>
+            <p><strong>{u.date}:</strong> {selectedContact.date}</p>
+            <p><strong>{u.message}:</strong></p>
+            <p>{selectedContact.message}</p>
+            <div className="flex gap-2 mt-4">
+              <button className="dash-btn dash-btn-ghost" onClick={() => window.print()}>{u.print}</button>
+              <button className="dash-btn dash-btn-ghost" onClick={() => setContactModalOpen(false)}>{u.close || u.cancel}</button>
+            </div>
+          </div>
         </ModalWrap>
       )}
 
