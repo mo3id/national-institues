@@ -1,11 +1,12 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
 import { SCHOOLS } from '@/constants';
-import { Send, CheckCircle } from 'lucide-react';
+import { Phone, Mail, MessageSquare, CheckCircle, Store, GraduationCap, MapPin, Loader2, Send } from 'lucide-react';
 import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
+import { CustomSelect } from '@/components/common/FormControls';
+import { getComplaintSchema } from '@/utils/validations';
 
 const Complaints: React.FC = () => {
   const { lang, isRTL, t: translationsRoot } = useLanguage();
@@ -16,18 +17,33 @@ const Complaints: React.FC = () => {
     fullName: '',
     phone: '',
     email: '',
-    messageType: (t?.complaints?.types || [])[0] || '',
+    messageType: '',
     school: '',
     message: ''
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string, value: string } }) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) setErrors(prev => ({ ...prev, [e.target.name]: '' }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const validationResult = getComplaintSchema(lang).safeParse(formData);
+    if (!validationResult.success) {
+      const newErrors: Record<string, string> = {};
+      validationResult.error.issues.forEach(err => {
+        if (err.path[0] && !newErrors[err.path[0] as string]) {
+          newErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(newErrors);
+      return;
+    }
+    setErrors({});
+
     setSubmitted(true);
 
     const newComplaint = {
@@ -90,7 +106,7 @@ const Complaints: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
+                  <form onSubmit={handleSubmit} className="space-y-8 relative z-10" noValidate>
                     <div className="text-start">
                       <h3 className="text-3xl font-bold text-slate-900 mb-2">
                         {lang === 'ar' ? siteData.formSettings?.contactFormTitleAr : siteData.formSettings?.contactFormTitle}
@@ -111,10 +127,10 @@ const Complaints: React.FC = () => {
                           name="fullName"
                           value={formData.fullName}
                           onChange={handleChange}
-                          required
-                          className={`w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all ${isRTL ? 'text-right' : 'text-left'}`}
+                          className={`w-full bg-slate-50 border ${errors.fullName ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-[#1e3a8a]'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${isRTL ? 'text-right' : 'text-left'}`}
                           placeholder={t?.complaints?.placeholders?.name}
                         />
+                        {errors.fullName && <p className="text-red-500 text-xs font-bold mt-1">{errors.fullName}</p>}
                       </div>
                       <div className="space-y-2">
                         <label className={`block font-bold text-slate-700 ${isRTL ? 'text-sm' : 'text-xs uppercase tracking-wider'}`}>
@@ -125,11 +141,11 @@ const Complaints: React.FC = () => {
                           name="phone"
                           value={formData.phone}
                           onChange={handleChange}
-                          required
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all text-left"
+                          className={`w-full bg-slate-50 border ${errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-[#1e3a8a]'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all text-left`}
                           placeholder={t?.complaints?.placeholders?.phone}
                           dir="ltr"
                         />
+                        {errors.phone && <p className="text-red-500 text-xs font-bold mt-1">{errors.phone}</p>}
                       </div>
                     </div>
 
@@ -143,11 +159,11 @@ const Complaints: React.FC = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        required
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all text-left"
+                        className={`w-full bg-slate-50 border ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-[#1e3a8a]'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all text-left`}
                         placeholder={t?.complaints?.placeholders?.email}
                         dir="ltr"
                       />
+                      {errors.email && <p className="text-red-500 text-xs font-bold mt-1">{errors.email}</p>}
                     </div>
 
                     {/* Message Type & School */}
@@ -160,12 +176,13 @@ const Complaints: React.FC = () => {
                           name="messageType"
                           value={formData.messageType}
                           onChange={handleChange}
-                          className={`w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all ${isRTL ? 'text-right' : 'text-left'}`}
+                          className={`w-full bg-slate-50 border ${errors.messageType ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-[#1e3a8a]'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${isRTL ? 'text-right' : 'text-left'}`}
                         >
                           {messageTypes.map((type: string) => (
                             <option key={type} value={type}>{type}</option>
                           ))}
                         </select>
+                        {errors.messageType && <p className="text-red-500 text-xs font-bold mt-1">{errors.messageType}</p>}
                       </div>
                       <div className="space-y-2">
                         <label className={`block font-bold text-slate-700 ${isRTL ? 'text-sm' : 'text-xs uppercase tracking-wider'}`}>
@@ -175,8 +192,7 @@ const Complaints: React.FC = () => {
                           name="school"
                           value={formData.school}
                           onChange={handleChange}
-                          required
-                          className={`w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all ${isRTL ? 'text-right' : 'text-left'}`}
+                          className={`w-full bg-slate-50 border ${errors.school ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-[#1e3a8a]'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${isRTL ? 'text-right' : 'text-left'}`}
                         >
                           <option value="">{t?.complaints?.placeholders?.school}</option>
                           {SCHOOLS.map(school => (
@@ -185,6 +201,7 @@ const Complaints: React.FC = () => {
                             </option>
                           ))}
                         </select>
+                        {errors.school && <p className="text-red-500 text-xs font-bold mt-1">{errors.school}</p>}
                       </div>
                     </div>
 
@@ -197,11 +214,11 @@ const Complaints: React.FC = () => {
                         name="message"
                         value={formData.message}
                         onChange={handleChange}
-                        required
                         rows={6}
-                        className={`w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all resize-none ${isRTL ? 'text-right' : 'text-left'}`}
+                        className={`w-full bg-slate-50 border ${errors.message ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-[#1e3a8a]'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all resize-none ${isRTL ? 'text-right' : 'text-left'}`}
                         placeholder={t?.complaints?.placeholders?.message}
                       />
+                      {errors.message && <p className="text-red-500 text-xs font-bold mt-1">{errors.message}</p>}
                     </div>
 
                     {/* Submit Button */}

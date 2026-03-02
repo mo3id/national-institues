@@ -6,16 +6,38 @@ import { useSiteData } from '@/context/DataContext';
 import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
 import { CustomSelect } from '@/components/common/FormControls';
+import { getJobApplicationSchema } from '@/utils/validations';
 
 const Careers: React.FC = () => {
   const { lang, isRTL, t: translationsRoot } = useLanguage();
   const t = translationsRoot.careers;
   const { data: siteData } = useSiteData();
   const [submitted, setSubmitted] = useState(false);
+  const [formData, setFormData] = useState({ fullName: '', email: '', phone: '' });
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleApply = (e: React.FormEvent) => {
     e.preventDefault();
+    const validationResult = getJobApplicationSchema(lang).safeParse({
+      ...formData,
+      job: selectedJob || '',
+      file: file
+    });
+
+    if (!validationResult.success) {
+      const newErrors: Record<string, string> = {};
+      validationResult.error.issues.forEach(err => {
+        if (err.path[0] && !newErrors[err.path[0] as string]) {
+          newErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     setSubmitted(true);
   };
 
@@ -107,7 +129,7 @@ const Careers: React.FC = () => {
                       <button onClick={() => setSubmitted(false)} className="text-blue-900 font-black uppercase tracking-widest text-xs underline decoration-2 underline-offset-4 hover:text-red-700 transition-colors">{t.applyAnother}</button>
                     </div>
                   ) : (
-                    <form onSubmit={handleApply} className="space-y-8 relative z-10">
+                    <form onSubmit={handleApply} className="space-y-8 relative z-10" noValidate>
                       <div>
                         <h3 className="text-2xl font-black text-[#1e3a8a] uppercase tracking-tight">
                           {lang === 'ar' ? siteData.formSettings?.jobFormTitleAr : siteData.formSettings?.jobFormTitle}
@@ -120,33 +142,85 @@ const Careers: React.FC = () => {
                       <div className="space-y-6">
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">{t.fullName}</label>
-                          <input required type="text" className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all font-medium text-blue-900" />
+                          <input
+                            type="text"
+                            className={`w-full px-5 py-4 bg-gray-50 border ${errors.fullName ? 'border-red-500 focus:ring-red-500' : 'border-gray-100 focus:ring-blue-100'} rounded-2xl focus:ring-4 focus:border-blue-500 outline-none transition-all font-medium text-blue-900`}
+                            value={formData.fullName}
+                            onChange={e => {
+                              setFormData(prev => ({ ...prev, fullName: e.target.value }));
+                              if (errors.fullName) setErrors(prev => ({ ...prev, fullName: '' }));
+                            }}
+                          />
+                          {errors.fullName && <p className="text-red-500 text-xs font-bold mt-1">{errors.fullName}</p>}
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">{t.email}</label>
-                          <input required type="email" className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all font-medium text-blue-900" />
+                          <input
+                            type="email"
+                            className={`w-full px-5 py-4 bg-gray-50 border ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-100 focus:ring-blue-100'} rounded-2xl focus:ring-4 focus:border-blue-500 outline-none transition-all font-medium text-blue-900`}
+                            value={formData.email}
+                            onChange={e => {
+                              setFormData(prev => ({ ...prev, email: e.target.value }));
+                              if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
+                            }}
+                          />
+                          {errors.email && <p className="text-red-500 text-xs font-bold mt-1">{errors.email}</p>}
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">{t.phone}</label>
+                          <input
+                            type="tel"
+                            className={`w-full px-5 py-4 bg-gray-50 border ${errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-gray-100 focus:ring-blue-100'} rounded-2xl focus:ring-4 focus:border-blue-500 outline-none transition-all font-medium text-blue-900`}
+                            value={formData.phone}
+                            onChange={e => {
+                              setFormData(prev => ({ ...prev, phone: e.target.value }));
+                              if (errors.phone) setErrors(prev => ({ ...prev, phone: '' }));
+                            }}
+                          />
+                          {errors.phone && <p className="text-red-500 text-xs font-bold mt-1">{errors.phone}</p>}
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">{t.jobRef}</label>
-                          <CustomSelect
-                            value={selectedJob || ''}
-                            onChange={setSelectedJob}
-                            options={[
-                              { value: '', label: t.selectJob },
-                              ...(siteData.jobs || []).map(j => ({ value: j.id, label: j.title }))
-                            ]}
-                            icon={<Briefcase className="h-4 w-4" />}
-                          />
+                          <div className={errors.job ? 'ring-2 ring-red-500 rounded-xl' : ''}>
+                            <CustomSelect
+                              value={selectedJob || ''}
+                              onChange={val => {
+                                setSelectedJob(val);
+                                if (errors.job) setErrors(prev => ({ ...prev, job: '' }));
+                              }}
+                              options={[
+                                { value: '', label: t.selectJob },
+                                ...(siteData.jobs || []).map(j => ({ value: j.id, label: j.title }))
+                              ]}
+                              icon={<Briefcase className="h-4 w-4" />}
+                            />
+                          </div>
+                          {errors.job && <p className="text-red-500 text-xs font-bold mt-1">{errors.job}</p>}
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">{t.upload}</label>
-                          <div className="border-2 border-dashed border-blue-50 rounded-2xl p-8 text-center hover:border-blue-400 transition-all cursor-pointer bg-blue-50/10 group">
+                          <label
+                            className={`border-2 border-dashed ${errors.file ? 'border-red-400 bg-red-50/10' : 'border-blue-50 hover:border-blue-400 bg-blue-50/10'} rounded-2xl p-8 text-center transition-all cursor-pointer group block`}
+                          >
                             <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                              <Upload className="h-6 w-6 text-blue-600" />
+                              <Upload className={`h-6 w-6 ${errors.file ? 'text-red-600' : 'text-blue-600'}`} />
                             </div>
-                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{t.uploadHint}</span>
-                            <input required type="file" className="hidden" accept=".pdf,.doc,.docx" />
-                          </div>
+                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                              {file ? file.name : t.uploadHint}
+                            </span>
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept=".pdf,.doc,.docx"
+                              onChange={e => {
+                                if (e.target.files?.[0]) {
+                                  setFile(e.target.files[0]);
+                                  if (errors.file) setErrors(prev => ({ ...prev, file: '' }));
+                                }
+                              }}
+                            />
+                          </label>
+                          {errors.file && <p className="text-red-500 text-xs font-bold mt-1">{errors.file}</p>}
                         </div>
                       </div>
                       <button type="submit" className="w-full bg-[#1e3a8a] text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-blue-900/20 hover:bg-blue-800 transition-all transform hover:-translate-y-1 active:scale-95">

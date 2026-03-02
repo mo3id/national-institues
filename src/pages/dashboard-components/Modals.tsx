@@ -3,6 +3,7 @@ import { Save, X, Plus } from 'lucide-react';
 import { DashNewsItem, HeroSlide, DashSchool, DashJob, Lang, UI } from './types';
 import { CustomSelect, CustomDatePicker, ImageUpload } from '../../components/common/FormControls';
 import { Filter, Calendar } from 'lucide-react';
+import { getDashNewsSchema, getDashHeroSchema, getDashSchoolSchema, getDashJobSchema } from '@/utils/validations';
 
 interface ModalWrapProps { title: string; onClose: () => void; children: React.ReactNode; }
 export const ModalWrap: React.FC<ModalWrapProps> = ({ title, onClose, children }) => (
@@ -21,31 +22,53 @@ export const ModalWrap: React.FC<ModalWrapProps> = ({ title, onClose, children }
 interface EditNewsProps { article: DashNewsItem; lang: Lang; onSave: (a: DashNewsItem) => void; onCancel: () => void; }
 export const EditNewsForm: React.FC<EditNewsProps> = ({ article, lang, onSave, onCancel }) => {
     const [d, setD] = useState({ ...article });
+    const [errors, setErrors] = useState<Record<string, string>>({});
     const u = UI[lang];
+
     return (
-        <form className="form-grid" onSubmit={e => { e.preventDefault(); onSave(d); }}>
+        <form className="form-grid" noValidate onSubmit={e => {
+            e.preventDefault();
+            const res = getDashNewsSchema().safeParse(d);
+            if (!res.success) {
+                const errs: Record<string, string> = {};
+                res.error.issues.forEach(i => errs[i.path[0] as string] = i.message);
+                setErrors(errs);
+                return;
+            }
+            onSave(d);
+        }}>
             <div className="form-col">
                 <label className="dash-label">{u.titleEn}</label>
-                <input className="dash-input" value={d.title} onChange={e => setD(p => ({ ...p, title: e.target.value }))} />
+                <input className={`dash-input ${errors.title ? 'border-red-500' : ''}`} value={d.title} onChange={e => { setD(p => ({ ...p, title: e.target.value })); if (errors.title) setErrors(p => ({ ...p, title: '' })) }} />
+                {errors.title && <span className="text-red-500 text-xs mt-1 block">{errors.title}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.titleAr}</label>
-                <input className="dash-input" dir="rtl" value={d.titleAr} onChange={e => setD(p => ({ ...p, titleAr: e.target.value }))} />
+                <input className={`dash-input ${errors.titleAr ? 'border-red-500' : ''}`} dir="rtl" value={d.titleAr} onChange={e => { setD(p => ({ ...p, titleAr: e.target.value })); if (errors.titleAr) setErrors(p => ({ ...p, titleAr: '' })) }} />
+                {errors.titleAr && <span className="text-red-500 text-xs mt-1 block">{errors.titleAr}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.summaryEn}</label>
-                <textarea className="dash-input dash-ta" value={d.summary} onChange={e => setD(p => ({ ...p, summary: e.target.value }))} />
+                <textarea className={`dash-input dash-ta ${errors.summary ? 'border-red-500' : ''}`} value={d.summary} onChange={e => { setD(p => ({ ...p, summary: e.target.value })); if (errors.summary) setErrors(p => ({ ...p, summary: '' })) }} />
+                {errors.summary && <span className="text-red-500 text-xs mt-1 block">{errors.summary}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.summaryAr}</label>
-                <textarea className="dash-input dash-ta" dir="rtl" value={d.summaryAr} onChange={e => setD(p => ({ ...p, summaryAr: e.target.value }))} />
+                <textarea className={`dash-input dash-ta ${errors.summaryAr ? 'border-red-500' : ''}`} dir="rtl" value={d.summaryAr} onChange={e => { setD(p => ({ ...p, summaryAr: e.target.value })); if (errors.summaryAr) setErrors(p => ({ ...p, summaryAr: '' })) }} />
+                {errors.summaryAr && <span className="text-red-500 text-xs mt-1 block">{errors.summaryAr}</span>}
             </div>
             <div>
                 <label className="dash-label">{u.date}</label>
-                <CustomDatePicker value={d.date} onChange={val => setD(p => ({ ...p, date: val }))} />
+                <div className={errors.date ? 'border border-red-500 rounded' : ''}>
+                    <CustomDatePicker value={d.date} onChange={val => { setD(p => ({ ...p, date: val })); if (errors.date) setErrors(p => ({ ...p, date: '' })) }} />
+                </div>
+                {errors.date && <span className="text-red-500 text-xs mt-1 block">{errors.date}</span>}
             </div>
             <div className="form-full">
-                <ImageUpload label={u.imageUrl} value={d.image} onChange={val => setD(p => ({ ...p, image: val }))} />
+                <div className={errors.image ? 'border border-red-500 p-2 rounded' : ''}>
+                    <ImageUpload label={u.imageUrl} value={d.image} onChange={val => { setD(p => ({ ...p, image: val })); if (errors.image) setErrors(p => ({ ...p, image: '' })) }} />
+                </div>
+                {errors.image && <span className="text-red-500 text-xs mt-1 block">{errors.image}</span>}
             </div>
             <div className="form-full flex items-center gap-3">
                 <input type="checkbox" id="ep" checked={d.published} onChange={e => setD(p => ({ ...p, published: e.target.checked }))} className="dash-cb" />
@@ -63,23 +86,41 @@ export const EditNewsForm: React.FC<EditNewsProps> = ({ article, lang, onSave, o
 interface EditHeroProps { slide: HeroSlide; lang: Lang; onSave: (s: HeroSlide) => void; onCancel: () => void; }
 export const EditHeroForm: React.FC<EditHeroProps> = ({ slide, lang, onSave, onCancel }) => {
     const [d, setD] = useState({ ...slide });
+    const [errors, setErrors] = useState<Record<string, string>>({});
     const u = UI[lang];
+
     return (
-        <form className="form-grid" onSubmit={e => { e.preventDefault(); onSave(d); }}>
+        <form className="form-grid" noValidate onSubmit={e => {
+            e.preventDefault();
+            const res = getDashHeroSchema().safeParse(d);
+            if (!res.success) {
+                const errs: Record<string, string> = {};
+                res.error.issues.forEach(i => errs[i.path[0] as string] = i.message);
+                setErrors(errs);
+                return;
+            }
+            onSave(d);
+        }}>
             <div className="form-full">
                 <label className="dash-label">{u.slideTitle}</label>
-                <input className="dash-input" value={d.title} onChange={e => setD(p => ({ ...p, title: e.target.value }))} />
+                <input className={`dash-input ${errors.title ? 'border-red-500' : ''}`} value={d.title} onChange={e => { setD(p => ({ ...p, title: e.target.value })); if (errors.title) setErrors(p => ({ ...p, title: '' })) }} />
+                {errors.title && <span className="text-red-500 text-xs mt-1 block">{errors.title}</span>}
             </div>
             <div className="form-full">
                 <label className="dash-label">{u.slideSubtitle}</label>
-                <input className="dash-input" value={d.subtitle} onChange={e => setD(p => ({ ...p, subtitle: e.target.value }))} />
+                <input className={`dash-input ${errors.subtitle ? 'border-red-500' : ''}`} value={d.subtitle} onChange={e => { setD(p => ({ ...p, subtitle: e.target.value })); if (errors.subtitle) setErrors(p => ({ ...p, subtitle: '' })) }} />
+                {errors.subtitle && <span className="text-red-500 text-xs mt-1 block">{errors.subtitle}</span>}
             </div>
             <div className="form-full">
                 <label className="dash-label">{u.slideDesc}</label>
-                <textarea className="dash-input dash-ta" value={d.description} onChange={e => setD(p => ({ ...p, description: e.target.value }))} />
+                <textarea className={`dash-input dash-ta ${errors.description ? 'border-red-500' : ''}`} value={d.description} onChange={e => { setD(p => ({ ...p, description: e.target.value })); if (errors.description) setErrors(p => ({ ...p, description: '' })) }} />
+                {errors.description && <span className="text-red-500 text-xs mt-1 block">{errors.description}</span>}
             </div>
             <div className="form-full">
-                <ImageUpload label={u.slideImage} value={d.image} onChange={val => setD(p => ({ ...p, image: val }))} />
+                <div className={errors.image ? 'border border-red-500 p-2 rounded' : ''}>
+                    <ImageUpload label={u.slideImage} value={d.image} onChange={val => { setD(p => ({ ...p, image: val })); if (errors.image) setErrors(p => ({ ...p, image: '' })) }} />
+                </div>
+                {errors.image && <span className="text-red-500 text-xs mt-1 block">{errors.image}</span>}
             </div>
             <div className="form-full dash-form-actions">
                 <button type="submit" className="dash-btn dash-btn-primary"><Save className="w-4 h-4" />{u.save}</button>
@@ -93,6 +134,7 @@ export const EditHeroForm: React.FC<EditHeroProps> = ({ slide, lang, onSave, onC
 interface EditSchoolProps { school: Partial<DashSchool>; lang: Lang; onSave: (s: DashSchool) => void; onCancel: () => void; }
 export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave, onCancel }) => {
     const [d, setD] = useState({ ...school });
+    const [errors, setErrors] = useState<Record<string, string>>({});
     const u = UI[lang];
     const governorates = [
         { value: 'Cairo', label: lang === 'ar' ? 'القاهرة' : 'Cairo' },
@@ -103,44 +145,70 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
     ];
 
     return (
-        <form className="form-grid" onSubmit={e => { e.preventDefault(); onSave(d as DashSchool); }}>
+        <form className="form-grid" noValidate onSubmit={e => {
+            e.preventDefault();
+            const res = getDashSchoolSchema().safeParse(d);
+            if (!res.success) {
+                const errs: Record<string, string> = {};
+                res.error.issues.forEach(i => errs[i.path[0] as string] = i.message);
+                setErrors(errs);
+                return;
+            }
+            onSave(d as DashSchool);
+        }}>
             <div className="form-full">
                 <label className="dash-label">{u.schoolName}</label>
-                <input className="dash-input" value={d.name || ''} onChange={e => setD(p => ({ ...p, name: e.target.value }))} />
+                <input className={`dash-input ${errors.name ? 'border-red-500' : ''}`} value={d.name || ''} onChange={e => { setD(p => ({ ...p, name: e.target.value })); if (errors.name) setErrors(p => ({ ...p, name: '' })) }} />
+                {errors.name && <span className="text-red-500 text-xs mt-1 block">{errors.name}</span>}
             </div>
             <div>
                 <label className="dash-label">{u.location}</label>
-                <input className="dash-input" value={d.location || ''} onChange={e => setD(p => ({ ...p, location: e.target.value }))} />
+                <input className={`dash-input ${errors.location ? 'border-red-500' : ''}`} value={d.location || ''} onChange={e => { setD(p => ({ ...p, location: e.target.value })); if (errors.location) setErrors(p => ({ ...p, location: '' })) }} />
+                {errors.location && <span className="text-red-500 text-xs mt-1 block">{errors.location}</span>}
             </div>
             <div>
                 <label className="dash-label">{u.governorate}</label>
-                <CustomSelect
-                    value={d.governorate || ''}
-                    onChange={val => {
-                        const gov = governorates.find(g => g.value === val);
-                        setD(p => ({ ...p, governorate: val, governorateAr: gov?.label }));
-                    }}
-                    options={governorates}
-                />
+                <div className={errors.governorate ? 'border border-red-500 rounded' : ''}>
+                    <CustomSelect
+                        value={d.governorate || ''}
+                        onChange={val => {
+                            const gov = governorates.find(g => g.value === val);
+                            setD(p => ({ ...p, governorate: val, governorateAr: gov?.label }));
+                            if (errors.governorate) setErrors(p => ({ ...p, governorate: '' }));
+                        }}
+                        options={governorates}
+                    />
+                </div>
+                {errors.governorate && <span className="text-red-500 text-xs mt-1 block">{errors.governorate}</span>}
             </div>
             <div>
                 <label className="dash-label">{u.principal}</label>
-                <input className="dash-input" value={d.principal || ''} onChange={e => setD(p => ({ ...p, principal: e.target.value }))} />
+                <input className={`dash-input ${errors.principal ? 'border-red-500' : ''}`} value={d.principal || ''} onChange={e => { setD(p => ({ ...p, principal: e.target.value })); if (errors.principal) setErrors(p => ({ ...p, principal: '' })) }} />
+                {errors.principal && <span className="text-red-500 text-xs mt-1 block">{errors.principal}</span>}
             </div>
             <div>
                 <label className="dash-label">{u.type}</label>
-                <CustomSelect
-                    value={d.type || ''}
-                    onChange={val => setD(p => ({ ...p, type: val }))}
-                    options={[
-                        { value: 'Language', label: lang === 'ar' ? 'لغات' : 'Language' },
-                        { value: 'National', label: lang === 'ar' ? 'قومي' : 'National' },
-                        { value: 'International', label: lang === 'ar' ? 'دولي' : 'International' }
-                    ]}
-                />
+                <div className={errors.type ? 'border border-red-500 rounded' : ''}>
+                    <CustomSelect
+                        value={d.type || ''}
+                        onChange={val => {
+                            setD(p => ({ ...p, type: val }));
+                            if (errors.type) setErrors(p => ({ ...p, type: '' }));
+                        }}
+                        options={[
+                            { value: 'Language', label: lang === 'ar' ? 'لغات' : 'Language' },
+                            { value: 'National', label: lang === 'ar' ? 'قومي' : 'National' },
+                            { value: 'International', label: lang === 'ar' ? 'دولي' : 'International' }
+                        ]}
+                    />
+                </div>
+                {errors.type && <span className="text-red-500 text-xs mt-1 block">{errors.type}</span>}
             </div>
             <div className="form-full">
-                <ImageUpload label={u.mainImage} value={d.mainImage || ''} onChange={val => setD(p => ({ ...p, mainImage: val }))} />
+                <div className={errors.mainImage ? 'border border-red-500 p-2 rounded' : ''}>
+                    <ImageUpload label={u.mainImage} value={d.mainImage || ''} onChange={val => { setD(p => ({ ...p, mainImage: val })); if (errors.mainImage) setErrors(p => ({ ...p, mainImage: '' })) }} />
+                </div>
+                {errors.mainImage && <span className="text-red-500 text-xs mt-1 block">{errors.mainImage}</span>}
             </div>
             <div className="form-full">
                 <ImageUpload label={u.logo} value={d.logo || ''} onChange={val => setD(p => ({ ...p, logo: val }))} />
@@ -195,6 +263,7 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
 interface EditJobProps { job: Partial<DashJob>; lang: Lang; onSave: (j: DashJob) => void; onCancel: () => void; }
 export const EditJobForm: React.FC<EditJobProps> = ({ job, lang, onSave, onCancel }) => {
     const [d, setD] = useState<Partial<DashJob>>({ ...job });
+    const [errors, setErrors] = useState<Record<string, string>>({});
     const u = UI[lang];
     const jobTypes = [
         { value: 'Full-time', labelAr: 'دوام كامل', labelEn: 'Full-time' },
@@ -204,49 +273,71 @@ export const EditJobForm: React.FC<EditJobProps> = ({ job, lang, onSave, onCance
     ];
 
     return (
-        <form className="form-grid" onSubmit={e => { e.preventDefault(); onSave(d as DashJob); }}>
+        <form className="form-grid" noValidate onSubmit={e => {
+            e.preventDefault();
+            const res = getDashJobSchema().safeParse(d);
+            if (!res.success) {
+                const errs: Record<string, string> = {};
+                res.error.issues.forEach(i => errs[i.path[0] as string] = i.message);
+                setErrors(errs);
+                return;
+            }
+            onSave(d as DashJob);
+        }}>
             <div className="form-col">
                 <label className="dash-label">{u.titleEn || 'Title (EN)'}</label>
-                <input className="dash-input" value={d.title || ''} onChange={e => setD(p => ({ ...p, title: e.target.value }))} />
+                <input className={`dash-input ${errors.title ? 'border-red-500' : ''}`} value={d.title || ''} onChange={e => { setD(p => ({ ...p, title: e.target.value })); if (errors.title) setErrors(p => ({ ...p, title: '' })) }} />
+                {errors.title && <span className="text-red-500 text-xs mt-1 block">{errors.title}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.titleAr || 'Title (AR)'}</label>
-                <input className="dash-input" dir="rtl" value={d.titleAr || ''} onChange={e => setD(p => ({ ...p, titleAr: e.target.value }))} />
+                <input className={`dash-input ${errors.titleAr ? 'border-red-500' : ''}`} dir="rtl" value={d.titleAr || ''} onChange={e => { setD(p => ({ ...p, titleAr: e.target.value })); if (errors.titleAr) setErrors(p => ({ ...p, titleAr: '' })) }} />
+                {errors.titleAr && <span className="text-red-500 text-xs mt-1 block">{errors.titleAr}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">Department (EN)</label>
-                <input className="dash-input" value={d.department || ''} onChange={e => setD(p => ({ ...p, department: e.target.value }))} />
+                <input className={`dash-input ${errors.department ? 'border-red-500' : ''}`} value={d.department || ''} onChange={e => { setD(p => ({ ...p, department: e.target.value })); if (errors.department) setErrors(p => ({ ...p, department: '' })) }} />
+                {errors.department && <span className="text-red-500 text-xs mt-1 block">{errors.department}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">القسم (عربي)</label>
-                <input className="dash-input" dir="rtl" value={d.departmentAr || ''} onChange={e => setD(p => ({ ...p, departmentAr: e.target.value }))} />
+                <input className={`dash-input ${errors.departmentAr ? 'border-red-500' : ''}`} dir="rtl" value={d.departmentAr || ''} onChange={e => { setD(p => ({ ...p, departmentAr: e.target.value })); if (errors.departmentAr) setErrors(p => ({ ...p, departmentAr: '' })) }} />
+                {errors.departmentAr && <span className="text-red-500 text-xs mt-1 block">{errors.departmentAr}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">Location (EN)</label>
-                <input className="dash-input" value={d.location || ''} onChange={e => setD(p => ({ ...p, location: e.target.value }))} />
+                <input className={`dash-input ${errors.location ? 'border-red-500' : ''}`} value={d.location || ''} onChange={e => { setD(p => ({ ...p, location: e.target.value })); if (errors.location) setErrors(p => ({ ...p, location: '' })) }} />
+                {errors.location && <span className="text-red-500 text-xs mt-1 block">{errors.location}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">الموقع (عربي)</label>
-                <input className="dash-input" dir="rtl" value={d.locationAr || ''} onChange={e => setD(p => ({ ...p, locationAr: e.target.value }))} />
+                <input className={`dash-input ${errors.locationAr ? 'border-red-500' : ''}`} dir="rtl" value={d.locationAr || ''} onChange={e => { setD(p => ({ ...p, locationAr: e.target.value })); if (errors.locationAr) setErrors(p => ({ ...p, locationAr: '' })) }} />
+                {errors.locationAr && <span className="text-red-500 text-xs mt-1 block">{errors.locationAr}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">Type</label>
-                <CustomSelect
-                    value={d.type || ''}
-                    onChange={val => {
-                        const type = jobTypes.find(t => t.value === val);
-                        setD(p => ({ ...p, type: val, typeAr: type?.labelAr }));
-                    }}
-                    options={jobTypes.map(t => ({ value: t.value, label: lang === 'ar' ? t.labelAr : t.labelEn }))}
-                />
+                <div className={errors.type ? 'border border-red-500 rounded' : ''}>
+                    <CustomSelect
+                        value={d.type || ''}
+                        onChange={val => {
+                            const type = jobTypes.find(t => t.value === val);
+                            setD(p => ({ ...p, type: val, typeAr: type?.labelAr }));
+                            if (errors.type) setErrors(p => ({ ...p, type: '' }));
+                        }}
+                        options={jobTypes.map(t => ({ value: t.value, label: lang === 'ar' ? t.labelAr : t.labelEn }))}
+                    />
+                </div>
+                {errors.type && <span className="text-red-500 text-xs mt-1 block">{errors.type}</span>}
             </div>
             <div className="form-full">
                 <label className="dash-label">Description (EN)</label>
-                <textarea className="dash-input dash-ta" value={d.description || ''} onChange={e => setD(p => ({ ...p, description: e.target.value }))} />
+                <textarea className={`dash-input dash-ta ${errors.description ? 'border-red-500' : ''}`} value={d.description || ''} onChange={e => { setD(p => ({ ...p, description: e.target.value })); if (errors.description) setErrors(p => ({ ...p, description: '' })) }} />
+                {errors.description && <span className="text-red-500 text-xs mt-1 block">{errors.description}</span>}
             </div>
             <div className="form-full">
                 <label className="dash-label">الوصف (عربي)</label>
-                <textarea className="dash-input dash-ta" dir="rtl" value={d.descriptionAr || ''} onChange={e => setD(p => ({ ...p, descriptionAr: e.target.value }))} />
+                <textarea className={`dash-input dash-ta ${errors.descriptionAr ? 'border-red-500' : ''}`} dir="rtl" value={d.descriptionAr || ''} onChange={e => { setD(p => ({ ...p, descriptionAr: e.target.value })); if (errors.descriptionAr) setErrors(p => ({ ...p, descriptionAr: '' })) }} />
+                {errors.descriptionAr && <span className="text-red-500 text-xs mt-1 block">{errors.descriptionAr}</span>}
             </div>
             <div className="form-full dash-form-actions">
                 <button type="submit" className="dash-btn dash-btn-primary"><Save className="w-4 h-4" />{u.save}</button>

@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { GraduationCap, Lock, Mail, Eye, EyeOff, Loader2, Sparkles, ArrowRight } from 'lucide-react';
 import PageTransition from '@/components/common/PageTransition';
+import { getLoginSchema } from '@/utils/validations';
 
 const LoginPage: React.FC = () => {
     const { isRTL, t: translationsRoot } = useLanguage();
@@ -13,11 +14,25 @@ const LoginPage: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
     const { login } = useAuth();
     const navigate = useNavigate();
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const result = getLoginSchema(isRTL).safeParse({ email, password });
+        if (!result.success) {
+            const newErrors: Record<string, string> = {};
+            result.error.issues.forEach(err => {
+                if (err.path[0] && !newErrors[err.path[0] as string]) {
+                    newErrors[err.path[0] as string] = err.message;
+                }
+            });
+            setFieldErrors(newErrors);
+            return;
+        }
+
+        setFieldErrors({});
         setLoading(true);
         setError('');
 
@@ -66,7 +81,7 @@ const LoginPage: React.FC = () => {
                                 </div>
                             )}
 
-                            <form onSubmit={handleSubmit} className="space-y-6">
+                            <form onSubmit={handleSubmit} className="space-y-6" noValidate>
                                 <div className="space-y-2 text-start">
                                     <label className={`text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ${isRTL ? 'mr-2' : 'ml-2'}`}>{t.email}</label>
                                     <div className="relative group/input">
@@ -74,12 +89,15 @@ const LoginPage: React.FC = () => {
                                         <input
                                             type="email"
                                             placeholder="admin@nis.edu.eg"
-                                            className={`w-full h-14 ${isRTL ? 'pr-14 pl-6' : 'pl-14 pr-6'} bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-600 focus:bg-white transition-all font-bold text-slate-700 placeholder:text-slate-300 text-start`}
+                                            className={`w-full h-14 ${isRTL ? 'pr-14 pl-6' : 'pl-14 pr-14'} bg-slate-50 border ${fieldErrors.email ? 'border-red-500 focus:ring-red-100' : 'border-slate-100 focus:ring-blue-100'} rounded-2xl outline-none focus:ring-4 focus:border-blue-600 focus:bg-white transition-all font-bold text-slate-700 placeholder:text-slate-300 text-start`}
                                             value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            required
+                                            onChange={(e) => {
+                                                setEmail(e.target.value);
+                                                if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: '' }));
+                                            }}
                                         />
                                     </div>
+                                    {fieldErrors.email && <p className="text-red-500 text-xs font-bold mt-1">{fieldErrors.email}</p>}
                                 </div>
 
                                 <div className="space-y-2 text-start">
@@ -89,10 +107,12 @@ const LoginPage: React.FC = () => {
                                         <input
                                             type={showPassword ? 'text' : 'password'}
                                             placeholder="••••••••"
-                                            className={`w-full h-14 ${isRTL ? 'pr-14 pl-14' : 'pl-14 pr-14'} bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-600 focus:bg-white transition-all font-bold text-slate-700 placeholder:text-slate-300 text-start`}
+                                            className={`w-full h-14 ${isRTL ? 'pr-14 pl-14' : 'pl-14 pr-14'} bg-slate-50 border ${fieldErrors.password ? 'border-red-500 focus:ring-red-100' : 'border-slate-100 focus:ring-blue-100'} rounded-2xl outline-none focus:ring-4 focus:border-blue-600 focus:bg-white transition-all font-bold text-slate-700 placeholder:text-slate-300 text-start`}
                                             value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            required
+                                            onChange={(e) => {
+                                                setPassword(e.target.value);
+                                                if (fieldErrors.password) setFieldErrors(prev => ({ ...prev, password: '' }));
+                                            }}
                                         />
                                         <button
                                             type="button"
@@ -102,6 +122,7 @@ const LoginPage: React.FC = () => {
                                             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                         </button>
                                     </div>
+                                    {fieldErrors.password && <p className="text-red-500 text-xs font-bold mt-1">{fieldErrors.password}</p>}
                                 </div>
 
                                 <div className="pt-4">

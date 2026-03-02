@@ -4,6 +4,7 @@ import { useSiteData } from '@/context/DataContext';
 import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
 import { Briefcase, MapPin, Building2, Clock, ArrowRight, ArrowLeft, X, UploadCloud, CheckCircle2 } from 'lucide-react';
+import { getJobApplicationSchema } from '@/utils/validations';
 
 const Jobs: React.FC = () => {
     const { lang, isRTL, t: translationsRoot } = useLanguage();
@@ -16,6 +17,28 @@ const Jobs: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+    // Form state
+    const [formData, setFormData] = useState({ fullName: '', email: '', phone: '', experience: '', coverLetter: '' });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+        if (errors[e.target.name]) setErrors(prev => ({ ...prev, [e.target.name]: '' }));
+    };
+
+    const handleApply = (e: React.FormEvent) => {
+        e.preventDefault();
+        const res = getJobApplicationSchema(lang).safeParse({ ...formData, file: selectedFile, job: selectedJob?.title || '' });
+        if (!res.success) {
+            const newErrs: Record<string, string> = {};
+            res.error.issues.forEach(i => newErrs[i.path[0] as string] = i.message);
+            setErrors(newErrs);
+            return;
+        }
+        setErrors({});
+        setIsSubmitted(true);
+    };
 
     // Prevent body scrolling when modal is open
     useEffect(() => {
@@ -213,34 +236,38 @@ const Jobs: React.FC = () => {
                                         </button>
                                     </div>
                                 ) : (
-                                    <form onSubmit={(e) => { e.preventDefault(); setIsSubmitted(true); }} className="space-y-6">
+                                    <form onSubmit={handleApply} className="space-y-6" noValidate>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="space-y-2 text-start">
                                                 <label className="text-sm font-bold text-slate-700">{t.fullName} <span className="text-red-500">*</span></label>
-                                                <input required type="text" className={`w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t.fullName} />
+                                                <input name="fullName" value={formData.fullName} onChange={handleChange} type="text" className={`w-full bg-slate-50 border ${errors.fullName ? 'border-red-500' : 'border-slate-200'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t.fullName} />
+                                                {errors.fullName && <p className="text-red-500 text-xs font-bold mt-1">{errors.fullName}</p>}
                                             </div>
                                             <div className="space-y-2 text-start">
                                                 <label className="text-sm font-bold text-slate-700">{t.email} <span className="text-red-500">*</span></label>
-                                                <input required type="email" className={`w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all text-left`} placeholder="example@email.com" />
+                                                <input name="email" value={formData.email} onChange={handleChange} type="email" className={`w-full bg-slate-50 border ${errors.email ? 'border-red-500' : 'border-slate-200'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all text-left`} placeholder="example@email.com" />
+                                                {errors.email && <p className="text-red-500 text-xs font-bold mt-1">{errors.email}</p>}
                                             </div>
                                             <div className="space-y-2 text-start">
                                                 <label className="text-sm font-bold text-slate-700">{t.phone} <span className="text-red-500">*</span></label>
-                                                <input required type="tel" className={`w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all text-left mt-1`} placeholder="+20 123 456 7890" />
+                                                <input name="phone" value={formData.phone} onChange={handleChange} type="tel" className={`w-full bg-slate-50 border ${errors.phone ? 'border-red-500' : 'border-slate-200'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all text-left mt-1`} placeholder="+20 123 456 7890" />
+                                                {errors.phone && <p className="text-red-500 text-xs font-bold mt-1">{errors.phone}</p>}
                                             </div>
                                             <div className="space-y-2 text-start">
                                                 <label className="text-sm font-bold text-slate-700">{t.experience}</label>
-                                                <select className={`w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                                <select name="experience" value={formData.experience} onChange={handleChange} className={`w-full bg-slate-50 border ${errors.experience ? 'border-red-500' : 'border-slate-200'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>
                                                     <option value="">{t.selectExp}</option>
                                                     <option value="0-2">{t.exp02}</option>
                                                     <option value="3-5">{t.exp35}</option>
                                                     <option value="5+">{t.exp5plus}</option>
                                                 </select>
+                                                {errors.experience && <p className="text-red-500 text-xs font-bold mt-1">{errors.experience}</p>}
                                             </div>
                                         </div>
 
                                         <div className="space-y-2 text-start">
                                             <label className="text-sm font-bold text-slate-700">{t.uploadCV} <span className="text-red-500">*</span></label>
-                                            <label className={`flex flex-col items-center justify-center w-full h-32 border-2 ${selectedFile ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-200 border-dashed bg-slate-50 hover:bg-[#1e3a8a]/5 hover:border-[#1e3a8a]'} rounded-2xl cursor-pointer transition-all mt-1 relative overflow-hidden`}>
+                                            <label className={`flex flex-col items-center justify-center w-full h-32 border-2 ${selectedFile ? 'border-emerald-500 bg-emerald-50/50' : errors.file ? 'border-red-500 bg-red-50' : 'border-slate-200 border-dashed bg-slate-50 hover:bg-[#1e3a8a]/5 hover:border-[#1e3a8a]'} rounded-2xl cursor-pointer transition-all mt-1 relative overflow-hidden`}>
                                                 {selectedFile ? (
                                                     <div className="flex flex-col items-center justify-center p-4 text-center w-full h-full">
                                                         <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mb-2">
@@ -251,8 +278,8 @@ const Jobs: React.FC = () => {
                                                     </div>
                                                 ) : (
                                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                        <UploadCloud className="w-8 h-8 mb-2 text-[#1e3a8a]/60" />
-                                                        <p className="text-sm text-slate-500 font-semibold mb-1">
+                                                        <UploadCloud className={`w-8 h-8 mb-2 ${errors.file ? 'text-red-500' : 'text-[#1e3a8a]/60'}`} />
+                                                        <p className={`text-sm font-semibold mb-1 ${errors.file ? 'text-red-500' : 'text-slate-500'}`}>
                                                             {t.uploadHint2}
                                                         </p>
                                                         <p className="text-xs text-slate-400">PDF, DOCX, DOC (Max: 5MB)</p>
@@ -260,21 +287,23 @@ const Jobs: React.FC = () => {
                                                 )}
                                                 <input
                                                     type="file"
-                                                    required
                                                     className="hidden"
                                                     accept=".pdf,.doc,.docx"
                                                     onChange={(e) => {
                                                         if (e.target.files && e.target.files[0]) {
                                                             setSelectedFile(e.target.files[0]);
+                                                            if (errors.file) setErrors(prev => ({ ...prev, file: '' }));
                                                         }
                                                     }}
                                                 />
                                             </label>
+                                            {errors.file && <p className="text-red-500 text-xs font-bold mt-1">{errors.file}</p>}
                                         </div>
 
                                         <div className="space-y-2 text-start">
                                             <label className="text-sm font-bold text-slate-700">{t.coverLetter}</label>
-                                            <textarea className={`w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all resize-none h-28 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t.coverLetterPlaceholder}></textarea>
+                                            <textarea name="coverLetter" value={formData.coverLetter} onChange={handleChange} className={`w-full bg-slate-50 border ${errors.coverLetter ? 'border-red-500' : 'border-slate-200'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all resize-none h-28 mt-1 ${isRTL ? 'text-right' : 'text-left'}`} placeholder={t.coverLetterPlaceholder}></textarea>
+                                            {errors.coverLetter && <p className="text-red-500 text-xs font-bold mt-1">{errors.coverLetter}</p>}
                                         </div>
 
                                         <div className="pt-4 flex justify-end">
