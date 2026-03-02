@@ -17,7 +17,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data, setData, updateData } = useDataStore();
     const queryClient = useQueryClient();
 
-    const { isLoading, error, data: apiData } = useQuery({
+    const { isLoading, error, data: apiData, refetch } = useQuery({
         queryKey: ['siteData'],
         queryFn: fetchSiteData,
         // Fallback or retry settings handled globally or here
@@ -26,7 +26,28 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     useEffect(() => {
         if (apiData) {
-            setData({ ...DEFAULT_SITE_DATA, ...apiData });
+            // Smart Merge: Don't override default mock data with empty arrays/objects from the API
+            const merged = { ...DEFAULT_SITE_DATA };
+
+            // Arrays
+            if (apiData.schools && apiData.schools.length > 0) merged.schools = apiData.schools;
+            if (apiData.news && apiData.news.length > 0) merged.news = apiData.news;
+            if (apiData.jobs && apiData.jobs.length > 0) merged.jobs = apiData.jobs;
+            if (apiData.heroSlides && apiData.heroSlides.length > 0) merged.heroSlides = apiData.heroSlides;
+            if (apiData.partners && apiData.partners.length > 0) merged.partners = apiData.partners;
+            if (apiData.galleryImages && apiData.galleryImages.length > 0) merged.galleryImages = apiData.galleryImages;
+
+            // Objects
+            if (apiData.aboutData && Object.keys(apiData.aboutData).length > 0) merged.aboutData = apiData.aboutData;
+            if (apiData.stats && Object.keys(apiData.stats).length > 0) merged.stats = apiData.stats;
+            if (apiData.homeData && Object.keys(apiData.homeData).length > 0) merged.homeData = apiData.homeData;
+            if (apiData.formSettings && Object.keys(apiData.formSettings).length > 0) merged.formSettings = apiData.formSettings;
+
+            // Arrays that can safely be empty if mock defaults are empty
+            if (apiData.complaints) merged.complaints = apiData.complaints;
+            if (apiData.contactMessages) merged.contactMessages = apiData.contactMessages;
+
+            setData(merged);
         }
     }, [apiData, setData]);
 
@@ -57,11 +78,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     if (error && !apiData) {
-        // If the fetching failed entirely AND no existing data was in cache/zustand override,
-        // Render the Error Page directly at the provider level for critical failure.
-        // However, we have DEFAULT_SITE_DATA. So it won't be a completely blank canvas.
-        // Let's console.warn the error so developers know it's offline fallback.
-        console.warn('API error, relying on default initial state.', error);
+        console.error('API Error details:', error);
+        return (
+            <div className="flex flex-col min-h-screen bg-[#fafcff]">
+                <ErrorPage error={error} onRetry={() => refetch()} />
+            </div>
+        );
     }
 
     return (
