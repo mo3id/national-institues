@@ -104,7 +104,7 @@ const App: React.FC = () => {
                           <Route path="/careers" element={<Jobs />} />
                           <Route path="/complaints" element={<Complaints />} />
                           <Route path="/contact" element={<ContactUs />} />
-                          <Route path="*" element={<ErrorPage />} />
+                          <Route path="*" element={<ErrorPage isNotFound={true} />} />
                         </Routes>
                       </Suspense>
                     </MainLayout>
