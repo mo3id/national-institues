@@ -3,9 +3,10 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
 import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
-import { Briefcase, MapPin, Building2, Clock, ArrowRight, ArrowLeft, X, UploadCloud, CheckCircle2 } from 'lucide-react';
+import { Briefcase, MapPin, Building2, Clock, ArrowRight, ArrowLeft, X, UploadCloud, CheckCircle2, Loader2 } from 'lucide-react';
 import { getJobApplicationSchema } from '@/utils/validations';
 import type { JobApplication } from '@/types';
+import { submitJobApplication } from '@/services/api';
 
 const Jobs: React.FC = () => {
     const { lang, isRTL, t: translationsRoot } = useLanguage();
@@ -17,6 +18,8 @@ const Jobs: React.FC = () => {
     const [selectedJob, setSelectedJob] = useState<any>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     // Form state
@@ -26,6 +29,7 @@ const Jobs: React.FC = () => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
         if (errors[e.target.name]) setErrors(prev => ({ ...prev, [e.target.name]: '' }));
+        if (submitError) setSubmitError(null);
     };
 
     const toBase64 = (file: File): Promise<string> =>
@@ -47,27 +51,33 @@ const Jobs: React.FC = () => {
         }
         setErrors({});
 
-        // build application object
-        const cvData = selectedFile ? await toBase64(selectedFile) : '';
-        const newApp: JobApplication = {
-            id: String(Date.now()),
-            jobId: selectedJob?.id || '',
-            jobTitle: lang === 'ar' ? selectedJob?.titleAr || '' : selectedJob?.title || '',
-            fullName: formData.fullName,
-            email: formData.email,
-            phone: formData.phone,
-            experience: formData.experience,
-            coverLetter: formData.coverLetter,
-            cvName: selectedFile?.name || '',
-            cvData,
-            appliedAt: new Date().toISOString(),
-            status: 'Pending',
-            notes: ''
-        };
-        const updatedApps = [...(siteData.jobApplications || []), newApp];
-        updateData('jobApplications', updatedApps);
+        setIsSubmitting(true);
+        setSubmitError(null);
 
-        setIsSubmitted(true);
+        try {
+            // build application object
+            const cvData = selectedFile ? await toBase64(selectedFile) : '';
+            const newApp = {
+                jobId: selectedJob?.id || '',
+                jobTitle: lang === 'ar' ? selectedJob?.titleAr || '' : selectedJob?.title || '',
+                fullName: formData.fullName,
+                email: formData.email,
+                phone: formData.phone,
+                experience: formData.experience,
+                coverLetter: formData.coverLetter,
+                cvName: selectedFile?.name || '',
+                cvData,
+                notes: ''
+            };
+
+            await submitJobApplication(newApp);
+
+            setIsSubmitted(true);
+        } catch (err: any) {
+            setSubmitError(lang === 'ar' ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى.' : err.message || 'Failed to submit application.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     // Prevent body scrolling when modal is open
@@ -336,10 +346,11 @@ const Jobs: React.FC = () => {
                                             {errors.coverLetter && <p className="text-red-500 text-xs font-bold mt-1">{errors.coverLetter}</p>}
                                         </div>
 
-                                        <div className="pt-4 flex justify-end">
-                                            <button type="submit" className={`w-full md:w-auto bg-[#1e3a8a] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-900 hover:shadow-lg transition-all flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                                <span>{t.submit}</span>
-                                                <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+                                        <div className="pt-4 flex flex-col items-end gap-3 w-full">
+                                            {submitError && <p className="text-red-500 font-bold">{submitError}</p>}
+                                            <button type="submit" disabled={isSubmitting} className={`w-full md:w-auto bg-[#1e3a8a] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-900 hover:shadow-lg transition-all flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}>
+                                                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>{t.submit}</span>}
+                                                {!isSubmitting && <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />}
                                             </button>
                                         </div>
                                     </form>

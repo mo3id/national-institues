@@ -57,25 +57,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // The user will still see the app functioning (just with default data).
     // We can also let the components access `error` if they want to explicitly show an error state.
 
-    // Generic mutation for reliable and instant dashboard updates
+    // Generic mutation for reliable dashboard updates (Requires REAL Server Success)
     const updateMutation = useMutation({
         mutationFn: async ({ category, newData }: { category: keyof SiteData, newData: any }) => {
-            try {
-                await updateCategory(category, newData);
-            } catch (err) {
-                console.warn(`[Local Fallback]: Update API failed or missing on server for ${category}. UI updated optimistically.`, err);
-                // Allow it to pass so the UI functions as intended until the real server is updated.
-            }
+            await updateCategory(category, newData);
             return { category, newData };
         },
-        onMutate: async ({ category, newData }) => {
-            // Optimistic Update: Instantly update Zustand so dashboard feels perfectly real-time
-            updateData(category, newData);
-        },
         onSuccess: (res) => {
+            // Only update Zustand UI if the server REALLY saved it
+            updateData(res.category as keyof SiteData, res.newData);
             // Optional: Backup save to localStorage to persist across refreshes if API is dead
             const currentObj = JSON.parse(localStorage.getItem('nis_offline_cache') || '{}');
             localStorage.setItem('nis_offline_cache', JSON.stringify({ ...currentObj, [res.category]: res.newData }));
+        },
+        onError: (err: any) => {
+            alert(`Dashboard save failed! Please upload the latest api.php to your server.\nError: ${err.message}`);
         }
     });
 

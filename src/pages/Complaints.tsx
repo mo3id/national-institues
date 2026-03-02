@@ -7,12 +7,15 @@ import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
 import { CustomSelect } from '@/components/common/FormControls';
 import { getComplaintSchema } from '@/utils/validations';
+import { submitComplaint } from '@/services/api';
 
 const Complaints: React.FC = () => {
   const { lang, isRTL, t: translationsRoot } = useLanguage();
   const t = translationsRoot;
   const { data: siteData, updateData } = useSiteData();
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -26,9 +29,10 @@ const Complaints: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string, value: string } }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (errors[e.target.name]) setErrors(prev => ({ ...prev, [e.target.name]: '' }));
+    if (submitError) setSubmitError(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const validationResult = getComplaintSchema(lang).safeParse(formData);
@@ -43,18 +47,24 @@ const Complaints: React.FC = () => {
       return;
     }
     setErrors({});
+    setIsSubmitting(true);
+    setSubmitError(null);
 
-    setSubmitted(true);
+    try {
+      const newComplaint = {
+        ...formData,
+        createdAt: new Date().toISOString()
+      };
+      await submitComplaint(newComplaint);
 
-    const newComplaint = {
-      ...formData,
-      id: String(Date.now()),
-      date: new Date().toISOString().split('T')[0]
-    };
-    updateData('complaints', [newComplaint, ...(siteData.complaints || [])]);
-
-    setFormData({ fullName: '', phone: '', email: '', messageType: (t?.complaints?.types || [])[0] || '', school: '', message: '' });
-    setTimeout(() => setSubmitted(false), 5000);
+      setSubmitted(true);
+      setFormData({ fullName: '', phone: '', email: '', messageType: (t?.complaints?.types || [])[0] || '', school: '', message: '' });
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch (err: any) {
+      setSubmitError(lang === 'ar' ? 'فشل إرسال الشكوى، يرجى المحاولة مرة أخرى.' : err.message || 'Failed to submit complaint.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const messageTypes = t?.complaints?.types || [];
@@ -222,13 +232,15 @@ const Complaints: React.FC = () => {
                     </div>
 
                     {/* Submit Button */}
-                    <div className="pt-4 flex justify-end">
+                    <div className="pt-4 flex flex-col items-end gap-3 w-full">
+                      {submitError && <p className="text-red-500 font-bold">{submitError}</p>}
                       <button
                         type="submit"
-                        className={`w-full md:w-auto bg-[#1e3a8a] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-900 hover:shadow-lg transition-all flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                        disabled={isSubmitting}
+                        className={`w-full md:w-auto bg-[#1e3a8a] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-900 hover:shadow-lg transition-all flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
                       >
-                        <Send className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
-                        <span>{t?.complaints?.submit}</span>
+                        {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />}
+                        <span>{isSubmitting ? (lang === 'ar' ? 'جاري الإرسال...' : 'Sending...') : t?.complaints?.submit}</span>
                       </button>
                     </div>
                   </form>

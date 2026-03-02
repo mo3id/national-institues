@@ -59,3 +59,9 @@ export const updateCategory = async (category: string, newData: any): Promise<Ap
     if (data.status !== 'success') throw new Error(data.message || `Failed to update ${category}`);
     return data;
 };
+
+export const submitJobApplication = async (applicationData: Record<string, any>): Promise<ApiResponse> => {
+    const { data } = await apiClient.post<ApiResponse>('?action=add_job_application', applicationData);
+    if (data.status !== 'success') throw new Error(data.message || 'Failed to submit application');
+    return data;
+};
