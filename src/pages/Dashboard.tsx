@@ -312,7 +312,7 @@ const Dashboard: React.FC = () => {
   const [editSchoolId, setEditSchoolId] = useState<string | null>(null);
   const [editJobId, setEditJobId] = useState<string | null>(null);
   const [addJobOpen, setAddJobOpen] = useState(false);
-  const [selectedRecruitmentJobId, setSelectedRecruitmentJobId] = useState<string | null>(null);
+  const [selectedRecruitmentJobId, setSelectedRecruitmentJobId] = useState<string | null>('all');
   const [selectedApplicant, setSelectedApplicant] = useState<DashJobApplication | null>(null);
   const [applicantModalOpen, setApplicantModalOpen] = useState(false);
 
@@ -462,7 +462,17 @@ const Dashboard: React.FC = () => {
   const filtered = newsList.filter(n => n.title.toLowerCase().includes(newsSearch.toLowerCase()) || n.titleAr.includes(newsSearch));
   const filteredSchools = schools.filter(s => s.name.toLowerCase().includes(schoolSearch.toLowerCase()) || s.governorate.toLowerCase().includes(schoolSearch.toLowerCase()));
   const filteredJobs = jobs.filter(j => j.title.toLowerCase().includes(jobSearch.toLowerCase()) || j.titleAr.includes(jobSearch) || j.department.toLowerCase().includes(jobSearch.toLowerCase()));
-  const filteredApplications = selectedRecruitmentJobId ? applications.filter(a => a.jobId === selectedRecruitmentJobId) : [];
+
+  const filteredApplications = applications.filter(a => {
+    const matchesJob = (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'all') ? true : a.jobId === selectedRecruitmentJobId;
+    const term = jobSearch.toLowerCase();
+    const matchesSearch =
+      (a.fullName || '').toLowerCase().includes(term) ||
+      (a.jobTitle || '').toLowerCase().includes(term) ||
+      (a.email || '').toLowerCase().includes(term) ||
+      (a.phone || '').includes(term);
+    return matchesJob && matchesSearch;
+  });
 
   const filteredComplaints = complaints.filter(c => {
     const term = complaintsSearch.toLowerCase();
@@ -721,71 +731,63 @@ const Dashboard: React.FC = () => {
           {/* ── Recruitment Portal ── */}
           {section === 'recruitment' && (
             <div className="section-enter">
-              {/* if no job selected show list */}
-              {!selectedRecruitmentJobId ? (
-                <>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                    <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.recruitmentPortal}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.applicantsManage}</p></div>
-                  </div>
-                  <div style={{ position: 'relative', marginBottom: 18, maxWidth: 320 }}>
-                    <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 14, right: isRTL ? 14 : 'auto', top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: 'var(--text2)' }} />
-                    <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={jobSearch} onChange={e => setJobSearch(e.target.value)} />
-                  </div>
-                  <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
-                    <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
-                      <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
-                        <tr>
-                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.title}</th>
-                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.department}</th>
-                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.location}</th>
-                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.actions}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredJobs.map((job, i) => (
-                          <tr key={job.id} style={{ cursor: 'pointer', borderBottom: i === filteredJobs.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onClick={() => setSelectedRecruitmentJobId(job.id)} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                            <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
-                              {job.image && <img src={job.image} alt="thumb" style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6 }} />}
-                              <span>{lang === 'ar' ? job.titleAr : job.title}</span>
-                            </td>
-                            <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{lang === 'ar' ? job.departmentAr : job.department}</td>
-                            <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{lang === 'ar' ? job.locationAr : job.location}</td>
-                            <td style={{ padding: '16px 24px', color: 'var(--accent)', fontSize: 13 }}>{u.viewJob}</td>
-                          </tr>
-                        ))}
-                        {filteredJobs.length === 0 && <tr><td colSpan={4} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><Briefcase style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></td></tr>}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <button className="dash-btn dash-btn-ghost" onClick={() => setSelectedRecruitmentJobId(null)} style={{ marginBottom: 16 }}><ArrowLeft style={{ width: 14, height: 14 }} /> {u.backToJobs}</button>
-                  <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
-                    <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
-                      <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
-                        <tr>
-                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.applicants}</th>
-                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.applicationDate}</th>
-                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.phone}</th>
-                          <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.status}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredApplications.map((app, i) => (
-                          <tr key={app.id} style={{ cursor: 'pointer', borderBottom: i === filteredApplications.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onClick={() => { setSelectedApplicant(app); setApplicantModalOpen(true); }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                            <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{app.fullName}</td>
-                            <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{new Date(app.appliedAt).toLocaleDateString()}</td>
-                            <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }} dir="ltr">{app.phone}</td>
-                            <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}><span style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--surface2)', fontSize: 11, fontWeight: 700 }}>{u[app.status.toLowerCase() as keyof typeof u] || app.status}</span></td>
-                          </tr>
-                        ))}
-                        {filteredApplications.length === 0 && <tr><td colSpan={4} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><Briefcase style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></td></tr>}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.recruitmentPortal}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.applicantsManage}</p></div>
+              </div>
+
+              {/* Tabs */}
+              <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 10, marginBottom: 20, whiteSpace: 'nowrap' }} className="dash-tabs dash-root">
+                <button
+                  className={`dash-btn ${(!selectedRecruitmentJobId || selectedRecruitmentJobId === 'all') ? 'dash-btn-primary' : 'dash-btn-ghost'}`}
+                  onClick={() => setSelectedRecruitmentJobId('all')}
+                  style={{ borderRadius: 999 }}
+                >
+                  {lang === 'ar' ? 'الكل' : 'All'}
+                </button>
+                {jobs.map(job => (
+                  <button
+                    key={job.id}
+                    className={`dash-btn ${selectedRecruitmentJobId === job.id ? 'dash-btn-primary' : 'dash-btn-ghost'}`}
+                    onClick={() => setSelectedRecruitmentJobId(job.id)}
+                    style={{ borderRadius: 999 }}
+                  >
+                    {lang === 'ar' ? job.titleAr : job.title}
+                  </button>
+                ))}
+              </div>
+
+              {/* Search */}
+              <div style={{ position: 'relative', marginBottom: 18, maxWidth: 320 }}>
+                <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 14, right: isRTL ? 14 : 'auto', top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: 'var(--text2)' }} />
+                <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={jobSearch} onChange={e => setJobSearch(e.target.value)} />
+              </div>
+
+              {/* Applications Table */}
+              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
+                <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
+                  <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
+                    <tr>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.applicants}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{lang === 'ar' ? 'الوظيفة المتقدم لها' : 'Applied Job'}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.applicationDate}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.phone}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.status}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredApplications.map((app, i) => (
+                      <tr key={app.id} style={{ cursor: 'pointer', borderBottom: i === filteredApplications.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onClick={() => { setSelectedApplicant(app); setApplicantModalOpen(true); }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{app.fullName}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, fontWeight: 600 }}>{app.jobTitle}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{new Date(app.appliedAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US')}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }} dir="ltr">{app.phone}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}><span style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--surface2)', fontSize: 11, fontWeight: 700 }}>{u[app.status?.toLowerCase() as keyof typeof u] || app.status || 'Pending'}</span></td>
+                      </tr>
+                    ))}
+                    {filteredApplications.length === 0 && <tr><td colSpan={5} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><Briefcase style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></td></tr>}
+                  </tbody>
+                </table>
+              </div>
 
               {/* applicant detail modal */}
               {applicantModalOpen && selectedApplicant && (
@@ -805,7 +807,7 @@ const Dashboard: React.FC = () => {
                     <div>
                       <label className="dash-label">{u.status}</label>
                       <select className="dash-input" value={selectedApplicant.status} onChange={e => setSelectedApplicant(a => a ? { ...a, status: e.target.value as any } : null)}>
-                        {['Pending','Interview','Rejected','Hired','On Hold'].map(st => (
+                        {['Pending', 'Interview', 'Rejected', 'Hired', 'On Hold'].map(st => (
                           <option key={st} value={st}>{u[st.toLowerCase() as keyof typeof u] || st}</option>
                         ))}
                       </select>
@@ -821,7 +823,7 @@ const Dashboard: React.FC = () => {
                         setApplications(updated);
                         updateData('jobApplications', updated);
                         setApplicantModalOpen(false);
-                        showToast(u.feedback+' saved');
+                        showToast(u.feedback + ' saved');
                       }}>{u.save}</button>
                       <button className="dash-btn dash-btn-ghost" onClick={() => setApplicantModalOpen(false)}>{u.cancel}</button>
                     </div>
@@ -1316,8 +1318,8 @@ const Dashboard: React.FC = () => {
             <div>
               <label className="dash-label">{u.status}</label>
               <select className="dash-input" value={selectedComplaint.status || 'Pending'} onChange={e => setSelectedComplaint(c => c ? { ...c, status: e.target.value } : null)}>
-                {['Pending','In Progress','Responded'].map(st => (
-                  <option key={st} value={st}>{u[st.toLowerCase().replace(/ /g,'') as keyof typeof u] || st}</option>
+                {['Pending', 'In Progress', 'Responded'].map(st => (
+                  <option key={st} value={st}>{u[st.toLowerCase().replace(/ /g, '') as keyof typeof u] || st}</option>
                 ))}
               </select>
             </div>
@@ -1328,7 +1330,7 @@ const Dashboard: React.FC = () => {
                 setComplaints(updated);
                 updateData('complaints', updated);
                 setComplaintModalOpen(false);
-                showToast(u.status+' updated');
+                showToast(u.status + ' updated');
               }}>{u.save}</button>
               <button className="dash-btn dash-btn-ghost" onClick={() => setComplaintModalOpen(false)}>{u.close || u.cancel}</button>
             </div>
