@@ -736,11 +736,11 @@ const Dashboard: React.FC = () => {
               </div>
 
               {/* Tabs */}
-              <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 10, marginBottom: 20, whiteSpace: 'nowrap' }} className="dash-tabs dash-root">
+              <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 10, marginBottom: 20, whiteSpace: 'nowrap', alignItems: 'center' }} className="dash-tabs dash-root">
                 <button
                   className={`dash-btn ${(!selectedRecruitmentJobId || selectedRecruitmentJobId === 'all') ? 'dash-btn-primary' : 'dash-btn-ghost'}`}
                   onClick={() => setSelectedRecruitmentJobId('all')}
-                  style={{ borderRadius: 999 }}
+                  style={{ borderRadius: 999, flexShrink: 0, height: '40px' }}
                 >
                   {lang === 'ar' ? 'الكل' : 'All'}
                 </button>
@@ -749,7 +749,7 @@ const Dashboard: React.FC = () => {
                     key={job.id}
                     className={`dash-btn ${selectedRecruitmentJobId === job.id ? 'dash-btn-primary' : 'dash-btn-ghost'}`}
                     onClick={() => setSelectedRecruitmentJobId(job.id)}
-                    style={{ borderRadius: 999 }}
+                    style={{ borderRadius: 999, flexShrink: 0, height: '40px' }}
                   >
                     {lang === 'ar' ? job.titleAr : job.title}
                   </button>
