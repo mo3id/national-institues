@@ -116,13 +116,13 @@ const CSS = `
   .dash-sidebar { width: 260px; background: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar2) 100%); display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0; z-index: 100; overflow: hidden; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s, right 0.3s; border-right: 1px solid rgba(255,255,255,0.03); box-shadow: 4px 0 24px rgba(0,0,0,0.1); }
   .dash-root.rtl .dash-sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid rgba(255,255,255,0.03); box-shadow: -4px 0 24px rgba(0,0,0,0.1); }
   .dash-sidebar.collapsed { width: 72px; }
-  .dash-main { flex: 1; margin-left: 260px; display: flex; flex-direction: column; min-height: 100vh; transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .dash-main { flex: 1; margin-left: 260px; display: flex; flex-direction: column; min-height: 100vh; transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1); min-width: 0; }
   .dash-root.rtl .dash-main { margin-left: 0; margin-right: 260px; }
   .dash-main.collapsed { margin-left: 72px; }
   .dash-root.rtl .dash-main.collapsed { margin-left: 0; margin-right: 72px; }
   .dash-topbar { background: rgba(var(--surface-rgb, 255, 255, 255), 0.8); border-bottom: 1px solid var(--border); padding: 0 24px; height: 68px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background-color: var(--surface); transition: background 0.3s; }
   .dash-root.dark .dash-topbar { background-color: rgba(19, 25, 43, 0.75); }
-  .dash-content { padding: 32px 28px; flex: 1; max-width: 1600px; margin: 0 auto; width: 100%; }
+  .dash-content { padding: 32px 28px; flex: 1; max-width: 1600px; margin: 0 auto; width: 100%; min-width: 0; }
   
   .dash-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-sm); transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease; }
   .dash-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: rgba(99, 102, 241, 0.2); }
@@ -257,6 +257,8 @@ const CSS = `
     .dash-btn { padding: 12px 16px; flex: 1; justify-content: center; }
     .dash-form-actions { flex-direction: column; }
     .dash-form-actions .dash-btn { width: 100%; }
+    .mobile-hide { display: none !important; }
+    .sm-show { display: none !important; }
     .toggle-pill button { padding: 6px 10px; font-size: 11px; }
   }
 `;
@@ -535,7 +537,7 @@ const Dashboard: React.FC = () => {
         <header className="dash-topbar">
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <button className="dash-icon-btn" onClick={() => setCollapsed(!collapsed)}><Menu style={{ width: 20, height: 20 }} /></button>
-            <div>
+            <div className="mobile-hide">
               <p style={{ fontWeight: 800, fontSize: 16, color: 'var(--text)', lineHeight: 1.2 }}>{u[section as keyof typeof u] as string}</p>
               <p style={{ fontSize: 11, color: 'var(--text2)' }}>National Institutes Schools Portal</p>
             </div>
