@@ -839,7 +839,7 @@ const Dashboard: React.FC = () => {
                       <label className="dash-label">{u.notes}</label>
                       <textarea className="dash-input dash-ta" value={selectedApplicant.notes || ''} onChange={e => setSelectedApplicant(a => a ? { ...a, notes: e.target.value } : null)} />
                     </div>
-                    <div className="dash-form-actions">
+                    <div className="dash-form-actions" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                       <button className="dash-btn dash-btn-primary" onClick={() => {
                         if (!selectedApplicant) return;
                         const updated = applications.map(a => a.id === selectedApplicant.id ? selectedApplicant : a);
@@ -849,6 +849,21 @@ const Dashboard: React.FC = () => {
                         showToast(u.feedback + ' saved');
                       }}>{u.save}</button>
                       <button className="dash-btn dash-btn-ghost" onClick={() => setApplicantModalOpen(false)}>{u.cancel}</button>
+                      <button
+                        className="dash-btn dash-btn-danger"
+                        style={{ marginInlineStart: 'auto' }}
+                        onClick={() => {
+                          if (window.confirm(lang === 'ar' ? 'هل أنت متأكد من حذف هذا المتقدم؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this applicant? This cannot be undone.')) {
+                            const updated = applications.filter(a => a.id !== selectedApplicant?.id);
+                            setApplications(updated);
+                            updateData('jobApplications', updated);
+                            setApplicantModalOpen(false);
+                            showToast(lang === 'ar' ? 'تم الحذف بنجاح' : 'Deleted successfully');
+                          }
+                        }}
+                      >
+                        <Trash2 style={{ width: 14, height: 14 }} /> {u.delete}
+                      </button>
                     </div>
                   </div>
                 </ModalWrap>
