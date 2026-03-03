@@ -257,7 +257,6 @@ const CSS = `
     .dash-btn { padding: 12px 16px; flex: 1; justify-content: center; }
     .dash-form-actions { flex-direction: column; }
     .dash-form-actions .dash-btn { width: 100%; }
-    .sm-show { display: none !important; }
     .toggle-pill button { padding: 6px 10px; font-size: 11px; }
   }
 `;
