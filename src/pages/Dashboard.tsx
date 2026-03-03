@@ -736,20 +736,42 @@ const Dashboard: React.FC = () => {
               </div>
 
               {/* Tabs */}
-              <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 10, marginBottom: 20, whiteSpace: 'nowrap', alignItems: 'center' }} className="dash-tabs dash-root">
+              <div className="dash-card" style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '16px 20px', marginBottom: 24, whiteSpace: 'nowrap', alignItems: 'center' }}>
                 <button
-                  className={`dash-btn ${(!selectedRecruitmentJobId || selectedRecruitmentJobId === 'all') ? 'dash-btn-primary' : 'dash-btn-ghost'}`}
                   onClick={() => setSelectedRecruitmentJobId('all')}
-                  style={{ borderRadius: 999, flexShrink: 0, height: '40px' }}
+                  style={{
+                    padding: '8px 28px',
+                    borderRadius: 12,
+                    fontWeight: 700,
+                    fontSize: 14,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    border: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'all') ? 'none' : '1px solid var(--border)',
+                    backgroundColor: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'all') ? '#111827' : 'var(--bg)',
+                    color: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'all') ? 'white' : 'var(--text2)',
+                    flexShrink: 0,
+                    boxShadow: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'all') ? '0 4px 10px rgba(0,0,0,0.1)' : 'none'
+                  }}
                 >
                   {lang === 'ar' ? 'الكل' : 'All'}
                 </button>
                 {jobs.map(job => (
                   <button
                     key={job.id}
-                    className={`dash-btn ${selectedRecruitmentJobId === job.id ? 'dash-btn-primary' : 'dash-btn-ghost'}`}
                     onClick={() => setSelectedRecruitmentJobId(job.id)}
-                    style={{ borderRadius: 999, flexShrink: 0, height: '40px' }}
+                    style={{
+                      padding: '8px 24px',
+                      borderRadius: 12,
+                      fontWeight: 700,
+                      fontSize: 14,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      border: selectedRecruitmentJobId === job.id ? 'none' : '1px solid var(--border)',
+                      backgroundColor: selectedRecruitmentJobId === job.id ? '#111827' : 'var(--bg)',
+                      color: selectedRecruitmentJobId === job.id ? 'white' : 'var(--text2)',
+                      flexShrink: 0,
+                      boxShadow: selectedRecruitmentJobId === job.id ? '0 4px 10px rgba(0,0,0,0.1)' : 'none'
+                    }}
                   >
                     {lang === 'ar' ? job.titleAr : job.title}
                   </button>
