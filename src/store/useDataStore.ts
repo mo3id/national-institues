@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { SCHOOLS, NEWS, JOBS } from '@/constants';
+// import { SCHOOLS, NEWS, JOBS } from '@/constants';
 import { School, NewsItem, JobVacancy, JobApplication } from '@/types';
 
 export interface SiteData {
@@ -72,9 +72,9 @@ export interface SiteData {
 }
 
 export const DEFAULT_SITE_DATA: SiteData = {
-    schools: SCHOOLS || [],
-    news: NEWS || [],
-    jobs: JOBS || [],
+    schools: [],
+    news: [],
+    jobs: [],
     jobApplications: [],
     complaints: [],
     contactMessages: [],
