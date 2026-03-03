@@ -38,6 +38,23 @@ export interface JobVacancy {
   typeAr: string;
   description: string;
   descriptionAr: string;
+  image?: string; // optional cover image base64/URL
+}
+
+export interface JobApplication {
+  id: string;
+  jobId: string;
+  jobTitle: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  experience?: string;
+  coverLetter?: string;
+  cvName: string;
+  cvData: string; // base64 or blob URL
+  appliedAt: string;
+  status: 'Pending' | 'Interview' | 'Rejected' | 'Hired' | 'On Hold';
+  notes?: string;
 }
 
 export enum ThinkingLevel {

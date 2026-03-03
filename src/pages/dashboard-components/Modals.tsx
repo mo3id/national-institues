@@ -5,6 +5,14 @@ import { CustomSelect, CustomDatePicker, ImageUpload } from '../../components/co
 import { Filter, Calendar } from 'lucide-react';
 import { getDashNewsSchema, getDashHeroSchema, getDashSchoolSchema, getDashJobSchema } from '@/utils/validations';
 
+// helper to convert File to base64 string
+const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = err => reject(err);
+    reader.readAsDataURL(file);
+});
+
 interface ModalWrapProps { title: string; onClose: () => void; children: React.ReactNode; }
 export const ModalWrap: React.FC<ModalWrapProps> = ({ title, onClose, children }) => (
     <div className="dash-modal-overlay" onClick={onClose}>
@@ -338,6 +346,38 @@ export const EditJobForm: React.FC<EditJobProps> = ({ job, lang, onSave, onCance
                 <label className="dash-label">الوصف (عربي)</label>
                 <textarea className={`dash-input dash-ta ${errors.descriptionAr ? 'border-red-500' : ''}`} dir="rtl" value={d.descriptionAr || ''} onChange={e => { setD(p => ({ ...p, descriptionAr: e.target.value })); if (errors.descriptionAr) setErrors(p => ({ ...p, descriptionAr: '' })) }} />
                 {errors.descriptionAr && <span className="text-red-500 text-xs mt-1 block">{errors.descriptionAr}</span>}
+            </div>
+            <div className="form-full">
+                <label className="dash-label">{u.jobImage}</label>
+                <label
+                    className={`flex flex-col items-center justify-center w-full h-32 border-2 ${d.image ? 'border-emerald-500 bg-emerald-50/50' : errors.image ? 'border-red-500 bg-red-50' : 'border-slate-200 border-dashed bg-slate-50 hover:bg-[#1e3a8a]/5 hover:border-[#1e3a8a]'} rounded-2xl cursor-pointer transition-all mt-1 relative overflow-hidden`}
+                    onDragOver={e => e.preventDefault()}
+                    onDrop={async e => {
+                        e.preventDefault();
+                        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                            const file = e.dataTransfer.files[0];
+                            const base = await toBase64(file);
+                            setD(p => ({ ...p, image: base }));
+                        }
+                    }}
+                >
+                    {d.image ? (
+                        <img src={d.image} alt="preview" className="max-h-full object-contain" />
+                    ) : (
+                        <div className="text-center text-sm text-slate-500">
+                            {u.uploadImage}<br/>
+                            <span className="text-xs text-slate-400">{u.dragDrop}</span>
+                        </div>
+                    )}
+                    <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={async e => {
+                        if (e.target.files?.[0]) {
+                            const file = e.target.files[0];
+                            const base = await toBase64(file);
+                            setD(p => ({ ...p, image: base }));
+                        }
+                    }} />
+                </label>
+                {errors.image && <span className="text-red-500 text-xs mt-1 block">{errors.image}</span>}
             </div>
             <div className="form-full dash-form-actions">
                 <button type="submit" className="dash-btn dash-btn-primary"><Save className="w-4 h-4" />{u.save}</button>
