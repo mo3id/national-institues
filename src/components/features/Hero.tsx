@@ -77,7 +77,7 @@ const Hero: React.FC = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 lg:gap-6 justify-start mt-6 lg:mt-0 relative z-30">
-            <Link to="/contact" className="bg-[#991b1b] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#7f1616] lg:hover:bg-white lg:hover:text-[#991b1b] transition-all duration-300 flex items-center justify-center gap-3 group shadow-xl">
+            <Link to="/contact" className="bg-[#991b1b] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#7f1616] lg:hover:bg-white lg:hover:text-[#991b1b] transition-all duration-300 flex items-center justify-center gap-3 group shadow-xl" aria-label={t.joinNow}>
               {t.joinNow}
               <span className={`material-symbols-outlined transition-transform ${isRTL ? 'rotate-180 sm:group-hover:-translate-x-1' : 'sm:group-hover:translate-x-1'}`}>arrow_forward</span>
             </Link>
@@ -143,6 +143,7 @@ const Hero: React.FC = () => {
               <button
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
+                aria-label={`Go to slide ${idx + 1}`}
                 className={`group relative w-1.5 transition-all duration-500 rounded-full overflow-hidden ${currentIndex === idx ? 'h-12 bg-white/40' : 'h-4 bg-white/10 hover:bg-white/30'}`}
               >
                 {currentIndex === idx && (

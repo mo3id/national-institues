@@ -51,11 +51,22 @@ export const getDashHeroSchema = () => z.object({
 
 export const getDashSchoolSchema = () => z.object({
     name: z.string().min(3, { message: 'School name is required' }),
+    nameAr: z.string().min(3, { message: 'Arabic name is required' }),
     location: z.string().min(3, { message: 'Location is required' }),
+    locationAr: z.string().min(3, { message: 'Arabic location is required' }),
     governorate: z.string().min(1, { message: 'Governorate is required' }),
     principal: z.string().min(3, { message: 'Principal name is required' }),
+    principalAr: z.string().optional(),
     type: z.string().min(1, { message: 'Type is required' }),
-    mainImage: z.string().min(1, { message: 'Main image is required' }),
+    mainImage: z.string().optional(),
+    about: z.string().optional(),
+    aboutAr: z.string().optional(),
+    phone: z.string().optional(),
+    email: z.string().optional(),
+    website: z.string().optional(),
+    rating: z.string().optional(),
+    studentCount: z.string().optional(),
+    foundedYear: z.string().optional(),
 });
 
 export const getDashJobSchema = () => z.object({

@@ -52,7 +52,7 @@ const Navbar: React.FC = () => {
           >
             {/* LOGO */}
             <Link to="/" className="flex items-center shrink-0">
-              <img src="/Layer 1.png" alt="National Institutes" className="h-9 md:h-11 lg:h-14 object-contain" />
+              <img src="/layer-1-small.webp" alt="National Institutes" className="h-9 md:h-11 lg:h-14 object-contain" width="134" height="56" fetchPriority="high" decoding="async" />
             </Link>
 
             {/* NAV LINKS - Middle */}
@@ -71,12 +71,14 @@ const Navbar: React.FC = () => {
               <div className="hidden lg:flex items-center gap-3">
                 <button
                   onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
+                  aria-label={lang === 'en' ? 'Switch to Arabic' : 'Switch to English'}
                   className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md transform-gpu border border-white/30 text-white hover:bg-white hover:text-[#1e3a8a] transition-all"
                 >
                   <span className="material-symbols-outlined text-[18px]">language</span>
                 </button>
                 <Link
                   to="/login"
+                  aria-label="Login"
                   className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md transform-gpu border border-white/30 text-white hover:bg-[#991b1b] hover:border-[#991b1b] transition-all"
                 >
                   <span className="material-symbols-outlined text-[18px]">login</span>
@@ -86,6 +88,7 @@ const Navbar: React.FC = () => {
               {/* Mobile Toggle */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
                 className={`lg:hidden w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-md transform-gpu transition-all shadow-lg ${scrolled ? 'bg-[#1e3a8a] text-white border-none' : 'bg-white/20 border-white/30 border text-white'}`}
               >
                 <span className="material-symbols-outlined text-[20px]">{mobileMenuOpen ? 'close' : 'menu'}</span>
@@ -103,12 +106,13 @@ const Navbar: React.FC = () => {
           >
             {/* LOGO */}
             <Link to="/" className="flex items-center shrink-0">
-              <img src="/Layer 1.png" alt="National Institutes" className="h-9 md:h-11 object-contain" />
+              <img src="/layer-1-small.webp" alt="National Institutes" className="h-9 md:h-11 object-contain" width="105" height="44" fetchPriority="high" decoding="async" />
             </Link>
 
             {/* MENU BUTTON */}
             <motion.button
               onClick={() => setDrawerOpen(true)}
+              aria-label="Open menu"
               whileHover="hover"
               className={`relative flex items-center transition-all duration-500 border rounded-full group ${isPastHero
                 ? 'bg-[#1e3a8a] border-[#1e3a8a] text-white shadow-xl p-2.5 px-4'
@@ -201,9 +205,10 @@ const Navbar: React.FC = () => {
               className={`fixed top-0 bottom-0 ${isRTL ? 'left-0' : 'right-0'} w-full max-w-sm bg-white shadow-2xl z-[300] flex flex-col p-6 md:p-12 overflow-y-auto overflow-x-hidden`}
             >
               <div className="flex items-center justify-between mb-8 md:mb-16 shrink-0">
-                <img src="/Layer 1.png" alt="Logo" className="h-10 object-contain" />
+                <img src="/layer-1-small.webp" alt="Logo" className="h-10 object-contain" />
                 <button
                   onClick={() => setDrawerOpen(false)}
+                  aria-label="Close menu"
                   className="w-12 h-12 flex items-center justify-center rounded-full bg-slate-100 text-[#1e3a8a] hover:bg-[#991b1b] hover:text-white transition-all shadow-sm"
                 >
                   <span className="material-symbols-outlined">close</span>
@@ -261,12 +266,12 @@ const Navbar: React.FC = () => {
                     <span className="text-[#1e3a8a] font-black text-lg">012-3456-7890</span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-[#1e3a8a]/5 flex items-center justify-center text-[#1e3a8a] hover:bg-[#1e3a8a] hover:text-white transition-all cursor-pointer">
+                    <button aria-label="Share" className="w-10 h-10 rounded-full bg-[#1e3a8a]/5 flex items-center justify-center text-[#1e3a8a] hover:bg-[#1e3a8a] hover:text-white transition-all cursor-pointer">
                       <span className="material-symbols-outlined text-[20px]">share</span>
-                    </div>
-                    <div className="w-10 h-10 rounded-full bg-[#1e3a8a]/5 flex items-center justify-center text-[#1e3a8a] hover:bg-[#1e3a8a] hover:text-white transition-all cursor-pointer">
+                    </button>
+                    <button aria-label="Email" className="w-10 h-10 rounded-full bg-[#1e3a8a]/5 flex items-center justify-center text-[#1e3a8a] hover:bg-[#1e3a8a] hover:text-white transition-all cursor-pointer">
                       <span className="material-symbols-outlined text-[20px]">mail</span>
-                    </div>
+                    </button>
                   </div>
                 </div>
               </div>

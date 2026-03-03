@@ -139,6 +139,7 @@ const Complaints: React.FC = () => {
                           onChange={handleChange}
                           className={`w-full bg-slate-50 border ${errors.fullName ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-[#1e3a8a]'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${isRTL ? 'text-right' : 'text-left'}`}
                           placeholder={t?.complaints?.placeholders?.name}
+                          dir={isRTL ? 'rtl' : 'ltr'}
                         />
                         {errors.fullName && <p className="text-red-500 text-xs font-bold mt-1">{errors.fullName}</p>}
                       </div>
@@ -151,9 +152,9 @@ const Complaints: React.FC = () => {
                           name="phone"
                           value={formData.phone}
                           onChange={handleChange}
-                          className={`w-full bg-slate-50 border ${errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-[#1e3a8a]'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all text-left`}
+                          className={`w-full bg-slate-50 border ${errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-[#1e3a8a]'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${isRTL && !formData.phone ? 'text-right' : 'text-left'}`}
                           placeholder={t?.complaints?.placeholders?.phone}
-                          dir="ltr"
+                          dir={formData.phone ? 'ltr' : (isRTL ? 'rtl' : 'ltr')}
                         />
                         {errors.phone && <p className="text-red-500 text-xs font-bold mt-1">{errors.phone}</p>}
                       </div>
@@ -169,9 +170,9 @@ const Complaints: React.FC = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className={`w-full bg-slate-50 border ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-[#1e3a8a]'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all text-left`}
+                        className={`w-full bg-slate-50 border ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-[#1e3a8a]'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${isRTL && !formData.email ? 'text-right' : 'text-left'}`}
                         placeholder={t?.complaints?.placeholders?.email}
-                        dir="ltr"
+                        dir={formData.email ? 'ltr' : (isRTL ? 'rtl' : 'ltr')}
                       />
                       {errors.email && <p className="text-red-500 text-xs font-bold mt-1">{errors.email}</p>}
                     </div>
@@ -227,6 +228,7 @@ const Complaints: React.FC = () => {
                         rows={6}
                         className={`w-full bg-slate-50 border ${errors.message ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-[#1e3a8a]'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all resize-none ${isRTL ? 'text-right' : 'text-left'}`}
                         placeholder={t?.complaints?.placeholders?.message}
+                        dir={isRTL ? 'rtl' : 'ltr'}
                       />
                       {errors.message && <p className="text-red-500 text-xs font-bold mt-1">{errors.message}</p>}
                     </div>

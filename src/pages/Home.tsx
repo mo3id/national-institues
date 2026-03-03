@@ -37,7 +37,7 @@ const Home: React.FC = () => {
     gatewayDescAr: 'انضم إلى آلاف الطلاب في جميع أنحاء مصر في شبكة معاهدنا القومية المتخصصة.',
     gatewayCTA: 'View Schools',
     gatewayCTAAr: 'عرض المدارس',
-    mapImage: '/nano-banana-17717977008341.png',
+    mapImage: '/nano-banana-17717977008341.webp',
     ctaTitle: 'Join the NIS Family Today',
     ctaTitleAr: 'انضم لعائلة المعاهد القومية اليوم',
     ctaDesc: 'Become part of Egypt\'s leading educational network and shape your child\'s future.',
@@ -99,9 +99,9 @@ const Home: React.FC = () => {
             <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
               <div className="w-full lg:w-5/12 flex flex-col items-center lg:items-start text-center lg:text-start space-y-6">
                 <ScrollReveal>
-                  <h2 className="text-3xl md:text-5xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-light text-slate-800 leading-[1.3] lg:leading-[1.2]">
-                    {lang === 'ar' ? h.trustedTitleAr : h.trustedTitle} <br />
-                    <span className="font-bold text-[#1e3a8a] tracking-tight">{lang === 'ar' ? h.trustedHighlightAr : h.trustedHighlight}</span>
+                  <h2 className="text-3xl md:text-5xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-light text-slate-800 flex flex-col gap-4 lg:gap-6 pb-2">
+                    <span className="leading-snug">{lang === 'ar' ? h.trustedTitleAr : h.trustedTitle}</span>
+                    <span className="font-bold text-[#1e3a8a] tracking-tight leading-snug">{lang === 'ar' ? h.trustedHighlightAr : h.trustedHighlight}</span>
                   </h2>
                 </ScrollReveal>
 
@@ -131,6 +131,9 @@ const Home: React.FC = () => {
                                 alt={school.name}
                                 className="max-w-[140px] max-h-[70px] object-contain"
                                 title={school.name}
+                                loading="lazy"
+                                width="140"
+                                height="70"
                               />
                             </div>
                           ))}
@@ -146,6 +149,7 @@ const Home: React.FC = () => {
                       <button
                         key={i}
                         onClick={() => setActiveChunk(i)}
+                        aria-label={`Go to slide ${i + 1}`}
                         className={`h-2 rounded-full transition-all duration-300 ${activeChunk === i ? 'w-8 bg-[#1e3a8a]' : 'w-2 bg-slate-200'}`}
                       />
                     ))}
@@ -187,6 +191,9 @@ const Home: React.FC = () => {
                 <img
                   src={h.mapImage}
                   alt="Global Network"
+                  loading="lazy"
+                  width="1152"
+                  height="800"
                   className="w-full max-w-6xl h-auto object-contain pointer-events-none mix-blend-multiply transform scale-[1.7] md:scale-100"
                 />
               </div>
@@ -211,6 +218,7 @@ const Home: React.FC = () => {
                 <button
                   onClick={prevNews}
                   disabled={newsIndex === 0}
+                  aria-label="Previous News"
                   className={`p-3 border transition-all ${newsIndex === 0 ? 'border-gray-100 text-gray-300 cursor-not-allowed' : 'border-gray-200 text-gray-900 hover:bg-gray-50 active:scale-95'}`}
                 >
                   <ChevronLeft className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
@@ -218,6 +226,7 @@ const Home: React.FC = () => {
                 <button
                   onClick={nextNews}
                   disabled={newsIndex >= maxNewsIndex}
+                  aria-label="Next News"
                   className={`p-3 bg-gray-900 text-white transition-all ${newsIndex >= maxNewsIndex ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-800 active:scale-95'}`}
                 >
                   <ChevronRight className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
@@ -240,6 +249,8 @@ const Home: React.FC = () => {
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                             alt={item.title}
                             loading="lazy"
+                            width="400"
+                            height="300"
                           />
                         </div>
                         <div className="space-y-3 flex-grow flex flex-col">
@@ -267,6 +278,7 @@ const Home: React.FC = () => {
                   <button
                     key={i}
                     onClick={() => setNewsIndex(i)}
+                    aria-label={`Go to slide ${i + 1}`}
                     className={`h-1.5 transition-all duration-300 rounded-full ${newsIndex === i ? 'w-6 bg-gray-900' : 'w-1.5 bg-gray-200'}`}
                   />
                 ))}

@@ -144,8 +144,9 @@ const Careers: React.FC = () => {
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">{t.fullName}</label>
                           <input
                             type="text"
-                            className={`w-full px-5 py-4 bg-gray-50 border ${errors.fullName ? 'border-red-500 focus:ring-red-500' : 'border-gray-100 focus:ring-blue-100'} rounded-2xl focus:ring-4 focus:border-blue-500 outline-none transition-all font-medium text-blue-900`}
+                            className={`w-full px-5 py-4 bg-gray-50 border ${errors.fullName ? 'border-red-500 focus:ring-red-500' : 'border-gray-100 focus:ring-blue-100'} rounded-2xl focus:ring-4 focus:border-blue-500 outline-none transition-all font-medium text-blue-900 ${isRTL ? 'text-right' : 'text-left'}`}
                             value={formData.fullName}
+                            dir={isRTL ? 'rtl' : 'ltr'}
                             onChange={e => {
                               setFormData(prev => ({ ...prev, fullName: e.target.value }));
                               if (errors.fullName) setErrors(prev => ({ ...prev, fullName: '' }));
@@ -157,8 +158,9 @@ const Careers: React.FC = () => {
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">{t.email}</label>
                           <input
                             type="email"
-                            className={`w-full px-5 py-4 bg-gray-50 border ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-100 focus:ring-blue-100'} rounded-2xl focus:ring-4 focus:border-blue-500 outline-none transition-all font-medium text-blue-900`}
+                            className={`w-full px-5 py-4 bg-gray-50 border ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-100 focus:ring-blue-100'} rounded-2xl focus:ring-4 focus:border-blue-500 outline-none transition-all font-medium text-blue-900 ${isRTL && !formData.email ? 'text-right' : 'text-left'}`}
                             value={formData.email}
+                            dir={formData.email ? 'ltr' : (isRTL ? 'rtl' : 'ltr')}
                             onChange={e => {
                               setFormData(prev => ({ ...prev, email: e.target.value }));
                               if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
@@ -170,8 +172,9 @@ const Careers: React.FC = () => {
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">{t.phone}</label>
                           <input
                             type="tel"
-                            className={`w-full px-5 py-4 bg-gray-50 border ${errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-gray-100 focus:ring-blue-100'} rounded-2xl focus:ring-4 focus:border-blue-500 outline-none transition-all font-medium text-blue-900`}
+                            className={`w-full px-5 py-4 bg-gray-50 border ${errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-gray-100 focus:ring-blue-100'} rounded-2xl focus:ring-4 focus:border-blue-500 outline-none transition-all font-medium text-blue-900 ${isRTL && !formData.phone ? 'text-right' : 'text-left'}`}
                             value={formData.phone}
+                            dir={formData.phone ? 'ltr' : (isRTL ? 'rtl' : 'ltr')}
                             onChange={e => {
                               setFormData(prev => ({ ...prev, phone: e.target.value }));
                               if (errors.phone) setErrors(prev => ({ ...prev, phone: '' }));

@@ -14,8 +14,12 @@ const FloatingLoginButton: React.FC = () => {
         title={lang === 'ar' ? "دخول المنظومة" : "System Login"}
       >
         <img
-          src="/WhatsApp Image 2026-02-25 at 9.40.12 PM.jpeg"
+          src="/whatsapp-small.webp"
           alt="Login"
+          width="40"
+          height="40"
+          loading="lazy"
+          decoding="async"
           className="w-10 h-10 object-contain group-hover:scale-110 transition-transform duration-300 rounded-full"
         />
 

@@ -10,9 +10,17 @@ export interface School {
   principal: string;
   principalAr?: string;
   logo: string;
-  type: 'National' | 'International' | 'Language';
+  type: 'Arabic' | 'Languages' | 'American' | 'British' | 'French';
   mainImage?: string;
   gallery?: string[];
+  about?: string;
+  aboutAr?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  rating?: string;
+  studentCount?: string;
+  foundedYear?: string;
 }
 
 export interface NewsItem {

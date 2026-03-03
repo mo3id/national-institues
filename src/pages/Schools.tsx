@@ -23,8 +23,8 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
         {/* Type Badge on cover */}
         <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'}`}>
           <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border border-white/20 shadow-sm
-            ${school.type === 'International' ? 'bg-purple-500/80 text-white' :
-              school.type === 'Language' ? 'bg-blue-500/80 text-white' :
+            ${school.type === 'American' || school.type === 'British' || school.type === 'French' ? 'bg-purple-500/80 text-white' :
+              school.type === 'Languages' ? 'bg-blue-500/80 text-white' :
                 'bg-emerald-500/80 text-white'
             }`}>
             {t.types[school.type as keyof typeof t.types] || school.type}
@@ -36,7 +36,7 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
       <div className={`absolute top-28 ${isRTL ? 'right-6' : 'left-6'} z-10`}>
         <div className="w-20 h-20 bg-white rounded-full p-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-gray-50">
           <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center p-2.5">
-            <img src={school.logo || "/Layer 1.png"} alt="NIS Logo" className="w-full h-full object-contain" />
+            <img src={school.logo || "/layer-1-small.webp"} alt="NIS Logo" className="w-full h-full object-contain" />
           </div>
         </div>
       </div>
@@ -79,10 +79,10 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
         <div className="flex items-center justify-between py-4 mb-5 mx-2">
           <div className="text-center flex-1">
             <div className="flex items-center justify-center gap-1 mb-0.5">
+              <span className="text-[15px] font-bold text-gray-900">{school.rating || '4.9'}</span>
               <svg className="w-3.5 h-3.5 text-gray-900 fill-gray-900" viewBox="0 0 24 24">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
               </svg>
-              <span className="text-[15px] font-bold text-gray-900">4.9</span>
             </div>
             <span className="text-[12px] font-medium text-gray-400">{common.rating}</span>
           </div>
@@ -90,15 +90,15 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
           <div className="w-[1px] h-6 bg-gray-100"></div>
 
           <div className="text-center flex-1">
-            <div className="text-[15px] font-bold text-gray-900 mb-0.5">2.5k+</div>
-            <span className="text-[12px] font-medium text-gray-400">{common.students}</span>
+            <div className="text-[15px] font-bold text-gray-900 mb-0.5">{school.studentCount || '+2.5k'}</div>
+            <span className="text-[12px] font-medium text-gray-400">{common.students || 'Students'}</span>
           </div>
 
           <div className="w-[1px] h-6 bg-gray-100"></div>
 
           <div className="text-center flex-1">
-            <div className="text-[15px] font-bold text-gray-900 mb-0.5">1995</div>
-            <span className="text-[12px] font-medium text-gray-400">{common.founded}</span>
+            <div className="text-[15px] font-bold text-gray-900 mb-0.5">{school.foundedYear || '1995'}</div>
+            <span className="text-[12px] font-medium text-gray-400">{common.founded || 'Founded'}</span>
           </div>
         </div>
 
@@ -125,7 +125,7 @@ const Schools: React.FC = () => {
   const [selectedType, setSelectedType] = useState('');
   const navigate = useNavigate();
 
-  const schoolTypes = ['National', 'International', 'Language'];
+  const schoolTypes = ['Arabic', 'Languages', 'American', 'British', 'French'];
 
   const filteredSchools = useMemo(() => {
     return SCHOOLS_DATA.filter(school => {

@@ -30,7 +30,7 @@ import ErrorPage from './components/common/ErrorPage';
 const PageLoader = () => (
   <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#fafcff]">
     <div className="relative w-32 h-32 flex items-center justify-center mb-6">
-      <img src="/Layer 1.png" alt="Loading" className="w-full h-auto object-contain animate-pulse" />
+      <img src="/layer-1-small.webp" alt="Loading" className="w-full h-auto object-contain animate-pulse" />
     </div>
     <div className="flex gap-2" dir="ltr">
       <div className="w-3 h-3 rounded-full bg-[#1e3a8a] animate-bounce" style={{ animationDelay: '0s' }} />

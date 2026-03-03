@@ -4,7 +4,7 @@ import {
   Plus, Pencil, Trash2, Eye, EyeOff, Save, X,
   Users, Home as HomeIcon, GraduationCap, MapPin, Bell, LogOut, Search,
   TrendingUp, CheckCircle, AlertCircle, Menu, Moon, Sun,
-  Globe, ChevronRight, Briefcase, MessageSquare, Mail, Filter, ChevronDown
+  Globe, ChevronRight, Briefcase, MessageSquare, Mail, Filter, ChevronDown, Phone
 } from 'lucide-react';
 import { NEWS, SCHOOLS } from '@/constants';
 import {
@@ -155,10 +155,12 @@ const CSS = `
   .dash-btn-ghost:hover { background: var(--border); color: var(--text); transform: translateY(-1px); }
   
   .dash-input { width: 100%; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 16px; font-size: 14px; outline: none; transition: all 0.25s ease; background: var(--surface2); color: var(--text); font-family: inherit; }
+  .dash-root.rtl .dash-input { direction: rtl; text-align: right; unicode-bidi: plaintext; }
   .dash-input:hover { border-color: rgba(99, 102, 241, 0.4); }
   .dash-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(79,70,229,0.1); background: var(--surface); }
   
   .dash-ta { resize: vertical; min-height: 100px; line-height: 1.5; }
+  .dash-root.rtl .dash-ta { direction: rtl; text-align: right; unicode-bidi: plaintext; }
   .dash-label { display: block; font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
   .dash-img-preview { width: 100%; height: 160px; object-fit: cover; border-radius: 14px; box-shadow: var(--shadow-sm); }
   .dash-cb { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; border-radius: 4px; }
@@ -260,8 +262,68 @@ const CSS = `
     .mobile-hide { display: none !important; }
     .sm-show { display: none !important; }
     .toggle-pill button { padding: 6px 10px; font-size: 11px; }
+    .dash-input { padding: 10px 12px; font-size: 13px; }
+    
+    /* Specific overrides for mobile grid forms */
+    .grid-cols-2 { grid-template-columns: 1fr; }
+    .flex.items-center.gap-2 { flex-wrap: wrap; }
+    .flex.items-center.gap-2 > select,
+    .flex.items-center.gap-2 > input { flex: 1; min-width: 40%; text-align: center; }
   }
 `;
+
+const DAYS_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAYS_AR = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+const getArNumber = (n: number | string) => n.toString().replace(/\d/g, (d: any) => '٠١٢٣٤٥٦٧٨٩'[d]);
+
+const formatTimeString = (time24: string, isAr: boolean) => {
+  if (!time24) return '';
+  const [hStr, mStr] = time24.split(':');
+  let h = parseInt(hStr, 10);
+  const m = parseInt(mStr, 10);
+  const ampmEn = h >= 12 ? 'PM' : 'AM';
+  const ampmAr = h >= 12 ? 'مساءً' : 'صباحاً';
+  h = h % 12 || 12;
+  const hDisplay = isAr ? getArNumber(h) : h.toString();
+  const mDisplay = isAr ? getArNumber(m.toString().padStart(2, '0')) : m.toString().padStart(2, '0');
+
+  if (isAr) return `${hDisplay}:${mDisplay} ${ampmAr}`;
+  return `${hDisplay}:${mDisplay} ${ampmEn}`;
+};
+
+const parseWorkingHoursStr = (str: string) => {
+  if (!str) return { startDay: 0, endDay: 4, startTime: '08:00', endTime: '15:00' };
+  const match = str.match(/(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)\s*-\s*(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday):\s*(\d{1,2}:\d{2})\s*(AM|PM)\s*-\s*(\d{1,2}:\d{2})\s*(AM|PM)/i);
+  if (match) {
+    const [, startDayStr, endDayStr, startTimeStr, startAmpm, endTimeStr, endAmpm] = match;
+    const startDay = DAYS_EN.findIndex(d => d.toLowerCase() === startDayStr.toLowerCase());
+    const endDay = DAYS_EN.findIndex(d => d.toLowerCase() === endDayStr.toLowerCase());
+
+    const to24 = (time: string, ampm: string) => {
+      let [h, m] = time.split(':');
+      let hn = parseInt(h, 10);
+      if (ampm.toUpperCase() === 'PM' && hn !== 12) hn += 12;
+      if (ampm.toUpperCase() === 'AM' && hn === 12) hn = 0;
+      return `${hn.toString().padStart(2, '0')}:${m}`;
+    };
+
+    return {
+      startDay: startDay > -1 ? startDay : 0,
+      endDay: endDay > -1 ? endDay : 4,
+      startTime: to24(startTimeStr, startAmpm),
+      endTime: to24(endTimeStr, endAmpm)
+    };
+  }
+  return { startDay: 0, endDay: 4, startTime: '08:00', endTime: '15:00' };
+};
+
+const buildWorkingHours = (form: any) => {
+  if (!form || form.startDay === undefined) return { en: '', ar: '' };
+  const en = `${DAYS_EN[form.startDay]} - ${DAYS_EN[form.endDay]}: ${formatTimeString(form.startTime, false)} - ${formatTimeString(form.endTime, false)}`;
+  const ar = `${DAYS_AR[form.startDay]} - ${DAYS_AR[form.endDay]}: ${formatTimeString(form.startTime, true)} - ${formatTimeString(form.endTime, true)}`;
+  return { en, ar };
+};
 
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
 const Dashboard: React.FC = () => {
@@ -286,6 +348,9 @@ const Dashboard: React.FC = () => {
   } as AboutData);
   const [homeData, setHomeData] = useState(siteData.homeData || {} as any);
   const [partners, setPartners] = useState(siteData.partners || []);
+  const [formSettings, setFormSettings] = useState(siteData.formSettings || {} as any);
+  const [contactData, setContactData] = useState(siteData.contactData || {} as any);
+  const [whForm, setWhForm] = useState(() => parseWorkingHoursStr(siteData.contactData?.workingHours || ''));
 
   useEffect(() => {
     if (siteData) {
@@ -303,6 +368,9 @@ const Dashboard: React.FC = () => {
       } as AboutData);
       setHomeData(siteData.homeData || {});
       setPartners(siteData.partners || []);
+      setFormSettings(siteData.formSettings || {});
+      setContactData(siteData.contactData || {});
+      setWhForm(parseWorkingHoursStr(siteData.contactData?.workingHours || ''));
     }
   }, [siteData]);
 
@@ -333,7 +401,8 @@ const Dashboard: React.FC = () => {
   const [newJob, setNewJob] = useState<Partial<DashJob>>({ title: '', titleAr: '', department: '', departmentAr: '', location: '', locationAr: '', type: '', typeAr: '', description: '', descriptionAr: '', image: '' });
   const [profileDraft, setProfileDraft] = useState({ ...profile });
   const [addSchoolOpen, setAddSchoolOpen] = useState(false);
-  const [newSchool, setNewSchool] = useState<Partial<DashSchool>>({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [] });
+  const [newSchool, setNewSchool] = useState<Partial<DashSchool>>({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '' });
+  const [confirmAction, setConfirmAction] = useState<{ message: string, onConfirm: () => void } | null>(null);
 
   const u = UI[lang];
   const isRTL = lang === 'ar';
@@ -341,6 +410,12 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('dash-theme', theme);
   }, [theme]);
+
+  // Sync Working Hours form to contactData strings
+  useEffect(() => {
+    const hours = buildWorkingHours(whForm);
+    setContactData((p: any) => ({ ...p, workingHours: hours.en, workingHoursAr: hours.ar }));
+  }, [whForm]);
 
   const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
     setToast({ msg, type });
@@ -355,10 +430,15 @@ const Dashboard: React.FC = () => {
     showToast(u.articleSaved);
   };
   const deleteNews = (id: string) => {
-    const updated = newsList.filter(n => n.id !== id);
-    setNewsList(updated);
-    updateData('news', updated);
-    showToast(u.articleDeleted, 'error');
+    setConfirmAction({
+      message: lang === 'ar' ? 'هل أنت متأكد من حذف هذا الخبر؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this news article? This cannot be undone.',
+      onConfirm: () => {
+        const updated = newsList.filter(n => n.id !== id);
+        setNewsList(updated);
+        updateData('news', updated);
+        showToast(u.articleDeleted, 'error');
+      }
+    });
   };
   const saveNews = (a: DashNewsItem) => {
     const updated = newsList.map(n => n.id === a.id ? a : n);
@@ -375,6 +455,7 @@ const Dashboard: React.FC = () => {
     updateData('news', updated);
     setAddNewsOpen(false);
     setNewArt({ title: '', titleAr: '', summary: '', summaryAr: '', date: '', image: '', published: true });
+    setNewsSearch('');
     showToast(u.articleAdded);
   };
   const saveHero = (s: HeroSlide) => {
@@ -389,6 +470,7 @@ const Dashboard: React.FC = () => {
     setSchools(updated);
     updateData('schools', updated);
     setEditSchoolId(null);
+    setSchoolSearch('');
     showToast(u.schoolSaved);
   };
   const addSchool = (s: DashSchool) => {
@@ -397,15 +479,20 @@ const Dashboard: React.FC = () => {
     setSchools(updated);
     updateData('schools', updated);
     setAddSchoolOpen(false);
-    setNewSchool({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [] });
+    setNewSchool({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '' });
+    setSchoolSearch('');
     showToast(u.schoolSaved);
   };
   const deleteSchool = (id: string) => {
-    if (!confirm('Are you sure you want to delete this school?')) return;
-    const updated = schools.filter(s => s.id !== id);
-    setSchools(updated);
-    updateData('schools', updated);
-    showToast('School deleted', 'error');
+    setConfirmAction({
+      message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه المدرسة؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this school? This cannot be undone.',
+      onConfirm: () => {
+        const updated = schools.filter(s => s.id !== id);
+        setSchools(updated);
+        updateData('schools', updated);
+        showToast('School deleted', 'error');
+      }
+    });
   };
 
   const saveJob = (j: DashJob) => {
@@ -417,10 +504,15 @@ const Dashboard: React.FC = () => {
   };
 
   const deleteJob = (id: string) => {
-    const updated = jobs.filter(j => j.id !== id);
-    setJobs(updated);
-    updateData('jobs', updated);
-    showToast(u.jobDeleted, 'error');
+    setConfirmAction({
+      message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه الوظيفة؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this job? This cannot be undone.',
+      onConfirm: () => {
+        const updated = jobs.filter(j => j.id !== id);
+        setJobs(updated);
+        updateData('jobs', updated);
+        showToast(u.jobDeleted, 'error');
+      }
+    });
   };
 
   const addJob = () => {
@@ -444,6 +536,7 @@ const Dashboard: React.FC = () => {
     updateData('jobs', updated);
     setAddJobOpen(false);
     setNewJob({ title: '', titleAr: '', department: '', departmentAr: '', location: '', locationAr: '', type: '', typeAr: '', description: '', descriptionAr: '', image: '' });
+    setJobSearch('');
     showToast(u.jobAdded);
   };
 
@@ -495,10 +588,53 @@ const Dashboard: React.FC = () => {
     { id: 'institute', label: u.institute, icon: Info },
     { id: 'home', label: u.home, icon: HomeIcon },
     { id: 'forms', label: u.forms, icon: Bell },
+    { id: 'contact', label: u.contactSettings || 'Contact Info', icon: Phone },
     { id: 'complaints', label: u.complaints, icon: MessageSquare },
     { id: 'contactMessages', label: u.contactMessages, icon: Mail },
     { id: 'settings', label: u.settings, icon: Settings },
   ];
+
+  const saveFormSettings = () => {
+    updateData('formSettings', formSettings);
+    showToast(u.settingsSaved || 'Settings saved!');
+  };
+
+  const saveContactData = () => {
+    // Basic validations
+    if (contactData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactData.email)) {
+      showToast(isRTL ? 'تنسيق البريد الإلكتروني غير صالح' : 'Invalid email format', 'error');
+      return;
+    }
+
+    // Check URLs
+    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+    if (contactData.facebook && !urlPattern.test(contactData.facebook)) {
+      showToast(isRTL ? 'رابط فيسبوك غير صالح' : 'Invalid Facebook URL', 'error'); return;
+    }
+    if (contactData.twitter && !urlPattern.test(contactData.twitter)) {
+      showToast(isRTL ? 'رابط تويتر غير صالح' : 'Invalid Twitter URL', 'error'); return;
+    }
+    if (contactData.instagram && !urlPattern.test(contactData.instagram)) {
+      showToast(isRTL ? 'رابط انستجرام غير صالح' : 'Invalid Instagram URL', 'error'); return;
+    }
+    if (contactData.linkedin && !urlPattern.test(contactData.linkedin)) {
+      showToast(isRTL ? 'رابط لينكد إن غير صالح' : 'Invalid LinkedIn URL', 'error'); return;
+    }
+
+    // Auto prepend https if missing and valid
+    const fixUrl = (u: string) => (u && !/^https?:\/\//i.test(u)) ? `https://${u}` : u;
+    const cleanData = {
+      ...contactData,
+      facebook: fixUrl(contactData.facebook),
+      twitter: fixUrl(contactData.twitter),
+      instagram: fixUrl(contactData.instagram),
+      linkedin: fixUrl(contactData.linkedin),
+    };
+
+    updateData('contactData', cleanData);
+    setContactData(cleanData); // Sync local state with cleaned URLs
+    showToast(u.settingsSaved || 'Settings saved!');
+  };
 
   return (
     <div className={`dash-root ${theme === 'dark' ? 'dark' : ''} ${isRTL ? 'rtl' : ''}`}>
@@ -608,7 +744,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 {newsList.slice(0, 5).map(n => (
                   <div key={n.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 20px', borderBottom: '1px solid var(--border)' }}>
-                    <img src={n.image} style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} alt="" />
+                    <img src={n.image || undefined} style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} alt="" />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{n.title}</p>
                       <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2 }}>{n.date}</p>
@@ -640,7 +776,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 {filtered.map(n => (
                   <div key={n.id} className="news-row">
-                    <img src={n.image} style={{ width: 52, height: 52, borderRadius: 10, objectFit: 'cover' }} alt="" />
+                    <img src={n.image || undefined} style={{ width: 52, height: 52, borderRadius: 10, objectFit: 'cover' }} alt="" />
                     <div style={{ minWidth: 0 }}>
                       <p style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{n.title}</p>
                       <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{n.titleAr}</p>
@@ -673,7 +809,7 @@ const Dashboard: React.FC = () => {
               <div className="school-grid">
                 {filteredSchools.map(s => (
                   <div key={s.id} className="school-card">
-                    <img src={s.logo} style={{ width: 52, height: 52, borderRadius: 12, objectFit: 'cover', background: 'var(--surface2)', flexShrink: 0 }} alt={s.name} />
+                    <img src={s.logo || undefined} style={{ width: 52, height: 52, borderRadius: 12, objectFit: 'cover', background: 'var(--surface2)', flexShrink: 0 }} alt={s.name} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{s.name}</p>
                       <p style={{ fontSize: 11, color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}><MapPin style={{ width: 11, height: 11 }} />{s.location}, {s.governorate}</p>
@@ -853,13 +989,16 @@ const Dashboard: React.FC = () => {
                         className="dash-btn dash-btn-danger"
                         style={{ marginInlineStart: 'auto' }}
                         onClick={() => {
-                          if (window.confirm(lang === 'ar' ? 'هل أنت متأكد من حذف هذا المتقدم؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this applicant? This cannot be undone.')) {
-                            const updated = applications.filter(a => a.id !== selectedApplicant?.id);
-                            setApplications(updated);
-                            updateData('jobApplications', updated);
-                            setApplicantModalOpen(false);
-                            showToast(lang === 'ar' ? 'تم الحذف بنجاح' : 'Deleted successfully');
-                          }
+                          setConfirmAction({
+                            message: lang === 'ar' ? 'هل أنت متأكد من حذف هذا المتقدم؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this applicant? This cannot be undone.',
+                            onConfirm: () => {
+                              const updated = applications.filter(a => a.id !== selectedApplicant?.id);
+                              setApplications(updated);
+                              updateData('jobApplications', updated);
+                              setApplicantModalOpen(false);
+                              showToast(lang === 'ar' ? 'تم الحذف بنجاح' : 'Deleted successfully');
+                            }
+                          });
                         }}
                       >
                         <Trash2 style={{ width: 14, height: 14 }} /> {u.delete}
@@ -908,7 +1047,9 @@ const Dashboard: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div className="dash-card" style={{ padding: 18 }}>
                     <p className="dash-label">{u.chairmanImageLabel}</p>
-                    <img src={about.chairmanImage} alt="" className="w-32 h-32 rounded-2xl object-cover border border-var(--border) mt-2" />
+                    {about.chairmanImage && (
+                      <img src={about.chairmanImage} alt="" className="w-32 h-32 rounded-2xl object-cover border border-var(--border) mt-2" />
+                    )}
                   </div>
                   {[{ l: u.chairmanName, v: about.name }, { l: u.role, v: about.role }, { l: u.quote, v: `"${about.quote}"` }, { l: u.description, v: about.desc }].map(({ l, v }) => (
                     <div key={l} className="dash-card" style={{ padding: 18 }}><p className="dash-label">{l}</p><p style={{ color: 'var(--text)', fontSize: 14, lineHeight: 1.6 }}>{v}</p></div>
@@ -1036,6 +1177,8 @@ const Dashboard: React.FC = () => {
                     <div className="form-col"><label className="dash-label">التظليل (عربي)</label><input className="dash-input" dir="rtl" value={homeData.trustedHighlightAr} onChange={e => setHomeData(p => ({ ...p, trustedHighlightAr: e.target.value }))} /></div>
                     <div className="form-full"><label className="dash-label">Description (EN)</label><textarea className="dash-input dash-ta" value={homeData.trustedDesc} onChange={e => setHomeData(p => ({ ...p, trustedDesc: e.target.value }))} /></div>
                     <div className="form-full"><label className="dash-label">الوصف (عربي)</label><textarea className="dash-input dash-ta" dir="rtl" value={homeData.trustedDescAr} onChange={e => setHomeData(p => ({ ...p, trustedDescAr: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">Button Text (EN)</label><input className="dash-input" value={homeData.trustedCTA} onChange={e => setHomeData(p => ({ ...p, trustedCTA: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">نص الزر (عربي)</label><input className="dash-input" dir="rtl" value={homeData.trustedCTAAr} onChange={e => setHomeData(p => ({ ...p, trustedCTAAr: e.target.value }))} /></div>
 
                     <h4 className="form-full font-bold border-b pb-2 mb-2 mt-6 text-slate-400 uppercase text-xs tracking-widest">{u.map}</h4>
                     <div className="form-col"><label className="dash-label">Gateway Title (EN)</label><input className="dash-input" value={homeData.gatewayTitle} onChange={e => setHomeData(p => ({ ...p, gatewayTitle: e.target.value }))} /></div>
@@ -1117,25 +1260,96 @@ const Dashboard: React.FC = () => {
             <div className="section-enter">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                 <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.forms}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.formsManage}</p></div>
-                <button className="dash-btn dash-btn-primary" onClick={() => updateData('formSettings', siteData.formSettings)}><Save style={{ width: 14, height: 14 }} />{u.save}</button>
+                <button className="dash-btn dash-btn-primary" onClick={saveFormSettings}><Save style={{ width: 14, height: 14 }} />{u.save}</button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="dash-card" style={{ padding: 24 }}>
                   <h3 className="font-bold mb-4 text-blue-900">{lang === 'ar' ? 'نموذج التواصل' : 'Contact Form'}</h3>
                   <div className="space-y-4">
-                    <div><label className="dash-label">Title (EN)</label><input className="dash-input" value={siteData.formSettings?.contactFormTitle} onChange={e => updateData('formSettings', { ...siteData.formSettings, contactFormTitle: e.target.value })} /></div>
-                    <div><label className="dash-label">العنوان (عربي)</label><input className="dash-input" dir="rtl" value={siteData.formSettings?.contactFormTitleAr} onChange={e => updateData('formSettings', { ...siteData.formSettings, contactFormTitleAr: e.target.value })} /></div>
-                    <div><label className="dash-label">Desc (EN)</label><textarea className="dash-input" value={siteData.formSettings?.contactFormDesc} onChange={e => updateData('formSettings', { ...siteData.formSettings, contactFormDesc: e.target.value })} /></div>
-                    <div><label className="dash-label">الوصف (عربي)</label><textarea className="dash-input" dir="rtl" value={siteData.formSettings?.contactFormDescAr} onChange={e => updateData('formSettings', { ...siteData.formSettings, contactFormDescAr: e.target.value })} /></div>
+                    <div><label className="dash-label">Title (EN)</label><input className="dash-input" value={formSettings?.contactFormTitle || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormTitle: e.target.value }))} /></div>
+                    <div><label className="dash-label">العنوان (عربي)</label><input className="dash-input" dir="rtl" value={formSettings?.contactFormTitleAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormTitleAr: e.target.value }))} /></div>
+                    <div><label className="dash-label">Desc (EN)</label><textarea className="dash-input" value={formSettings?.contactFormDesc || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormDesc: e.target.value }))} /></div>
+                    <div><label className="dash-label">الوصف (عربي)</label><textarea className="dash-input" dir="rtl" value={formSettings?.contactFormDescAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormDescAr: e.target.value }))} /></div>
                   </div>
                 </div>
                 <div className="dash-card" style={{ padding: 24 }}>
                   <h3 className="font-bold mb-4 text-blue-900">{lang === 'ar' ? 'نموذج الوظائف' : 'Careers Form'}</h3>
                   <div className="space-y-4">
-                    <div><label className="dash-label">Title (EN)</label><input className="dash-input" value={siteData.formSettings?.jobFormTitle} onChange={e => updateData('formSettings', { ...siteData.formSettings, jobFormTitle: e.target.value })} /></div>
-                    <div><label className="dash-label">العنوان (عربي)</label><input className="dash-input" dir="rtl" value={siteData.formSettings?.jobFormTitleAr} onChange={e => updateData('formSettings', { ...siteData.formSettings, jobFormTitleAr: e.target.value })} /></div>
-                    <div><label className="dash-label">Desc (EN)</label><textarea className="dash-input" value={siteData.formSettings?.jobFormDesc} onChange={e => updateData('formSettings', { ...siteData.formSettings, jobFormDesc: e.target.value })} /></div>
-                    <div><label className="dash-label">الوصف (عربي)</label><textarea className="dash-input" dir="rtl" value={siteData.formSettings?.jobFormDescAr} onChange={e => updateData('formSettings', { ...siteData.formSettings, jobFormDescAr: e.target.value })} /></div>
+                    <div><label className="dash-label">Title (EN)</label><input className="dash-input" value={formSettings?.jobFormTitle || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormTitle: e.target.value }))} /></div>
+                    <div><label className="dash-label">العنوان (عربي)</label><input className="dash-input" dir="rtl" value={formSettings?.jobFormTitleAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormTitleAr: e.target.value }))} /></div>
+                    <div><label className="dash-label">Desc (EN)</label><textarea className="dash-input" value={formSettings?.jobFormDesc || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormDesc: e.target.value }))} /></div>
+                    <div><label className="dash-label">الوصف (عربي)</label><textarea className="dash-input" dir="rtl" value={formSettings?.jobFormDescAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormDescAr: e.target.value }))} /></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Contact Settings ── */}
+          {section === 'contact' && (
+            <div className="section-enter">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.contactSettings || 'Contact Info'}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.contactSettingsManage || 'Manage global contact details'}</p></div>
+                <button className="dash-btn dash-btn-primary" onClick={saveContactData}><Save style={{ width: 14, height: 14 }} />{u.save}</button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="dash-card" style={{ padding: 24 }}>
+                  <h3 className="font-bold mb-4 text-blue-900">{lang === 'ar' ? 'معلومات أساسية' : 'Basic Info'}</h3>
+                  <div className="space-y-4">
+                    <div><label className="dash-label">{lang === 'ar' ? 'العنوان' : 'Address'}</label><input className="dash-input" value={contactData?.address || ''} onChange={e => setContactData((p: any) => ({ ...p, address: e.target.value }))} /></div>
+                    <div><label className="dash-label">{lang === 'ar' ? 'العنوان (عربي)' : 'Address (AR)'}</label><input className="dash-input" dir="rtl" value={contactData?.addressAr || ''} onChange={e => setContactData((p: any) => ({ ...p, addressAr: e.target.value }))} /></div>
+                    <div><label className="dash-label">{lang === 'ar' ? 'الهاتف' : 'Phone'}</label><input className="dash-input" value={contactData?.phone || ''} onChange={e => setContactData((p: any) => ({ ...p, phone: e.target.value }))} /></div>
+                    <div><label className="dash-label">{lang === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label><input className="dash-input" value={contactData?.email || ''} onChange={e => setContactData((p: any) => ({ ...p, email: e.target.value }))} /></div>
+                    <div className="pt-2 border-t border-slate-100">
+                      <label className="dash-label mb-3">{lang === 'ar' ? 'أيام وساعات العمل (تلقائي)' : 'Working Days & Hours (Dynamic)'}</label>
+                      <div className="flex flex-col gap-4 bg-slate-50 border border-slate-100 p-4 rounded-xl">
+                        <div>
+                          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{lang === 'ar' ? 'من يوم - إلى يوم' : 'From - To Day'}</label>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                            <select className="dash-input !py-2 text-center" value={whForm.startDay} onChange={e => setWhForm(p => ({ ...p, startDay: parseInt(e.target.value) }))}>
+                              {(lang === 'ar' ? DAYS_AR : DAYS_EN).map((d, i) => <option key={i} value={i}>{d}</option>)}
+                            </select>
+                            <span className="text-slate-400 font-medium hidden sm:block">-</span>
+                            <select className="dash-input !py-2 text-center" value={whForm.endDay} onChange={e => setWhForm(p => ({ ...p, endDay: parseInt(e.target.value) }))}>
+                              {(lang === 'ar' ? DAYS_AR : DAYS_EN).map((d, i) => <option key={i} value={i}>{d}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{lang === 'ar' ? 'من ساعة - إلى ساعة' : 'From - To Time'}</label>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                            <input type="time" className="dash-input !py-2 text-center w-full" value={whForm.startTime} onChange={e => setWhForm(p => ({ ...p, startTime: e.target.value }))} />
+                            <span className="text-slate-400 font-medium hidden sm:block">-</span>
+                            <input type="time" className="dash-input !py-2 text-center w-full" value={whForm.endTime} onChange={e => setWhForm(p => ({ ...p, endTime: e.target.value }))} />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 text-xs bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex flex-col gap-2">
+                        <p className="text-blue-900 font-medium leading-relaxed" dir="ltr">{contactData.workingHours || buildWorkingHours(whForm).en}</p>
+                        <p className="text-blue-900 font-bold leading-relaxed" dir="rtl">{contactData.workingHoursAr || buildWorkingHours(whForm).ar}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-6">
+                  <div className="dash-card" style={{ padding: 24 }}>
+                    <h3 className="font-bold mb-4 text-blue-900">{lang === 'ar' ? 'التواصل الاجتماعي' : 'Social Media'}</h3>
+                    <div className="space-y-4">
+                      <div><label className="dash-label">Facebook</label><input className="dash-input" value={contactData?.facebook || ''} onChange={e => setContactData((p: any) => ({ ...p, facebook: e.target.value }))} /></div>
+                      <div><label className="dash-label">Twitter / X</label><input className="dash-input" value={contactData?.twitter || ''} onChange={e => setContactData((p: any) => ({ ...p, twitter: e.target.value }))} /></div>
+                      <div><label className="dash-label">Instagram</label><input className="dash-input" value={contactData?.instagram || ''} onChange={e => setContactData((p: any) => ({ ...p, instagram: e.target.value }))} /></div>
+                      <div><label className="dash-label">LinkedIn</label><input className="dash-input" value={contactData?.linkedin || ''} onChange={e => setContactData((p: any) => ({ ...p, linkedin: e.target.value }))} /></div>
+                    </div>
+                  </div>
+
+                  <div className="dash-card" style={{ padding: 24 }}>
+                    <h3 className="font-bold mb-4 text-blue-900">{lang === 'ar' ? 'نصوص الفوتر' : 'Footer Texts'}</h3>
+                    <div className="space-y-4">
+                      <div><label className="dash-label">Footer Description (EN)</label><textarea className="dash-input dash-ta" value={contactData?.footerDesc || ''} onChange={e => setContactData((p: any) => ({ ...p, footerDesc: e.target.value }))} /></div>
+                      <div><label className="dash-label">وصف الفوتر (عربي)</label><textarea className="dash-input dash-ta" dir="rtl" value={contactData?.footerDescAr || ''} onChange={e => setContactData((p: any) => ({ ...p, footerDescAr: e.target.value }))} /></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1389,6 +1603,33 @@ const Dashboard: React.FC = () => {
             <div className="flex gap-2 mt-4">
               <button className="dash-btn dash-btn-ghost" onClick={() => window.print()}>{u.print}</button>
               <button className="dash-btn dash-btn-ghost" onClick={() => setContactModalOpen(false)}>{u.close || u.cancel}</button>
+            </div>
+          </div>
+        </ModalWrap>
+      )}
+
+      {/* Confirmation Modal */}
+      {confirmAction && (
+        <ModalWrap title={lang === 'ar' ? 'تأكيد الحذف' : 'Confirm Deletion'} onClose={() => setConfirmAction(null)}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <p style={{ fontSize: '15px', color: 'var(--text)', fontWeight: 500 }}>
+              {confirmAction.message}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px' }}>
+              <button
+                className="dash-btn dash-btn-ghost"
+                onClick={() => setConfirmAction(null)}
+              >
+                {lang === 'ar' ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button
+                className="dash-btn dash-btn-danger"
+                onClick={() => {
+                  confirmAction.onConfirm();
+                }}
+              >
+                {u.delete || (lang === 'ar' ? 'حذف' : 'Delete')}
+              </button>
             </div>
           </div>
         </ModalWrap>

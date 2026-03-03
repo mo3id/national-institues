@@ -164,17 +164,27 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
             }
             onSave(d as DashSchool);
         }}>
-            <div className="form-full">
-                <label className="dash-label">{u.schoolName}</label>
+            <div className="form-col">
+                <label className="dash-label">{u.schoolName} (EN)</label>
                 <input className={`dash-input ${errors.name ? 'border-red-500' : ''}`} value={d.name || ''} onChange={e => { setD(p => ({ ...p, name: e.target.value })); if (errors.name) setErrors(p => ({ ...p, name: '' })) }} />
                 {errors.name && <span className="text-red-500 text-xs mt-1 block">{errors.name}</span>}
             </div>
-            <div>
-                <label className="dash-label">{u.location}</label>
+            <div className="form-col">
+                <label className="dash-label">{u.schoolName} (AR)</label>
+                <input className={`dash-input ${errors.nameAr ? 'border-red-500' : ''}`} dir="rtl" value={d.nameAr || ''} onChange={e => { setD(p => ({ ...p, nameAr: e.target.value })); if (errors.nameAr) setErrors(p => ({ ...p, nameAr: '' })) }} />
+                {errors.nameAr && <span className="text-red-500 text-xs mt-1 block">{errors.nameAr}</span>}
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.location} (EN)</label>
                 <input className={`dash-input ${errors.location ? 'border-red-500' : ''}`} value={d.location || ''} onChange={e => { setD(p => ({ ...p, location: e.target.value })); if (errors.location) setErrors(p => ({ ...p, location: '' })) }} />
                 {errors.location && <span className="text-red-500 text-xs mt-1 block">{errors.location}</span>}
             </div>
-            <div>
+            <div className="form-col">
+                <label className="dash-label">{u.location} (AR)</label>
+                <input className={`dash-input ${errors.locationAr ? 'border-red-500' : ''}`} dir="rtl" value={d.locationAr || ''} onChange={e => { setD(p => ({ ...p, locationAr: e.target.value })); if (errors.locationAr) setErrors(p => ({ ...p, locationAr: '' })) }} />
+                {errors.locationAr && <span className="text-red-500 text-xs mt-1 block">{errors.locationAr}</span>}
+            </div>
+            <div className="form-col">
                 <label className="dash-label">{u.governorate}</label>
                 <div className={errors.governorate ? 'border border-red-500 rounded' : ''}>
                     <CustomSelect
@@ -189,12 +199,17 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
                 </div>
                 {errors.governorate && <span className="text-red-500 text-xs mt-1 block">{errors.governorate}</span>}
             </div>
-            <div>
-                <label className="dash-label">{u.principal}</label>
+            <div className="form-col">
+                <label className="dash-label">{u.principal} (EN)</label>
                 <input className={`dash-input ${errors.principal ? 'border-red-500' : ''}`} value={d.principal || ''} onChange={e => { setD(p => ({ ...p, principal: e.target.value })); if (errors.principal) setErrors(p => ({ ...p, principal: '' })) }} />
                 {errors.principal && <span className="text-red-500 text-xs mt-1 block">{errors.principal}</span>}
             </div>
-            <div>
+            <div className="form-col">
+                <label className="dash-label">{u.principal} (AR)</label>
+                <input className={`dash-input ${errors.principalAr ? 'border-red-500' : ''}`} dir="rtl" value={d.principalAr || ''} onChange={e => { setD(p => ({ ...p, principalAr: e.target.value })); if (errors.principalAr) setErrors(p => ({ ...p, principalAr: '' })) }} />
+                {errors.principalAr && <span className="text-red-500 text-xs mt-1 block">{errors.principalAr}</span>}
+            </div>
+            <div className="form-col">
                 <label className="dash-label">{u.type}</label>
                 <div className={errors.type ? 'border border-red-500 rounded' : ''}>
                     <CustomSelect
@@ -204,13 +219,47 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
                             if (errors.type) setErrors(p => ({ ...p, type: '' }));
                         }}
                         options={[
-                            { value: 'Language', label: lang === 'ar' ? 'لغات' : 'Language' },
-                            { value: 'National', label: lang === 'ar' ? 'قومي' : 'National' },
-                            { value: 'International', label: lang === 'ar' ? 'دولي' : 'International' }
+                            { value: 'Arabic', label: lang === 'ar' ? 'عربي' : 'Arabic' },
+                            { value: 'Languages', label: lang === 'ar' ? 'لغات' : 'Languages' },
+                            { value: 'American', label: lang === 'ar' ? 'أمريكي' : 'American' },
+                            { value: 'British', label: lang === 'ar' ? 'بريطاني' : 'British' },
+                            { value: 'French', label: lang === 'ar' ? 'فرنسي' : 'French' }
                         ]}
                     />
                 </div>
                 {errors.type && <span className="text-red-500 text-xs mt-1 block">{errors.type}</span>}
+            </div>
+            <div className="form-full">
+                <label className="dash-label">{u.aboutSchool} (EN)</label>
+                <textarea className="dash-input dash-ta" value={d.about || ''} onChange={e => { setD(p => ({ ...p, about: e.target.value })); }} />
+            </div>
+            <div className="form-full">
+                <label className="dash-label">{u.aboutSchool} (AR)</label>
+                <textarea className="dash-input dash-ta" dir="rtl" value={d.aboutAr || ''} onChange={e => { setD(p => ({ ...p, aboutAr: e.target.value })); }} />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.phone}</label>
+                <input className="dash-input" value={d.phone || ''} onChange={e => setD(p => ({ ...p, phone: e.target.value }))} type="tel" />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.email}</label>
+                <input className="dash-input" value={d.email || ''} onChange={e => setD(p => ({ ...p, email: e.target.value }))} type="email" />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.website}</label>
+                <input className="dash-input" value={d.website || ''} onChange={e => setD(p => ({ ...p, website: e.target.value }))} type="url" />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.rating}</label>
+                <input className="dash-input" value={d.rating || ''} onChange={e => setD(p => ({ ...p, rating: e.target.value }))} placeholder="e.g. 4.9" />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.studentCount}</label>
+                <input className="dash-input" value={d.studentCount || ''} onChange={e => setD(p => ({ ...p, studentCount: e.target.value }))} placeholder="e.g. +2.5k" />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.foundedYear}</label>
+                <input className="dash-input" value={d.foundedYear || ''} onChange={e => setD(p => ({ ...p, foundedYear: e.target.value }))} placeholder="e.g. 1995" />
             </div>
             <div className="form-full">
                 <div className={errors.mainImage ? 'border border-red-500 p-2 rounded' : ''}>
@@ -365,7 +414,7 @@ export const EditJobForm: React.FC<EditJobProps> = ({ job, lang, onSave, onCance
                         <img src={d.image} alt="preview" className="max-h-full object-contain" />
                     ) : (
                         <div className="text-center text-sm text-slate-500">
-                            {u.uploadImage}<br/>
+                            {u.uploadImage}<br />
                             <span className="text-xs text-slate-400">{u.dragDrop}</span>
                         </div>
                     )}

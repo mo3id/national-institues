@@ -97,7 +97,7 @@ const About: React.FC = () => {
                             <div className="w-full lg:w-1/2">
                                 <div className="relative aspect-[4/3] lg:aspect-[4/5] rounded-[40px] overflow-hidden group shadow-2xl">
                                     <img
-                                        src={d.storyImage || "/nano-banana-1771792169108.png"}
+                                        src={d.storyImage || "/nano-banana-1771792169108.webp"}
                                         className="w-full h-full object-cover object-left group-hover:scale-105 transition-transform duration-1000 ease-in-out"
                                         alt="Our Story"
                                     />

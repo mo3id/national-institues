@@ -55,6 +55,20 @@ export interface SiteData {
         jobFormDesc: string;
         jobFormDescAr: string;
     };
+    contactData: {
+        address: string;
+        addressAr: string;
+        phone: string;
+        email: string;
+        workingHours: string;
+        workingHoursAr: string;
+        facebook: string;
+        twitter: string;
+        instagram: string;
+        linkedin: string;
+        footerDesc?: string;
+        footerDescAr?: string;
+    };
 }
 
 export const DEFAULT_SITE_DATA: SiteData = {
@@ -73,7 +87,7 @@ export const DEFAULT_SITE_DATA: SiteData = {
             subtitleAr: 'إرث من التميز',
             description: 'Empowering the next generation with world-class education and values.',
             descriptionAr: 'تمكين الجيل القادم من خلال تعليم وقيم ذات مستوى عالمي.',
-            image: '/nano-banana-1771792169108.png'
+            image: '/nano-banana-1771792169108.webp'
         },
         { id: 2, title: 'Excellence in Education', titleAr: 'التميز في التعليم', subtitle: 'Leading National Institutes in Egypt', subtitleAr: 'المعاهد القومية الرائدة في مصر', description: 'Empowering future generations with knowledge and values.', descriptionAr: 'تمكين أجيال المستقبل بالمعرفة والقيم.', image: '/nano-banana-1771778144311.png' },
         { id: 3, title: 'Modern Learning', titleAr: 'تعلم حديث', subtitle: 'Advanced Curriculum & Facilities', subtitleAr: 'مناهج ومرافق متطورة', description: 'Preparing students for a globalized world.', descriptionAr: 'إعداد الطلاب لعالم معولم.', image: '/nano-banana-1771806330134.png' },
@@ -89,7 +103,7 @@ export const DEFAULT_SITE_DATA: SiteData = {
         quoteAr: 'التعليم هو أقوى سلاح يمكنك استخدامه لتغيير العالم.',
         points: ['40+ Years of Excellence', 'Modern Curriculum', 'Expert Faculty', 'Advanced Facilities'],
         pointsAr: ['أكثر من ٤٠ عاماً من التميز', 'مناهج حديثة', 'أعضاء هيئة تدريس خبراء', 'مرافق متقدمة'],
-        chairmanImage: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=2000&auto=format&fit=crop',
+        chairmanImage: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600&auto=format&fit=crop',
         storyTitle: 'Crafting the Future Since 1995',
         storyTitleAr: 'صياغة المستقبل منذ عام ١٩٩٥',
         storyDesc: 'Our journey began with a simple yet profound vision: to provide world-class education that respects our national roots while embracing global innovation.',
@@ -136,7 +150,7 @@ export const DEFAULT_SITE_DATA: SiteData = {
         gatewayDescAr: 'انضم إلى آلاف الطلاب في جميع أنحاء مصر في شبكة معاهدنا القومية المتخصصة.',
         gatewayCTA: 'View Map',
         gatewayCTAAr: 'عرض الخريطة',
-        mapImage: '/nano-banana-17717977008341.png',
+        mapImage: '/nano-banana-17717977008341.webp',
         ctaTitle: 'Join the NIS Family Today',
         ctaTitleAr: 'انضم لعائلة المعاهد القومية اليوم',
         ctaDesc: 'Become part of Egypt\'s leading educational network and shape your child\'s future.',
@@ -165,6 +179,20 @@ export const DEFAULT_SITE_DATA: SiteData = {
         jobFormTitleAr: 'انضم إلى فريقنا',
         jobFormDesc: 'Fill out the form below to apply for your dream job at NIS.',
         jobFormDescAr: 'املأ النموذج أدناه للتقدم لوظيفة أحلامك في المعاهد القومية.',
+    },
+    contactData: {
+        address: '123 Education St, Cairo, Egypt',
+        addressAr: '١٢٣ شارع التعليم، القاهرة، مصر',
+        phone: '+20 123 456 7890',
+        email: 'info@nis.edu.eg',
+        workingHours: 'Sunday - Thursday: 8:00 AM - 3:00 PM',
+        workingHoursAr: 'الأحد - الخميس: ٨:٠٠ صباحاً - ٣:٠٠ مساءً',
+        facebook: 'https://facebook.com',
+        twitter: 'https://twitter.com',
+        instagram: 'https://instagram.com',
+        linkedin: 'https://linkedin.com',
+        footerDesc: 'The largest educational organization in Egypt, overseeing excellence in national and international schooling for over 60 years.',
+        footerDescAr: 'أكبر مؤسسة تعليمية في مصر، تشرف على التميز في التعليم القومي والدولي لأكثر من 60 عاماً.',
     }
 };
 

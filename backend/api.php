@@ -4,6 +4,9 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Accept");
 header("Content-Type: application/json; charset=UTF-8");
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -17,6 +20,11 @@ $action = $_GET['action'] ?? '';
 try {
     switch ($action) {
         case 'get_site_data':
+            // Automatic migration of old school types to new types
+            $pdo->exec("UPDATE schools SET type = 'Arabic' WHERE type = 'National'");
+            $pdo->exec("UPDATE schools SET type = 'Languages' WHERE type = 'Language'");
+            $pdo->exec("UPDATE schools SET type = 'American' WHERE type = 'International'");
+
             // Fetch schools
             $stmt = $pdo->query("SELECT * FROM schools");
             $schools = $stmt->fetchAll();
@@ -76,7 +84,21 @@ try {
                 $pdo->exec("DELETE FROM schools");
                 $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 foreach ($newData as $s) {
-                    $stmt->execute([$s['id'], $s['name'], $s['nameAr'], $s['location'], $s['locationAr'], $s['governorate'], $s['governorateAr'], $s['principal'], $s['principalAr'] ?? '', $s['logo'], $s['type'], $s['mainImage'] ?? '', json_encode($s['gallery'] ?? [])]);
+                    $stmt->execute([
+                        $s['id'] ?? '',
+                        $s['name'] ?? '',
+                        $s['nameAr'] ?? ($s['name'] ?? ''),
+                        $s['location'] ?? '',
+                        $s['locationAr'] ?? ($s['location'] ?? ''),
+                        $s['governorate'] ?? '',
+                        $s['governorateAr'] ?? ($s['governorate'] ?? ''),
+                        $s['principal'] ?? '',
+                        $s['principalAr'] ?? ($s['principal'] ?? ''),
+                        $s['logo'] ?? '',
+                        $s['type'] ?? '',
+                        $s['mainImage'] ?? '',
+                        json_encode($s['gallery'] ?? [])
+                    ]);
                 }
             } elseif ($category === 'news') {
                 $pdo->exec("DELETE FROM news");

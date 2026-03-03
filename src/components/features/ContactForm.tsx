@@ -80,8 +80,9 @@ const ContactForm: React.FC = () => {
                         name="fullName"
                         value={formData.fullName}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 bg-slate-50 border ${errors.fullName ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-blue-500'} rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all`}
+                        className={`w-full px-4 py-3 bg-slate-50 border ${errors.fullName ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-blue-500'} rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all ${isRTL ? 'text-right' : 'text-left'}`}
                         placeholder={lang === 'ar' ? 'أدخل اسمك بالكامل' : 'Enter your full name'}
+                        dir={isRTL ? 'rtl' : 'ltr'}
                     />
                     {errors.fullName && <p className="text-red-500 text-xs font-bold mt-1">{errors.fullName}</p>}
                 </div>
@@ -94,8 +95,9 @@ const ContactForm: React.FC = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 bg-slate-50 border ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-blue-500'} rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all`}
+                        className={`w-full px-4 py-3 bg-slate-50 border ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-blue-500'} rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all ${isRTL && !formData.email ? 'text-right' : 'text-left'}`}
                         placeholder={lang === 'ar' ? 'أدخل بريدك الإلكتروني' : 'Enter your email address'}
+                        dir={formData.email ? 'ltr' : (isRTL ? 'rtl' : 'ltr')}
                     />
                     {errors.email && <p className="text-red-500 text-xs font-bold mt-1">{errors.email}</p>}
                 </div>
@@ -110,8 +112,9 @@ const ContactForm: React.FC = () => {
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 bg-slate-50 border ${errors.subject ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-blue-500'} rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all`}
+                    className={`w-full px-4 py-3 bg-slate-50 border ${errors.subject ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-blue-500'} rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all ${isRTL ? 'text-right' : 'text-left'}`}
                     placeholder={lang === 'ar' ? 'موضوع رسالتك' : 'Subject of your message'}
+                    dir={isRTL ? 'rtl' : 'ltr'}
                 />
                 {errors.subject && <p className="text-red-500 text-xs font-bold mt-1">{errors.subject}</p>}
             </div>
@@ -125,8 +128,9 @@ const ContactForm: React.FC = () => {
                     value={formData.message}
                     onChange={handleChange}
                     rows={5}
-                    className={`w-full px-4 py-3 bg-slate-50 border ${errors.message ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-blue-500'} rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all resize-none`}
+                    className={`w-full px-4 py-3 bg-slate-50 border ${errors.message ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-blue-500'} rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all resize-none ${isRTL ? 'text-right' : 'text-left'}`}
                     placeholder={lang === 'ar' ? 'اكتب رسالتك هنا...' : 'Write your message here...'}
+                    dir={isRTL ? 'rtl' : 'ltr'}
                 />
                 {errors.message && <p className="text-red-500 text-xs font-bold mt-1">{errors.message}</p>}
             </div>

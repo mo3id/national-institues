@@ -49,7 +49,7 @@ export const ar = {
             {
                 title: "نبتكر اليوم لنبني غداً أفضل لأبنائنا",
                 description: "مناهج تعليمية متطورة تواكب العصر، تهدف إلى تنمية مهارات التفكير النقدي والإبداع لدى الطلاب منذ الصغر.",
-                image: "/nano-banana-1771792169108.png"
+                image: "/nano-banana-1771792169108.webp"
             }
         ]
     },
@@ -176,9 +176,11 @@ export const ar = {
         noResults: "لم يتم العثور على مدارس تطابق معايير البحث.",
         clearFilters: "مسح الفلاتر",
         types: {
-            National: "قومي",
-            International: "دولي",
-            Language: "لغات"
+            Arabic: "عربي",
+            Languages: "لغات",
+            American: "أمريكي",
+            British: "بريطاني",
+            French: "فرنسي"
         }
     },
     footer: {

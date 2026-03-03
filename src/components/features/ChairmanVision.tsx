@@ -78,7 +78,7 @@ const ChairmanVision: React.FC = () => {
 
                             <div className="relative aspect-square">
                                 <img
-                                    src="/chairman.png"
+                                    src={chairman.chairmanImage || "/chairman.png"}
                                     alt={name}
                                     className="w-full h-full object-cover rounded-full"
                                 />

@@ -20,22 +20,22 @@ const ContactUs: React.FC = () => {
         {
             icon: MapPin,
             title: lang === 'ar' ? 'عنواننا' : 'Our Location',
-            desc: lang === 'ar' ? '١٢ شارع المعاهد القومية، القاهرة، مصر' : '12 National Institutes St, Cairo, Egypt'
+            desc: lang === 'ar' ? siteData.contactData?.addressAr || '١٢ شارع المعاهد القومية، القاهرة، مصر' : siteData.contactData?.address || '12 National Institutes St, Cairo, Egypt'
         },
         {
             icon: Phone,
             title: lang === 'ar' ? 'رقم الهاتف' : 'Phone Number',
-            desc: '+20 123 456 7890'
+            desc: siteData.contactData?.phone || '+20 123 456 7890'
         },
         {
             icon: Mail,
             title: lang === 'ar' ? 'البريد الإلكتروني' : 'Email Address',
-            desc: 'info@nis.edu.eg'
+            desc: siteData.contactData?.email || 'info@nis.edu.eg'
         },
         {
             icon: Clock,
             title: lang === 'ar' ? 'ساعات العمل' : 'Working Hours',
-            desc: lang === 'ar' ? 'الأحد - الخميس: ٨ صباحاً - ٤ عصراً' : 'Sun - Thu: 8:00 AM - 4:00 PM'
+            desc: lang === 'ar' ? siteData.contactData?.workingHoursAr || 'الأحد - الخميس: ٨ صباحاً - ٤ عصراً' : siteData.contactData?.workingHours || 'Sun - Thu: 8:00 AM - 4:00 PM'
         }
     ];
 

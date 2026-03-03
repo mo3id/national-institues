@@ -1,20 +1,21 @@
 
 import React from 'react';
-import { Twitter, Instagram, Linkedin, Github } from 'lucide-react';
+import { Twitter, Instagram, Linkedin, Github, Facebook } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import NISLogo from '../common/NISLogo';
 import { useLanguage } from '@/context/LanguageContext';
+import { useSiteData } from '@/context/DataContext';
 import ScrollReveal from '../common/ScrollReveal';
 
 const Footer: React.FC = () => {
   const { lang, isRTL, t: translationsRoot } = useLanguage();
+  const { data: siteData } = useSiteData();
   const t = translationsRoot.footer;
 
   const socialLinks = [
-    { Icon: Twitter, href: "#" },
-    { Icon: Instagram, href: "#" },
-    { Icon: Linkedin, href: "#" },
-    { Icon: Github, href: "#" },
+    { Icon: Facebook, href: siteData.contactData?.facebook || "#" },
+    { Icon: Twitter, href: siteData.contactData?.twitter || "#" },
+    { Icon: Instagram, href: siteData.contactData?.instagram || "#" },
+    { Icon: Linkedin, href: siteData.contactData?.linkedin || "#" },
   ];
 
   return (
@@ -25,24 +26,30 @@ const Footer: React.FC = () => {
           <div className="lg:col-span-5 space-y-12">
             <ScrollReveal direction="right">
               <div className="flex flex-col md:flex-row items-center gap-4 justify-center md:justify-start">
-                <img src="/Layer 1.png" alt="NIS Logo" className="h-12 md:h-16 object-contain" />
+                <img src="/layer-1-small.webp" alt="NIS Logo" className="h-12 md:h-16 object-contain" width="134" height="48" loading="lazy" decoding="async" />
                 <span className="text-[26px] md:text-[32px] font-bold tracking-tight text-[#1e3a8a]">
                   {t.networkName}
                 </span>
               </div>
-              <p className="mt-10 text-gray-500 text-[16px] md:text-[20px] leading-relaxed max-w-lg text-center md:text-start mx-auto md:mx-0">
-                {t.description}
+              <p className="mt-10 text-gray-600 text-[16px] md:text-[20px] leading-relaxed max-w-lg text-center md:text-start mx-auto md:mx-0">
+                {(lang === 'ar' ? siteData.contactData?.footerDescAr : siteData.contactData?.footerDesc) || t.description}
               </p>
               <div className="flex gap-10 mt-12 justify-center md:justify-start">
-                {socialLinks.map(({ Icon, href }, i) => (
-                  <a
-                    key={i}
-                    href={href}
-                    className="text-gray-400 hover:text-black transition-colors"
-                  >
-                    <Icon className="h-8 w-8" />
-                  </a>
-                ))}
+                {socialLinks.map(({ Icon, href }, i) => {
+                  if (!href || href === "#") return null;
+                  return (
+                    <a
+                      key={i}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Visit our ${Icon.name || 'social media'} page`}
+                      className="text-gray-600 hover:text-[#1e3a8a] transition-all duration-300 hover:-translate-y-1"
+                    >
+                      <Icon className="h-7 w-7 md:h-8 md:w-8" />
+                    </a>
+                  );
+                })}
               </div>
             </ScrollReveal>
           </div>
@@ -52,11 +59,11 @@ const Footer: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-12">
               <ScrollReveal delay={0.1}>
                 <div className="text-center md:text-start flex flex-col items-center md:items-start">
-                  <h4 className="font-bold text-[20px] md:text-[26px] mb-10">{t.productTitle}</h4>
+                  <h3 className="font-bold text-[20px] md:text-[26px] mb-10">{t.productTitle}</h3>
                   <ul className="space-y-6">
                     {t.productLinks.map((link: any, idx: number) => (
                       <li key={idx}>
-                        <Link to={link.path} className="text-gray-500 hover:text-black text-[16px] md:text-[20px] transition-colors">
+                        <Link to={link.path} className="text-gray-600 hover:text-black text-[16px] md:text-[20px] transition-colors">
                           {link.label}
                         </Link>
                       </li>
@@ -67,11 +74,11 @@ const Footer: React.FC = () => {
 
               <ScrollReveal delay={0.2}>
                 <div className="text-center md:text-start flex flex-col items-center md:items-start">
-                  <h4 className="font-bold text-[20px] md:text-[26px] mb-10">{t.resourcesTitle}</h4>
+                  <h3 className="font-bold text-[20px] md:text-[26px] mb-10">{t.resourcesTitle}</h3>
                   <ul className="space-y-6">
                     {t.resourceLinks.map((link: any, idx: number) => (
                       <li key={idx}>
-                        <Link to={link.path} className="text-gray-500 hover:text-black text-[16px] md:text-[20px] transition-colors">
+                        <Link to={link.path} className="text-gray-600 hover:text-black text-[16px] md:text-[20px] transition-colors">
                           {link.label}
                         </Link>
                       </li>
@@ -82,11 +89,11 @@ const Footer: React.FC = () => {
 
               <ScrollReveal delay={0.3}>
                 <div className="text-center md:text-start flex flex-col items-center md:items-start">
-                  <h4 className="font-bold text-[20px] md:text-[26px] mb-10">{t.companyTitle}</h4>
+                  <h3 className="font-bold text-[20px] md:text-[26px] mb-10">{t.companyTitle}</h3>
                   <ul className="space-y-6">
                     {t.companyLinks.map((link: any, idx: number) => (
                       <li key={idx}>
-                        <Link to={link.path} className="text-gray-500 hover:text-black text-[16px] md:text-[20px] transition-colors">
+                        <Link to={link.path} className="text-gray-600 hover:text-black text-[16px] md:text-[20px] transition-colors">
                           {link.label}
                         </Link>
                       </li>
@@ -101,12 +108,12 @@ const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <ScrollReveal direction="up" delay={0.4}>
           <div className="pt-12 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-10">
-            <div className="text-[16px] md:text-[20px] text-gray-400 text-center md:text-start">
+            <div className="text-[16px] md:text-[20px] text-gray-600 text-center md:text-start">
               {t.copyright}
             </div>
             <div className="flex flex-wrap justify-center gap-12 text-[16px] md:text-[20px]">
               {[t.privacy, t.terms, t.cookies].map((link, i) => (
-                <a key={i} href="#" className="text-gray-400 hover:text-black transition-colors">
+                <a key={i} href="#" className="text-gray-600 hover:text-black transition-colors">
                   {link}
                 </a>
               ))}

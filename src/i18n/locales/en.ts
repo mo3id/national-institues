@@ -49,7 +49,7 @@ export const en = {
             {
                 title: "Innovating Today to Build a Better Future for Our Children",
                 description: "Advanced educational curricula that keep pace with the times, aiming to develop critical thinking and creativity skills in students from a young age.",
-                image: "/nano-banana-1771792169108.png"
+                image: "/nano-banana-1771792169108.webp"
             }
         ]
     },
@@ -176,9 +176,11 @@ export const en = {
         noResults: "No schools found matching your criteria.",
         clearFilters: "Clear Filters",
         types: {
-            National: "National",
-            International: "International",
-            Language: "Language"
+            Arabic: "Arabic",
+            Languages: "Languages",
+            American: "American",
+            British: "British",
+            French: "French"
         }
     },
     footer: {

@@ -1,4 +1,4 @@
-export type Section = 'overview' | 'news' | 'schools' | 'jobs' | 'recruitment' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'complaints' | 'contactMessages' | 'settings';
+export type Section = 'overview' | 'news' | 'schools' | 'jobs' | 'recruitment' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'contact' | 'complaints' | 'contactMessages' | 'settings';
 export type Theme = 'light' | 'dark';
 export type Lang = 'en' | 'ar';
 
@@ -27,6 +27,15 @@ export interface DashSchool {
     type: string;
     mainImage?: string;
     gallery?: string[];
+    // New fields
+    about?: string;
+    aboutAr?: string;
+    phone?: string;
+    email?: string;
+    website?: string;
+    rating?: string;
+    studentCount?: string;
+    foundedYear?: string;
 }
 
 export interface DashJob {
@@ -151,6 +160,8 @@ export const UI: Record<Lang, Record<string, string>> = {
         instituteManage: 'Manage history, mission and vision',
         forms: 'Forms Settings',
         formsManage: 'Update form titles and descriptions',
+        contactSettings: 'Contact Info',
+        contactSettingsManage: 'Manage global addresses, phones and social links',
         noResults: 'No results found',
         addSchool: 'Add School',
         addJob: 'Add Job Vacancy',
@@ -168,6 +179,12 @@ export const UI: Record<Lang, Record<string, string>> = {
         mainImage: 'Primary Image',
         gallery: 'Photo Gallery',
         addImage: 'Add Image',
+        aboutSchool: 'About School',
+        contactData: 'Contact info',
+        website: 'Website',
+        rating: 'Rating',
+        studentCount: 'Students Count',
+        foundedYear: 'Founded Year',
         complaints: 'Complaints',
         complaintsManage: 'View and manage submitted complaints',
         senderName: 'Sender Name',
@@ -249,6 +266,8 @@ export const UI: Record<Lang, Record<string, string>> = {
         instituteManage: 'إدارة التاريخ والرسالة والرؤية',
         forms: 'إعدادات النماذج',
         formsManage: 'تحديث عناوين ونصوص النماذج',
+        contactSettings: 'بيانات الاتصال',
+        contactSettingsManage: 'إدارة العناوين والهواتف وروابط التواصل الاجتماعي',
         noResults: 'لم يتم العثور على نتائج',
         addSchool: 'إضافة مدرسة',
         addJob: 'إضافة وظيفة شاغرة',
@@ -256,7 +275,7 @@ export const UI: Record<Lang, Record<string, string>> = {
         story: 'قصتنا',
         mission: 'الرسالة',
         vision: 'الرؤية',
-        introduction: 'قسم المقدمة',
+        introduction: 'قسم المقدمة (أجيال تثق في)',
         map: 'قسم الخريطة',
         partnersGallery: 'الشركاء والمعرض',
         loading: 'جاري التحميل...',
@@ -266,6 +285,12 @@ export const UI: Record<Lang, Record<string, string>> = {
         mainImage: 'الصورة الرئيسية',
         gallery: 'معرض الصور',
         addImage: 'إضافة صورة',
+        aboutSchool: 'عن المدرسة',
+        contactData: 'تفاصيل التواصل',
+        website: 'الموقع الإلكتروني',
+        rating: 'التقييم',
+        studentCount: 'عدد الطلاب',
+        foundedYear: 'سنة التأسيس',
         complaints: 'الشكاوى',
         complaintsManage: 'عرض وإدارة الشكاوى المقدمة',
         senderName: 'اسم المرسل',

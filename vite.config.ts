@@ -18,6 +18,16 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, './src'),
       }
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom', 'react-router-dom', 'framer-motion', 'lucide-react', 'zod', 'zustand', '@tanstack/react-query'],
+            ui: ['@google/genai']
+          }
+        }
+      }
     }
   };
 });

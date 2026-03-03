@@ -42,6 +42,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (apiData.stats && Object.keys(apiData.stats).length > 0) merged.stats = apiData.stats;
             if (apiData.homeData && Object.keys(apiData.homeData).length > 0) merged.homeData = apiData.homeData;
             if (apiData.formSettings && Object.keys(apiData.formSettings).length > 0) merged.formSettings = apiData.formSettings;
+            if (apiData.contactData && Object.keys(apiData.contactData).length > 0) merged.contactData = apiData.contactData;
 
             // Arrays that can safely be empty if mock defaults are empty
             if (apiData.complaints) merged.complaints = apiData.complaints;
@@ -114,6 +115,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             merged.stats = mergeStrategy('stats', false) as any;
             merged.homeData = mergeStrategy('homeData', false) as any;
             merged.formSettings = mergeStrategy('formSettings', false) as any;
+            merged.contactData = mergeStrategy('contactData', false) as any;
+
+            if (merged.schools && Array.isArray(merged.schools)) {
+                merged.schools = merged.schools.map((s: any) => {
+                    let type = s.type;
+                    if (type === 'National') type = 'Arabic';
+                    if (type === 'Language') type = 'Languages';
+                    if (type === 'International') type = 'American';
+                    return { ...s, type };
+                });
+            }
 
             setData(merged);
         }
