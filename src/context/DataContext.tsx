@@ -65,6 +65,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
         onSuccess: (res) => {
             // Only update Zustand UI if the server REALLY saved it
+            queryClient.setQueryData(['siteData'], (oldData: any) => {
+                if (!oldData) return oldData;
+                return {
+                    ...oldData,
+                    [res.category]: res.newData
+                };
+            });
             updateData(res.category as keyof SiteData, res.newData);
             // Optional: Backup save to localStorage to persist across refreshes if API is dead
             const currentObj = JSON.parse(localStorage.getItem('nis_offline_cache') || '{}');
