@@ -118,7 +118,10 @@ export const CustomDatePicker: React.FC<DatePickerProps> = ({ value, onChange, p
 
     const handleDateSelect = (day: number) => {
         const d = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-        const formatted = d.toISOString().split('T')[0];
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const dayStr = String(d.getDate()).padStart(2, '0');
+        const formatted = `${year}-${month}-${dayStr}`;
         onChange(formatted);
         setIsOpen(false);
     };
