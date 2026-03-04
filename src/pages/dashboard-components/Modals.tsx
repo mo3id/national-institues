@@ -4,6 +4,7 @@ import { DashNewsItem, HeroSlide, DashSchool, DashJob, Lang, UI } from './types'
 import { CustomSelect, CustomDatePicker, ImageUpload } from '../../components/common/FormControls';
 import { Filter, Calendar } from 'lucide-react';
 import { getDashNewsSchema, getDashHeroSchema, getDashSchoolSchema, getDashJobSchema } from '@/utils/validations';
+import { useSiteData } from '@/context/DataContext';
 
 // helper to convert File to base64 string
 const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
@@ -321,6 +322,7 @@ interface EditJobProps { job: Partial<DashJob>; lang: Lang; onSave: (j: DashJob)
 export const EditJobForm: React.FC<EditJobProps> = ({ job, lang, onSave, onCancel }) => {
     const [d, setD] = useState<Partial<DashJob>>({ ...job });
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const { data } = useSiteData();
     const u = UI[lang];
     const jobTypes = [
         { value: 'Full-time', labelAr: 'دوام كامل', labelEn: 'Full-time' },
@@ -352,14 +354,45 @@ export const EditJobForm: React.FC<EditJobProps> = ({ job, lang, onSave, onCance
                 {errors.titleAr && <span className="text-red-500 text-xs mt-1 block">{errors.titleAr}</span>}
             </div>
             <div className="form-col">
-                <label className="dash-label">Department (EN)</label>
-                <input className={`dash-input ${errors.department ? 'border-red-500' : ''}`} value={d.department || ''} onChange={e => { setD(p => ({ ...p, department: e.target.value })); if (errors.department) setErrors(p => ({ ...p, department: '' })) }} />
+                <label className="dash-label">Department (EN) / القسم (عربي)</label>
+                <div className={errors.department ? 'border border-red-500 rounded' : ''}>
+                    <CustomSelect
+                        value={d.department || ''}
+                        onChange={val => {
+                            // Find the matching Arabic translation from existing jobs
+                            const existingJob = data.jobs?.find(j => j.department === val);
+                            setD(p => ({
+                                ...p,
+                                department: val,
+                                departmentAr: existingJob?.departmentAr || val
+                            }));
+                            if (errors.department) {
+                                setErrors(p => ({ ...p, department: '', departmentAr: '' }));
+                            }
+                        }}
+                        options={Array.from(new Set(data.jobs?.map(j => j.department) || [])).filter(Boolean).map(dep => {
+                            const ar = data.jobs?.find(j => j.department === dep)?.departmentAr;
+                            return {
+                                value: dep,
+                                label: lang === 'ar' ? (ar || dep) : dep
+                            };
+                        }).concat([
+                            // Give them standard fallback departments if jobs list is empty or they need them
+                            { value: 'Academic', label: lang === 'ar' ? 'أكاديمي' : 'Academic' },
+                            { value: 'Admin', label: lang === 'ar' ? 'إداري' : 'Admin' },
+                            { value: 'Student Services', label: lang === 'ar' ? 'خدمات الطلاب' : 'Student Services' },
+                            { value: 'Sports', label: lang === 'ar' ? 'رياضي' : 'Sports' },
+                        ]).filter((tag, idx, arr) => arr.findIndex(t => t.value === tag.value) === idx)} // ensure unique
+                    />
+                </div>
                 {errors.department && <span className="text-red-500 text-xs mt-1 block">{errors.department}</span>}
-            </div>
-            <div className="form-col">
-                <label className="dash-label">القسم (عربي)</label>
-                <input className={`dash-input ${errors.departmentAr ? 'border-red-500' : ''}`} dir="rtl" value={d.departmentAr || ''} onChange={e => { setD(p => ({ ...p, departmentAr: e.target.value })); if (errors.departmentAr) setErrors(p => ({ ...p, departmentAr: '' })) }} />
-                {errors.departmentAr && <span className="text-red-500 text-xs mt-1 block">{errors.departmentAr}</span>}
+                <div style={{ marginTop: 8 }}>
+                    <label className="dash-label text-xs opacity-50">or Add New Department manually / أو أدخل قسم جديد يدوياً</label>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                        <input className="dash-input" placeholder="Department (EN)" value={d.department || ''} onChange={e => setD(p => ({ ...p, department: e.target.value }))} />
+                        <input className="dash-input" placeholder="القسم (عربي)" dir="rtl" value={d.departmentAr || ''} onChange={e => setD(p => ({ ...p, departmentAr: e.target.value }))} />
+                    </div>
+                </div>
             </div>
             <div className="form-col">
                 <label className="dash-label">Location (EN)</label>

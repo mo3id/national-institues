@@ -151,11 +151,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Strict Loading State (Waits for DB response, NO EMPTY SCREENS)
     if (isLoading && !apiData) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
-                <div className="flex flex-col items-center gap-6">
-                    <img src="/layer-1-small.webp" alt="Loading" className="h-16 object-contain animate-pulse" />
-                    <div className="w-8 h-8 border-4 border-[#1e3a8a] border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-[#1e3a8a] font-bold text-lg animate-pulse">Loading Data...</p>
+            <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#fafcff]">
+                <div className="relative w-32 h-32 flex items-center justify-center mb-6">
+                    <img src="/layer-1-small.webp" alt="Loading" className="w-full h-auto object-contain animate-pulse" />
+                </div>
+                <div className="flex gap-2" dir="ltr">
+                    <div className="w-3 h-3 rounded-full bg-[#1e3a8a] animate-bounce" style={{ animationDelay: '0s' }} />
+                    <div className="w-3 h-3 rounded-full bg-[#1e3a8a] animate-bounce" style={{ animationDelay: '0.2s' }} />
+                    <div className="w-3 h-3 rounded-full bg-[#991b1b] animate-bounce" style={{ animationDelay: '0.4s' }} />
                 </div>
             </div>
         );

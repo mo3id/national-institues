@@ -448,14 +448,17 @@ const Dashboard: React.FC = () => {
     setEditNewsId(null);
     showToast(u.articleSaved);
   };
-  const addNews = () => {
-    if (!newArt.title || !newArt.date) return showToast(u.required, 'error');
-    const newEntry = { id: String(Date.now()), title: newArt.title!, titleAr: newArt.titleAr || '', summary: newArt.summary || '', summaryAr: newArt.summaryAr || '', date: newArt.date!, image: newArt.image || `https://picsum.photos/seed/${Date.now()}/800/600`, published: newArt.published ?? true };
+  const addNews = (n: DashNewsItem) => {
+    const newEntry = {
+      ...n,
+      id: String(Date.now()),
+      image: n.image || `https://picsum.photos/seed/${Date.now()}/800/600`,
+      published: n.published ?? true
+    };
     const updated = [newEntry, ...newsList];
     setNewsList(updated);
     updateData('news', updated);
     setAddNewsOpen(false);
-    setNewArt({ title: '', titleAr: '', summary: '', summaryAr: '', date: '', image: '', published: true });
     setNewsSearch('');
     showToast(u.articleAdded);
   };
@@ -516,27 +519,15 @@ const Dashboard: React.FC = () => {
     });
   };
 
-  const addJob = () => {
-    if (!newJob.title || !newJob.department) return showToast(u.required, 'error');
+  const addJob = (j: DashJob) => {
     const newEntry: DashJob = {
+      ...j,
       id: String(Date.now()),
-      title: newJob.title!,
-      titleAr: newJob.titleAr || '',
-      department: newJob.department!,
-      departmentAr: newJob.departmentAr || '',
-      location: newJob.location || '',
-      locationAr: newJob.locationAr || '',
-      type: newJob.type || '',
-      typeAr: newJob.typeAr || '',
-      description: newJob.description || '',
-      descriptionAr: newJob.descriptionAr || '',
-      image: newJob.image || ''
     };
     const updated = [newEntry, ...jobs];
     setJobs(updated);
     updateData('jobs', updated);
     setAddJobOpen(false);
-    setNewJob({ title: '', titleAr: '', department: '', departmentAr: '', location: '', locationAr: '', type: '', typeAr: '', description: '', descriptionAr: '', image: '' });
     setJobSearch('');
     showToast(u.jobAdded);
   };
@@ -1577,10 +1568,7 @@ const Dashboard: React.FC = () => {
 
       {addNewsOpen && (
         <ModalWrap title={u.addArticle} onClose={() => setAddNewsOpen(false)}>
-          <EditNewsForm article={newArt as DashNewsItem} lang={lang} onSave={(a) => {
-            setNewArt(a);
-            addNews();
-          }} onCancel={() => setAddNewsOpen(false)} />
+          <EditNewsForm article={newArt as DashNewsItem} lang={lang} onSave={addNews} onCancel={() => setAddNewsOpen(false)} />
         </ModalWrap>
       )}
 
