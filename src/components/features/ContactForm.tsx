@@ -48,15 +48,12 @@ const ContactForm: React.FC = () => {
         setSubmitting(true);
         setSubmitError(null);
         try {
-            const newMessage = {
-                createdAt: new Date().toISOString(),
+            await submitContactMessage({
                 fullName: formData.fullName,
                 email: formData.email,
                 subject: formData.subject,
                 message: formData.message
-            };
-
-            await submitContactMessage(newMessage);
+            });
 
             setSuccess(true);
             setFormData({ fullName: '', email: '', subject: '', message: '' });

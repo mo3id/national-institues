@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { deleteEntry } from '@/services/api';
 import {
   LayoutDashboard, Newspaper, School, Image, Info, Settings,
   Plus, Pencil, Trash2, Eye, EyeOff, Save, X,
@@ -540,6 +541,32 @@ const Dashboard: React.FC = () => {
     showToast(u.jobAdded);
   };
 
+  const deleteComplaint = (id: string) => {
+    setConfirmAction({
+      message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه الشكوى؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this complaint? This cannot be undone.',
+      onConfirm: async () => {
+        const updated = complaints.filter(c => c.id !== id);
+        setComplaints(updated);
+        updateData('complaints', updated);
+        try { await deleteEntry('complaints', id); } catch { /* already updated locally */ }
+        showToast(lang === 'ar' ? 'تم حذف الشكوى' : 'Complaint deleted', 'error');
+      }
+    });
+  };
+
+  const deleteContactMessage = (id: string) => {
+    setConfirmAction({
+      message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه الرسالة؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this message? This cannot be undone.',
+      onConfirm: async () => {
+        const updated = contactMessages.filter(c => c.id !== id);
+        setContactMessages(updated);
+        updateData('contactMessages', updated);
+        try { await deleteEntry('contactMessages', id); } catch { /* already updated locally */ }
+        showToast(lang === 'ar' ? 'تم حذف الرسالة' : 'Message deleted', 'error');
+      }
+    });
+  };
+
   const saveAbout = () => {
     updateData('aboutData', about);
     setEditAbout(false);
@@ -558,7 +585,7 @@ const Dashboard: React.FC = () => {
   const filteredJobs = jobs.filter(j => j.title.toLowerCase().includes(jobSearch.toLowerCase()) || j.titleAr.includes(jobSearch) || j.department.toLowerCase().includes(jobSearch.toLowerCase()));
 
   const filteredApplications = applications.filter(a => {
-    const matchesJob = (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'all') ? true : a.jobId === selectedRecruitmentJobId;
+    const matchesJob = (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'all') ? true : (a.job === selectedRecruitmentJobId || a.jobId === selectedRecruitmentJobId);
     const term = jobSearch.toLowerCase();
     const matchesSearch =
       (a.fullName || '').toLowerCase().includes(term) ||
@@ -1407,23 +1434,39 @@ const Dashboard: React.FC = () => {
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.messageType}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.message}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.status}</th>
+                      <th style={{ padding: '14px 12px', width: 48 }} />
                     </tr>
                   </thead>
                   <tbody>
                     {filteredComplaints.length > 0 ? filteredComplaints.map((c, i) => (
-                      <tr key={i} style={{ cursor: 'pointer', borderBottom: i === filteredComplaints.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onClick={() => { setSelectedComplaint(c); setComplaintModalOpen(true); }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{c.fullName}</td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }} dir="ltr">{c.phone}</td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{c.school}</td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}><span style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--surface2)', fontSize: 11, fontWeight: 700 }}>{c.messageType}</span></td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, maxWidth: 300 }}>
+                      <tr key={i} style={{ borderBottom: i === filteredComplaints.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onClick={() => { setSelectedComplaint(c); setComplaintModalOpen(true); }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
+                          <p>{c.fullName}</p>
+                          <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2 }}>{c.createdAt ? new Date(c.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB') : ''}</p>
+                        </td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, cursor: 'pointer' }} dir="ltr">{c.phone}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, cursor: 'pointer' }}>{c.school}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, cursor: 'pointer' }}><span style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--surface2)', fontSize: 11, fontWeight: 700 }}>{c.messageType}</span></td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, maxWidth: 300, cursor: 'pointer' }}>
                           <p style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={c.message}>{c.message}</p>
                           <p style={{ fontSize: 11, color: 'var(--accent)', marginTop: 4 }}>{c.email}</p>
+                        </td>
+                        <td style={{ padding: '16px 24px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                          <span style={{
+                            padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700,
+                            background: c.status === 'Responded' ? 'rgba(16,185,129,0.15)' : c.status === 'In Progress' ? 'rgba(245,158,11,0.15)' : 'rgba(99,102,241,0.12)',
+                            color: c.status === 'Responded' ? '#10b981' : c.status === 'In Progress' ? '#f59e0b' : 'var(--accent)',
+                          }}>{c.status || 'Pending'}</span>
+                        </td>
+                        <td style={{ padding: '16px 12px' }} onClick={e => e.stopPropagation()}>
+                          <button className="dash-icon-btn" title={lang === 'ar' ? 'حذف' : 'Delete'} onClick={() => deleteComplaint(c.id)}>
+                            <Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} />
+                          </button>
                         </td>
                       </tr>
                     )) : (
                       <tr>
-                        <td colSpan={5} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}>
+                        <td colSpan={7} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}>
                           <MessageSquare style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} />
                           <p style={{ fontWeight: 600 }}>{u.noResults}</p>
                         </td>
@@ -1451,6 +1494,7 @@ const Dashboard: React.FC = () => {
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.subject}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.message}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.date}</th>
+                      <th style={{ padding: '14px 12px', width: 48 }} />
                     </tr>
                   </thead>
                   <tbody>
@@ -1462,11 +1506,16 @@ const Dashboard: React.FC = () => {
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, maxWidth: 300 }}>
                           <p style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={c.message}>{c.message}</p>
                         </td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 12, fontWeight: 600 }}>{c.date}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 12, fontWeight: 600 }}>{c.createdAt ? new Date(c.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB') : c.date || '—'}</td>
+                        <td style={{ padding: '16px 12px' }} onClick={e => e.stopPropagation()}>
+                          <button className="dash-icon-btn" title={lang === 'ar' ? 'حذف' : 'Delete'} onClick={() => deleteContactMessage(c.id)}>
+                            <Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} />
+                          </button>
+                        </td>
                       </tr>
                     )) : (
                       <tr>
-                        <td colSpan={5} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}>
+                        <td colSpan={6} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}>
                           <Mail style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} />
                           <p style={{ fontWeight: 600 }}>{u.noResults}</p>
                         </td>
@@ -1597,7 +1646,7 @@ const Dashboard: React.FC = () => {
             <p><strong>{u.senderName}:</strong> {selectedContact.fullName}</p>
             <p><strong>{u.email}:</strong> {selectedContact.email}</p>
             <p><strong>{u.subject}:</strong> {selectedContact.subject}</p>
-            <p><strong>{u.date}:</strong> {selectedContact.date}</p>
+            <p><strong>{u.date}:</strong> {selectedContact.createdAt ? new Date(selectedContact.createdAt).toLocaleString(lang === 'ar' ? 'ar-EG' : 'en-GB') : selectedContact.date || '—'}</p>
             <p><strong>{u.message}:</strong></p>
             <p>{selectedContact.message}</p>
             <div className="flex gap-2 mt-4">

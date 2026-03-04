@@ -1,8 +1,13 @@
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDataStore, SiteData, DEFAULT_SITE_DATA } from '@/store/useDataStore';
 import { fetchSiteData, updateCategory } from '@/services/api';
 import ErrorPage from '@/components/common/ErrorPage';
+
+// ─── Cross-Tab Sync Channel ───────────────────────────────────────────────────
+// Broadcasts a signal to all other open tabs of the same origin whenever the
+// dashboard saves data, so they refetch immediately without needing a reload.
+const SYNC_CHANNEL_NAME = 'nis_data_sync';
 
 interface DataContextType {
     data: SiteData;
@@ -13,123 +18,131 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+// ─── Smart Merge Helper ───────────────────────────────────────────────────────
+function buildMergedData(apiData: SiteData): SiteData {
+    const offlineCache = JSON.parse(localStorage.getItem('nis_offline_cache') || '{}');
+    const merged = { ...DEFAULT_SITE_DATA };
+
+    const pick = (key: keyof SiteData, isArray: boolean): any => {
+        const api = apiData[key] as any;
+        const cache = offlineCache[key];
+        const def = merged[key] as any;
+        if (isArray) {
+            return (api && api.length > 0) ? api : (cache || def);
+        } else {
+            return (api && Object.keys(api).length > 0) ? api : (cache || def);
+        }
+    };
+
+    merged.schools = pick('schools', true);
+    merged.news = pick('news', true);
+    merged.jobs = pick('jobs', true);
+    merged.heroSlides = pick('heroSlides', true);
+    merged.partners = pick('partners', true);
+    merged.galleryImages = pick('galleryImages', true);
+    merged.jobApplications = pick('jobApplications', true);
+    merged.complaints = pick('complaints', true);
+    merged.contactMessages = pick('contactMessages', true);
+    merged.aboutData = pick('aboutData', false);
+    merged.stats = pick('stats', false);
+    merged.homeData = pick('homeData', false);
+    merged.formSettings = pick('formSettings', false);
+    merged.contactData = pick('contactData', false);
+
+    // Normalize legacy school type values
+    if (Array.isArray(merged.schools)) {
+        merged.schools = merged.schools.map((s: any) => {
+            let type = s.type;
+            if (type === 'National') type = 'Arabic';
+            if (type === 'Language') type = 'Languages';
+            if (type === 'International') type = 'American';
+            return { ...s, type };
+        });
+    }
+
+    return merged;
+}
+
+// ─── Provider ─────────────────────────────────────────────────────────────────
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { data, setData, updateData } = useDataStore();
     const queryClient = useQueryClient();
+    const channelRef = useRef<BroadcastChannel | null>(null);
 
+    // ── React Query (with polling + window focus refetch) ─────────────────
     const { isLoading, error, data: apiData, refetch } = useQuery({
         queryKey: ['siteData'],
         queryFn: fetchSiteData,
-        // Fallback or retry settings handled globally or here
-        staleTime: 5 * 60 * 1000, // 5 minutes cache
+
+        staleTime: 0,                   // Always consider data stale → refetch when focused
+        refetchOnWindowFocus: true,     // Refetch when user switches back to this tab
+        refetchInterval: 30 * 1000,    // Poll server every 30 seconds as a safety net
+        refetchIntervalInBackground: false, // Don't poll when tab is hidden (saves resources)
     });
 
+    // ── Apply fetched data to Zustand store ───────────────────────────────
     useEffect(() => {
         if (apiData) {
-            // Smart Merge: Don't override default mock data with empty arrays/objects from the API
-            const merged = { ...DEFAULT_SITE_DATA };
-
-            // Arrays
-            if (apiData.schools && apiData.schools.length > 0) merged.schools = apiData.schools;
-            if (apiData.news && apiData.news.length > 0) merged.news = apiData.news;
-            if (apiData.jobs && apiData.jobs.length > 0) merged.jobs = apiData.jobs;
-            if (apiData.heroSlides && apiData.heroSlides.length > 0) merged.heroSlides = apiData.heroSlides;
-            if (apiData.partners && apiData.partners.length > 0) merged.partners = apiData.partners;
-            if (apiData.galleryImages && apiData.galleryImages.length > 0) merged.galleryImages = apiData.galleryImages;
-
-            // Objects
-            if (apiData.aboutData && Object.keys(apiData.aboutData).length > 0) merged.aboutData = apiData.aboutData;
-            if (apiData.stats && Object.keys(apiData.stats).length > 0) merged.stats = apiData.stats;
-            if (apiData.homeData && Object.keys(apiData.homeData).length > 0) merged.homeData = apiData.homeData;
-            if (apiData.formSettings && Object.keys(apiData.formSettings).length > 0) merged.formSettings = apiData.formSettings;
-            if (apiData.contactData && Object.keys(apiData.contactData).length > 0) merged.contactData = apiData.contactData;
-
-            // Arrays that can safely be empty if mock defaults are empty
-            if (apiData.complaints) merged.complaints = apiData.complaints;
-            if (apiData.contactMessages) merged.contactMessages = apiData.contactMessages;
-            if (apiData.jobApplications) merged.jobApplications = apiData.jobApplications;
-
-            setData(merged);
+            setData(buildMergedData(apiData));
         }
     }, [apiData, setData]);
 
-    // Fallback logic internally for UI robustness
-    // If the API call fails, we still load the `data` from Zustand (which is initialized to DEFAULT_SITE_DATA).
-    // The user will still see the app functioning (just with default data).
-    // We can also let the components access `error` if they want to explicitly show an error state.
+    // ── BroadcastChannel: listen for changes from OTHER tabs ──────────────
+    useEffect(() => {
+        if (typeof BroadcastChannel === 'undefined') return; // SSR / old browser guard
 
-    // Generic mutation for reliable dashboard updates (Requires REAL Server Success)
+        const channel = new BroadcastChannel(SYNC_CHANNEL_NAME);
+        channelRef.current = channel;
+
+        channel.onmessage = (event) => {
+            if (event.data?.type === 'DATA_UPDATED') {
+                // Another tab saved data → refetch immediately so this tab is up-to-date
+                queryClient.invalidateQueries({ queryKey: ['siteData'] });
+            }
+        };
+
+        return () => {
+            channel.close();
+            channelRef.current = null;
+        };
+    }, [queryClient]);
+
+    // ── Mutation: save to server + sync all tabs ──────────────────────────
     const updateMutation = useMutation({
-        mutationFn: async ({ category, newData }: { category: keyof SiteData, newData: any }) => {
+        mutationFn: async ({ category, newData }: { category: keyof SiteData; newData: any }) => {
             await updateCategory(category, newData);
             return { category, newData };
         },
+
         onSuccess: (res) => {
-            // Only update Zustand UI if the server REALLY saved it
+            // 1. Update query cache in THIS tab immediately (no extra network round-trip)
             queryClient.setQueryData(['siteData'], (oldData: any) => {
                 if (!oldData) return oldData;
-                return {
-                    ...oldData,
-                    [res.category]: res.newData
-                };
+                return { ...oldData, [res.category]: res.newData };
             });
+
+            // 2. Update Zustand store in THIS tab
             updateData(res.category as keyof SiteData, res.newData);
-            // Optional: Backup save to localStorage to persist across refreshes if API is dead
+
+            // 3. Persist to localStorage offline cache
             const currentObj = JSON.parse(localStorage.getItem('nis_offline_cache') || '{}');
             localStorage.setItem('nis_offline_cache', JSON.stringify({ ...currentObj, [res.category]: res.newData }));
+
+            // 4. Broadcast to ALL OTHER open tabs → they will refetch from server immediately
+            if (channelRef.current) {
+                channelRef.current.postMessage({ type: 'DATA_UPDATED', category: res.category });
+            }
         },
+
         onError: (err: any) => {
             alert(`Dashboard save failed! Please upload the latest api.php to your server.\nError: ${err.message}`);
-        }
+        },
     });
 
     const contextUpdateData = (category: keyof SiteData, newData: any) => {
         updateMutation.mutate({ category, newData });
     };
 
-    // Optional: Load offline cache if API returns empty for things
-    useEffect(() => {
-        if (apiData) {
-            const merged = { ...DEFAULT_SITE_DATA };
-            const offlineCache = JSON.parse(localStorage.getItem('nis_offline_cache') || '{}');
-
-            const mergeStrategy = (key: keyof SiteData, isArray: boolean) => {
-                if (isArray) {
-                    return (apiData[key] && (apiData[key] as any[]).length > 0) ? apiData[key] : (offlineCache[key] || merged[key]);
-                } else {
-                    return (apiData[key] && Object.keys(apiData[key] as any).length > 0) ? apiData[key] : (offlineCache[key] || merged[key]);
-                }
-            };
-
-            merged.schools = mergeStrategy('schools', true) as any;
-            merged.news = mergeStrategy('news', true) as any;
-            merged.jobs = mergeStrategy('jobs', true) as any;
-            merged.heroSlides = mergeStrategy('heroSlides', true) as any;
-            merged.partners = mergeStrategy('partners', true) as any;
-            merged.galleryImages = mergeStrategy('galleryImages', true) as any;
-            merged.jobApplications = mergeStrategy('jobApplications', true) as any;
-            merged.complaints = mergeStrategy('complaints', true) as any;
-            merged.contactMessages = mergeStrategy('contactMessages', true) as any;
-
-            merged.aboutData = mergeStrategy('aboutData', false) as any;
-            merged.stats = mergeStrategy('stats', false) as any;
-            merged.homeData = mergeStrategy('homeData', false) as any;
-            merged.formSettings = mergeStrategy('formSettings', false) as any;
-            merged.contactData = mergeStrategy('contactData', false) as any;
-
-            if (merged.schools && Array.isArray(merged.schools)) {
-                merged.schools = merged.schools.map((s: any) => {
-                    let type = s.type;
-                    if (type === 'National') type = 'Arabic';
-                    if (type === 'Language') type = 'Languages';
-                    if (type === 'International') type = 'American';
-                    return { ...s, type };
-                });
-            }
-
-            setData(merged);
-        }
-    }, [apiData, setData]);
     if (error && !apiData) {
         console.error('API Error details:', error);
         return (

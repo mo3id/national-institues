@@ -234,6 +234,31 @@ try {
              echo json_encode(["status" => "success", "message" => "Application submitted successfully.", "data" => $input]);
              break;
 
+        case 'delete_entry':
+            $input = json_decode(file_get_contents('php://input'), true);
+            if (!is_array($input)) throw new Exception('Invalid JSON payload');
+
+            // Whitelist allowed types — never expose arbitrary settings keys to the client
+            $allowedTypes = ['complaints', 'contactMessages'];
+            $type = $input['type'] ?? '';
+            $id   = $input['id']   ?? '';
+
+            if (!in_array($type, $allowedTypes, true)) throw new Exception('Invalid entry type');
+            if (!$id) throw new Exception('Entry id is required');
+
+            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = " . $pdo->quote($type));
+            $row  = $stmt->fetch();
+            $entries = $row ? json_decode($row['setting_value'], true) : [];
+
+            // Filter out the entry whose id matches
+            $updated = array_values(array_filter($entries, fn($e) => ($e['id'] ?? '') !== $id));
+
+            $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES (?, ?)");
+            $stmt->execute([$type, json_encode($updated, JSON_UNESCAPED_UNICODE)]);
+
+            echo json_encode(["status" => "success", "message" => "Entry deleted successfully."]);
+            break;
+
         default:
             http_response_code(404);
             echo json_encode(["status" => "error", "message" => "Invalid action."]);

@@ -55,7 +55,8 @@ export interface DashJob {
 
 export interface DashJobApplication {
     id: string;
-    jobId: string;
+    job?: string;      // Job ID — field name sent by Careers.tsx
+    jobId?: string;    // Legacy / alternate key (kept for compatibility)
     jobTitle: string;
     fullName: string;
     email: string;

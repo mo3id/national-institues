@@ -1,24 +1,36 @@
 
 import React, { useState } from 'react';
-import { Briefcase, MapPin, Clock, ArrowRight, Upload, CheckCircle } from 'lucide-react';
+import { Briefcase, MapPin, Clock, ArrowRight, Upload, CheckCircle, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
 import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
 import { CustomSelect } from '@/components/common/FormControls';
 import { getJobApplicationSchema } from '@/utils/validations';
+import { submitJobApplication } from '@/services/api';
 
 const Careers: React.FC = () => {
   const { lang, isRTL, t: translationsRoot } = useLanguage();
   const t = translationsRoot.careers;
   const { data: siteData } = useSiteData();
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState({ fullName: '', email: '', phone: '' });
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleApply = (e: React.FormEvent) => {
+  // Helper: convert File to base64 string
+  const fileToBase64 = (f: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(f);
+    });
+
+  const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
     const validationResult = getJobApplicationSchema(lang).safeParse({
       ...formData,
@@ -38,7 +50,42 @@ const Careers: React.FC = () => {
     }
 
     setErrors({});
-    setSubmitted(true);
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      // Find the selected job details for reference
+      const selectedJobData = siteData.jobs?.find(j => j.id === selectedJob);
+
+      const payload: Record<string, any> = {
+        ...formData,
+        job: selectedJob || '',
+        jobTitle: selectedJobData ? (lang === 'ar' ? selectedJobData.titleAr : selectedJobData.title) : '',
+        experience: '',
+        coverLetter: '',
+      };
+
+      // Attach CV file if provided
+      if (file) {
+        const base64 = await fileToBase64(file);
+        payload.cvData = base64;
+        payload.cvName = file.name;
+      }
+
+      await submitJobApplication(payload);
+      setSubmitted(true);
+      setFormData({ fullName: '', email: '', phone: '' });
+      setSelectedJob(null);
+      setFile(null);
+    } catch (err: any) {
+      setSubmitError(
+        lang === 'ar'
+          ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى.'
+          : err.message || 'Failed to submit application.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -226,8 +273,20 @@ const Careers: React.FC = () => {
                           {errors.file && <p className="text-red-500 text-xs font-bold mt-1">{errors.file}</p>}
                         </div>
                       </div>
-                      <button type="submit" className="w-full bg-[#1e3a8a] text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-blue-900/20 hover:bg-blue-800 transition-all transform hover:-translate-y-1 active:scale-95">
-                        {t.submit}
+                      {submitError && (
+                        <p className="text-red-500 text-xs font-bold text-center">{submitError}</p>
+                      )}
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full bg-[#1e3a8a] text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-blue-900/20 hover:bg-blue-800 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            {lang === 'ar' ? 'جاري الإرسال...' : 'Sending...'}
+                          </>
+                        ) : t.submit}
                       </button>
                     </form>
                   )}

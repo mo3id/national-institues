@@ -51,11 +51,7 @@ const Complaints: React.FC = () => {
     setSubmitError(null);
 
     try {
-      const newComplaint = {
-        ...formData,
-        createdAt: new Date().toISOString()
-      };
-      await submitComplaint(newComplaint);
+      await submitComplaint({ ...formData });
 
       setSubmitted(true);
       setFormData({ fullName: '', phone: '', email: '', messageType: (t?.complaints?.types || [])[0] || '', school: '', message: '' });

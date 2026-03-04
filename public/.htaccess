@@ -1,3 +1,28 @@
+# ══════════════════════════════════════════════════════════════════════════
+# BLOCK ALL .env FILES FROM BROWSER ACCESS — CRITICAL SECURITY RULE
+# Returns 403 Forbidden for any .env file anywhere on the server
+# ══════════════════════════════════════════════════════════════════════════
+<FilesMatch "^\.env(\..*)?$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# Block other sensitive files too
+<FilesMatch "\.(sql|log|bak|backup|sh|bat)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /

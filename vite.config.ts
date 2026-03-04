@@ -8,7 +8,25 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       host: '0.0.0.0',
+      proxy: {
+        '/api.php': {
+          target: 'https://gani.edu.eg',
+          changeOrigin: true,
+          secure: true,
+        },
+      },
     },
+    preview: {
+      port: 4173,
+      proxy: {
+        '/api.php': {
+          target: 'https://gani.edu.eg',
+          changeOrigin: true,
+          secure: true,
+        },
+      },
+    },
+
     plugins: [react()],
     define: {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),

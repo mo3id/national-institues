@@ -69,3 +69,9 @@ export const submitJobApplication = async (applicationData: Record<string, any>)
     if (data.status !== 'success') throw new Error(data.message || 'Failed to submit application');
     return data;
 };
+
+export const deleteEntry = async (type: 'complaints' | 'contactMessages', id: string): Promise<ApiResponse> => {
+    const { data } = await apiClient.post<ApiResponse>('?action=delete_entry', { type, id });
+    if (data.status !== 'success') throw new Error(data.message || 'Failed to delete entry');
+    return data;
+};
