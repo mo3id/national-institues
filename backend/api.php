@@ -1,19 +1,76 @@
 <?php
 // api.php
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CORS — Allowed Origins Whitelist (never use * in production)
+// ═══════════════════════════════════════════════════════════════════════════
+$allowedOrigins = [
+    'http://localhost:3000',       // Vite dev server
+    'http://localhost:4173',       // Vite preview
+    'https://gani.edu.eg',         // Production domain
+    'https://www.gani.edu.eg',     // Production www
+];
+
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+if (in_array($origin, $allowedOrigins, true)) {
+    header("Access-Control-Allow-Origin: {$origin}");
+    header("Vary: Origin");
+} else {
+    // Deny cross-origin requests from unknown origins silently
+    // (Do not send Allow-Origin header — browser will block automatically)
+}
+
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Accept");
+header("Access-Control-Max-Age: 3600");
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SECURITY HEADERS
+// ═══════════════════════════════════════════════════════════════════════════
 header("Content-Type: application/json; charset=UTF-8");
+header("X-Content-Type-Options: nosniff");
+header("X-Frame-Options: SAMEORIGIN");
+header("X-XSS-Protection: 1; mode=block");
+header("Referrer-Policy: strict-origin-when-cross-origin");
+header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CACHE CONTROL
+// ═══════════════════════════════════════════════════════════════════════════
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
+
+require_once 'db_config.php';
+
+// ── Handle OPTIONS preflight (must be after headers, before DB) ───────────
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
-require_once 'db_config.php';
+// ═══════════════════════════════════════════════════════════════════════════
+// SANITIZATION HELPER
+// Strips HTML tags, escapes special chars, trims whitespace.
+// Use on every user-supplied string before storing to DB.
+// ═══════════════════════════════════════════════════════════════════════════
+function sanitizeInput(?string $value): string {
+    if ($value === null) return '';
+    // Remove any HTML/script tags completely, then escape remaining special chars
+    $stripped = strip_tags(trim($value));
+    return htmlspecialchars($stripped, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+}
+
+function sanitizeArray(?array $data, array $textFields): array {
+    if (!$data) return [];
+    foreach ($textFields as $field) {
+        if (isset($data[$field])) {
+            $data[$field] = sanitizeInput((string)$data[$field]);
+        }
+    }
+    return $data;
+}
 
 $action = $_GET['action'] ?? '';
 
@@ -122,43 +179,58 @@ try {
 
         case 'add_complaint':
             $input = json_decode(file_get_contents('php://input'), true);
+            if (!is_array($input)) throw new Exception('Invalid JSON payload');
+
+            // ── Sanitize all user-supplied text fields ─────────────────────
+            $input = sanitizeArray($input, ['fullName', 'email', 'phone', 'messageType', 'school', 'message']);
+
             $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'complaints'");
             $row = $stmt->fetch();
             $complaints = $row ? json_decode($row['setting_value'], true) : [];
-            $input['id'] = uniqid();
+            $input['id']        = uniqid('cmp_', true);
             $input['createdAt'] = date('c');
-            $input['status'] = 'Pending';
+            $input['status']    = 'Pending';
             $complaints[] = $input;
             $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('complaints', ?)");
-            $stmt->execute([json_encode($complaints)]);
+            $stmt->execute([json_encode($complaints, JSON_UNESCAPED_UNICODE)]);
             echo json_encode(["status" => "success", "message" => "Complaint added successfully.", "data" => $input]);
             break;
 
         case 'add_contact_message':
              $input = json_decode(file_get_contents('php://input'), true);
+             if (!is_array($input)) throw new Exception('Invalid JSON payload');
+
+             // ── Sanitize all user-supplied text fields ─────────────────────
+             $input = sanitizeArray($input, ['fullName', 'email', 'phone', 'subject', 'message']);
+
              $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'contactMessages'");
              $row = $stmt->fetch();
              $messages = $row ? json_decode($row['setting_value'], true) : [];
-             $input['id'] = uniqid();
+             $input['id']        = uniqid('msg_', true);
              $input['createdAt'] = date('c');
-             $input['status'] = 'Pending';
+             $input['status']    = 'Pending';
              $messages[] = $input;
              $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('contactMessages', ?)");
-             $stmt->execute([json_encode($messages)]);
+             $stmt->execute([json_encode($messages, JSON_UNESCAPED_UNICODE)]);
              echo json_encode(["status" => "success", "message" => "Message sent successfully.", "data" => $input]);
              break;
 
         case 'add_job_application':
              $input = json_decode(file_get_contents('php://input'), true);
+             if (!is_array($input)) throw new Exception('Invalid JSON payload');
+
+             // ── Sanitize text fields (cvData is base64 — do NOT htmlspecialchars it)
+             $input = sanitizeArray($input, ['fullName', 'email', 'phone', 'job', 'experience', 'coverLetter', 'cvName']);
+
              $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'jobApplications'");
              $row = $stmt->fetch();
              $applications = $row ? json_decode($row['setting_value'], true) : [];
-             $input['id'] = uniqid();
+             $input['id']        = uniqid('app_', true);
              $input['appliedAt'] = date('c');
-             $input['status'] = 'Pending';
+             $input['status']    = 'Pending';
              $applications[] = $input;
              $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('jobApplications', ?)");
-             $stmt->execute([json_encode($applications)]);
+             $stmt->execute([json_encode($applications, JSON_UNESCAPED_UNICODE)]);
              echo json_encode(["status" => "success", "message" => "Application submitted successfully.", "data" => $input]);
              break;
 
@@ -169,6 +241,8 @@ try {
     }
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(["status" => "error", "message" => "Server error: " . $e->getMessage()]);
+    // Log the real error server-side, never expose it to the client
+    error_log('[NIS API Error] Action: ' . ($action ?? 'unknown') . ' | ' . $e->getMessage());
+    echo json_encode(["status" => "error", "message" => "An internal server error occurred. Please try again."]);
 }
 ?>

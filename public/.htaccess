@@ -2,16 +2,88 @@
   RewriteEngine On
   RewriteBase /
 
-
-  Header set Access-Control-Allow-Origin "*"
-  Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
-  Header set Access-Control-Allow-Headers "Content-Type, Authorization"
-
+  # ── React Router — SPA fallback ──────────────────────────────────────────
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME} !-l
- 
   RewriteCond %{REQUEST_URI} !^/api\.php
   RewriteRule . /index.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # ── Security Headers ────────────────────────────────────────────────────
+
+  # Prevent clickjacking attacks
+  Header always set X-Frame-Options "SAMEORIGIN"
+
+  # Prevent MIME-type sniffing
+  Header always set X-Content-Type-Options "nosniff"
+
+  # Enable XSS filter in legacy browsers
+  Header always set X-XSS-Protection "1; mode=block"
+
+  # Control referrer information
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Restrict browser features
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+
+  # HTTP Strict Transport Security (enable only if you have HTTPS)
+  # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+  # Content Security Policy — adjust as needed for your CDNs/fonts
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://gani.edu.eg https://generativelanguage.googleapis.com; frame-ancestors 'none';"
+
+  # Hide server/PHP version from response headers
+  Header always unset X-Powered-By
+  Header always unset Server
+
+  # ── CORS for API — only from known origins ──────────────────────────────
+  # NOTE: The PHP api.php handles CORS dynamically per-request (safer).
+  # These rules are for static assets only — do NOT use wildcard here.
+  <FilesMatch "\.(json|woff2?|ttf|eot|svg)$">
+    Header set Access-Control-Allow-Origin "https://gani.edu.eg"
+  </FilesMatch>
+</IfModule>
+
+# ── Static Asset Caching (Vite hashed filenames) ────────────────────────────
+<IfModule mod_expires.c>
+  ExpiresActive On
+
+  # HTML — no cache (always fresh)
+  ExpiresByType text/html                 "access plus 0 seconds"
+
+  # Vite outputs hashed filenames for JS/CSS — cache aggressively
+  ExpiresByType application/javascript    "access plus 1 year"
+  ExpiresByType text/javascript           "access plus 1 year"
+  ExpiresByType text/css                  "access plus 1 year"
+
+  # Images and fonts
+  ExpiresByType image/webp                "access plus 6 months"
+  ExpiresByType image/png                 "access plus 6 months"
+  ExpiresByType image/jpeg                "access plus 6 months"
+  ExpiresByType image/svg+xml             "access plus 6 months"
+  ExpiresByType font/woff2                "access plus 1 year"
+  ExpiresByType application/font-woff2    "access plus 1 year"
+</IfModule>
+
+# ── Hashed assets: immutable cache ──────────────────────────────────────────
+<IfModule mod_headers.c>
+  <FilesMatch "\.[0-9a-f]{8,}\.(js|css|woff2?)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # HTML files must never be cached
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate"
+    Header set Pragma "no-cache"
+  </FilesMatch>
+</IfModule>
+
+# ── PHP error display: OFF in production ────────────────────────────────────
+<IfModule mod_php.c>
+  php_flag display_errors Off
+  php_flag log_errors     On
+  php_value error_log     /var/log/php_errors.log
 </IfModule>

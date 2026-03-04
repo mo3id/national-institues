@@ -28,6 +28,32 @@ export default defineConfig(({ mode }) => {
           }
         }
       }
-    }
+    },
+    // ── Vitest Configuration ─────────────────────────────────────────────
+    test: {
+      environment: 'jsdom',
+      globals: true,
+      setupFiles: ['./tests/unit/setup.ts'],
+      include: ['tests/unit/**/*.{test,spec}.{ts,tsx}'],
+      exclude: ['node_modules', 'tests/e2e', 'dist'],
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'html', 'lcov'],
+        reportsDirectory: './coverage',
+        exclude: [
+          'node_modules/',
+          'tests/',
+          'dist/',
+          'src/index.tsx',
+          '**/*.d.ts',
+        ],
+        thresholds: {
+          statements: 70,
+          branches: 65,
+          functions: 70,
+          lines: 70,
+        },
+      },
+    },
   };
 });

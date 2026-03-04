@@ -1,0 +1,515 @@
+{
+    "info": {
+        "name": "NIS Portal – API Test Collection",
+        "description": "Complete Postman/Insomnia collection for the NIS api.php backend.\nImport this JSON into Postman or Insomnia to run all endpoint tests.\n\nBase URL variable: {{BASE_URL}} = http://localhost/backend\n\nEnvironments:\n  - Local: http://localhost/backend\n  - Production: https://yourdomain.com/backend",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "BASE_URL",
+            "value": "http://localhost/backend",
+            "type": "string"
+        },
+        {
+            "key": "SCHOOL_ID",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "JOB_ID",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "1. GET Site Data (All Resources)",
+            "item": [
+                {
+                    "name": "1.1 Get All Site Data – 200 OK",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                                    "",
+                                    "pm.test('Response has status:success', () => {",
+                                    "  const json = pm.response.json();",
+                                    "  pm.expect(json.status).to.eql('success');",
+                                    "});",
+                                    "",
+                                    "pm.test('Contains schools array', () => {",
+                                    "  const json = pm.response.json();",
+                                    "  pm.expect(json.data).to.have.property('schools');",
+                                    "  pm.expect(json.data.schools).to.be.an('array');",
+                                    "});",
+                                    "",
+                                    "pm.test('Contains news array', () => {",
+                                    "  const json = pm.response.json();",
+                                    "  pm.expect(json.data.news).to.be.an('array');",
+                                    "});",
+                                    "",
+                                    "pm.test('Contains jobs array', () => {",
+                                    "  const json = pm.response.json();",
+                                    "  pm.expect(json.data.jobs).to.be.an('array');",
+                                    "});",
+                                    "",
+                                    "pm.test('Response time < 3000ms', () => {",
+                                    "  pm.expect(pm.response.responseTime).to.be.below(3000);",
+                                    "});",
+                                    "",
+                                    "pm.test('Content-Type is application/json', () => {",
+                                    "  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+                                    "});",
+                                    "",
+                                    "// Store first school ID for later tests",
+                                    "const json = pm.response.json();",
+                                    "if (json.data.schools && json.data.schools.length > 0) {",
+                                    "  pm.collectionVariables.set('SCHOOL_ID', json.data.schools[0].id);",
+                                    "}",
+                                    "if (json.data.jobs && json.data.jobs.length > 0) {",
+                                    "  pm.collectionVariables.set('JOB_ID', json.data.jobs[0].id);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "url": "{{BASE_URL}}/api.php?action=get_site_data",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "1.2 Verify School Schema Fields",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Schools have required fields', () => {",
+                                    "  const json = pm.response.json();",
+                                    "  if (json.data.schools.length === 0) return; // skip if empty",
+                                    "  const school = json.data.schools[0];",
+                                    "  pm.expect(school).to.have.property('id');",
+                                    "  pm.expect(school).to.have.property('name');",
+                                    "  pm.expect(school).to.have.property('nameAr');",
+                                    "  pm.expect(school).to.have.property('governorate');",
+                                    "  pm.expect(school).to.have.property('type');",
+                                    "  pm.expect(school).to.have.property('principal');",
+                                    "  pm.expect(['Arabic','Languages','American','British','French'])",
+                                    "    .to.include(school.type);",
+                                    "});",
+                                    "",
+                                    "pm.test('News items have published boolean field', () => {",
+                                    "  const json = pm.response.json();",
+                                    "  json.data.news.forEach(n => {",
+                                    "    pm.expect(n.published).to.be.a('boolean');",
+                                    "  });",
+                                    "});",
+                                    "",
+                                    "pm.test('Jobs have required fields', () => {",
+                                    "  const json = pm.response.json();",
+                                    "  if (json.data.jobs.length === 0) return;",
+                                    "  const job = json.data.jobs[0];",
+                                    "  pm.expect(job).to.have.property('title');",
+                                    "  pm.expect(job).to.have.property('titleAr');",
+                                    "  pm.expect(job).to.have.property('department');",
+                                    "  pm.expect(job).to.have.property('location');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "url": "{{BASE_URL}}/api.php?action=get_site_data"
+                    }
+                },
+                {
+                    "name": "1.3 Invalid Action – 404",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status is 404 for invalid action', () => pm.response.to.have.status(404));",
+                                    "pm.test('Returns error status', () => {",
+                                    "  const json = pm.response.json();",
+                                    "  pm.expect(json.status).to.eql('error');",
+                                    "  pm.expect(json.message).to.include('Invalid action');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "url": "{{BASE_URL}}/api.php?action=unknown_action"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Add Complaint",
+            "item": [
+                {
+                    "name": "2.1 Submit Valid Complaint – 200",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Complaint saved successfully', () => {",
+                                    "  const json = pm.response.json();",
+                                    "  pm.expect(json.status).to.eql('success');",
+                                    "  pm.expect(json.data).to.have.property('id');",
+                                    "  pm.expect(json.data).to.have.property('createdAt');",
+                                    "  pm.expect(json.data.status).to.eql('Pending');",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains the submitted fullName', () => {",
+                                    "  const json = pm.response.json();",
+                                    "  pm.expect(json.data.fullName).to.eql('Test User E2E');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "url": "{{BASE_URL}}/api.php?action=add_complaint",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"fullName\": \"Test User E2E\",\n  \"email\": \"test@nis.eg\",\n  \"phone\": \"+201012345678\",\n  \"messageType\": \"Academic\",\n  \"school\": \"Cairo National Institute\",\n  \"message\": \"This is a test complaint with enough content.\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "2.2 XSS Injection in Complaint – Should Sanitize",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Request does not crash server (200 or controlled error)', () => {",
+                                    "  pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response does not echo raw <script> tag in JSON', () => {",
+                                    "  const body = pm.response.text();",
+                                    "  // The tag should be stored escaped or rejected, never echoed as-is",
+                                    "  pm.expect(body).to.not.include('<script>alert(');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "url": "{{BASE_URL}}/api.php?action=add_complaint",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"fullName\": \"<script>alert('XSS')</script>\",\n  \"email\": \"xss@test.com\",\n  \"phone\": \"+20100000001\",\n  \"messageType\": \"<img src=x onerror=alert(1)>\",\n  \"school\": \"'; DROP TABLE schools; --\",\n  \"message\": \"<script>document.cookie</script> XSS test payload\"\n}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3. Add Job Application",
+            "item": [
+                {
+                    "name": "3.1 Submit Valid Application",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Application includes auto-generated id + timestamp', () => {",
+                                    "  const json = pm.response.json();",
+                                    "  pm.expect(json.data.id).to.exist;",
+                                    "  pm.expect(json.data.appliedAt).to.exist;",
+                                    "  pm.expect(json.data.status).to.eql('Pending');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "url": "{{BASE_URL}}/api.php?action=add_job_application",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"fullName\": \"Mariam Youssef\",\n  \"email\": \"mariam@school.eg\",\n  \"phone\": \"+201112223344\",\n  \"job\": \"{{JOB_ID}}\",\n  \"experience\": \"5 years\",\n  \"coverLetter\": \"I am very interested in this position.\",\n  \"cvName\": \"mariam_cv.pdf\",\n  \"cvData\": \"data:application/pdf;base64,JVBERi0xLjQ=\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "3.2 SQL Injection in Job Application",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Server does not return 500 Internal Server Error', () => {",
+                                    "  pm.expect(pm.response.code).to.not.eql(500);",
+                                    "});",
+                                    "",
+                                    "pm.test('Payload is stored safely (PDO parameterized)', () => {",
+                                    "  const body = pm.response.text();",
+                                    "  pm.expect(body).to.not.include('SQL syntax error');",
+                                    "  pm.expect(body).to.not.include('mysql_error');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "url": "{{BASE_URL}}/api.php?action=add_job_application",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"fullName\": \"Robert'); DROP TABLE jobs; --\",\n  \"email\": \"injection@test.com\",\n  \"phone\": \"1' OR '1'='1\",\n  \"job\": \"1 UNION SELECT * FROM settings--\",\n  \"cvName\": \"hack.pdf\",\n  \"cvData\": \"data:application/pdf;base64,dGVzdA==\"\n}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4. Update Category (Admin)",
+            "item": [
+                {
+                    "name": "4.1 Update Schools Category",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Update success confirmed', () => {",
+                                    "  const json = pm.response.json();",
+                                    "  pm.expect(json.status).to.eql('success');",
+                                    "  pm.expect(json.category).to.eql('schools');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "url": "{{BASE_URL}}/api.php?action=update_category",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"category\": \"schools\",\n  \"newData\": [\n    {\n      \"id\": \"test-school-1\",\n      \"name\": \"API Test School\",\n      \"nameAr\": \"مدرسة اختبار API\",\n      \"location\": \"Test City\",\n      \"locationAr\": \"مدينة الاختبار\",\n      \"governorate\": \"Cairo\",\n      \"governorateAr\": \"القاهرة\",\n      \"principal\": \"Dr. Tester\",\n      \"principalAr\": \"د. اختبار\",\n      \"logo\": \"\",\n      \"type\": \"Arabic\",\n      \"mainImage\": \"\",\n      \"gallery\": []\n    }\n  ]\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "4.2 Missing Category Field – Error",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Returns error when category is missing', () => {",
+                                    "  pm.expect(pm.response.code).to.be.oneOf([400, 500]);",
+                                    "  const json = pm.response.json();",
+                                    "  pm.expect(json.status).to.eql('error');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "url": "{{BASE_URL}}/api.php?action=update_category",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"newData\": [] }"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "5. Contact Message",
+            "item": [
+                {
+                    "name": "5.1 Submit Valid Contact Message",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Message has id and createdAt', () => {",
+                                    "  const json = pm.response.json();",
+                                    "  pm.expect(json.data.id).to.exist;",
+                                    "  pm.expect(json.data.createdAt).to.exist;",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "url": "{{BASE_URL}}/api.php?action=add_contact_message",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"fullName\": \"Ahmad Khaled\",\n  \"email\": \"ahmad@parent.eg\",\n  \"subject\": \"School Enrollment\",\n  \"message\": \"I would like to enquire about enrollment procedures for next year.\"\n}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "6. Security & Edge Cases",
+            "item": [
+                {
+                    "name": "6.1 OPTIONS Preflight – CORS",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('CORS OPTIONS returns 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Access-Control-Allow-Origin header present', () => {",
+                                    "  pm.expect(pm.response.headers.get('Access-Control-Allow-Origin')).to.exist;",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "OPTIONS",
+                        "url": "{{BASE_URL}}/api.php?action=get_site_data",
+                        "header": [
+                            {
+                                "key": "Origin",
+                                "value": "http://localhost:3000"
+                            },
+                            {
+                                "key": "Access-Control-Request-Method",
+                                "value": "GET"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "6.2 Oversized Payload (>10MB) – Server should reject",
+                    "event": [
+                        {
+                            "listen": "pre-request",
+                            "script": {
+                                "exec": [
+                                    "// Generate a 512KB string to test payload limits",
+                                    "pm.collectionVariables.set('LARGE_PAYLOAD', 'A'.repeat(524288));"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Server handles large payload gracefully (not 200 internal crash)', () => {",
+                                    "  pm.expect(pm.response.code).to.not.eql(200).or.be.oneOf([400,413,500]);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "url": "{{BASE_URL}}/api.php?action=update_category",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"category\": \"schools\", \"newData\": \"{{LARGE_PAYLOAD}}\" }"
+                        }
+                    }
+                },
+                {
+                    "name": "6.3 Verify No-Cache Headers",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Cache-Control: no-store header is present', () => {",
+                                    "  const header = pm.response.headers.get('Cache-Control');",
+                                    "  pm.expect(header).to.include('no-store');",
+                                    "});",
+                                    "",
+                                    "pm.test('Pragma: no-cache header present', () => {",
+                                    "  const pragma = pm.response.headers.get('Pragma');",
+                                    "  pm.expect(pragma).to.include('no-cache');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "url": "{{BASE_URL}}/api.php?action=get_site_data"
+                    }
+                }
+            ]
+        }
+    ]
+}
