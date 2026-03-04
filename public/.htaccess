@@ -1,11 +1,17 @@
-# /public/.htaccess
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+
+  Header set Access-Control-Allow-Origin "*"
+  Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+  Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME} !-l
+ 
   RewriteCond %{REQUEST_URI} !^/api\.php
   RewriteRule . /index.html [L]
 </IfModule>

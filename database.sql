@@ -40,7 +40,7 @@ INSERT INTO `schools` (`id`, `name`, `nameAr`, `location`, `locationAr`, `govern
 INSERT INTO `schools` (`id`, `name`, `nameAr`, `location`, `locationAr`, `governorate`, `governorateAr`, `principal`, `principalAr`, `logo`, `type`, `mainImage`, `gallery`) VALUES ('23', 'Tanta American School', 'مدرسة طنطا الأمريكية', 'Tanta', 'طنطا', 'Gharbia', 'الغربية', 'Mr. Robert Wilson', '', 'https://picsum.photos/seed/school23/100/100', 'American', 'undefined', '[]');
 INSERT INTO `schools` (`id`, `name`, `nameAr`, `location`, `locationAr`, `governorate`, `governorateAr`, `principal`, `principalAr`, `logo`, `type`, `mainImage`, `gallery`) VALUES ('24', 'Giza Language Academy', 'أكاديمية الجيزة للغات', 'Mohandessin', 'المهندسين', 'Giza', 'الجيزة', 'Ms. Ghada Abdel Razek', '', 'https://picsum.photos/seed/school24/100/100', 'Languages', 'undefined', '[]');
 INSERT INTO `schools` (`id`, `name`, `nameAr`, `location`, `locationAr`, `governorate`, `governorateAr`, `principal`, `principalAr`, `logo`, `type`, `mainImage`, `gallery`) VALUES ('25', 'Sheraton National School', 'مدرسة شيراتون القومية', 'Sheraton', 'شيراتون', 'Cairo', 'القاهرة', 'Mr. Ahmed Mekky', '', 'https://picsum.photos/seed/school25/100/100', 'Arabic', 'undefined', '[]');
-\n
+
 CREATE TABLE IF NOT EXISTS `news` (
   `id` varchar(50) NOT NULL PRIMARY KEY,
   `title` text,
@@ -64,7 +64,7 @@ INSERT INTO `news` (`id`, `title`, `titleAr`, `date`, `summary`, `summaryAr`, `i
 INSERT INTO `news` (`id`, `title`, `titleAr`, `date`, `summary`, `summaryAr`, `image`, `published`) VALUES ('10', 'Community Service Week', 'أسبوع الخدمة المجتمعية', '2024-02-10', 'Students from 40+ schools joined forces to plant 10,000 trees across 5 governorates.', 'تعاون طلاب من أكثر من ٤٠ مدرسة لزراعة ١٠,٠٠٠ شجرة في ٥ محافظات.', 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80', 1);
 INSERT INTO `news` (`id`, `title`, `titleAr`, `date`, `summary`, `summaryAr`, `image`, `published`) VALUES ('11', 'Digital Transformation Phase 2', 'المرحلة الثانية من التحول الرقمي', '2024-02-05', 'All NIS classrooms are now equipped with interactive smart boards and high-speed fiber optics.', 'تم تجهيز جميع فصولنا بسبورات ذكية تفاعلية وألياف ضوئية عالية السرعة.', 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80', 1);
 INSERT INTO `news` (`id`, `title`, `titleAr`, `date`, `summary`, `summaryAr`, `image`, `published`) VALUES ('12', 'Music and Arts Festival', 'مهرجان الموسيقى والفنون', '2024-02-01', 'A showcase of Egyptian talent at the Cairo Opera House featuring our NIS symphony orchestra.', 'عرض للمواهب المصرية في دار الأوبرا المصرية يضم أوركسترا السيمفوني للمعاهد القومية.', 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&w=800&q=80', 1);
-\n
+
 CREATE TABLE IF NOT EXISTS `jobs` (
   `id` varchar(50) NOT NULL PRIMARY KEY,
   `title` text,
@@ -84,7 +84,7 @@ INSERT INTO `jobs` (`id`, `title`, `titleAr`, `department`, `departmentAr`, `loc
 INSERT INTO `jobs` (`id`, `title`, `titleAr`, `department`, `departmentAr`, `location`, `locationAr`, `type`, `typeAr`, `description`, `descriptionAr`) VALUES ('3', 'Administrative Assistant', 'مساعد إداري', 'Admin', 'إدارة', 'Maadi, Cairo', 'المعادي، القاهرة', 'Part-time', 'دوام جزئي', 'Assisting the principal office with daily administrative tasks.', 'مساعدة مكتب المدير في المهام الإدارية اليومية.');
 INSERT INTO `jobs` (`id`, `title`, `titleAr`, `department`, `departmentAr`, `location`, `locationAr`, `type`, `typeAr`, `description`, `descriptionAr`) VALUES ('4', 'Physical Education Coach', 'مدرب تربية رياضية', 'Sports', 'أنشطة رياضية', 'Tanta, Gharbia', 'طنطا، الغربية', 'Full-time', 'دوام كامل', 'Lead sports programs and manage inter-school athletic competitions.', 'قيادة البرامج الرياضية وإدارة المسابقات الرياضية بين المدارس.');
 INSERT INTO `jobs` (`id`, `title`, `titleAr`, `department`, `departmentAr`, `location`, `locationAr`, `type`, `typeAr`, `description`, `descriptionAr`) VALUES ('5', 'English Literature Specialist', 'أخصائي أدب إنجليزي', 'Academic', 'أكاديمي', 'Nasr City, Cairo', 'مدينة نصر، القاهرة', 'Full-time', 'دوام كامل', 'Advanced literature instruction for secondary levels.', 'تعليم متقدم للأدب للمراحل الثانوية.');
-\n
+
 CREATE TABLE IF NOT EXISTS `settings` (
   `setting_key` varchar(100) NOT NULL PRIMARY KEY,
   `setting_value` longtext
