@@ -189,7 +189,7 @@ const Home: React.FC = () => {
             <ScrollReveal delay={0.3}>
               <div className="w-full flex justify-center mt-8 md:mt-12 overflow-visible md:overflow-visible">
                 <img
-                  src={h.mapImage}
+                  src={h.mapImage || '/nano-banana-17717977008341.webp'}
                   alt="Global Network"
                   loading="lazy"
                   width="1152"

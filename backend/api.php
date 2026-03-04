@@ -36,11 +36,52 @@ header("Referrer-Policy: strict-origin-when-cross-origin");
 header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
 
 // ═══════════════════════════════════════════════════════════════════════════
-// CACHE CONTROL
+// CACHE CONTROL (HTTP headers)
 // ═══════════════════════════════════════════════════════════════════════════
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 
+// ═══════════════════════════════════════════════════════════════════════════
+// FILE CACHE — serves get_site_data instantly from disk (~1ms vs ~7s DB)
+// Cache is stored in: cache/site_data.json
+// TTL: 5 minutes. Busted immediately on any write action.
+// ═══════════════════════════════════════════════════════════════════════════
+define('CACHE_FILE', __DIR__ . '/cache/site_data.json');
+define('CACHE_TTL',  5 * 60); // 5 minutes in seconds
+
+function getCached(): ?string {
+    if (!file_exists(CACHE_FILE)) return null;
+    if ((time() - filemtime(CACHE_FILE)) > CACHE_TTL) return null;
+    $content = file_get_contents(CACHE_FILE);
+    return ($content !== false && strlen($content) > 10) ? $content : null;
+}
+
+function bustCache(): void {
+    if (file_exists(CACHE_FILE)) {
+        @unlink(CACHE_FILE);
+    }
+}
+
+function writeCache(string $json): void {
+    $dir = dirname(CACHE_FILE);
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0755, true);
+    }
+    @file_put_contents(CACHE_FILE, $json, LOCK_EX);
+}
+
+// ── Serve from cache immediately for read requests ─────────────────────────
+$action = $_GET['action'] ?? '';
+if ($action === 'get_site_data' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $cached = getCached();
+    if ($cached !== null) {
+        // Cache HIT — return instantly, skip DB entirely
+        header('X-Cache: HIT');
+        echo $cached;
+        exit();
+    }
+    header('X-Cache: MISS');
+}
 
 require_once 'db_config.php';
 
@@ -128,7 +169,9 @@ try {
                 'formSettings' => $settings['formSettings'] ?? new stdClass(),
             ];
 
-            echo json_encode(["status" => "success", "data" => $response]);
+            $jsonOut = json_encode(["status" => "success", "data" => $response]);
+            writeCache($jsonOut); // Save to disk cache for instant future responses
+            echo $jsonOut;
             break;
 
         case 'update_category':
@@ -174,6 +217,7 @@ try {
                 $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES (?, ?)");
                 $stmt->execute([$category, json_encode($newData)]);
             }
+            bustCache(); // Invalidate cache so next read fetches fresh data
             echo json_encode(["status" => "success", "message" => "Updated successfully.", "category" => $category]);
             break;
 
@@ -193,6 +237,7 @@ try {
             $complaints[] = $input;
             $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('complaints', ?)");
             $stmt->execute([json_encode($complaints, JSON_UNESCAPED_UNICODE)]);
+            bustCache();
             echo json_encode(["status" => "success", "message" => "Complaint added successfully.", "data" => $input]);
             break;
 
@@ -212,6 +257,7 @@ try {
              $messages[] = $input;
              $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('contactMessages', ?)");
              $stmt->execute([json_encode($messages, JSON_UNESCAPED_UNICODE)]);
+             bustCache();
              echo json_encode(["status" => "success", "message" => "Message sent successfully.", "data" => $input]);
              break;
 
@@ -231,6 +277,7 @@ try {
              $applications[] = $input;
              $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('jobApplications', ?)");
              $stmt->execute([json_encode($applications, JSON_UNESCAPED_UNICODE)]);
+             bustCache();
              echo json_encode(["status" => "success", "message" => "Application submitted successfully.", "data" => $input]);
              break;
 
@@ -256,6 +303,7 @@ try {
             $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES (?, ?)");
             $stmt->execute([$type, json_encode($updated, JSON_UNESCAPED_UNICODE)]);
 
+            bustCache();
             echo json_encode(["status" => "success", "message" => "Entry deleted successfully."]);
             break;
 

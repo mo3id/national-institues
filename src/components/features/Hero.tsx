@@ -16,14 +16,15 @@ const Hero: React.FC = () => {
     description: lang === 'ar' ? s.descriptionAr : s.description
   }));
 
-  if (slides.length === 0) return null;
-
   useEffect(() => {
+    if (slides.length === 0) return;
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % slides.length);
     }, 8000);
     return () => clearInterval(timer);
   }, [slides.length]);
+
+  if (slides.length === 0) return null;
 
   const currentSlide = slides[currentIndex];
 

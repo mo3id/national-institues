@@ -5,8 +5,6 @@ import { fetchSiteData, updateCategory } from '@/services/api';
 import ErrorPage from '@/components/common/ErrorPage';
 
 // ─── Cross-Tab Sync Channel ───────────────────────────────────────────────────
-// Broadcasts a signal to all other open tabs of the same origin whenever the
-// dashboard saves data, so they refetch immediately without needing a reload.
 const SYNC_CHANNEL_NAME = 'nis_data_sync';
 
 interface DataContextType {
@@ -18,19 +16,18 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-// ─── Smart Merge Helper ───────────────────────────────────────────────────────
+// ─── Direct Merge Helper ───────────────────────────────────────────────────────
 function buildMergedData(apiData: SiteData): SiteData {
-    const offlineCache = JSON.parse(localStorage.getItem('nis_offline_cache') || '{}');
     const merged = { ...DEFAULT_SITE_DATA };
 
+    // API Data is the single source of truth
     const pick = (key: keyof SiteData, isArray: boolean): any => {
-        const api = apiData[key] as any;
-        const cache = offlineCache[key];
+        const api = apiData ? apiData[key] as any : undefined;
         const def = merged[key] as any;
         if (isArray) {
-            return (api && api.length > 0) ? api : (cache || def);
+            return (api && api.length > 0) ? api : def;
         } else {
-            return (api && Object.keys(api).length > 0) ? api : (cache || def);
+            return (api && Object.keys(api).length > 0) ? api : def;
         }
     };
 
@@ -60,6 +57,7 @@ function buildMergedData(apiData: SiteData): SiteData {
         });
     }
 
+    // No local storage code anymore!
     return merged;
 }
 
@@ -69,15 +67,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const queryClient = useQueryClient();
     const channelRef = useRef<BroadcastChannel | null>(null);
 
-    // ── React Query (with polling + window focus refetch) ─────────────────
+    // ── React Query (Server defines everything) ───────────────────────────────
     const { isLoading, error, data: apiData, refetch } = useQuery({
         queryKey: ['siteData'],
         queryFn: fetchSiteData,
 
-        staleTime: 0,                   // Always consider data stale → refetch when focused
-        refetchOnWindowFocus: true,     // Refetch when user switches back to this tab
-        refetchInterval: 30 * 1000,    // Poll server every 30 seconds as a safety net
-        refetchIntervalInBackground: false, // Don't poll when tab is hidden (saves resources)
+        staleTime: 0,
+        refetchOnWindowFocus: true,
+        refetchInterval: 30 * 1000,
+        refetchIntervalInBackground: false,
     });
 
     // ── Apply fetched data to Zustand store ───────────────────────────────
@@ -89,14 +87,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // ── BroadcastChannel: listen for changes from OTHER tabs ──────────────
     useEffect(() => {
-        if (typeof BroadcastChannel === 'undefined') return; // SSR / old browser guard
+        if (typeof BroadcastChannel === 'undefined') return;
 
         const channel = new BroadcastChannel(SYNC_CHANNEL_NAME);
         channelRef.current = channel;
 
         channel.onmessage = (event) => {
             if (event.data?.type === 'DATA_UPDATED') {
-                // Another tab saved data → refetch immediately so this tab is up-to-date
                 queryClient.invalidateQueries({ queryKey: ['siteData'] });
             }
         };
@@ -115,7 +112,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
 
         onSuccess: (res) => {
-            // 1. Update query cache in THIS tab immediately (no extra network round-trip)
+            // 1. Update query cache in THIS tab immediately 
             queryClient.setQueryData(['siteData'], (oldData: any) => {
                 if (!oldData) return oldData;
                 return { ...oldData, [res.category]: res.newData };
@@ -124,11 +121,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // 2. Update Zustand store in THIS tab
             updateData(res.category as keyof SiteData, res.newData);
 
-            // 3. Persist to localStorage offline cache
-            const currentObj = JSON.parse(localStorage.getItem('nis_offline_cache') || '{}');
-            localStorage.setItem('nis_offline_cache', JSON.stringify({ ...currentObj, [res.category]: res.newData }));
+            // No persistent local storage cache!
 
-            // 4. Broadcast to ALL OTHER open tabs → they will refetch from server immediately
+            // 3. Broadcast to ALL OTHER open tabs
             if (channelRef.current) {
                 channelRef.current.postMessage({ type: 'DATA_UPDATED', category: res.category });
             }
@@ -143,6 +138,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateMutation.mutate({ category, newData });
     };
 
+    // Strict Error State
     if (error && !apiData) {
         console.error('API Error details:', error);
         return (
@@ -152,8 +148,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         );
     }
 
+    // Strict Loading State (Waits for DB response, NO EMPTY SCREENS)
+    if (isLoading && !apiData) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
+                <div className="flex flex-col items-center gap-6">
+                    <img src="/layer-1-small.webp" alt="Loading" className="h-16 object-contain animate-pulse" />
+                    <div className="w-8 h-8 border-4 border-[#1e3a8a] border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-[#1e3a8a] font-bold text-lg animate-pulse">Loading Data...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <DataContext.Provider value={{ data, updateData: contextUpdateData, isLoading: isLoading && !apiData, error }}>
+        <DataContext.Provider value={{ data, updateData: contextUpdateData, isLoading, error }}>
             {children}
         </DataContext.Provider>
     );

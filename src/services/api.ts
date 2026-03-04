@@ -10,9 +10,8 @@ export const apiClient = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    // Optional: timeout to prevent hanging requests indefinitely
-    // Short timeout to fail fast if backend is not running
-    timeout: 2500,
+    // Timeout set to 15s to accommodate slow cPanel shared hosting (~7s avg response)
+    timeout: 15000,
 });
 
 interface ApiResponse<T = any> {
