@@ -631,19 +631,19 @@ const Dashboard: React.FC = () => {
 
   const navItems: { id: Section; label: string; icon: React.ElementType }[] = [
     { id: 'overview', label: u.overview, icon: LayoutDashboard },
-    { id: 'news', label: u.news, icon: Newspaper },
-    { id: 'schools', label: u.schools, icon: School },
-    { id: 'jobs', label: u.jobs, icon: Briefcase },
-    { id: 'departments', label: lang === 'ar' ? 'أقسام الوظائف' : 'Job Departments', icon: LayoutDashboard },
-    { id: 'recruitment', label: u.recruitmentPortal, icon: Briefcase },
+    { id: 'home', label: u.home, icon: HomeIcon },
     { id: 'hero', label: u.hero, icon: Image },
     { id: 'chairman', label: u.chairman, icon: Users },
     { id: 'institute', label: u.institute, icon: Info },
-    { id: 'home', label: u.home, icon: HomeIcon },
-    { id: 'forms', label: u.forms, icon: Bell },
-    { id: 'contact', label: u.contactSettings || 'Contact Info', icon: Phone },
+    { id: 'schools', label: u.schools, icon: School },
+    { id: 'news', label: u.news, icon: Newspaper },
+    { id: 'recruitment', label: u.recruitmentPortal, icon: Briefcase },
+    { id: 'departments', label: lang === 'ar' ? 'أقسام الوظائف' : 'Job Departments', icon: LayoutDashboard },
+    { id: 'jobs', label: u.jobs, icon: Briefcase },
     { id: 'complaints', label: u.complaints, icon: MessageSquare },
+    { id: 'contact', label: u.contactSettings || 'Contact Info', icon: Phone },
     { id: 'contactMessages', label: u.contactMessages, icon: Mail },
+    { id: 'forms', label: u.forms, icon: Bell },
     { id: 'settings', label: u.settings, icon: Settings },
   ];
 
