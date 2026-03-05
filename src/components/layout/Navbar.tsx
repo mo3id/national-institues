@@ -15,10 +15,10 @@ const Navbar: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Keep full nav on mobile regardless of scroll
-  const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' && window.innerWidth < 1024);
+  const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' && window.innerWidth < 1280);
 
   React.useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    const handleResize = () => setIsMobile(window.innerWidth < 1280);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -48,17 +48,17 @@ const Navbar: React.FC = () => {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="fixed top-[10px] left-[10px] right-[10px] z-[100] py-4 lg:py-6 px-6 lg:px-10 flex items-center justify-between rounded-[20px] bg-transparent"
+            className="fixed top-[10px] left-[10px] right-[10px] z-[100] py-4 xl:py-6 px-6 xl:px-10 flex items-center justify-between rounded-[20px] bg-transparent"
           >
             {/* LOGO */}
             <Link to="/" className="flex items-center shrink-0">
-              <img src="/layer-1-small.webp" alt="National Institutes" className="h-9 md:h-11 lg:h-14 object-contain" width="134" height="56" fetchPriority="high" decoding="async" />
+              <img src="/layer-1-small.webp" alt="National Institutes" className="h-9 md:h-11 xl:h-14 object-contain" width="134" height="56" fetchPriority="high" decoding="async" />
             </Link>
 
             {/* NAV LINKS - Middle */}
-            <div className="hidden lg:flex items-center gap-2 text-[13px] font-bold">
+            <div className="hidden xl:flex items-center gap-1.5 text-[13px] font-bold">
               {menuLinks.map((link) => (
-                <Link key={link.to} to={link.to} className={`group flex items-center gap-1.5 transition-all whitespace-nowrap px-4 py-2 rounded-full transform-gpu ${isActive(link.to) ? 'bg-white/15 backdrop-blur-md text-white border border-white/20' : 'text-white hover:text-white/80'}`}>
+                <Link key={link.to} to={link.to} className={`group flex items-center gap-1.5 transition-all whitespace-nowrap px-3 py-2 rounded-full transform-gpu ${isActive(link.to) ? 'bg-white/15 backdrop-blur-md text-white border border-white/20' : 'text-white hover:text-white/80'}`}>
                   <span className="material-symbols-outlined text-[18px]">{link.icon}</span>
                   <span>{link.label}</span>
                 </Link>
@@ -66,9 +66,9 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Actions (Lang/Login + Mobile Toggle) */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0">
               {/* LANGUAGE & LOGIN - Hidden on Mobile */}
-              <div className="hidden lg:flex items-center gap-3">
+              <div className="hidden xl:flex items-center gap-3">
                 <button
                   onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
                   aria-label={lang === 'en' ? 'Switch to Arabic' : 'Switch to English'}
@@ -89,7 +89,7 @@ const Navbar: React.FC = () => {
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-                className={`lg:hidden w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-md transform-gpu transition-all shadow-lg ${scrolled ? 'bg-[#1e3a8a] text-white border-none' : 'bg-white/20 border-white/30 border text-white'}`}
+                className={`xl:hidden w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-md transform-gpu transition-all shadow-lg ${scrolled ? 'bg-[#1e3a8a] text-white border-none' : 'bg-white/20 border-white/30 border text-white'}`}
               >
                 <span className="material-symbols-outlined text-[20px]">{mobileMenuOpen ? 'close' : 'menu'}</span>
               </button>
@@ -146,7 +146,7 @@ const Navbar: React.FC = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed top-[90px] left-[26px] right-[26px] bg-white/95 backdrop-blur-lg transform-gpu shadow-2xl rounded-2xl p-6 flex flex-col gap-4 border border-slate-100 lg:hidden z-[110]"
+            className="fixed top-[90px] left-[26px] right-[26px] bg-white/95 backdrop-blur-lg transform-gpu shadow-2xl rounded-2xl p-6 flex flex-col gap-4 border border-slate-100 xl:hidden z-[110]"
           >
             <div className="flex flex-col gap-1">
               {menuLinks.map((link) => (
