@@ -223,7 +223,8 @@ const Careers: React.FC = () => {
                             value={formData.phone}
                             dir={formData.phone ? 'ltr' : (isRTL ? 'rtl' : 'ltr')}
                             onChange={e => {
-                              setFormData(prev => ({ ...prev, phone: e.target.value }));
+                              const val = e.target.value.replace(/[^0-9+]/g, '');
+                              setFormData(prev => ({ ...prev, phone: val }));
                               if (errors.phone) setErrors(prev => ({ ...prev, phone: '' }));
                             }}
                           />

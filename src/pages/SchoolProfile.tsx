@@ -50,7 +50,7 @@ const SchoolProfile: React.FC = () => {
               className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 scale-105"
               style={{
                 backgroundImage: `url('${school?.mainImage || '/nano-banana-1771806527783.png'}')`,
-                transform: isRTL ? 'scaleX(-1) scale(1.05)' : 'scale(1.05)'
+                transform: 'scale(1.05)'
               }}
             />
             {/* Gradient overlay */}

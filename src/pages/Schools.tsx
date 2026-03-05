@@ -155,8 +155,7 @@ const Schools: React.FC = () => {
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: `url('/nano-banana-1771806527783.png')`,
-                transform: isRTL ? 'scaleX(-1)' : 'none'
+                backgroundImage: `url('/nano-banana-1771806527783.png')`
               }}
             />
             {/* Gradient overlay */}

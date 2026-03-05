@@ -290,7 +290,10 @@ const Jobs: React.FC = () => {
                                             </div>
                                             <div className="space-y-2 text-start">
                                                 <label className="text-sm font-bold text-slate-700">{t.phone} <span className="text-red-500">*</span></label>
-                                                <input name="phone" value={formData.phone} onChange={handleChange} type="tel" className={`w-full bg-slate-50 border ${errors.phone ? 'border-red-500' : 'border-slate-200'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all text-left mt-1`} placeholder="+20 123 456 7890" />
+                                                <input name="phone" value={formData.phone} onChange={e => {
+                                                    const val = e.target.value.replace(/[^0-9+]/g, '');
+                                                    handleChange({ target: { name: 'phone', value: val } } as any);
+                                                }} type="tel" className={`w-full bg-slate-50 border ${errors.phone ? 'border-red-500' : 'border-slate-200'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all text-left mt-1`} placeholder="+20 123 456 7890" />
                                                 {errors.phone && <p className="text-red-500 text-xs font-bold mt-1">{errors.phone}</p>}
                                             </div>
                                             <div className="space-y-2 text-start">

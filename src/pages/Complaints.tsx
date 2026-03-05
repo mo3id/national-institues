@@ -147,7 +147,10 @@ const Complaints: React.FC = () => {
                           type="tel"
                           name="phone"
                           value={formData.phone}
-                          onChange={handleChange}
+                          onChange={e => {
+                            const val = e.target.value.replace(/[^0-9+]/g, '');
+                            handleChange({ target: { name: 'phone', value: val } } as any);
+                          }}
                           className={`w-full bg-slate-50 border ${errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-[#1e3a8a]'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${isRTL && !formData.phone ? 'text-right' : 'text-left'}`}
                           placeholder={t?.complaints?.placeholders?.phone}
                           dir={formData.phone ? 'ltr' : (isRTL ? 'rtl' : 'ltr')}
