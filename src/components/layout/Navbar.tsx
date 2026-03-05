@@ -263,7 +263,7 @@ const Navbar: React.FC = () => {
 
                   <div className="flex flex-col">
                     <span className="text-slate-400 text-[10px] uppercase font-bold tracking-widest mb-1">{t.contactUs}</span>
-                    <span className="text-[#1e3a8a] font-black text-lg">012-3456-7890</span>
+                    <span className="text-[#1e3a8a] font-black text-lg">{siteData.contactData?.phone || "012-3456-7890"}</span>
                   </div>
                   <div className="flex items-center gap-4">
                     <button aria-label="Share" className="w-10 h-10 rounded-full bg-[#1e3a8a]/5 flex items-center justify-center text-[#1e3a8a] hover:bg-[#1e3a8a] hover:text-white transition-all cursor-pointer">

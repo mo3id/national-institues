@@ -72,9 +72,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // ═══════════════════════════════════════════════════════════════════════════
 function sanitizeInput(?string $value): string {
     if ($value === null) return '';
-    // Remove any HTML/script tags completely, then escape remaining special chars
-    $stripped = strip_tags(trim($value));
-    return htmlspecialchars($stripped, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    // Strip tags and trim whitespace, but don't use htmlspecialchars 
+    // to avoid mangling Arabic characters and special symbols in JSON fields.
+    return strip_tags(trim($value));
 }
 
 function sanitizeArray(?array $data, array $textFields): array {
@@ -159,6 +159,7 @@ try {
                 'homeData' => $settings['homeData'] ?? new stdClass(),
                 'partners' => $settings['partners'] ?? [],
                 'galleryImages' => $settings['galleryImages'] ?? [],
+                'contactData' => $settings['contactData'] ?? new stdClass(),
                 'formSettings' => $settings['formSettings'] ?? new stdClass(),
             ];
 
