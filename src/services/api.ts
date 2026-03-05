@@ -5,6 +5,16 @@ import { SiteData } from '@/store/useDataStore';
 // This uses Vite's string replacement for env variables.
 // Remove /api.php from base URL to handle paths cleanly
 const API_BASE_URL: string = ((import.meta as any).env.VITE_API_BASE_URL || '/api.php').replace(/\/api\.php\/?$/, '');
+const SYNC_CHANNEL_NAME = 'nis_data_sync';
+
+// Cross-tab sync helper
+const notifyUpdate = () => {
+    if (typeof BroadcastChannel !== 'undefined') {
+        const channel = new BroadcastChannel(SYNC_CHANNEL_NAME);
+        channel.postMessage({ type: 'DATA_UPDATED' });
+        channel.close();
+    }
+};
 
 export const apiClient = axios.create({
     baseURL: API_BASE_URL || '',
@@ -49,12 +59,14 @@ export const fetchSiteData = async (): Promise<SiteData> => {
 export const submitComplaint = async (complaintData: Record<string, any>): Promise<ApiResponse> => {
     const { data } = await apiClient.post<ApiResponse>('?action=add_complaint', complaintData);
     if (data.status !== 'success') throw new Error(data.message || 'Failed to submit complaint');
+    notifyUpdate();
     return data;
 };
 
 export const submitContactMessage = async (contactData: Record<string, any>): Promise<ApiResponse> => {
     const { data } = await apiClient.post<ApiResponse>('?action=add_contact_message', contactData);
     if (data.status !== 'success') throw new Error(data.message || 'Failed to submit message');
+    notifyUpdate();
     return data;
 };
 
@@ -62,6 +74,7 @@ export const updateCategory = async (category: string, newData: any): Promise<Ap
     try {
         const { data } = await apiClient.post<ApiResponse>('?action=update_category', { category, newData });
         if (data.status !== 'success') throw new Error(data.message || `Failed to update ${category}`);
+        notifyUpdate();
         return data;
     } catch (err: any) {
         const errorMsg = err.response?.data?.message || err.message || `Failed to update ${category}`;
@@ -73,6 +86,7 @@ export const updateCategory = async (category: string, newData: any): Promise<Ap
 export const submitJobApplication = async (applicationData: Record<string, any>): Promise<ApiResponse> => {
     const { data } = await apiClient.post<ApiResponse>('?action=add_job_application', applicationData);
     if (data.status !== 'success') throw new Error(data.message || 'Failed to submit application');
+    notifyUpdate();
     return data;
 };
 
