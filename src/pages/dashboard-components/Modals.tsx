@@ -256,6 +256,16 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
                 {errors.locationAr && <span className="text-red-500 text-xs mt-1 block">{errors.locationAr}</span>}
             </div>
             <div className="form-col">
+                <label className="dash-label">{u.address} (EN)</label>
+                <input className={`dash-input ${errors.address ? 'border-red-500' : ''}`} value={d.address || ''} onChange={e => { setD(p => ({ ...p, address: e.target.value })); if (errors.address) setErrors(p => ({ ...p, address: '' })) }} />
+                {errors.address && <span className="text-red-500 text-xs mt-1 block">{errors.address}</span>}
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.address} (AR)</label>
+                <input className={`dash-input ${errors.addressAr ? 'border-red-500' : ''}`} dir="rtl" value={d.addressAr || ''} onChange={e => { setD(p => ({ ...p, addressAr: e.target.value })); if (errors.addressAr) setErrors(p => ({ ...p, addressAr: '' })) }} />
+                {errors.addressAr && <span className="text-red-500 text-xs mt-1 block">{errors.addressAr}</span>}
+            </div>
+            <div className="form-col">
                 <label className="dash-label">{u.governorate}</label>
                 <div className={errors.governorate ? 'border border-red-500 rounded' : ''}>
                     <CustomSelect

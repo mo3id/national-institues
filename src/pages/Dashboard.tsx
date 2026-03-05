@@ -412,7 +412,7 @@ const Dashboard: React.FC = () => {
   const [newJob, setNewJob] = useState<Partial<DashJob>>({ title: '', titleAr: '', department: '', departmentAr: '', location: '', locationAr: '', type: '', typeAr: '', description: '', descriptionAr: '', image: '' });
   const [profileDraft, setProfileDraft] = useState({ ...profile });
   const [addSchoolOpen, setAddSchoolOpen] = useState(false);
-  const [newSchool, setNewSchool] = useState<Partial<DashSchool>>({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '' });
+  const [newSchool, setNewSchool] = useState<Partial<DashSchool>>({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '', address: '', addressAr: '' });
   const [confirmAction, setConfirmAction] = useState<{ message: string, onConfirm: () => void } | null>(null);
 
   const u = UI[lang];
@@ -493,7 +493,7 @@ const Dashboard: React.FC = () => {
     setSchools(updated);
     updateData('schools', updated);
     setAddSchoolOpen(false);
-    setNewSchool({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '' });
+    setNewSchool({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '', address: '', addressAr: '' });
     setSchoolSearch('');
     showToast(u.schoolSaved);
   };

@@ -62,6 +62,8 @@ export const getDashSchoolSchema = () => z.object({
     location: z.string().nullish(),
     locationAr: z.string().nullish(),
     governorate: z.string().nullish(),
+    address: z.string().nullish(),
+    addressAr: z.string().nullish(),
     principal: z.string().nullish(),
     principalAr: z.string().nullish(),
     type: z.string().nullish(),

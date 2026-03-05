@@ -114,7 +114,7 @@ const SchoolProfile: React.FC = () => {
                         </div>
                         <div>
                           <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{lang === 'ar' ? 'العنوان' : 'Address'}</p>
-                          <p className="font-semibold text-slate-800 text-sm">{lang === 'ar' ? 'شارع التعليم، الحي الأول' : 'Education St, First District'}</p>
+                          <p className="font-semibold text-slate-800 text-sm">{lang === 'ar' ? (school?.addressAr || school?.address || 'غير متوفر') : (school?.address || 'Not available')}</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-4 group">

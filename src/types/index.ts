@@ -7,6 +7,8 @@ export interface School {
   locationAr: string;
   governorate: string;
   governorateAr: string;
+  address?: string;
+  addressAr?: string;
   principal: string;
   principalAr?: string;
   logo: string;

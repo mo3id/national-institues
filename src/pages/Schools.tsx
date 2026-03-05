@@ -42,14 +42,6 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
         </div>
       </div>
 
-      {/* Bookmark/Action Icon */}
-      <div className={`absolute top-[170px] ${isRTL ? 'left-4' : 'right-4'} z-10`}>
-        <button className="w-10 h-10 bg-white rounded-full border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors shadow-sm">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-          </svg>
-        </button>
-      </div>
 
       {/* Card Body */}
       <div className="px-4 pb-4 pt-12 flex flex-col flex-grow">
@@ -70,9 +62,6 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
               <User className="w-3 h-3 text-white" />
             </div>
             <span className="text-[13px] font-bold text-gray-700">{t.principal}: {lang === 'ar' ? (school.principalAr || school.principal) : school.principal}</span>
-          </div>
-          <div className="px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100 text-[13px] font-semibold text-gray-500">
-            +6 {common.facilities}
           </div>
         </div>
 

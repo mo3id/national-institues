@@ -172,7 +172,7 @@ try {
 
             if ($category === 'schools') {
                 $pdo->exec("DELETE FROM schools");
-                $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, foundedYear) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, foundedYear, address, addressAr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 foreach ($newData as $s) {
                     $stmt->execute([
                         $s['id'] ?? '',
@@ -195,7 +195,9 @@ try {
                         $s['website'] ?? '',
                         $s['rating'] ?? '',
                         $s['studentCount'] ?? '',
-                        $s['foundedYear'] ?? ''
+                        $s['foundedYear'] ?? '',
+                        $s['address'] ?? '',
+                        $s['addressAr'] ?? ''
                     ]);
                 }
             } elseif ($category === 'news') {

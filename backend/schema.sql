@@ -15,7 +15,9 @@ CREATE TABLE IF NOT EXISTS schools (
     logo TEXT,
     type VARCHAR(50),
     mainImage TEXT,
-    gallery JSON
+    gallery JSON,
+    address TEXT,
+    addressAr TEXT
 );
 
 CREATE TABLE IF NOT EXISTS news (

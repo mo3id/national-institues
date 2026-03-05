@@ -28,6 +28,8 @@ export interface DashSchool {
     locationAr?: string;
     governorate: string;
     governorateAr?: string;
+    address?: string;
+    addressAr?: string;
     principal: string;
     principalAr?: string;
     logo: string;
@@ -135,6 +137,7 @@ export const UI: Record<Lang, Record<string, string>> = {
         keyPoints: 'Key Points (comma separated)', slideTitle: 'Title',
         slideSubtitle: 'Subtitle / Badge', slideDesc: 'Description', slideImage: 'Image URL',
         schoolName: 'School Name', location: 'Location', governorate: 'Governorate',
+        address: 'Physical Address',
         principal: 'Principal', type: 'Type', logo: 'Logo URL',
         adminProfile: 'Admin Profile', adminName: 'Name', adminEmail: 'Email',
         language: 'Dashboard Language', darkMode: 'Dark Mode',
@@ -244,6 +247,7 @@ export const UI: Record<Lang, Record<string, string>> = {
         keyPoints: 'النقاط الرئيسية (مفصولة بفاصلة)', slideTitle: 'العنوان',
         slideSubtitle: 'العنوان الفرعي / الشارة', slideDesc: 'الوصف', slideImage: 'رابط الصورة',
         schoolName: 'اسم المدرسة', location: 'الموقع', governorate: 'المحافظة',
+        address: 'العنوان التفصيلي',
         principal: 'المدير', type: 'النوع', logo: 'رابط الشعار',
         adminProfile: 'الملف الشخصي', adminName: 'الاسم', adminEmail: 'البريد الإلكتروني',
         language: 'لغة لوحة التحكم', darkMode: 'الوضع الداكن',
