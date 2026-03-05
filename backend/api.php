@@ -158,6 +158,7 @@ try {
                 'news' => $news,
                 'jobs' => $jobs,
                 'jobApplications' => $settings['jobApplications'] ?? [],
+                'jobDepartments' => $settings['jobDepartments'] ?? [],
                 'heroSlides' => $settings['heroSlides'] ?? [],
                 'aboutData' => $settings['aboutData'] ?? new stdClass(),
                 'complaints' => $settings['complaints'] ?? [],

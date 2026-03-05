@@ -338,6 +338,7 @@ const Dashboard: React.FC = () => {
   const [newsList, setNewsList] = useState<DashNewsItem[]>([]);
   const [schools, setSchools] = useState<DashSchool[]>([]);
   const [jobs, setJobs] = useState<DashJob[]>([]);
+  const [departments, setDepartments] = useState<{ id: string, nameEn: string, nameAr: string }[]>([]);
   const [applications, setApplications] = useState<DashJobApplication[]>([]);
   const [hero, setHero] = useState<HeroSlide[]>([]);
   const [complaints, setComplaints] = useState<any[]>([]);
@@ -358,6 +359,7 @@ const Dashboard: React.FC = () => {
       setNewsList(prepareNews(siteData.news || []));
       setSchools((siteData.schools || []).map(s => ({ ...s })));
       setJobs((siteData.jobs || []).map(j => ({ ...j })));
+      setDepartments((siteData.jobDepartments || []).map(d => ({ ...d })));
       setApplications((siteData.jobApplications || []).map(a => ({ ...a })));
       setComplaints(siteData.complaints || []);
       setContactMessages(siteData.contactMessages || []);
@@ -382,6 +384,8 @@ const Dashboard: React.FC = () => {
   const [editSchoolId, setEditSchoolId] = useState<string | null>(null);
   const [editJobId, setEditJobId] = useState<string | null>(null);
   const [addJobOpen, setAddJobOpen] = useState(false);
+  const [addDepartmentOpen, setAddDepartmentOpen] = useState(false);
+  const [newDepartment, setNewDepartment] = useState({ nameEn: '', nameAr: '' });
   const [selectedRecruitmentJobId, setSelectedRecruitmentJobId] = useState<string | null>('all');
   const [selectedApplicant, setSelectedApplicant] = useState<DashJobApplication | null>(null);
   const [applicantModalOpen, setApplicantModalOpen] = useState(false);
@@ -532,6 +536,36 @@ const Dashboard: React.FC = () => {
     showToast(u.jobAdded);
   };
 
+  const addDepartment = () => {
+    if (!newDepartment.nameEn || !newDepartment.nameAr) return showToast(lang === 'ar' ? 'الرجاء إدخال اسم القسم باللغتين' : 'Please enter department name in both languages', 'error');
+    const newEntry = { id: String(Date.now()), nameEn: newDepartment.nameEn, nameAr: newDepartment.nameAr };
+    const updated = [newEntry, ...departments];
+    setDepartments(updated);
+    updateData('jobDepartments', updated);
+    setAddDepartmentOpen(false);
+    setNewDepartment({ nameEn: '', nameAr: '' });
+    showToast(lang === 'ar' ? 'تم إضافة القسم' : 'Department added');
+  };
+
+  const deleteDepartment = (id: string) => {
+    const dep = departments.find(d => d.id === id);
+    if (!dep) return;
+    const isUsed = jobs.some(j => j.department === dep.nameEn || j.departmentAr === dep.nameAr);
+    if (isUsed) {
+      showToast(lang === 'ar' ? 'لا يمكن حذف القسم لأنه يحتوي على وظائف مسجلة.' : 'Cannot delete department as it contains active jobs.', 'error');
+      return;
+    }
+    setConfirmAction({
+      message: lang === 'ar' ? 'هل أنت متأكد من حذف هذا القسم؟' : 'Are you sure you want to delete this department?',
+      onConfirm: () => {
+        const updated = departments.filter(d => d.id !== id);
+        setDepartments(updated);
+        updateData('jobDepartments', updated);
+        showToast(lang === 'ar' ? 'تم الحذف بنجاح' : 'Deleted successfully', 'error');
+      }
+    });
+  };
+
   const deleteComplaint = (id: string) => {
     setConfirmAction({
       message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه الشكوى؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this complaint? This cannot be undone.',
@@ -600,6 +634,7 @@ const Dashboard: React.FC = () => {
     { id: 'news', label: u.news, icon: Newspaper },
     { id: 'schools', label: u.schools, icon: School },
     { id: 'jobs', label: u.jobs, icon: Briefcase },
+    { id: 'departments', label: lang === 'ar' ? 'أقسام الوظائف' : 'Job Departments', icon: LayoutDashboard },
     { id: 'recruitment', label: u.recruitmentPortal, icon: Briefcase },
     { id: 'hero', label: u.hero, icon: Image },
     { id: 'chairman', label: u.chairman, icon: Users },
@@ -692,7 +727,7 @@ const Dashboard: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <button className="dash-icon-btn" onClick={() => setCollapsed(!collapsed)}><Menu style={{ width: 20, height: 20 }} /></button>
             <div className="mobile-hide">
-              <p style={{ fontWeight: 800, fontSize: 16, color: 'var(--text)', lineHeight: 1.2 }}>{u[section as keyof typeof u] as string}</p>
+              <p style={{ fontWeight: 800, fontSize: 16, color: 'var(--text)', lineHeight: 1.2 }}>{section === 'departments' ? (lang === 'ar' ? 'أقسام الوظائف' : 'Job Departments') : (u[section as keyof typeof u] as string)}</p>
               <p style={{ fontSize: 11, color: 'var(--text2)' }}>National Institutes Schools Portal</p>
             </div>
           </div>
@@ -839,6 +874,39 @@ const Dashboard: React.FC = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Departments ── */}
+          {section === 'departments' && (
+            <div className="section-enter">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{lang === 'ar' ? 'أقسام الوظائف' : 'Job Departments'}</h2></div>
+                <button className="dash-btn dash-btn-primary" onClick={() => setAddDepartmentOpen(true)}><Plus style={{ width: 15, height: 15 }} />{lang === 'ar' ? 'بناء قسم جديد' : 'New Department'}</button>
+              </div>
+              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
+                <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
+                  <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
+                    <tr>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.title} (EN)</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.titleAr || 'الاسم (AR)'}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.actions}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {departments.map((dep, i) => (
+                      <tr key={dep.id} style={{ borderBottom: i === departments.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{dep.nameEn}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontSize: 13 }}>{dep.nameAr}</td>
+                        <td style={{ padding: '16px 24px' }}>
+                          <button className="dash-icon-btn" onClick={() => deleteDepartment(dep.id)} title={u.delete}><Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} /></button>
+                        </td>
+                      </tr>
+                    ))}
+                    {departments.length === 0 && <tr><td colSpan={3} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><LayoutDashboard style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></td></tr>}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
@@ -1594,6 +1662,25 @@ const Dashboard: React.FC = () => {
         </ModalWrap>
       )}
 
+      {addDepartmentOpen && (
+        <ModalWrap title={lang === 'ar' ? 'إضافة قسم جديد' : 'Add New Department'} onClose={() => setAddDepartmentOpen(false)}>
+          <div className="form-grid">
+            <div className="form-col">
+              <label className="dash-label">Department Name (EN)</label>
+              <input className="dash-input" value={newDepartment.nameEn} onChange={e => setNewDepartment(p => ({ ...p, nameEn: e.target.value }))} />
+            </div>
+            <div className="form-col">
+              <label className="dash-label">اسم القسم (AR)</label>
+              <input className="dash-input" dir="rtl" value={newDepartment.nameAr} onChange={e => setNewDepartment(p => ({ ...p, nameAr: e.target.value }))} />
+            </div>
+            <div className="form-full dash-form-actions">
+              <button className="dash-btn dash-btn-primary" onClick={addDepartment}><Save className="w-4 h-4" />{u.save}</button>
+              <button className="dash-btn dash-btn-ghost" onClick={() => setAddDepartmentOpen(false)}>{u.cancel}</button>
+            </div>
+          </div>
+        </ModalWrap>
+      )}
+
       {/* complaint detail modal */}
       {complaintModalOpen && selectedComplaint && (
         <ModalWrap title={lang === 'ar' ? 'تفاصيل الشكوى' : 'Complaint Details'} onClose={() => setComplaintModalOpen(false)}>
@@ -1663,6 +1750,7 @@ const Dashboard: React.FC = () => {
                 className="dash-btn dash-btn-danger"
                 onClick={() => {
                   confirmAction.onConfirm();
+                  setConfirmAction(null);
                 }}
               >
                 {u.delete || (lang === 'ar' ? 'حذف' : 'Delete')}

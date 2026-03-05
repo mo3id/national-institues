@@ -354,45 +354,34 @@ export const EditJobForm: React.FC<EditJobProps> = ({ job, lang, onSave, onCance
                 {errors.titleAr && <span className="text-red-500 text-xs mt-1 block">{errors.titleAr}</span>}
             </div>
             <div className="form-col">
-                <label className="dash-label">Department (EN) / القسم (عربي)</label>
+                <label className="dash-label">Department / القسم</label>
                 <div className={errors.department ? 'border border-red-500 rounded' : ''}>
                     <CustomSelect
                         value={d.department || ''}
+                        placeholder={lang === 'ar' ? 'اختر قسم...' : 'Select department...'}
                         onChange={val => {
-                            // Find the matching Arabic translation from existing jobs
-                            const existingJob = data.jobs?.find(j => j.department === val);
+                            const selectedDep = data.jobDepartments?.find(jd => jd.nameEn === val);
                             setD(p => ({
                                 ...p,
-                                department: val,
-                                departmentAr: existingJob?.departmentAr || val
+                                department: selectedDep?.nameEn || val,
+                                departmentAr: selectedDep?.nameAr || val
                             }));
                             if (errors.department) {
                                 setErrors(p => ({ ...p, department: '', departmentAr: '' }));
                             }
                         }}
-                        options={Array.from(new Set(data.jobs?.map(j => j.department) || [])).filter(Boolean).map(dep => {
-                            const ar = data.jobs?.find(j => j.department === dep)?.departmentAr;
-                            return {
-                                value: dep,
-                                label: lang === 'ar' ? (ar || dep) : dep
-                            };
-                        }).concat([
-                            // Give them standard fallback departments if jobs list is empty or they need them
-                            { value: 'Academic', label: lang === 'ar' ? 'أكاديمي' : 'Academic' },
-                            { value: 'Admin', label: lang === 'ar' ? 'إداري' : 'Admin' },
-                            { value: 'Student Services', label: lang === 'ar' ? 'خدمات الطلاب' : 'Student Services' },
-                            { value: 'Sports', label: lang === 'ar' ? 'رياضي' : 'Sports' },
-                        ]).filter((tag, idx, arr) => arr.findIndex(t => t.value === tag.value) === idx)} // ensure unique
+                        options={(data.jobDepartments || []).map(dep => ({
+                            value: dep.nameEn,
+                            label: lang === 'ar' ? dep.nameAr : dep.nameEn
+                        }))}
                     />
                 </div>
                 {errors.department && <span className="text-red-500 text-xs mt-1 block">{errors.department}</span>}
-                <div style={{ marginTop: 8 }}>
-                    <label className="dash-label text-xs opacity-50">or Add New Department manually / أو أدخل قسم جديد يدوياً</label>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                        <input className="dash-input" placeholder="Department (EN)" value={d.department || ''} onChange={e => setD(p => ({ ...p, department: e.target.value }))} />
-                        <input className="dash-input" placeholder="القسم (عربي)" dir="rtl" value={d.departmentAr || ''} onChange={e => setD(p => ({ ...p, departmentAr: e.target.value }))} />
-                    </div>
-                </div>
+                {(!data.jobDepartments || data.jobDepartments.length === 0) && (
+                    <span className="text-orange-500 text-xs mt-1 block">
+                        {lang === 'ar' ? 'الرجاء إضافة أقسام من قائمة الأقسام أولاً' : 'Please add departments from the Departments menu first'}
+                    </span>
+                )}
             </div>
             <div className="form-col">
                 <label className="dash-label">Location (EN)</label>

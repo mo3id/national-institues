@@ -3,15 +3,25 @@ import { SiteData } from '@/store/useDataStore';
 
 // Ensure the API base URL falls back to relative /api.php if VITE_API_BASE_URL is not provided or undefined
 // This uses Vite's string replacement for env variables.
-const API_BASE_URL: string = (import.meta as any).env.VITE_API_BASE_URL || '/api.php';
+// Remove /api.php from base URL to handle paths cleanly
+const API_BASE_URL: string = ((import.meta as any).env.VITE_API_BASE_URL || '/api.php').replace(/\/api\.php\/?$/, '');
 
 export const apiClient = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL: API_BASE_URL || '',
     headers: {
         'Content-Type': 'application/json',
     },
     // Timeout set to 15s to accommodate slow cPanel shared hosting (~7s avg response)
     timeout: 15000,
+});
+
+// Axios interceptor to append /api.php correctly without redundant slashes
+apiClient.interceptors.request.use(config => {
+    // If the url is just query params (e.g. ?action=...), prepend /api.php
+    if (config.url && config.url.startsWith('?')) {
+        config.url = `/api.php${config.url}`;
+    }
+    return config;
 });
 
 interface ApiResponse<T = any> {
