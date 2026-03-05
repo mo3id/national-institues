@@ -73,9 +73,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         queryKey: ['siteData'],
         queryFn: fetchSiteData,
 
-        staleTime: 0,
-        refetchOnWindowFocus: true,
-        refetchInterval: 30 * 1000,
+        staleTime: 30 * 1000,          // Data stays fresh for 30s — no refetch on tab switch
+        refetchOnWindowFocus: false,    // Don't refetch every time user switches tabs
+        refetchInterval: 60 * 1000,    // Sync with backend cache TTL (60s)
         refetchIntervalInBackground: false,
     });
 

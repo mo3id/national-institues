@@ -42,17 +42,31 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 
 // ═══════════════════════════════════════════════════════════════════════════
-// FILE CACHE — serves get_site_data instantly from disk (~1ms vs ~7s DB)
-// Cache is stored in: cache/site_data.json
-// TTL: 5 minutes. Busted immediately on any write action.
+// FILE CACHE — serves get_site_data instantly from disk (~1ms vs ~1.5s DB)
+// Cache stored in: cache/site_data.json
+// TTL: 60 seconds. Busted immediately on any write action (update_category, etc.)
 // ═══════════════════════════════════════════════════════════════════════════
-// No file cache anymore — always query the DB directly in real time
-function bustCache(): void {
-    // No-op
+define('CACHE_FILE', __DIR__ . '/cache/site_data.json');
+define('CACHE_TTL', 60); // seconds
+
+function serveFromCache(): bool {
+    if (!file_exists(CACHE_FILE)) return false;
+    if ((time() - filemtime(CACHE_FILE)) > CACHE_TTL) return false;
+    $cached = @file_get_contents(CACHE_FILE);
+    if (!$cached) return false;
+    header('X-Cache: HIT');
+    echo $cached;
+    return true;
 }
 
 function writeCache(string $json): void {
-    // No-op
+    $dir = dirname(CACHE_FILE);
+    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+    @file_put_contents(CACHE_FILE, $json, LOCK_EX);
+}
+
+function bustCache(): void {
+    if (file_exists(CACHE_FILE)) @unlink(CACHE_FILE);
 }
 
 $action = $_GET['action'] ?? '';
@@ -92,27 +106,8 @@ $action = $_GET['action'] ?? '';
 try {
     switch ($action) {
         case 'get_site_data':
-            // Migration queries removed for performance. DB should now be the source of truth.
-            try {
-                $pdo->exec("ALTER TABLE news ADD COLUMN content longtext, ADD COLUMN contentAr longtext");
-            } catch (PDOException $e) {
-                // Ignore if columns already exist
-            }
-            try {
-                $pdo->exec("ALTER TABLE news ADD COLUMN featured tinyint(1) DEFAULT 0");
-            } catch (PDOException $e) {
-                // Ignore if columns already exist
-            }
-            try {
-                $pdo->exec("ALTER TABLE news ADD COLUMN highlightTitle varchar(255), ADD COLUMN highlightTitleAr varchar(255), ADD COLUMN highlightContent longtext, ADD COLUMN highlightContentAr longtext");
-            } catch (PDOException $e) {
-                // Ignore if columns already exist
-            }
-            try {
-                $pdo->exec("ALTER TABLE schools ADD COLUMN about longtext, ADD COLUMN aboutAr longtext, ADD COLUMN phone varchar(255), ADD COLUMN email varchar(255), ADD COLUMN website varchar(255), ADD COLUMN rating varchar(50), ADD COLUMN studentCount varchar(50), ADD COLUMN foundedYear varchar(50)");
-            } catch (PDOException $e) {
-                // Ignore if columns already exist
-            }
+            // Serve from file cache if fresh (TTL: 60s) — avoids 4 SQL queries per request
+            if (serveFromCache()) break;
 
             // Fetch schools
             $stmt = $pdo->query("SELECT * FROM schools");
@@ -164,6 +159,8 @@ try {
             ];
 
             $jsonOut = json_encode(["status" => "success", "data" => $response]);
+            writeCache($jsonOut); // Store in file cache for next 60s
+            header('X-Cache: MISS');
             echo $jsonOut;
             break;
 

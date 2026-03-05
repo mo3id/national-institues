@@ -104,6 +104,7 @@ const News: React.FC = () => {
                       src={item.image}
                       alt={item.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      loading="lazy"
                     />
                     <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'}`}>
                       <span className="px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md bg-red-500/80 text-white border border-white/20 shadow-sm">

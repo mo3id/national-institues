@@ -19,6 +19,7 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
           src={school.mainImage || "/nano-banana-1771806527783.png"}
           alt="Cover"
           className="w-full h-full object-cover"
+          loading="lazy"
         />
         {/* Type Badge on cover */}
         <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'}`}>
@@ -36,7 +37,7 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
       <div className={`absolute top-28 ${isRTL ? 'right-6' : 'left-6'} z-10`}>
         <div className="w-20 h-20 bg-white rounded-full p-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-gray-50">
           <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center p-2.5">
-            <img src={school.logo || "/layer-1-small.webp"} alt="NIS Logo" className="w-full h-full object-contain" />
+            <img src={school.logo || "/layer-1-small.webp"} alt="NIS Logo" className="w-full h-full object-contain" loading="lazy" />
           </div>
         </div>
       </div>
