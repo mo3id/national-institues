@@ -1,12 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
-import { Calendar, ArrowRight, Share2, ArrowLeft, CloudCog } from 'lucide-react';
+import { Calendar, ArrowRight, Share2, ArrowLeft } from 'lucide-react';
 import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
-import { Console } from 'console';
-
 const NewsDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const { lang, isRTL } = useLanguage();
@@ -21,10 +19,27 @@ const NewsDetail: React.FC = () => {
     const title = lang === 'ar' ? newsItem.titleAr : newsItem.title;
     const summary = lang === 'ar' ? newsItem.summaryAr : newsItem.summary;
 
-    console.log(newsItem);
+    const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+    const handleShare = async () => {
+        try {
+            await navigator.clipboard.writeText(window.location.href);
+            setToastMsg(isRTL ? 'تم نسخ الرابط بنجاح' : 'Link copied to clipboard');
+            setTimeout(() => setToastMsg(null), 3000);
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+        }
+    };
+
     return (
         <PageTransition>
-            <div className="bg-slate-50 min-h-screen pb-24">
+            <div className="bg-slate-50 min-h-screen pb-24 relative">
+                {/* Toast Notification */}
+                {toastMsg && (
+                    <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded-full shadow-lg transition-all flex items-center gap-2">
+                        {toastMsg}
+                    </div>
+                )}
 
                 {/* Unified Hero Header — floating card pattern */}
                 <section className="m-[10px] rounded-[20px] relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-[#0f172a]">
@@ -85,7 +100,7 @@ const NewsDetail: React.FC = () => {
                         <div className="p-8 md:p-14">
                             {/* Action bar */}
                             <div className="flex items-center mb-10 pb-6 border-b border-gray-100 justify-start">
-                                <button className="p-3 bg-slate-50 text-slate-600 rounded-full hover:bg-blue-50 hover:text-blue-600 transition-colors shadow-sm group">
+                                <button onClick={handleShare} className="p-3 bg-slate-50 text-slate-600 rounded-full hover:bg-blue-50 hover:text-blue-600 transition-colors shadow-sm group">
                                     <Share2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
                                 </button>
                             </div>
