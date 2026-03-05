@@ -36,13 +36,13 @@ export const CustomSelect: React.FC<SelectProps> = ({ value, onChange, options, 
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-full flex items-center justify-between px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all font-bold text-sm text-blue-900 shadow-sm hover:shadow-md ${isRTL ? 'text-right' : 'text-left'}`}
+                className={`w-full flex items-center justify-between px-5 py-4 bg-[var(--surface2)] border border-[var(--border)] rounded-2xl focus:ring-4 focus:ring-[var(--accent)]/10 focus:border-[var(--accent)] outline-none transition-all font-bold text-sm text-[var(--text)] shadow-sm hover:shadow-md ${isRTL ? 'text-right' : 'text-left'}`}
             >
                 <div className="flex items-center gap-3 overflow-hidden">
-                    {icon && <span className="text-gray-400 shrink-0">{icon}</span>}
+                    {icon && <span className="text-[var(--text2)] shrink-0">{icon}</span>}
                     <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
                 </div>
-                <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`h-4 w-4 text-[var(--text2)] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 
             <AnimatePresence>
@@ -52,7 +52,7 @@ export const CustomSelect: React.FC<SelectProps> = ({ value, onChange, options, 
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 8, scale: 0.95 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute top-full left-0 right-0 z-[100] mt-1 bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden max-h-60 overflow-y-auto"
+                        className="absolute top-full left-0 right-0 z-[100] mt-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-lg overflow-hidden max-h-60 overflow-y-auto"
                     >
                         {options.map((opt) => (
                             <button
@@ -62,10 +62,10 @@ export const CustomSelect: React.FC<SelectProps> = ({ value, onChange, options, 
                                     onChange(opt.value);
                                     setIsOpen(false);
                                 }}
-                                className={`w-full px-4 py-3 text-sm font-medium hover:bg-blue-50 transition-colors flex items-center justify-between ${value === opt.value ? 'text-blue-600 bg-blue-50/50' : 'text-gray-700'} ${isRTL ? 'text-right' : 'text-left'}`}
+                                className={`w-full px-4 py-3 text-sm font-medium hover:bg-[var(--accent)]/5 transition-colors flex items-center justify-between ${value === opt.value ? 'text-[var(--accent)] bg-[var(--accent)]/10' : 'text-[var(--text)]'} ${isRTL ? 'text-right' : 'text-left'}`}
                             >
                                 <span>{opt.label}</span>
-                                {value === opt.value && <div className="h-2 w-2 bg-blue-600 rounded-full shrink-0" />}
+                                {value === opt.value && <div className="h-2 w-2 bg-[var(--accent)] rounded-full shrink-0" />}
                             </button>
                         ))}
                     </motion.div>
@@ -142,10 +142,10 @@ export const CustomDatePicker: React.FC<DatePickerProps> = ({ value, onChange, p
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-full flex items-center justify-between px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all font-bold text-sm text-blue-900 shadow-sm hover:shadow-md ${isRTL ? 'text-right' : 'text-left'}`}
+                className={`w-full flex items-center justify-between px-5 py-4 bg-[var(--surface2)] border border-[var(--border)] rounded-2xl focus:ring-4 focus:ring-[var(--accent)]/10 focus:border-[var(--accent)] outline-none transition-all font-bold text-sm text-[var(--text)] shadow-sm hover:shadow-md ${isRTL ? 'text-right' : 'text-left'}`}
             >
                 <div className="flex items-center gap-3 overflow-hidden">
-                    <CalendarIcon className="h-4 w-4 text-gray-400 shrink-0" />
+                    <CalendarIcon className="h-4 w-4 text-[var(--text2)] shrink-0" />
                     <span className="truncate">{value || ct?.selectDate || placeholder}</span>
                 </div>
             </button>
@@ -156,25 +156,25 @@ export const CustomDatePicker: React.FC<DatePickerProps> = ({ value, onChange, p
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className={`absolute z-[110] w-[280px] md:w-[320px] mt-2 bg-white border border-gray-100 rounded-[2rem] shadow-2xl p-6 ${isRTL ? 'right-0 origin-top-right' : 'left-0 origin-top-left'}`}
+                        className={`absolute z-[110] w-[280px] md:w-[320px] mt-2 bg-[var(--surface)] border border-[var(--border)] rounded-[2rem] shadow-2xl p-6 ${isRTL ? 'right-0 origin-top-right' : 'left-0 origin-top-left'}`}
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between mb-6">
-                            <button type="button" onClick={handlePrevMonth} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-                                <ChevronLeft className={`h-4 w-4 text-gray-600 ${isRTL ? 'rotate-180' : ''}`} />
+                            <button type="button" onClick={handlePrevMonth} className="p-2 hover:bg-[var(--surface2)] rounded-xl transition-colors">
+                                <ChevronLeft className={`h-4 w-4 text-[var(--text)] ${isRTL ? 'rotate-180' : ''}`} />
                             </button>
-                            <div className="text-sm font-black text-blue-900 uppercase tracking-widest">
+                            <div className="text-sm font-black text-[var(--text)] uppercase tracking-widest">
                                 {ct?.months[viewDate.getMonth()]} {viewDate.getFullYear()}
                             </div>
-                            <button type="button" onClick={handleNextMonth} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-                                <ChevronRight className={`h-4 w-4 text-gray-600 ${isRTL ? 'rotate-180' : ''}`} />
+                            <button type="button" onClick={handleNextMonth} className="p-2 hover:bg-[var(--surface2)] rounded-xl transition-colors">
+                                <ChevronRight className={`h-4 w-4 text-[var(--text)] ${isRTL ? 'rotate-180' : ''}`} />
                             </button>
                         </div>
 
                         {/* Weekdays */}
                         <div className={`grid grid-cols-7 gap-1 mb-2 ${isRTL ? 'direction-rtl' : ''}`}>
                             {ct?.days.map((d: string) => (
-                                <div key={d} className="text-[10px] font-black text-gray-400 text-center uppercase py-2">
+                                <div key={d} className="text-[10px] font-black text-[var(--text2)] text-center uppercase py-2">
                                     {d}
                                 </div>
                             ))}
@@ -194,10 +194,10 @@ export const CustomDatePicker: React.FC<DatePickerProps> = ({ value, onChange, p
                                         onClick={() => handleDateSelect(day)}
                                         className={`h-9 w-9 rounded-xl flex items-center justify-center text-xs font-bold transition-all
                       ${isSelected(day)
-                                                ? 'bg-blue-900 text-white shadow-lg scale-110'
+                                                ? 'bg-[var(--accent)] text-white shadow-lg scale-110'
                                                 : isToday(day)
-                                                    ? 'bg-red-50 text-red-600 border border-red-100'
-                                                    : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                                                    ? 'bg-red-500/10 text-red-500 border border-red-500/20'
+                                                    : 'text-[var(--text)] hover:bg-[var(--accent)]/10 hover:text-[var(--accent)]'
                                             }`}
                                     >
                                         {day}
@@ -260,13 +260,13 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label
 
     return (
         <div className={`space-y-3 ${className}`}>
-            {label && <label className="block text-sm font-black text-blue-900 mb-2 uppercase tracking-tight">{label}</label>}
+            {label && <label className="block text-sm font-black text-[var(--text)] mb-2 uppercase tracking-tight">{label}</label>}
 
-            <div className="flex p-1 bg-gray-100 rounded-xl w-fit mb-2">
+            <div className="flex p-1 bg-[var(--surface2)] rounded-xl w-fit mb-2">
                 <button
                     type="button"
                     onClick={() => setMode('file')}
-                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'file' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500'}`}
+                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'file' ? 'bg-[var(--surface)] shadow-sm text-[var(--accent)]' : 'text-[var(--text2)]'}`}
                 >
                     <Upload className="h-3 w-3 inline-block mr-2" />
                     {isRTL ? 'رفع ملف' : 'Upload File'}
@@ -274,7 +274,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label
                 <button
                     type="button"
                     onClick={() => setMode('url')}
-                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'url' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500'}`}
+                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'url' ? 'bg-[var(--surface)] shadow-sm text-[var(--accent)]' : 'text-[var(--text2)]'}`}
                 >
                     <LinkIcon className="h-3 w-3 inline-block mr-2" />
                     {isRTL ? 'رابط مباشر' : 'Direct Link'}
@@ -288,7 +288,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label
                         value={value}
                         onChange={e => onChange(e.target.value)}
                         placeholder="https://images.unsplash.com/..."
-                        className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all font-medium text-sm text-blue-900 shadow-sm"
+                        className="w-full px-5 py-4 bg-[var(--surface2)] border border-[var(--border)] rounded-2xl focus:ring-4 focus:ring-[var(--accent)]/10 focus:border-[var(--accent)] outline-none transition-all font-medium text-sm text-[var(--text)] shadow-sm"
                     />
                 </div>
             ) : (
@@ -303,7 +303,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label
                         accept="image/*"
                         className="hidden"
                     />
-                    <div className="w-full h-40 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-2 group-hover:bg-blue-50/50 group-hover:border-blue-200 transition-all">
+                    <div className="w-full h-40 bg-[var(--surface2)] border-2 border-dashed border-[var(--border)] rounded-2xl flex flex-col items-center justify-center gap-2 group-hover:bg-[var(--accent)]/5 group-hover:border-[var(--accent)]/30 transition-all">
                         {value ? (
                             <div className="relative w-full h-full p-2">
                                 <img src={value} className="w-full h-full object-contain rounded-xl" alt="Preview" />
@@ -317,10 +317,10 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label
                             </div>
                         ) : (
                             <>
-                                <div className="p-4 bg-white rounded-2xl shadow-sm text-gray-400 group-hover:text-blue-500 group-hover:scale-110 transition-all">
-                                    <Upload className="h-8 w-8 text-blue-500" />
+                                <div className="p-4 bg-[var(--surface)] rounded-2xl shadow-sm text-[var(--text2)] group-hover:text-[var(--accent)] group-hover:scale-110 transition-all">
+                                    <Upload className="h-8 w-8 text-[var(--accent)]" />
                                 </div>
-                                <span className="text-sm font-medium text-gray-500 group-hover:text-blue-600">
+                                <span className="text-sm font-medium text-[var(--text2)] group-hover:text-[var(--text)]">
                                     {isRTL ? 'اضغط لرفع صورة' : 'Click to select or drop image'}
                                 </span>
                             </>

@@ -109,8 +109,8 @@ export const EditNewsForm: React.FC<EditNewsProps> = ({ article, lang, onSave, o
                 <textarea className="dash-input dash-ta" style={{ minHeight: 180 }} placeholder="تفاصيل الخبر بالكامل..." dir="rtl" value={d.contentAr || ''} onChange={e => setD(p => ({ ...p, contentAr: e.target.value }))} />
             </div>
 
-            <div className="form-full mt-4 pt-4 border-t border-slate-200">
-                <h4 className="font-bold text-slate-800 mb-4">{lang === 'ar' ? 'القسم الإضافي (آفاق مستقبلية واعدة) - اختياري' : 'Highlight Section (Promising Future) - Optional'}</h4>
+            <div className="form-full mt-4 pt-4 border-t border-[var(--border)]">
+                <h4 className="font-bold text-[var(--text)] mb-4">{lang === 'ar' ? 'القسم الإضافي (آفاق مستقبلية واعدة) - اختياري' : 'Highlight Section (Promising Future) - Optional'}</h4>
                 <div className="form-grid">
                     <div className="form-col">
                         <label className="dash-label">{u.highlightTitleEn}</label>
@@ -494,7 +494,7 @@ export const EditJobForm: React.FC<EditJobProps> = ({ job, lang, onSave, onCance
             <div className="form-full">
                 <label className="dash-label">{u.jobImage}</label>
                 <label
-                    className={`flex flex-col items-center justify-center w-full h-32 border-2 ${d.image ? 'border-emerald-500 bg-emerald-50/50' : errors.image ? 'border-red-500 bg-red-50' : 'border-slate-200 border-dashed bg-slate-50 hover:bg-[#1e3a8a]/5 hover:border-[#1e3a8a]'} rounded-2xl cursor-pointer transition-all mt-1 relative overflow-hidden`}
+                    className={`flex flex-col items-center justify-center w-full h-32 border-2 ${d.image ? 'border-emerald-500 bg-emerald-500/10' : errors.image ? 'border-red-500 bg-red-500/10' : 'border-[var(--border)] border-dashed bg-[var(--surface2)] hover:bg-[var(--accent)]/5 hover:border-[var(--accent)]'} rounded-2xl cursor-pointer transition-all mt-1 relative overflow-hidden`}
                     onDragOver={e => e.preventDefault()}
                     onDrop={async e => {
                         e.preventDefault();
@@ -508,9 +508,9 @@ export const EditJobForm: React.FC<EditJobProps> = ({ job, lang, onSave, onCance
                     {d.image ? (
                         <img src={d.image} alt="preview" className="max-h-full object-contain" />
                     ) : (
-                        <div className="text-center text-sm text-slate-500">
+                        <div className="text-center text-sm text-[var(--text2)]">
                             {u.uploadImage}<br />
-                            <span className="text-xs text-slate-400">{u.dragDrop}</span>
+                            <span className="text-xs text-[var(--text2)] opacity-70">{u.dragDrop}</span>
                         </div>
                     )}
                     <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={async e => {

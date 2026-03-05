@@ -271,6 +271,12 @@ const CSS = `
     .flex.items-center.gap-2 > select,
     .flex.items-center.gap-2 > input { flex: 1; min-width: 40%; text-align: center; }
   }
+
+  /* Standard Select Option fix for Dark Mode */
+  .dash-root.dark select option {
+    background-color: var(--surface2);
+    color: var(--text);
+  }
 `;
 
 const DAYS_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -1349,7 +1355,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="dash-card" style={{ padding: 24 }}>
-                  <h3 className="font-bold mb-4 text-blue-900">{lang === 'ar' ? 'نموذج التواصل' : 'Contact Form'}</h3>
+                  <h3 className="font-bold mb-4 text-[var(--text)]">{lang === 'ar' ? 'نموذج التواصل' : 'Contact Form'}</h3>
                   <div className="space-y-4">
                     <div><label className="dash-label">Title (EN)</label><input className="dash-input" value={formSettings?.contactFormTitle || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormTitle: e.target.value }))} /></div>
                     <div><label className="dash-label">العنوان (عربي)</label><input className="dash-input" dir="rtl" value={formSettings?.contactFormTitleAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormTitleAr: e.target.value }))} /></div>
@@ -1358,7 +1364,7 @@ const Dashboard: React.FC = () => {
                   </div>
                 </div>
                 <div className="dash-card" style={{ padding: 24 }}>
-                  <h3 className="font-bold mb-4 text-blue-900">{lang === 'ar' ? 'نموذج الوظائف' : 'Careers Form'}</h3>
+                  <h3 className="font-bold mb-4 text-[var(--text)]">{lang === 'ar' ? 'نموذج الوظائف' : 'Careers Form'}</h3>
                   <div className="space-y-4">
                     <div><label className="dash-label">Title (EN)</label><input className="dash-input" value={formSettings?.jobFormTitle || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormTitle: e.target.value }))} /></div>
                     <div><label className="dash-label">العنوان (عربي)</label><input className="dash-input" dir="rtl" value={formSettings?.jobFormTitleAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormTitleAr: e.target.value }))} /></div>
@@ -1379,40 +1385,40 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="dash-card" style={{ padding: 24 }}>
-                  <h3 className="font-bold mb-4 text-blue-900">{lang === 'ar' ? 'معلومات أساسية' : 'Basic Info'}</h3>
+                  <h3 className="font-bold mb-4 text-[var(--text)]">{lang === 'ar' ? 'معلومات أساسية' : 'Basic Info'}</h3>
                   <div className="space-y-4">
                     <div><label className="dash-label">{lang === 'ar' ? 'العنوان' : 'Address'}</label><input className="dash-input" value={contactData?.address || ''} onChange={e => setContactData((p: any) => ({ ...p, address: e.target.value }))} /></div>
                     <div><label className="dash-label">{lang === 'ar' ? 'العنوان (عربي)' : 'Address (AR)'}</label><input className="dash-input" dir="rtl" value={contactData?.addressAr || ''} onChange={e => setContactData((p: any) => ({ ...p, addressAr: e.target.value }))} /></div>
                     <div><label className="dash-label">{lang === 'ar' ? 'الهاتف' : 'Phone'}</label><input className="dash-input" value={contactData?.phone || ''} onChange={e => setContactData((p: any) => ({ ...p, phone: e.target.value }))} /></div>
                     <div><label className="dash-label">{lang === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label><input className="dash-input" value={contactData?.email || ''} onChange={e => setContactData((p: any) => ({ ...p, email: e.target.value }))} /></div>
-                    <div className="pt-2 border-t border-slate-100">
+                    <div className="pt-2 border-t border-[var(--border)]">
                       <label className="dash-label mb-3">{lang === 'ar' ? 'أيام وساعات العمل' : 'Working Days & Hours'}</label>
-                      <div className="flex flex-col gap-4 bg-slate-50 border border-slate-100 p-4 rounded-xl">
+                      <div className="flex flex-col gap-4 bg-[var(--surface2)] border border-[var(--border)] p-4 rounded-xl">
                         <div>
-                          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{lang === 'ar' ? 'من يوم - إلى يوم' : 'From - To Day'}</label>
+                          <label className="text-[11px] font-bold text-[var(--text2)] uppercase tracking-widest mb-2 block">{lang === 'ar' ? 'من يوم - إلى يوم' : 'From - To Day'}</label>
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                             <select className="dash-input !py-2 text-center" value={whForm.startDay} onChange={e => setWhForm(p => ({ ...p, startDay: parseInt(e.target.value) }))}>
                               {(lang === 'ar' ? DAYS_AR : DAYS_EN).map((d, i) => <option key={i} value={i}>{d}</option>)}
                             </select>
-                            <span className="text-slate-400 font-medium hidden sm:block">-</span>
+                            <span className="text-[var(--border)] font-medium hidden sm:block">-</span>
                             <select className="dash-input !py-2 text-center" value={whForm.endDay} onChange={e => setWhForm(p => ({ ...p, endDay: parseInt(e.target.value) }))}>
                               {(lang === 'ar' ? DAYS_AR : DAYS_EN).map((d, i) => <option key={i} value={i}>{d}</option>)}
                             </select>
                           </div>
                         </div>
                         <div>
-                          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{lang === 'ar' ? 'من ساعة - إلى ساعة' : 'From - To Time'}</label>
+                          <label className="text-[11px] font-bold text-[var(--text2)] uppercase tracking-widest mb-2 block">{lang === 'ar' ? 'من ساعة - إلى ساعة' : 'From - To Time'}</label>
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                             <input type="time" className="dash-input !py-2 text-center w-full" value={whForm.startTime} onChange={e => setWhForm(p => ({ ...p, startTime: e.target.value }))} />
-                            <span className="text-slate-400 font-medium hidden sm:block">-</span>
+                            <span className="text-[var(--border)] font-medium hidden sm:block">-</span>
                             <input type="time" className="dash-input !py-2 text-center w-full" value={whForm.endTime} onChange={e => setWhForm(p => ({ ...p, endTime: e.target.value }))} />
                           </div>
                         </div>
                       </div>
 
-                      <div className="mt-4 text-xs bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex flex-col gap-2">
-                        <p className="text-blue-900 font-medium leading-relaxed" dir="ltr">{contactData.workingHours || buildWorkingHours(whForm).en}</p>
-                        <p className="text-blue-900 font-bold leading-relaxed" dir="rtl">{contactData.workingHoursAr || buildWorkingHours(whForm).ar}</p>
+                      <div className="mt-4 text-xs bg-[var(--accent)]/10 p-4 rounded-xl border border-[var(--accent)]/20 flex flex-col gap-2">
+                        <p className="text-[var(--accent)] font-medium leading-relaxed" dir="ltr">{contactData.workingHours || buildWorkingHours(whForm).en}</p>
+                        <p className="text-[var(--accent)] font-bold leading-relaxed" dir="rtl">{contactData.workingHoursAr || buildWorkingHours(whForm).ar}</p>
                       </div>
                     </div>
                   </div>
@@ -1420,7 +1426,7 @@ const Dashboard: React.FC = () => {
 
                 <div className="flex flex-col gap-6">
                   <div className="dash-card" style={{ padding: 24 }}>
-                    <h3 className="font-bold mb-4 text-blue-900">{lang === 'ar' ? 'التواصل الاجتماعي' : 'Social Media'}</h3>
+                    <h3 className="font-bold mb-4 text-[var(--text)]">{lang === 'ar' ? 'التواصل الاجتماعي' : 'Social Media'}</h3>
                     <div className="space-y-4">
                       <div><label className="dash-label">Facebook</label><input className="dash-input" value={contactData?.facebook || ''} onChange={e => setContactData((p: any) => ({ ...p, facebook: e.target.value }))} /></div>
                       <div><label className="dash-label">Twitter / X</label><input className="dash-input" value={contactData?.twitter || ''} onChange={e => setContactData((p: any) => ({ ...p, twitter: e.target.value }))} /></div>
@@ -1430,7 +1436,7 @@ const Dashboard: React.FC = () => {
                   </div>
 
                   <div className="dash-card" style={{ padding: 24 }}>
-                    <h3 className="font-bold mb-4 text-blue-900">{lang === 'ar' ? 'نصوص الفوتر' : 'Footer Texts'}</h3>
+                    <h3 className="font-bold mb-4 text-[var(--text)]">{lang === 'ar' ? 'نصوص الفوتر' : 'Footer Texts'}</h3>
                     <div className="space-y-4">
                       <div><label className="dash-label">Footer Description (EN)</label><textarea className="dash-input dash-ta" value={contactData?.footerDesc || ''} onChange={e => setContactData((p: any) => ({ ...p, footerDesc: e.target.value }))} /></div>
                       <div><label className="dash-label">وصف الفوتر (عربي)</label><textarea className="dash-input dash-ta" dir="rtl" value={contactData?.footerDescAr || ''} onChange={e => setContactData((p: any) => ({ ...p, footerDescAr: e.target.value }))} /></div>
