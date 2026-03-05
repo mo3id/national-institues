@@ -2,9 +2,10 @@ import React, { useMemo } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
-import { Calendar, ArrowRight, Share2, ArrowLeft } from 'lucide-react';
+import { Calendar, ArrowRight, Share2, ArrowLeft, CloudCog } from 'lucide-react';
 import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
+import { Console } from 'console';
 
 const NewsDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -20,6 +21,7 @@ const NewsDetail: React.FC = () => {
     const title = lang === 'ar' ? newsItem.titleAr : newsItem.title;
     const summary = lang === 'ar' ? newsItem.summaryAr : newsItem.summary;
 
+    console.log(newsItem);
     return (
         <PageTransition>
             <div className="bg-slate-50 min-h-screen pb-24">
@@ -41,16 +43,15 @@ const NewsDetail: React.FC = () => {
                         <ScrollReveal>
                             <Link
                                 to="/news"
-                                className={`inline-flex items-center gap-2 text-white/80 hover:text-white mb-8 tracking-wide text-sm font-bold bg-white/10 px-5 py-2.5 rounded-full backdrop-blur-md transition-all hover:bg-white/20 shadow-lg ${isRTL ? 'flex-row-reverse' : ''}`}
+                                className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-8 tracking-wide text-sm font-bold bg-white/10 px-5 py-2.5 rounded-full backdrop-blur-md transition-all hover:bg-white/20 shadow-lg"
                             >
                                 {isRTL ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
                                 <span>{lang === 'ar' ? 'العودة للأخبار' : 'Back to News'}</span>
                             </Link>
                         </ScrollReveal>
 
-                        {/* Title */}
                         <ScrollReveal>
-                            <h1 className={`text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-8 text-white drop-shadow-xl max-w-4xl ${isRTL ? 'text-right' : 'text-left'}`}>
+                            <h1 className={`text-4xl md:text-5xl lg:text-6xl font-black leading-[1.4] md:leading-[1.5] mb-8 text-white drop-shadow-xl max-w-4xl ${isRTL ? 'text-right' : 'text-left'}`}>
                                 {title}
                             </h1>
                         </ScrollReveal>
@@ -83,7 +84,7 @@ const NewsDetail: React.FC = () => {
 
                         <div className="p-8 md:p-14">
                             {/* Action bar */}
-                            <div className={`flex items-center mb-10 pb-6 border-b border-gray-100 ${isRTL ? 'flex-row-reverse justify-end' : 'justify-start'}`}>
+                            <div className="flex items-center mb-10 pb-6 border-b border-gray-100 justify-start">
                                 <button className="p-3 bg-slate-50 text-slate-600 rounded-full hover:bg-blue-50 hover:text-blue-600 transition-colors shadow-sm group">
                                     <Share2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
                                 </button>
@@ -153,7 +154,7 @@ const NewsDetail: React.FC = () => {
                             <div className="mt-16 pt-10 border-t border-gray-100 flex justify-center">
                                 <Link
                                     to="/news"
-                                    className={`inline-flex items-center gap-2 bg-[#1e3a8a] text-white px-8 py-4 rounded-full font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-900/20 hover:-translate-y-1 ${isRTL ? 'flex-row-reverse' : ''}`}
+                                    className="inline-flex items-center gap-2 bg-[#1e3a8a] text-white px-8 py-4 rounded-full font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-900/20 hover:-translate-y-1"
                                 >
                                     <span>{lang === 'ar' ? 'تصفح المزيد من الأخبار' : 'Read More Articles'}</span>
                                     {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}

@@ -70,10 +70,10 @@ const News: React.FC = () => {
                   <p className={`text-slate-500 mb-12 leading-relaxed text-lg ${isRTL ? 'text-right' : 'text-left'}`}>
                     {lang === 'ar' ? featured.summaryAr : featured.summary}
                   </p>
-                  <div className={`flex items-center ${isRTL ? 'justify-end' : 'justify-start'}`}>
-                    <span className={`inline-flex items-center px-10 py-[18px] bg-slate-50 text-[#1e3a8a] rounded-2xl text-base font-bold transition-all duration-300 group-hover:bg-[#1e3a8a] group-hover:text-white group-hover:shadow-xl group-hover:shadow-blue-900/20 group-hover:-translate-y-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <div className="flex items-center justify-start">
+                    <span className="inline-flex items-center gap-3 px-10 py-[18px] bg-slate-50 text-[#1e3a8a] rounded-2xl text-base font-bold transition-all duration-300 group-hover:bg-[#1e3a8a] group-hover:text-white group-hover:shadow-xl group-hover:shadow-blue-900/20 group-hover:-translate-y-1">
                       <span>{t.news.readMore}</span>
-                      <ArrowRight className={`h-5 w-5 transition-transform ${isRTL ? 'rotate-180 mr-3 group-hover:-translate-x-2' : 'ml-3 group-hover:translate-x-2'}`} />
+                      <ArrowRight className={`h-5 w-5 transition-transform ${isRTL ? 'rotate-180 group-hover:-translate-x-2' : 'group-hover:translate-x-2'}`} />
                     </span>
                   </div>
                 </div>
