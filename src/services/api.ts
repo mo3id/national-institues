@@ -21,8 +21,8 @@ export const apiClient = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    // Timeout set to 15s to accommodate slow cPanel shared hosting (~7s avg response)
-    timeout: 15000,
+    // Timeout set to 30s to accommodate slow cPanel shared hosting
+    timeout: 30000,
 });
 
 // Axios interceptor to append /api.php correctly without redundant slashes
