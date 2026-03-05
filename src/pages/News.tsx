@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
 import { Search, Calendar, ArrowRight } from 'lucide-react';
@@ -10,6 +10,16 @@ const News: React.FC = () => {
   const { t, lang, isRTL } = useLanguage();
   const { data: siteData } = useSiteData();
   const [query, setQuery] = useState('');
+  const [randomFeaturedId, setRandomFeaturedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const activeNews = (siteData.news || []).filter(n => n.published !== false);
+    const featuredItems = activeNews.filter(n => n.featured);
+    if (featuredItems.length > 0) {
+      const randomItem = featuredItems[Math.floor(Math.random() * featuredItems.length)];
+      setRandomFeaturedId(randomItem.id);
+    }
+  }, [siteData.news]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -20,11 +30,13 @@ const News: React.FC = () => {
 
   const featured = useMemo(() => {
     const featuredItems = filtered.filter(n => n.featured);
-    if (featuredItems.length > 0) {
-      return featuredItems[Math.floor(Math.random() * featuredItems.length)];
+    if (randomFeaturedId) {
+      const foundMatch = featuredItems.find(n => n.id === randomFeaturedId);
+      if (foundMatch) return foundMatch;
     }
-    return filtered[0];
-  }, [filtered]);
+    if (featuredItems.length > 0) return featuredItems[0];
+    return filtered.length > 0 ? filtered[0] : null;
+  }, [filtered, randomFeaturedId]);
 
   return (
     <PageTransition>
