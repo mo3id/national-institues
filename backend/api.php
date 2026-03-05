@@ -134,6 +134,11 @@ try {
             } catch (PDOException $e) {
                 // Ignore if columns already exist
             }
+            try {
+                $pdo->exec("ALTER TABLE news ADD COLUMN highlightTitle varchar(255), ADD COLUMN highlightTitleAr varchar(255), ADD COLUMN highlightContent longtext, ADD COLUMN highlightContentAr longtext");
+            } catch (PDOException $e) {
+                // Ignore if columns already exist
+            }
 
             // Fetch schools
             $stmt = $pdo->query("SELECT * FROM schools");
@@ -216,9 +221,9 @@ try {
                 }
             } elseif ($category === 'news') {
                 $pdo->exec("DELETE FROM news");
-                $stmt = $pdo->prepare("INSERT INTO news (id, title, titleAr, date, summary, summaryAr, content, contentAr, image, published, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt = $pdo->prepare("INSERT INTO news (id, title, titleAr, date, summary, summaryAr, content, contentAr, highlightTitle, highlightTitleAr, highlightContent, highlightContentAr, image, published, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 foreach ($newData as $n) {
-                    $stmt->execute([$n['id'], $n['title'], $n['titleAr'], $n['date'], $n['summary'], $n['summaryAr'], $n['content'] ?? '', $n['contentAr'] ?? '', $n['image'], $n['published'] ? 1 : 0, !empty($n['featured']) ? 1 : 0]);
+                    $stmt->execute([$n['id'], $n['title'], $n['titleAr'], $n['date'], $n['summary'], $n['summaryAr'], $n['content'] ?? '', $n['contentAr'] ?? '', $n['highlightTitle'] ?? '', $n['highlightTitleAr'] ?? '', $n['highlightContent'] ?? '', $n['highlightContentAr'] ?? '', $n['image'], $n['published'] ? 1 : 0, !empty($n['featured']) ? 1 : 0]);
                 }
             } elseif ($category === 'jobs') {
                 $pdo->exec("DELETE FROM jobs");

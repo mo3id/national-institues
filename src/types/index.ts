@@ -35,6 +35,10 @@ export interface NewsItem {
   image: string;
   published?: boolean;
   featured?: boolean;
+  highlightTitle?: string;
+  highlightTitleAr?: string;
+  highlightContent?: string;
+  highlightContentAr?: string;
 }
 
 export interface JobVacancy {

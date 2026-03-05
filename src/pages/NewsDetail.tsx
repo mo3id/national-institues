@@ -101,6 +101,7 @@ const NewsDetail: React.FC = () => {
                             {/* Body */}
                             <ScrollReveal delay={0.2}>
                                 <div className={`prose prose-lg max-w-none prose-headings:text-[#1e3a8a] prose-a:text-red-600 ${isRTL ? 'text-right' : 'text-left'} bg-blue-50/50 p-8 md:p-12 rounded-[24px] border border-blue-100/50 mt-10`}>
+                                    {/* Main Content paragraphs */}
                                     {lang === 'ar' ? (
                                         newsItem.contentAr ? (
                                             newsItem.contentAr.split('\n').map((paragraph, idx) => (
@@ -110,14 +111,6 @@ const NewsDetail: React.FC = () => {
                                             <>
                                                 <p className="text-[#334155] leading-loose whitespace-pre-line mb-6 font-medium text-lg">هذا النص التوضيحي يهدف إلى إعطاء نظرة أعمق وأشمل للأخبار المتعلقة بالمعاهد القومية. نحرص دائما على إبقاء الطلاب وأولياء الأمور والمعلمين وكل شركاء العملية التعليمية على اطلاع دائم بآخر التطورات والإنجازات التي تتم على مستوى جميع فروعنا.</p>
                                                 <p className="text-[#334155] leading-loose whitespace-pre-line mb-6 font-medium text-lg mt-4">نعمل بجد واجتهاد لتوفير بيئة تعليمية آمنة ومحفزة تساند وتتبنى أحدث الوسائل التكنولوجية إيمانا منّا بأن التعليم والمواكبة العصرية هما الأساس لبناء قادة المستقبل وصناع الأمل. وفي إطار حرصنا على تفعيل الأنشطة الصفية واللاصفية، يأتي هذا الخبر كاستكمال لمسيرة من النجاح الممتد على مدار العقود الماضية.</p>
-
-                                                <div className="my-12 relative">
-                                                    <div className="absolute inset-0 bg-white transform -skew-y-2 rounded-3xl shadow-sm"></div>
-                                                    <div className="relative p-8 md:p-12 text-center">
-                                                        <h3 className="text-3xl font-black text-blue-900 mb-4">آفاق مستقبلية واعدة</h3>
-                                                        <p className="text-[#475569] leading-relaxed text-lg">نخطط لمزيد من التوسعات والمبادرات الإيجابية في العام الدراسي المقبل وفق الرؤية الاستراتيجية التربوية، حيث نسعى جنباً إلى جنب مع كفاءاتنا التعليمية والإدارية لرسم مسار جديد يضع معايير الجودة العالمية في مقدمة أولوياتنا.</p>
-                                                    </div>
-                                                </div>
                                             </>
                                         )
                                     ) : (
@@ -129,16 +122,29 @@ const NewsDetail: React.FC = () => {
                                             <>
                                                 <p className="text-[#334155] leading-loose whitespace-pre-line mb-6 font-medium text-lg">This explanatory text aims to provide a deeper and more comprehensive insight into the news regarding the National Institutes. We consistently strive to keep our students, parents, faculty, and all educational partners fully informed about the latest developments and achievements across our campuses.</p>
                                                 <p className="text-[#334155] leading-loose whitespace-pre-line mb-6 font-medium text-lg mt-4">We work diligently to foster a safe and motivating learning environment that adopts the latest technological tools, believing firmly that contemporary education is the foundation for building future leaders and creators of hope. As part of our commitment to both curricular and extracurricular activities, this update continues a decades-long trajectory of success.</p>
-
-                                                <div className="my-12 relative">
-                                                    <div className="absolute inset-0 bg-white transform -skew-y-2 rounded-3xl shadow-sm"></div>
-                                                    <div className="relative p-8 md:p-12 text-center">
-                                                        <h3 className="text-3xl font-black text-blue-900 mb-4">Promising Future Horizons</h3>
-                                                        <p className="text-[#475569] leading-relaxed text-lg">We are planning further expansions and positive initiatives for the upcoming academic year in accordance with our strategic educational vision. Hand in hand with our skilled educational and administrative professionals, we are charting a new path where global quality standards remain our foremost priority.</p>
-                                                    </div>
-                                                </div>
                                             </>
                                         )
+                                    )}
+
+                                    {/* Highlight Section (Optional) */}
+                                    {lang === 'ar' && (newsItem.highlightTitleAr || newsItem.highlightContentAr) && (
+                                        <div className="my-12 relative">
+                                            <div className="absolute inset-0 bg-white transform -skew-y-2 rounded-3xl shadow-sm"></div>
+                                            <div className="relative p-8 md:p-12 text-center">
+                                                {newsItem.highlightTitleAr && <h3 className="text-3xl font-black text-blue-900 mb-4">{newsItem.highlightTitleAr}</h3>}
+                                                {newsItem.highlightContentAr && <p className="text-[#475569] leading-relaxed text-lg whitespace-pre-line">{newsItem.highlightContentAr}</p>}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {lang === 'en' && (newsItem.highlightTitle || newsItem.highlightContent) && (
+                                        <div className="my-12 relative">
+                                            <div className="absolute inset-0 bg-white transform -skew-y-2 rounded-3xl shadow-sm"></div>
+                                            <div className="relative p-8 md:p-12 text-center">
+                                                {newsItem.highlightTitle && <h3 className="text-3xl font-black text-blue-900 mb-4">{newsItem.highlightTitle}</h3>}
+                                                {newsItem.highlightContent && <p className="text-[#475569] leading-relaxed text-lg whitespace-pre-line">{newsItem.highlightContent}</p>}
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
                             </ScrollReveal>

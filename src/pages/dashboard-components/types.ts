@@ -14,6 +14,10 @@ export interface DashNewsItem {
     image: string;
     published: boolean;
     featured?: boolean;
+    highlightTitle?: string;
+    highlightTitleAr?: string;
+    highlightContent?: string;
+    highlightContentAr?: string;
 }
 
 export interface DashSchool {
@@ -124,6 +128,8 @@ export const UI: Record<Lang, Record<string, string>> = {
         published: 'Published', draft: 'Draft', search: 'Search...',
         titleEn: 'Title (EN)', titleAr: 'Title (AR)', summaryEn: 'Short Summary (EN)',
         summaryAr: 'Short Summary (AR)', contentEn: 'Full Content (EN)', contentAr: 'Full Content (AR)', date: 'Date', imageUrl: 'Image URL',
+        highlightTitleEn: 'Highlight Title (EN)', highlightTitleAr: 'Highlight Title (AR)',
+        highlightContentEn: 'Highlight Content (EN)', highlightContentAr: 'Highlight Content (AR)',
         publishNow: 'Publish immediately', chairmanName: 'Chairman Name',
         role: 'Role / Title', quote: 'Quote', description: 'Description',
         keyPoints: 'Key Points (comma separated)', slideTitle: 'Title',
@@ -231,6 +237,8 @@ export const UI: Record<Lang, Record<string, string>> = {
         published: 'منشور', draft: 'مسودة', search: 'بحث...',
         titleEn: 'العنوان (إنجليزي)', titleAr: 'العنوان (عربي)', summaryEn: 'الملخص المختصر (إنجليزي)',
         summaryAr: 'الملخص المختصر (عربي)', contentEn: 'تفاصيل الخبر (إنجليزي)', contentAr: 'تفاصيل الخبر (عربي)', date: 'التاريخ', imageUrl: 'رابط الصورة',
+        highlightTitleEn: 'عنوان القسم الإضافي (إنجليزي)', highlightTitleAr: 'عنوان القسم الإضافي (عربي)',
+        highlightContentEn: 'محتوى القسم الإضافي (إنجليزي)', highlightContentAr: 'محتوى القسم الإضافي (عربي)',
         publishNow: 'نشر فوراً', chairmanName: 'اسم الرئيس',
         role: 'الدور / اللقب', quote: 'الاقتباس', description: 'الوصف',
         keyPoints: 'النقاط الرئيسية (مفصولة بفاصلة)', slideTitle: 'العنوان',

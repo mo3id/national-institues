@@ -18,7 +18,13 @@ const News: React.FC = () => {
     return activeNews.filter(n => (n.title + (n.titleAr || '') + (n.summary || '') + (n.summaryAr || '')).toLowerCase().includes(q));
   }, [query, siteData.news]);
 
-  const featured = filtered.find(n => n.featured) || filtered[0];
+  const featured = useMemo(() => {
+    const featuredItems = filtered.filter(n => n.featured);
+    if (featuredItems.length > 0) {
+      return featuredItems[Math.floor(Math.random() * featuredItems.length)];
+    }
+    return filtered[0];
+  }, [filtered]);
 
   return (
     <PageTransition>

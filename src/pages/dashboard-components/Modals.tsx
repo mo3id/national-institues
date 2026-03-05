@@ -74,6 +74,28 @@ export const EditNewsForm: React.FC<EditNewsProps> = ({ article, lang, onSave, o
                 <label className="dash-label">{u.contentAr}</label>
                 <textarea className="dash-input dash-ta" style={{ minHeight: 180 }} placeholder="تفاصيل الخبر بالكامل..." dir="rtl" value={d.contentAr || ''} onChange={e => setD(p => ({ ...p, contentAr: e.target.value }))} />
             </div>
+
+            <div className="form-full mt-4 pt-4 border-t border-slate-200">
+                <h4 className="font-bold text-slate-800 mb-4">{lang === 'ar' ? 'القسم الإضافي (آفاق مستقبلية واعدة) - اختياري' : 'Highlight Section (Promising Future) - Optional'}</h4>
+                <div className="form-grid">
+                    <div className="form-col">
+                        <label className="dash-label">{u.highlightTitleEn}</label>
+                        <input className="dash-input" placeholder="Promising Future Horizons" value={d.highlightTitle || ''} onChange={e => setD(p => ({ ...p, highlightTitle: e.target.value }))} />
+                    </div>
+                    <div className="form-col">
+                        <label className="dash-label">{u.highlightTitleAr}</label>
+                        <input className="dash-input" dir="rtl" placeholder="آفاق مستقبلية واعدة" value={d.highlightTitleAr || ''} onChange={e => setD(p => ({ ...p, highlightTitleAr: e.target.value }))} />
+                    </div>
+                    <div className="form-col">
+                        <label className="dash-label">{u.highlightContentEn}</label>
+                        <textarea className="dash-input dash-ta" value={d.highlightContent || ''} onChange={e => setD(p => ({ ...p, highlightContent: e.target.value }))} />
+                    </div>
+                    <div className="form-col">
+                        <label className="dash-label">{u.highlightContentAr}</label>
+                        <textarea className="dash-input dash-ta" dir="rtl" value={d.highlightContentAr || ''} onChange={e => setD(p => ({ ...p, highlightContentAr: e.target.value }))} />
+                    </div>
+                </div>
+            </div>
             <div>
                 <label className="dash-label">{u.date}</label>
                 <div className={errors.date ? 'border border-red-500 rounded' : ''}>
