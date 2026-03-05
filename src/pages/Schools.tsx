@@ -10,7 +10,7 @@ import ScrollReveal from '@/components/common/ScrollReveal';
 import { CustomSelect } from '@/components/common/FormControls';
 
 const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, onView }: any) => (
-  <ScrollReveal>
+  <ScrollReveal heightFull={true}>
     <div className="bg-white rounded-[24px] border border-gray-100/60 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] overflow-hidden transition-all duration-300 group flex flex-col h-full relative p-2">
 
       {/* Background Cover Image with margin */}
@@ -53,11 +53,11 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
       {/* Card Body */}
       <div className="px-4 pb-4 pt-12 flex flex-col flex-grow">
         {/* Title & Subtitle */}
-        <div className="mb-5 text-start">
-          <h3 className="text-[22px] font-bold text-gray-900 mb-0.5 leading-tight tracking-tight">
+        <div className="mb-5 text-start min-h-[5rem]">
+          <h3 className="text-[22px] font-bold text-gray-900 mb-0.5 leading-tight tracking-tight line-clamp-2">
             {lang === 'ar' ? (school.nameAr || school.name) : school.name}
           </h3>
-          <p className="text-[14px] font-medium text-gray-500">
+          <p className="text-[14px] font-medium text-gray-500 line-clamp-1">
             {lang === 'ar' ? (school.governorateAr || school.governorate) : school.governorate} • {lang === 'ar' ? (school.locationAr || school.location) : school.location}
           </p>
         </div>
@@ -68,7 +68,7 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
             <div className="w-5 h-5 rounded-full bg-gray-900 flex items-center justify-center">
               <User className="w-3 h-3 text-white" />
             </div>
-            <span className="text-[13px] font-bold text-gray-700">{t.principal}: {(school.principal || '').split(' ')[0]}</span>
+            <span className="text-[13px] font-bold text-gray-700">{t.principal}: {lang === 'ar' ? (school.principalAr || school.principal) : school.principal}</span>
           </div>
           <div className="px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100 text-[13px] font-semibold text-gray-500">
             +6 {common.facilities}

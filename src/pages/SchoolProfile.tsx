@@ -119,6 +119,15 @@ const SchoolProfile: React.FC = () => {
                           <p className="font-semibold text-blue-600 hover:text-blue-800 transition-colors text-sm truncate max-w-[200px]">{school?.website || 'www.school-website.com'}</p>
                         </div>
                       </div>
+                      <div className="flex items-start gap-4 group">
+                        <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-[#1e3a8a] group-hover:text-white transition-all duration-300">
+                          <User className="w-5 h-5 text-[#1e3a8a] group-hover:text-white transition-colors" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{t.schools.principal || (lang === 'ar' ? 'المدير' : 'Principal')}</p>
+                          <p className="font-semibold text-slate-800 text-sm">{principalName}</p>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="mt-12 pt-8 border-t border-gray-100 flex justify-center">

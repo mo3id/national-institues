@@ -118,9 +118,9 @@ const Careers: React.FC = () => {
               </ScrollReveal>
 
               {(siteData.jobs || []).map((job, i) => (
-                <ScrollReveal key={job.id} delay={i * 0.1}>
+                <ScrollReveal key={job.id} delay={i * 0.1} heightFull={true}>
                   <div
-                    className={`bg-white p-8 rounded-3xl shadow-sm border-2 transition-all cursor-pointer text-start group ${selectedJob === job.id ? 'border-blue-600 shadow-xl' : 'border-transparent hover:border-blue-100 hover:shadow-lg'
+                    className={`bg-white p-8 rounded-3xl shadow-sm border-2 transition-all cursor-pointer text-start group h-full flex flex-col ${selectedJob === job.id ? 'border-blue-600 shadow-xl' : 'border-transparent hover:border-blue-100 hover:shadow-lg'
                       }`}
                     onClick={() => setSelectedJob(job.id)}
                   >

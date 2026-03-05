@@ -95,7 +95,7 @@ const News: React.FC = () => {
 
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {filtered.filter(i => i.id !== featured?.id).slice(0, 12).map((item, i) => (
-              <ScrollReveal key={item.id} delay={(i % 3) * 0.1} className="h-full">
+              <ScrollReveal key={item.id} delay={(i % 3) * 0.1} className="h-full" heightFull={true}>
                 <Link to={`/news/${item.id}`} className="block bg-white rounded-[24px] border border-gray-100/60 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 overflow-hidden transition-all duration-300 group flex flex-col h-full relative p-2">
 
                   {/* Image with container margin like SchoolCard */}
@@ -123,8 +123,8 @@ const News: React.FC = () => {
 
                   {/* Card Content */}
                   <div className="px-4 pb-4 pt-10 flex flex-col flex-grow">
-                    <div className={`mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-                      <h3 className="text-[20px] font-bold text-gray-900 mb-2 leading-tight tracking-tight line-clamp-2 min-h-14">
+                    <div className={`mb-4 ${isRTL ? 'text-right' : 'text-left'} min-h-[5.5rem]`}>
+                      <h3 className="text-[20px] font-bold text-gray-900 mb-2 leading-tight tracking-tight line-clamp-2">
                         {lang === 'ar' ? item.titleAr : item.title}
                       </h3>
                       <div className="flex items-center gap-2 text-[12px] font-medium text-gray-400">

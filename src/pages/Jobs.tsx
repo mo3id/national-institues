@@ -160,7 +160,7 @@ const Jobs: React.FC = () => {
                         {/* Jobs Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
                             {filteredJobs.map((job, i) => (
-                                <ScrollReveal key={job.id} direction="up" delay={i * 0.1}>
+                                <ScrollReveal key={job.id} direction="up" delay={i * 0.1} heightFull={true}>
                                     <div className="bg-white rounded-[24px] border border-gray-100/60 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] overflow-hidden transition-all duration-300 group flex flex-col h-full relative p-2">
 
                                         {/* Background Cover Image with margin */}
@@ -181,14 +181,14 @@ const Jobs: React.FC = () => {
                                         {/* Card Body */}
                                         <div className="px-4 pb-4 flex flex-col flex-grow">
                                             {/* Title */}
-                                            <div className="mb-5 text-start">
+                                            <div className="mb-5 text-start min-h-[3.5rem]">
                                                 <h3 className="text-[20px] font-bold text-gray-900 mb-1 leading-tight tracking-tight group-hover:text-[#1e3a8a] transition-colors line-clamp-2">
                                                     {lang === 'ar' ? job.titleAr : job.title}
                                                 </h3>
                                             </div>
 
                                             {/* Description */}
-                                            <p className="text-[14px] text-gray-500 mb-6 leading-relaxed line-clamp-3 flex-grow">
+                                            <p className="text-[14px] text-gray-500 mb-6 leading-relaxed line-clamp-3 flex-grow min-h-[4rem]">
                                                 {lang === 'ar' ? job.descriptionAr : job.description}
                                             </p>
 

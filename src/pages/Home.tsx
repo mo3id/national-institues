@@ -257,7 +257,7 @@ const Home: React.FC = () => {
                           <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">
                             {lang === 'ar' ? 'تحديث' : 'Update'}
                           </span>
-                          <h3 className="text-lg font-bold text-gray-900 leading-snug transition-colors line-clamp-2">
+                          <h3 className="text-lg font-bold text-gray-900 leading-snug transition-colors line-clamp-2 min-h-[3rem]">
                             {lang === 'ar' ? item.titleAr : item.title}
                           </h3>
                           <span className="mt-auto inline-flex items-center w-fit px-5 py-2.5 bg-slate-50 text-slate-700 rounded-xl text-sm font-semibold transition-all duration-300 group-hover:bg-[#1e3a8a] group-hover:text-white">
