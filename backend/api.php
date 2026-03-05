@@ -46,42 +46,16 @@ header("Pragma: no-cache");
 // Cache is stored in: cache/site_data.json
 // TTL: 5 minutes. Busted immediately on any write action.
 // ═══════════════════════════════════════════════════════════════════════════
-define('CACHE_FILE', __DIR__ . '/cache/site_data.json');
-define('CACHE_TTL',  5 * 60); // 5 minutes in seconds
-
-function getCached(): ?string {
-    if (!file_exists(CACHE_FILE)) return null;
-    if ((time() - filemtime(CACHE_FILE)) > CACHE_TTL) return null;
-    $content = file_get_contents(CACHE_FILE);
-    return ($content !== false && strlen($content) > 10) ? $content : null;
-}
-
+// No file cache anymore — always query the DB directly in real time
 function bustCache(): void {
-    if (file_exists(CACHE_FILE)) {
-        @unlink(CACHE_FILE);
-    }
+    // No-op
 }
 
 function writeCache(string $json): void {
-    $dir = dirname(CACHE_FILE);
-    if (!is_dir($dir)) {
-        @mkdir($dir, 0755, true);
-    }
-    @file_put_contents(CACHE_FILE, $json, LOCK_EX);
+    // No-op
 }
 
-// ── Serve from cache immediately for read requests ─────────────────────────
 $action = $_GET['action'] ?? '';
-if ($action === 'get_site_data' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-    $cached = getCached();
-    if ($cached !== null) {
-        // Cache HIT — return instantly, skip DB entirely
-        header('X-Cache: HIT');
-        echo $cached;
-        exit();
-    }
-    header('X-Cache: MISS');
-}
 
 require_once 'db_config.php';
 
@@ -118,12 +92,7 @@ $action = $_GET['action'] ?? '';
 try {
     switch ($action) {
         case 'get_site_data':
-            // Automatic migration of old school types to new types
-            $pdo->exec("UPDATE schools SET type = 'Arabic' WHERE type = 'National'");
-            $pdo->exec("UPDATE schools SET type = 'Languages' WHERE type = 'Language'");
-            $pdo->exec("UPDATE schools SET type = 'American' WHERE type = 'International'");
-            
-            // Automatic migration: add content and featured columns to news
+            // Migration queries removed for performance. DB should now be the source of truth.
             try {
                 $pdo->exec("ALTER TABLE news ADD COLUMN content longtext, ADD COLUMN contentAr longtext");
             } catch (PDOException $e) {
@@ -136,6 +105,11 @@ try {
             }
             try {
                 $pdo->exec("ALTER TABLE news ADD COLUMN highlightTitle varchar(255), ADD COLUMN highlightTitleAr varchar(255), ADD COLUMN highlightContent longtext, ADD COLUMN highlightContentAr longtext");
+            } catch (PDOException $e) {
+                // Ignore if columns already exist
+            }
+            try {
+                $pdo->exec("ALTER TABLE schools ADD COLUMN about longtext, ADD COLUMN aboutAr longtext, ADD COLUMN phone varchar(255), ADD COLUMN email varchar(255), ADD COLUMN website varchar(255), ADD COLUMN rating varchar(50), ADD COLUMN studentCount varchar(50), ADD COLUMN foundedYear varchar(50)");
             } catch (PDOException $e) {
                 // Ignore if columns already exist
             }
@@ -189,7 +163,6 @@ try {
             ];
 
             $jsonOut = json_encode(["status" => "success", "data" => $response]);
-            writeCache($jsonOut); // Save to disk cache for instant future responses
             echo $jsonOut;
             break;
 
@@ -201,7 +174,7 @@ try {
 
             if ($category === 'schools') {
                 $pdo->exec("DELETE FROM schools");
-                $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, foundedYear) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 foreach ($newData as $s) {
                     $stmt->execute([
                         $s['id'] ?? '',
@@ -216,7 +189,15 @@ try {
                         $s['logo'] ?? '',
                         $s['type'] ?? '',
                         $s['mainImage'] ?? '',
-                        json_encode($s['gallery'] ?? [])
+                        json_encode($s['gallery'] ?? []),
+                        $s['about'] ?? '',
+                        $s['aboutAr'] ?? '',
+                        $s['phone'] ?? '',
+                        $s['email'] ?? '',
+                        $s['website'] ?? '',
+                        $s['rating'] ?? '',
+                        $s['studentCount'] ?? '',
+                        $s['foundedYear'] ?? ''
                     ]);
                 }
             } elseif ($category === 'news') {

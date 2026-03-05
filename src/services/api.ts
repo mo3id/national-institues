@@ -40,10 +40,9 @@ export const fetchSiteData = async (): Promise<SiteData> => {
         }
 
         return data.data;
-    } catch (error) {
-        console.warn('[API Warning]: Backend unreachable, falling back to local storage cache.');
-        const offlineCache = JSON.parse(localStorage.getItem('nis_offline_cache') || '{}');
-        return offlineCache as SiteData;
+    } catch (error: any) {
+        console.error('[API Error]: Failed to fetch site data:', error);
+        throw new Error(error.response?.data?.message || error.message || 'Failed to fetch site data from server.');
     }
 };
 
@@ -64,12 +63,10 @@ export const updateCategory = async (category: string, newData: any): Promise<Ap
         const { data } = await apiClient.post<ApiResponse>('?action=update_category', { category, newData });
         if (data.status !== 'success') throw new Error(data.message || `Failed to update ${category}`);
         return data;
-    } catch (err) {
-        console.warn(`[API Warning]: API update failed for ${category}, saving locally.`);
-        const offlineCache = JSON.parse(localStorage.getItem('nis_offline_cache') || '{}');
-        offlineCache[category] = newData;
-        localStorage.setItem('nis_offline_cache', JSON.stringify(offlineCache));
-        return { status: 'success' };
+    } catch (err: any) {
+        const errorMsg = err.response?.data?.message || err.message || `Failed to update ${category}`;
+        console.error(`[API Error]: API update failed for ${category}`, err.response?.data || err);
+        throw new Error(errorMsg);
     }
 };
 

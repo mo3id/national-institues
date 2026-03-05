@@ -7,9 +7,42 @@ import { getDashNewsSchema, getDashHeroSchema, getDashSchoolSchema, getDashJobSc
 import { useSiteData } from '@/context/DataContext';
 
 // helper to convert File to base64 string
+// helper to convert File to base64 string with automatic client-side compression
 const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            // Compress large images to avoid "Payload Too Large" PHP errors via base64
+            const MAX_WIDTH = 1200;
+            const MAX_HEIGHT = 1200;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+            } else {
+                if (height > MAX_HEIGHT) {
+                    width *= MAX_HEIGHT / height;
+                    height = MAX_HEIGHT;
+                }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+
+            // Output as WebP for smaller size and high quality
+            resolve(canvas.toDataURL('image/webp', 0.8));
+        };
+        img.onerror = err => reject(err);
+        img.src = e.target?.result as string;
+    };
     reader.onerror = err => reject(err);
     reader.readAsDataURL(file);
 });
@@ -288,15 +321,18 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.rating}</label>
-                <input className="dash-input" value={d.rating || ''} onChange={e => setD(p => ({ ...p, rating: e.target.value }))} placeholder="e.g. 4.9" />
+                <input className={`dash-input ${errors.rating ? 'border-red-500' : ''}`} value={d.rating || ''} onChange={e => { setD(p => ({ ...p, rating: e.target.value })); if (errors.rating) setErrors(p => ({ ...p, rating: '' })) }} type="number" step="0.1" min="0" max="5" placeholder="e.g. 4.9" />
+                {errors.rating && <span className="text-red-500 text-xs mt-1 block">{errors.rating}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.studentCount}</label>
-                <input className="dash-input" value={d.studentCount || ''} onChange={e => setD(p => ({ ...p, studentCount: e.target.value }))} placeholder="e.g. +2.5k" />
+                <input className={`dash-input ${errors.studentCount ? 'border-red-500' : ''}`} value={d.studentCount || ''} onChange={e => { setD(p => ({ ...p, studentCount: e.target.value })); if (errors.studentCount) setErrors(p => ({ ...p, studentCount: '' })) }} type="number" min="0" placeholder="e.g. 2500" />
+                {errors.studentCount && <span className="text-red-500 text-xs mt-1 block">{errors.studentCount}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.foundedYear}</label>
-                <input className="dash-input" value={d.foundedYear || ''} onChange={e => setD(p => ({ ...p, foundedYear: e.target.value }))} placeholder="e.g. 1995" />
+                <input className={`dash-input ${errors.foundedYear ? 'border-red-500' : ''}`} value={d.foundedYear || ''} onChange={e => { setD(p => ({ ...p, foundedYear: e.target.value })); if (errors.foundedYear) setErrors(p => ({ ...p, foundedYear: '' })) }} type="number" min="1900" max={new Date().getFullYear()} placeholder="e.g. 1995" />
+                {errors.foundedYear && <span className="text-red-500 text-xs mt-1 block">{errors.foundedYear}</span>}
             </div>
             <div className="form-full">
                 <div className={errors.mainImage ? 'border border-red-500 p-2 rounded' : ''}>
