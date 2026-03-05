@@ -33,6 +33,31 @@ const SchoolProfile: React.FC = () => {
     return shuffled.slice(0, 6);
   }, [rawGallery]);
 
+  // SEO: Update Meta Tags
+  React.useEffect(() => {
+    if (school) {
+      const pageTitle = `${name} | ${gov} | NIS`;
+      const pageDesc = `${name} - ${gov}, ${loc}. ${t.schools.principal}: ${principalName}`;
+
+      document.title = pageTitle;
+
+      // Update meta description
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.setAttribute('content', pageDesc);
+      } else {
+        metaDesc = document.createElement('meta');
+        metaDesc.setAttribute('name', 'description');
+        metaDesc.setAttribute('content', pageDesc);
+        document.head.appendChild(metaDesc);
+      }
+
+      return () => {
+        document.title = "National Institutes Schools Portal";
+      };
+    }
+  }, [school, name, gov, loc, principalName, t.schools.principal]);
+
   if (!school) return (
     <div className="min-h-[60vh] flex items-center justify-center">
       <p className="text-gray-600 font-bold uppercase tracking-widest">School not found</p>

@@ -146,6 +146,14 @@ const Schools: React.FC = () => {
     setSelectedType('');
   }, []);
 
+  // SEO: Update Title
+  React.useEffect(() => {
+    document.title = lang === 'ar' ? 'شبكة المدارس | المعاهد القومية' : 'Schools Network | National Institutes';
+    return () => {
+      document.title = "National Institutes Schools Portal";
+    };
+  }, [lang]);
+
   return (
     <PageTransition>
       <div className="min-h-screen bg-gray-50 pb-24">

@@ -1,5 +1,4 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, Image as ImageIcon, Video, Search, BrainCircuit, Mic, Wand2, FileSearch, Loader2 } from 'lucide-react';
 import { geminiService } from '../services/geminiService';
 import { AspectRatio, ImageSize } from '@/types';
@@ -49,7 +48,6 @@ const AIStudio: React.FC = () => {
           response = await geminiService.generatePremiumImage(prompt, aspectRatio, imageSize);
           break;
         case 'video':
-          // Need to handle video generation process
           response = await geminiService.generateVideoFromImage(base64Data, prompt, aspectRatio.includes('9:16') ? '9:16' : '16:9');
           break;
         case 'search':
@@ -99,6 +97,14 @@ const AIStudio: React.FC = () => {
     }
   };
 
+  // SEO: Update Title
+  useEffect(() => {
+    document.title = "AI Studio | NIS Artificial Intelligence";
+    return () => {
+      document.title = "National Institutes Schools Portal";
+    };
+  }, []);
+
   return (
     <PageTransition>
       <div className="max-w-7xl mx-auto px-4 py-12">
@@ -138,8 +144,8 @@ const AIStudio: React.FC = () => {
                     setPrompt('');
                   }}
                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTool === tool.id
-                      ? `bg-${tool.color}-600 text-white shadow-lg scale-[1.02]`
-                      : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-100 shadow-sm'
+                    ? `bg-${tool.color}-600 text-white shadow-lg scale-[1.02]`
+                    : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-100 shadow-sm'
                     }`}
                 >
                   <tool.icon className={`h-5 w-5 ${activeTool === tool.id ? 'text-white' : `text-${tool.color}-600`}`} />

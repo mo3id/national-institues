@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
 import PageTransition from '@/components/common/PageTransition';
@@ -38,6 +38,14 @@ const ContactUs: React.FC = () => {
             desc: lang === 'ar' ? siteData.contactData?.workingHoursAr || 'الأحد - الخميس: ٨ صباحاً - ٤ عصراً' : siteData.contactData?.workingHours || 'Sun - Thu: 8:00 AM - 4:00 PM'
         }
     ];
+
+    // SEO: Update Title
+    useEffect(() => {
+        document.title = lang === 'ar' ? 'اتصل بنا | تواصل معنا' : 'Contact Us | Get in Touch';
+        return () => {
+            document.title = "National Institutes Schools Portal";
+        };
+    }, [lang]);
 
     return (
         <PageTransition>

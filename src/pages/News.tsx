@@ -97,7 +97,6 @@ const News: React.FC = () => {
             {filtered.filter(i => i.id !== featured?.id).slice(0, 12).map((item, i) => (
               <ScrollReveal key={item.id} delay={(i % 3) * 0.1} className="h-full" heightFull={true}>
                 <Link to={`/news/${item.id}`} className="block bg-white rounded-[24px] border border-gray-100/60 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 overflow-hidden transition-all duration-300 group flex flex-col h-full relative p-2">
-
                   {/* Image with container margin like SchoolCard */}
                   <div className="relative h-48 w-full rounded-[20px] overflow-hidden bg-gray-50">
                     <img
@@ -151,6 +150,22 @@ const News: React.FC = () => {
               </ScrollReveal>
             ))}
           </section>
+
+          {filtered.length === 0 && (
+            <div className="text-center py-24 bg-white rounded-[32px] border border-dashed border-slate-200">
+              <div className="bg-slate-50 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <Search className="h-10 w-10 text-slate-300" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                {lang === 'ar' ? 'لا يوجد أخبار' : 'No news found'}
+              </h3>
+              <p className="text-lg text-slate-400 max-w-md mx-auto">
+                {lang === 'ar'
+                  ? 'عذراً، لم نجد أي أخبار تطابق بحثك حالياً.'
+                  : 'Sorry, we couldn\'t find any news articles matching your search.'}
+              </p>
+            </div>
+          )}
         </main>
       </div>
     </PageTransition>

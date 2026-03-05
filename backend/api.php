@@ -266,6 +266,16 @@ try {
              // ── Sanitize text fields (cvData is base64 — do NOT htmlspecialchars it)
              $input = sanitizeArray($input, ['fullName', 'email', 'phone', 'job', 'experience', 'coverLetter', 'cvName']);
 
+             // SERVER-SIDE SECURITY CHECK: Validate file extension
+             $fileName = $input['cvName'] ?? '';
+             $allowedExtensions = ['pdf', 'doc', 'docx'];
+             if (!empty($fileName)) {
+                 $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                 if (!in_array($ext, $allowedExtensions, true)) {
+                     throw new Exception('Invalid file type. Only PDF, DOC, and DOCX are allowed.');
+                 }
+             }
+
              $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'jobApplications'");
              $row = $stmt->fetch();
              $applications = $row ? json_decode($row['setting_value'], true) : [];

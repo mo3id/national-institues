@@ -31,6 +31,32 @@ const NewsDetail: React.FC = () => {
         }
     };
 
+    // Update Meta Tags for SEO
+    React.useEffect(() => {
+        if (newsItem) {
+            const pageTitle = `${title} | NIS`;
+            const pageDesc = summary.substring(0, 160);
+
+            document.title = pageTitle;
+
+            // Update meta description
+            let metaDesc = document.querySelector('meta[name="description"]');
+            if (metaDesc) {
+                metaDesc.setAttribute('content', pageDesc);
+            } else {
+                metaDesc = document.createElement('meta');
+                metaDesc.setAttribute('name', 'description');
+                metaDesc.setAttribute('content', pageDesc);
+                document.head.appendChild(metaDesc);
+            }
+
+            // Clean up on unmount
+            return () => {
+                document.title = "National Institutes Schools Portal";
+            };
+        }
+    }, [newsItem, title, summary]);
+
     return (
         <PageTransition>
             <div className="bg-slate-50 min-h-screen pb-24 relative">

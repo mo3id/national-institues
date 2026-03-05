@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
 import { motion } from 'framer-motion';
@@ -36,6 +37,14 @@ const About: React.FC = () => {
     const valIcons = [Award, Lightbulb, ShieldCheck, Users];
     const valueColors = ["text-blue-600", "text-amber-500", "text-emerald-500", "text-purple-600"];
     const valueBg = ["bg-blue-50", "bg-amber-50", "bg-emerald-50", "bg-purple-50"];
+
+    // SEO: Update Title
+    useEffect(() => {
+        document.title = lang === 'ar' ? 'عن المعاهد القومية | رؤيتنا ورسالتنا' : 'About National Institutes | Our Vision & Mission';
+        return () => {
+            document.title = "National Institutes Schools Portal";
+        };
+    }, [lang]);
 
     return (
         <PageTransition>

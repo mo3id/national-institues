@@ -110,6 +110,14 @@ const Jobs: React.FC = () => {
         return (lang === 'ar' ? job.departmentAr : job.department) === filter;
     });
 
+    // SEO: Update Title
+    useEffect(() => {
+        document.title = lang === 'ar' ? 'فرص العمل والتوظيف | المعاهد القومية' : 'Careers & Job Openings | National Institutes';
+        return () => {
+            document.title = "National Institutes Schools Portal";
+        };
+    }, [lang]);
+
     return (
         <PageTransition>
             <div className="min-h-screen bg-[#fafcff]">
