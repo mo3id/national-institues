@@ -7,7 +7,7 @@ import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
 const NewsDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const { lang, isRTL } = useLanguage();
+    const { lang, isRTL, t: translationsRoot } = useLanguage();
     const { data: siteData } = useSiteData();
 
     const newsItem = useMemo(() => (siteData.news || []).find(n => n.id === id), [id, siteData.news]);
@@ -155,10 +155,9 @@ const NewsDetail: React.FC = () => {
                                                 paragraph.trim() ? <p key={idx} className="text-[#334155] leading-loose whitespace-pre-line mb-6 font-medium text-lg">{paragraph}</p> : null
                                             ))
                                         ) : (
-                                            <>
-                                                <p className="text-[#334155] leading-loose whitespace-pre-line mb-6 font-medium text-lg">هذا النص التوضيحي يهدف إلى إعطاء نظرة أعمق وأشمل للأخبار المتعلقة بالمعاهد القومية. نحرص دائما على إبقاء الطلاب وأولياء الأمور والمعلمين وكل شركاء العملية التعليمية على اطلاع دائم بآخر التطورات والإنجازات التي تتم على مستوى جميع فروعنا.</p>
-                                                <p className="text-[#334155] leading-loose whitespace-pre-line mb-6 font-medium text-lg mt-4">نعمل بجد واجتهاد لتوفير بيئة تعليمية آمنة ومحفزة تساند وتتبنى أحدث الوسائل التكنولوجية إيمانا منّا بأن التعليم والمواكبة العصرية هما الأساس لبناء قادة المستقبل وصناع الأمل. وفي إطار حرصنا على تفعيل الأنشطة الصفية واللاصفية، يأتي هذا الخبر كاستكمال لمسيرة من النجاح الممتد على مدار العقود الماضية.</p>
-                                            </>
+                                            <p className="text-[#334155] leading-loose whitespace-pre-line mb-6 font-medium text-lg italic opacity-70">
+                                                {translationsRoot.common.notAvailable}
+                                            </p>
                                         )
                                     ) : (
                                         newsItem.content ? (
@@ -166,10 +165,9 @@ const NewsDetail: React.FC = () => {
                                                 paragraph.trim() ? <p key={idx} className="text-[#334155] leading-loose whitespace-pre-line mb-6 font-medium text-lg">{paragraph}</p> : null
                                             ))
                                         ) : (
-                                            <>
-                                                <p className="text-[#334155] leading-loose whitespace-pre-line mb-6 font-medium text-lg">This explanatory text aims to provide a deeper and more comprehensive insight into the news regarding the National Institutes. We consistently strive to keep our students, parents, faculty, and all educational partners fully informed about the latest developments and achievements across our campuses.</p>
-                                                <p className="text-[#334155] leading-loose whitespace-pre-line mb-6 font-medium text-lg mt-4">We work diligently to foster a safe and motivating learning environment that adopts the latest technological tools, believing firmly that contemporary education is the foundation for building future leaders and creators of hope. As part of our commitment to both curricular and extracurricular activities, this update continues a decades-long trajectory of success.</p>
-                                            </>
+                                            <p className="text-[#334155] leading-loose whitespace-pre-line mb-6 font-medium text-lg italic opacity-70">
+                                                {translationsRoot.common.notAvailable}
+                                            </p>
                                         )
                                     )}
 

@@ -4,14 +4,15 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
 
 const ChairmanVision: React.FC = () => {
-    const { isRTL, lang } = useLanguage();
+    const { isRTL, lang, t } = useLanguage();
     const { data: siteData } = useSiteData();
     const chairman = siteData.aboutData || {};
 
-    const name = lang === 'ar' ? chairman.nameAr : chairman.name;
-    const description = lang === 'ar' ? chairman.descAr : chairman.desc;
-    const quote = lang === 'ar' ? chairman.quoteAr : chairman.quote;
-    const role = lang === 'ar' ? chairman.roleAr : chairman.role;
+    const na = t.common.notAvailable;
+    const name = (lang === 'ar' ? chairman.nameAr : chairman.name) || na;
+    const description = (lang === 'ar' ? chairman.descAr : chairman.desc) || '';
+    const quote = (lang === 'ar' ? chairman.quoteAr : chairman.quote) || na;
+    const role = (lang === 'ar' ? chairman.roleAr : chairman.role) || na;
 
     const containerRef = useRef<HTMLElement>(null);
     const isInView = useInView(containerRef, { once: false, amount: 0.3 });

@@ -114,7 +114,7 @@ const SchoolProfile: React.FC = () => {
                         </div>
                         <div>
                           <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{lang === 'ar' ? 'العنوان' : 'Address'}</p>
-                          <p className="font-semibold text-slate-800 text-sm">{lang === 'ar' ? (school?.addressAr || school?.address || 'غير متوفر') : (school?.address || 'Not available')}</p>
+                          <p className="font-semibold text-slate-800 text-sm">{lang === 'ar' ? (school?.addressAr || school?.address || t.common.notAvailable) : (school?.address || t.common.notAvailable)}</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-4 group">
@@ -123,7 +123,7 @@ const SchoolProfile: React.FC = () => {
                         </div>
                         <div>
                           <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{lang === 'ar' ? 'الهاتف' : 'Phone'}</p>
-                          <p className="font-semibold text-slate-800 text-sm">{school?.phone || '02-12345678'}</p>
+                          <p className="font-semibold text-slate-800 text-sm">{school?.phone || t.common.notAvailable}</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-4 group">
@@ -132,7 +132,7 @@ const SchoolProfile: React.FC = () => {
                         </div>
                         <div>
                           <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{lang === 'ar' ? 'البريد الإلكتروني' : 'Email'}</p>
-                          <p className="font-semibold text-slate-800 text-sm">{school?.email || `info@school${(school as any)?.id || '1'}.edu.eg`}</p>
+                          <p className="font-semibold text-slate-800 text-sm">{school?.email || t.common.notAvailable}</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-4 group">
@@ -141,7 +141,7 @@ const SchoolProfile: React.FC = () => {
                         </div>
                         <div>
                           <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{lang === 'ar' ? 'الموقع الإلكتروني' : 'Website'}</p>
-                          <p className="font-semibold text-blue-600 hover:text-blue-800 transition-colors text-sm truncate max-w-[200px]">{school?.website || 'www.school-website.com'}</p>
+                          <p className="font-semibold text-blue-600 hover:text-blue-800 transition-colors text-sm truncate max-w-[200px]">{school?.website || t.common.notAvailable}</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-4 group">
@@ -174,8 +174,8 @@ const SchoolProfile: React.FC = () => {
                   <div className="prose prose-blue max-w-none">
                     <p className="text-slate-500 text-lg leading-relaxed whitespace-pre-line">
                       {lang === 'ar'
-                        ? (school?.aboutAr || 'هذه فقرة تجريبية لوصف المدرسة. تتميز المدرسة بتقديم تعليم عالي الجودة وتوفر بيئة تعليمية آمنة ومحفزة للطلاب. تضم المدرسة نخبة من المعلمين ذوي الخبرة والكفاءة العالية.\n\nتلتزم المدرسة بالتميز الأكاديمي والنمو الشخصي لكل طالب.')
-                        : (school?.about || 'At our institution, we believe in nurturing the holistic development of every child. Our school offers high-quality education in a safe and stimulating learning environment, facilitated by a team of world-class educators.\n\nWe are committed to academic excellence and personal growth, ensuring that our students are well-prepared for the challenges of the future.')}
+                        ? (school?.aboutAr || school?.about || t.common.notAvailable)
+                        : (school?.about || school?.aboutAr || t.common.notAvailable)}
                     </p>
                   </div>
                 </div>

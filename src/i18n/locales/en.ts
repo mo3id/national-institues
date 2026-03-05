@@ -245,7 +245,8 @@ export const en = {
         facilities: "Facilities",
         contactUs: "Contact Us",
         schoolsAvailable: "Schools Available",
-        ourNetwork: "Our Network"
+        ourNetwork: "Our Network",
+        notAvailable: "Not Available"
     },
     calendar: {
         months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],

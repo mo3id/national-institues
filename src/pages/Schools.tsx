@@ -69,10 +69,12 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
         <div className="flex items-center justify-between py-4 mb-5 mx-2">
           <div className="text-center flex-1">
             <div className="flex items-center justify-center gap-1 mb-0.5">
-              <span className="text-[15px] font-bold text-gray-900">{school.rating || '4.9'}</span>
-              <svg className="w-3.5 h-3.5 text-gray-900 fill-gray-900" viewBox="0 0 24 24">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
+              <span className="text-[15px] font-bold text-gray-900">{school.rating || common.notAvailable}</span>
+              {school.rating && (
+                <svg className="w-3.5 h-3.5 text-gray-900 fill-gray-900" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              )}
             </div>
             <span className="text-[12px] font-medium text-gray-400">{common.rating}</span>
           </div>
@@ -80,14 +82,16 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
           <div className="w-[1px] h-6 bg-gray-100"></div>
 
           <div className="text-center flex-1">
-            <div className="text-[15px] font-bold text-gray-900 mb-0.5">{school.studentCount || '+2.5k'}</div>
+            <div className="text-[15px] font-bold text-gray-900 mb-0.5">
+              {school.studentCount ? `+${school.studentCount}` : common.notAvailable}
+            </div>
             <span className="text-[12px] font-medium text-gray-400">{common.students || 'Students'}</span>
           </div>
 
           <div className="w-[1px] h-6 bg-gray-100"></div>
 
           <div className="text-center flex-1">
-            <div className="text-[15px] font-bold text-gray-900 mb-0.5">{school.foundedYear || '1995'}</div>
+            <div className="text-[15px] font-bold text-gray-900 mb-0.5">{school.foundedYear || common.notAvailable}</div>
             <span className="text-[12px] font-medium text-gray-400">{common.founded || 'Founded'}</span>
           </div>
         </div>

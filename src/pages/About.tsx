@@ -22,12 +22,12 @@ const About: React.FC = () => {
     const t = translationsRoot?.aboutPage || ({} as any);
 
     // Localized values
-    const storyTitle = lang === 'ar' ? d.storyTitleAr : d.storyTitle;
-    const storyDesc = lang === 'ar' ? d.storyDescAr : d.storyDesc;
-    const missionTitle = lang === 'ar' ? d.missionTitleAr : d.missionTitle;
-    const missionDesc = lang === 'ar' ? d.missionDescAr : d.missionDesc;
-    const visionTitle = lang === 'ar' ? d.visionTitleAr : d.visionTitle;
-    const visionDesc = lang === 'ar' ? d.visionDescAr : d.visionDesc;
+    const storyTitle = (lang === 'ar' ? d.storyTitleAr : d.storyTitle) || translationsRoot.common.notAvailable;
+    const storyDesc = (lang === 'ar' ? d.storyDescAr : d.storyDesc) || translationsRoot.common.notAvailable;
+    const missionTitle = (lang === 'ar' ? d.missionTitleAr : d.missionTitle) || translationsRoot.common.notAvailable;
+    const missionDesc = (lang === 'ar' ? d.missionDescAr : d.missionDesc) || translationsRoot.common.notAvailable;
+    const visionTitle = (lang === 'ar' ? d.visionTitleAr : d.visionTitle) || translationsRoot.common.notAvailable;
+    const visionDesc = (lang === 'ar' ? d.visionDescAr : d.visionDesc) || translationsRoot.common.notAvailable;
     const values = (d.values || []).map((v: any) => ({
         title: lang === 'ar' ? v.titleAr : v.title,
         desc: lang === 'ar' ? v.descAr : v.desc

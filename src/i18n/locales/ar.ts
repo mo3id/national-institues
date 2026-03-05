@@ -245,7 +245,8 @@ export const ar = {
         facilities: "مرافق",
         contactUs: "اتصل بنا",
         schoolsAvailable: "مدرسة متاحة",
-        ourNetwork: "شبكة المدارس"
+        ourNetwork: "شبكة المدارس",
+        notAvailable: "غير متوفر"
     },
     calendar: {
         months: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"],
