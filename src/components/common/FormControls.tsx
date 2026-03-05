@@ -54,7 +54,8 @@ export const CustomSelect: React.FC<SelectProps> = ({ value, onChange, options, 
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 12, scale: 0.95 }}
                         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                        className="absolute top-full left-0 right-0 z-[100] mt-2 bg-[var(--surface)] border border-[var(--border)] rounded-[1.5rem] shadow-2xl overflow-hidden max-h-60 overflow-y-auto p-2"
+                        className="absolute top-full left-0 right-0 z-[100] mt-2 bg-[var(--surface,#ffffff)] border border-[var(--border)] rounded-[1.5rem] shadow-2xl overflow-hidden max-h-60 overflow-y-auto p-2"
+                        style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
                     >
                         {options.map((opt) => (
                             <button
@@ -67,8 +68,7 @@ export const CustomSelect: React.FC<SelectProps> = ({ value, onChange, options, 
                                 className={`w-full px-5 py-3.5 text-sm font-bold rounded-xl transition-all flex items-center justify-between mb-1 last:mb-0
                   ${value === opt.value
                                         ? 'text-[var(--accent)] bg-[var(--accent)]/5'
-                                        : 'text-[var(--text)] hover:bg-[var(--surface2)]'} 
-                  ${isRTL ? 'text-right' : 'text-left'}`}
+                                        : 'text-[var(--text)] hover:bg-[var(--surface2)]'}`}
                             >
                                 <span>{opt.label}</span>
                                 {value === opt.value && <div className="h-1.5 w-1.5 bg-[var(--accent)] rounded-full shrink-0 shadow-[0_0_8px_var(--accent)]" />}
@@ -165,7 +165,7 @@ export const CustomDatePicker: React.FC<DatePickerProps> = ({ value, onChange, p
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className={`absolute z-[110] w-[280px] md:w-[320px] mt-2 bg-[var(--surface)] border border-[var(--border)] rounded-[2rem] shadow-2xl p-6 ${isRTL ? 'right-0 origin-top-right' : 'left-0 origin-top-left'}`}
+                        className={`absolute z-[110] w-[280px] md:w-[320px] mt-2 bg-[var(--surface,#ffffff)] border border-[var(--border)] rounded-[2rem] shadow-2xl p-6 ${isRTL ? 'right-0 origin-top-right' : 'left-0 origin-top-left'}`}
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between mb-6">
@@ -181,7 +181,7 @@ export const CustomDatePicker: React.FC<DatePickerProps> = ({ value, onChange, p
                         </div>
 
                         {/* Weekdays */}
-                        <div className={`grid grid-cols-7 gap-1 mb-2 ${isRTL ? 'direction-rtl' : ''}`}>
+                        <div className="grid grid-cols-7 gap-1 mb-2">
                             {ct?.days.map((d: string) => (
                                 <div key={d} className="text-[10px] font-black text-[var(--text2)] text-center uppercase py-2">
                                     {d}
@@ -190,7 +190,7 @@ export const CustomDatePicker: React.FC<DatePickerProps> = ({ value, onChange, p
                         </div>
 
                         {/* Days Grid */}
-                        <div className={`grid grid-cols-7 gap-1 ${isRTL ? 'direction-rtl' : ''}`}>
+                        <div className="grid grid-cols-7 gap-1">
                             {Array.from({ length: startDay }).map((_, i) => (
                                 <div key={`empty-${i}`} />
                             ))}
@@ -277,7 +277,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label
                     onClick={() => setMode('file')}
                     className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'file' ? 'bg-[var(--surface)] shadow-sm text-[var(--accent)]' : 'text-[var(--text2)]'}`}
                 >
-                    <Upload className="h-3 w-3 inline-block mr-2" />
+                    <Upload className="h-3 w-3 inline-block me-2" />
                     {isRTL ? 'رفع ملف' : 'Upload File'}
                 </button>
                 <button
@@ -285,7 +285,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label
                     onClick={() => setMode('url')}
                     className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'url' ? 'bg-[var(--surface)] shadow-sm text-[var(--accent)]' : 'text-[var(--text2)]'}`}
                 >
-                    <LinkIcon className="h-3 w-3 inline-block mr-2" />
+                    <LinkIcon className="h-3 w-3 inline-block me-2" />
                     {isRTL ? 'رابط مباشر' : 'Direct Link'}
                 </button>
             </div>

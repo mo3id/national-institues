@@ -99,10 +99,6 @@ const GalleryMosaic: React.FC = () => {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       loading="lazy"
                       decoding="async"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = `https://picsum.photos/seed/nis${rIdx}${iIdx}/600/400`;
-                      }}
                     />
                     <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors duration-300" />
                   </div>

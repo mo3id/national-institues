@@ -188,6 +188,10 @@ const CSS = `
   .dash-badge { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; transition: all 0.2s; }
   .badge-green { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
   .dash-root.dark .badge-green { background: rgba(16, 185, 129, 0.1); color: #34d399; }
+  .badge-blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
+  .badge-red { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+  .badge-orange { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+  .badge-purple { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.2); }
   .badge-gray { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
   
   .dash-modal-overlay { position: fixed; inset: 0; background: rgba(11, 15, 25, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -1031,7 +1035,15 @@ const Dashboard: React.FC = () => {
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, fontWeight: 600 }}>{app.jobTitle}</td>
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{new Date(app.appliedAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US')}</td>
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }} dir="ltr">{app.phone}</td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}><span style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--surface2)', fontSize: 11, fontWeight: 700 }}>{u[app.status?.toLowerCase() as keyof typeof u] || app.status || 'Pending'}</span></td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>
+                          <span className={`dash-badge ${app.status === 'Hired' ? 'badge-green' :
+                            app.status === 'Interview' ? 'badge-blue' :
+                              app.status === 'Rejected' ? 'badge-red' :
+                                app.status === 'On Hold' ? 'badge-orange' : 'badge-gray'
+                            }`}>
+                            {u[app.status?.toLowerCase() as keyof typeof u] || app.status || 'Pending'}
+                          </span>
+                        </td>
                       </tr>
                     ))}
                     {filteredApplications.length === 0 && <tr><td colSpan={5} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><Briefcase style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></td></tr>}
@@ -1112,7 +1124,7 @@ const Dashboard: React.FC = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {hero.map((s, i) => (
                   <div key={s.id} className="hero-card">
-                    {s.image && <div style={{ position: 'relative', height: 160, overflow: 'hidden' }}><img src={s.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => (e.currentTarget.style.display = 'none')} /><div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)' }} /><span style={{ position: 'absolute', bottom: 12, left: 16, right: 16, color: 'white', fontWeight: 800, fontSize: 18 }}>{s.title}</span></div>}
+                    {s.image && <div style={{ position: 'relative', height: 160, overflow: 'hidden' }}><img src={s.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /><div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)' }} /><span style={{ position: 'absolute', bottom: 12, left: 16, right: 16, color: 'white', fontWeight: 800, fontSize: 18 }}>{s.title}</span></div>}
                     <div style={{ padding: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: 14, flexShrink: 0 }}>{i + 1}</div>

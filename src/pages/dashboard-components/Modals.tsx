@@ -312,23 +312,28 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
             </div>
             <div className="form-full">
                 <label className="dash-label">{u.aboutSchool} (EN)</label>
-                <textarea className="dash-input dash-ta" value={d.about || ''} onChange={e => { setD(p => ({ ...p, about: e.target.value })); }} />
+                <textarea className={`dash-input dash-ta ${errors.about ? 'border-red-500' : ''}`} value={d.about || ''} onChange={e => { setD(p => ({ ...p, about: e.target.value })); if (errors.about) setErrors(p => ({ ...p, about: '' })) }} />
+                {errors.about && <span className="text-red-500 text-xs mt-1 block">{errors.about}</span>}
             </div>
             <div className="form-full">
                 <label className="dash-label">{u.aboutSchool} (AR)</label>
-                <textarea className="dash-input dash-ta" dir="rtl" value={d.aboutAr || ''} onChange={e => { setD(p => ({ ...p, aboutAr: e.target.value })); }} />
+                <textarea className={`dash-input dash-ta ${errors.aboutAr ? 'border-red-500' : ''}`} dir="rtl" value={d.aboutAr || ''} onChange={e => { setD(p => ({ ...p, aboutAr: e.target.value })); if (errors.aboutAr) setErrors(p => ({ ...p, aboutAr: '' })) }} />
+                {errors.aboutAr && <span className="text-red-500 text-xs mt-1 block">{errors.aboutAr}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.phone}</label>
-                <input className="dash-input" value={d.phone || ''} onChange={e => setD(p => ({ ...p, phone: e.target.value.replace(/[^0-9+]/g, '') }))} type="tel" />
+                <input className={`dash-input ${errors.phone ? 'border-red-500' : ''}`} value={d.phone || ''} onChange={e => { setD(p => ({ ...p, phone: e.target.value.replace(/[^0-9+]/g, '') })); if (errors.phone) setErrors(p => ({ ...p, phone: '' })) }} type="tel" />
+                {errors.phone && <span className="text-red-500 text-xs mt-1 block">{errors.phone}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.email}</label>
-                <input className="dash-input" value={d.email || ''} onChange={e => setD(p => ({ ...p, email: e.target.value }))} type="email" />
+                <input className={`dash-input ${errors.email ? 'border-red-500' : ''}`} value={d.email || ''} onChange={e => { setD(p => ({ ...p, email: e.target.value })); if (errors.email) setErrors(p => ({ ...p, email: '' })) }} type="email" />
+                {errors.email && <span className="text-red-500 text-xs mt-1 block">{errors.email}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.website}</label>
-                <input className="dash-input" value={d.website || ''} onChange={e => setD(p => ({ ...p, website: e.target.value }))} type="url" />
+                <input className={`dash-input ${errors.website ? 'border-red-500' : ''}`} value={d.website || ''} onChange={e => { setD(p => ({ ...p, website: e.target.value })); if (errors.website) setErrors(p => ({ ...p, website: '' })) }} type="url" />
+                {errors.website && <span className="text-red-500 text-xs mt-1 block">{errors.website}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.rating}</label>
@@ -352,7 +357,10 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
                 {errors.mainImage && <span className="text-red-500 text-xs mt-1 block">{errors.mainImage}</span>}
             </div>
             <div className="form-full">
-                <ImageUpload label={u.logo} value={d.logo || ''} onChange={val => setD(p => ({ ...p, logo: val }))} />
+                <div className={errors.logo ? 'border border-red-500 p-2 rounded' : ''}>
+                    <ImageUpload label={u.logo} value={d.logo || ''} onChange={val => { setD(p => ({ ...p, logo: val })); if (errors.logo) setErrors(p => ({ ...p, logo: '' })) }} />
+                </div>
+                {errors.logo && <span className="text-red-500 text-xs mt-1 block">{errors.logo}</span>}
             </div>
             <div className="form-full" style={{ borderTop: '1px solid var(--border)', paddingTop: '20px', marginTop: '10px' }}>
                 <label className="dash-label" style={{ marginBottom: '15px', display: 'block' }}>{u.gallery} (Max 8)</label>
@@ -502,35 +510,7 @@ export const EditJobForm: React.FC<EditJobProps> = ({ job, lang, onSave, onCance
                 {errors.descriptionAr && <span className="text-red-500 text-xs mt-1 block">{errors.descriptionAr}</span>}
             </div>
             <div className="form-full">
-                <label className="dash-label">{u.jobImage}</label>
-                <label
-                    className={`flex flex-col items-center justify-center w-full h-32 border-2 ${d.image ? 'border-emerald-500 bg-emerald-500/10' : errors.image ? 'border-red-500 bg-red-500/10' : 'border-[var(--border)] border-dashed bg-[var(--surface2)] hover:bg-[var(--accent)]/5 hover:border-[var(--accent)]'} rounded-2xl cursor-pointer transition-all mt-1 relative overflow-hidden`}
-                    onDragOver={e => e.preventDefault()}
-                    onDrop={async e => {
-                        e.preventDefault();
-                        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                            const file = e.dataTransfer.files[0];
-                            const base = await toBase64(file);
-                            setD(p => ({ ...p, image: base }));
-                        }
-                    }}
-                >
-                    {d.image ? (
-                        <img src={d.image} alt="preview" className="max-h-full object-contain" />
-                    ) : (
-                        <div className="text-center text-sm text-[var(--text2)]">
-                            {u.uploadImage}<br />
-                            <span className="text-xs text-[var(--text2)] opacity-70">{u.dragDrop}</span>
-                        </div>
-                    )}
-                    <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={async e => {
-                        if (e.target.files?.[0]) {
-                            const file = e.target.files[0];
-                            const base = await toBase64(file);
-                            setD(p => ({ ...p, image: base }));
-                        }
-                    }} />
-                </label>
+                <ImageUpload label={u.jobImage || 'Job Image'} value={d.image || ''} onChange={val => setD(p => ({ ...p, image: val }))} />
                 {errors.image && <span className="text-red-500 text-xs mt-1 block">{errors.image}</span>}
             </div>
             <div className="form-full dash-form-actions">

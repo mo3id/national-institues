@@ -22,6 +22,24 @@ const NewsDetail: React.FC = () => {
     const [toastMsg, setToastMsg] = useState<string | null>(null);
 
     const handleShare = async () => {
+        const shareData = {
+            title: title + ' | NIS',
+            text: summary,
+            url: window.location.href
+        };
+
+        if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+            try {
+                await navigator.share(shareData);
+                return;
+            } catch (err) {
+                // If user cancelled, don't show error/fallback
+                if ((err as Error).name === 'AbortError') return;
+                console.error('Error sharing:', err);
+            }
+        }
+
+        // Fallback to clipboard
         try {
             await navigator.clipboard.writeText(window.location.href);
             setToastMsg(isRTL ? 'تم نسخ الرابط بنجاح' : 'Link copied to clipboard');
@@ -39,16 +57,33 @@ const NewsDetail: React.FC = () => {
 
             document.title = pageTitle;
 
-            // Update meta description
-            let metaDesc = document.querySelector('meta[name="description"]');
-            if (metaDesc) {
-                metaDesc.setAttribute('content', pageDesc);
-            } else {
-                metaDesc = document.createElement('meta');
-                metaDesc.setAttribute('name', 'description');
-                metaDesc.setAttribute('content', pageDesc);
-                document.head.appendChild(metaDesc);
-            }
+            // Helper to update or create meta tags
+            const updateMetaTag = (name: string, content: string, isProperty = false) => {
+                const attr = isProperty ? 'property' : 'name';
+                let element = document.querySelector(`meta[${attr}="${name}"]`);
+                if (!element) {
+                    element = document.createElement('meta');
+                    element.setAttribute(attr, name);
+                    document.head.appendChild(element);
+                }
+                element.setAttribute('content', content);
+            };
+
+            const pageImage = newsItem.image.startsWith('http') ? newsItem.image : window.location.origin + newsItem.image;
+            const pageUrl = window.location.href;
+
+            updateMetaTag('description', pageDesc);
+            updateMetaTag('og:title', pageTitle, true);
+            updateMetaTag('og:description', pageDesc, true);
+            updateMetaTag('og:image', pageImage, true);
+            updateMetaTag('og:url', pageUrl, true);
+            updateMetaTag('og:site_name', 'National Institutes Schools Portal', true);
+            updateMetaTag('og:locale', lang === 'ar' ? 'ar_EG' : 'en_US', true);
+            updateMetaTag('og:type', 'article', true);
+            updateMetaTag('twitter:card', 'summary_large_image');
+            updateMetaTag('twitter:title', pageTitle);
+            updateMetaTag('twitter:description', pageDesc);
+            updateMetaTag('twitter:image', pageImage);
 
             // Clean up on unmount
             return () => {
