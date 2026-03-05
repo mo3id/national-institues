@@ -40,7 +40,7 @@ export const CustomSelect: React.FC<SelectProps> = ({ value, onChange, options, 
           ${isOpen ? 'border-[var(--accent)] ring-4 ring-[var(--accent)]/5 shadow-md' : 'border-[var(--border)] shadow-sm hover:shadow-md'}
           ${isRTL ? 'text-right' : 'text-left'}`}
             >
-                <div className={`flex items-center gap-3 overflow-hidden ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className="flex items-center gap-3 overflow-hidden">
                     {icon && <span className={`${isOpen ? 'text-[var(--accent)]' : 'text-[var(--text2)]'} shrink-0 transition-colors`}>{icon}</span>}
                     <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
                 </div>
@@ -68,7 +68,7 @@ export const CustomSelect: React.FC<SelectProps> = ({ value, onChange, options, 
                   ${value === opt.value
                                         ? 'text-[var(--accent)] bg-[var(--accent)]/5'
                                         : 'text-[var(--text)] hover:bg-[var(--surface2)]'} 
-                  ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
+                  ${isRTL ? 'text-right' : 'text-left'}`}
                             >
                                 <span>{opt.label}</span>
                                 {value === opt.value && <div className="h-1.5 w-1.5 bg-[var(--accent)] rounded-full shrink-0 shadow-[0_0_8px_var(--accent)]" />}
@@ -152,7 +152,7 @@ export const CustomDatePicker: React.FC<DatePickerProps> = ({ value, onChange, p
           ${isOpen ? 'border-[var(--accent)] ring-4 ring-[var(--accent)]/5 shadow-md' : 'border-[var(--border)] shadow-sm hover:shadow-md'}
           ${isRTL ? 'text-right' : 'text-left'}`}
             >
-                <div className={`flex items-center gap-3 overflow-hidden ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className="flex items-center gap-3 overflow-hidden">
                     <CalendarIcon className={`h-4 w-4 transition-colors ${isOpen ? 'text-[var(--accent)]' : 'text-[var(--text2)]'} shrink-0`} />
                     <span className="truncate">{value || ct?.selectDate || placeholder}</span>
                 </div>
