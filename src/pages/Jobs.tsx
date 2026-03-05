@@ -4,6 +4,7 @@ import { useSiteData } from '@/context/DataContext';
 import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
 import { Briefcase, MapPin, Building2, Clock, ArrowRight, ArrowLeft, X, UploadCloud, CheckCircle2, Loader2 } from 'lucide-react';
+import { CustomSelect } from '@/components/common/FormControls';
 import { getJobApplicationSchema } from '@/utils/validations';
 import type { JobApplication } from '@/types';
 import { submitJobApplication } from '@/services/api';
@@ -311,12 +312,17 @@ const Jobs: React.FC = () => {
                                             </div>
                                             <div className="space-y-2 text-start">
                                                 <label className="text-sm font-bold text-slate-700">{t.experience}</label>
-                                                <select name="experience" value={formData.experience} onChange={handleChange} className={`w-full bg-slate-50 border ${errors.experience ? 'border-red-500' : 'border-slate-200'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] transition-all mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                                    <option value="">{t.selectExp}</option>
-                                                    <option value="0-2">{t.exp02}</option>
-                                                    <option value="3-5">{t.exp35}</option>
-                                                    <option value="5+">{t.exp5plus}</option>
-                                                </select>
+                                                <CustomSelect
+                                                    value={formData.experience}
+                                                    placeholder={t.selectExp}
+                                                    onChange={val => handleChange({ target: { name: 'experience', value: val } } as any)}
+                                                    options={[
+                                                        { value: "0-2", label: t.exp02 },
+                                                        { value: "3-5", label: t.exp35 },
+                                                        { value: "5+", label: t.exp5plus }
+                                                    ]}
+                                                    className={errors.experience ? 'border-red-500' : ''}
+                                                />
                                                 {errors.experience && <p className="text-red-500 text-xs font-bold mt-1">{errors.experience}</p>}
                                             </div>
                                         </div>

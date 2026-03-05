@@ -4,6 +4,7 @@ import { geminiService } from '../services/geminiService';
 import { AspectRatio, ImageSize } from '@/types';
 import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
+import { CustomSelect } from '@/components/common/FormControls';
 
 const AIStudio: React.FC = () => {
   const [activeTool, setActiveTool] = useState<'edit' | 'generate' | 'video' | 'search' | 'analyze' | 'think'>('think');
@@ -165,28 +166,30 @@ const AIStudio: React.FC = () => {
                     <div className="flex flex-wrap gap-4 p-4 bg-indigo-50 rounded-2xl animate-fade-in">
                       <div className="space-y-2">
                         <label className="text-xs font-bold text-indigo-700 uppercase">Aspect Ratio</label>
-                        <select
+                        <CustomSelect
                           value={aspectRatio}
-                          onChange={(e) => setAspectRatio(e.target.value as AspectRatio)}
-                          className="bg-white border border-indigo-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 font-bold"
-                        >
-                          <option value="1:1">1:1 (Square)</option>
-                          <option value="16:9">16:9 (Landscape)</option>
-                          <option value="9:16">9:16 (Portrait)</option>
-                          <option value="21:9">21:9 (Ultrawide)</option>
-                        </select>
+                          onChange={(val) => setAspectRatio(val as AspectRatio)}
+                          options={[
+                            { value: "1:1", label: "1:1 (Square)" },
+                            { value: "16:9", label: "16:9 (Landscape)" },
+                            { value: "9:16", label: "9:16 (Portrait)" },
+                            { value: "21:9", label: "21:9 (Ultrawide)" }
+                          ]}
+                          className="!py-2 !px-4"
+                        />
                       </div>
                       <div className="space-y-2">
                         <label className="text-xs font-bold text-indigo-700 uppercase">Quality</label>
-                        <select
+                        <CustomSelect
                           value={imageSize}
-                          onChange={(e) => setImageSize(e.target.value as ImageSize)}
-                          className="bg-white border border-indigo-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 font-bold"
-                        >
-                          <option value="1K">Standard (1K)</option>
-                          <option value="2K">High (2K)</option>
-                          <option value="4K">Ultra (4K)</option>
-                        </select>
+                          onChange={(val) => setImageSize(val as ImageSize)}
+                          options={[
+                            { value: "1K", label: "Standard (1K)" },
+                            { value: "2K", label: "High (2K)" },
+                            { value: "4K", label: "Ultra (4K)" }
+                          ]}
+                          className="!py-2 !px-4"
+                        />
                       </div>
                     </div>
                   )}

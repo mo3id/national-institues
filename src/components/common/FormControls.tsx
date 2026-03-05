@@ -36,23 +36,25 @@ export const CustomSelect: React.FC<SelectProps> = ({ value, onChange, options, 
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-full flex items-center justify-between px-5 py-4 bg-[var(--surface2)] border border-[var(--border)] rounded-2xl focus:ring-4 focus:ring-[var(--accent)]/10 focus:border-[var(--accent)] outline-none transition-all font-bold text-sm text-[var(--text)] shadow-sm hover:shadow-md ${isRTL ? 'text-right' : 'text-left'}`}
+                className={`w-full flex items-center justify-between px-6 py-4 bg-[var(--surface2)] border transition-all duration-300 rounded-2xl outline-none font-bold text-sm text-[var(--text)]
+          ${isOpen ? 'border-[var(--accent)] ring-4 ring-[var(--accent)]/5 shadow-md' : 'border-[var(--border)] shadow-sm hover:shadow-md'}
+          ${isRTL ? 'text-right' : 'text-left'}`}
             >
-                <div className="flex items-center gap-3 overflow-hidden">
-                    {icon && <span className="text-[var(--text2)] shrink-0">{icon}</span>}
+                <div className={`flex items-center gap-3 overflow-hidden ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    {icon && <span className={`${isOpen ? 'text-[var(--accent)]' : 'text-[var(--text2)]'} shrink-0 transition-colors`}>{icon}</span>}
                     <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
                 </div>
-                <ChevronDown className={`h-4 w-4 text-[var(--text2)] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`h-4 w-4 transition-all duration-300 ${isOpen ? 'rotate-180 text-[var(--accent)]' : 'text-[var(--text2)]'}`} />
             </button>
 
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 12, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute top-full left-0 right-0 z-[100] mt-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-lg overflow-hidden max-h-60 overflow-y-auto"
+                        exit={{ opacity: 0, y: 12, scale: 0.95 }}
+                        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                        className="absolute top-full left-0 right-0 z-[100] mt-2 bg-[var(--surface)] border border-[var(--border)] rounded-[1.5rem] shadow-2xl overflow-hidden max-h-60 overflow-y-auto p-2"
                     >
                         {options.map((opt) => (
                             <button
@@ -62,10 +64,14 @@ export const CustomSelect: React.FC<SelectProps> = ({ value, onChange, options, 
                                     onChange(opt.value);
                                     setIsOpen(false);
                                 }}
-                                className={`w-full px-4 py-3 text-sm font-medium hover:bg-[var(--accent)]/5 transition-colors flex items-center justify-between ${value === opt.value ? 'text-[var(--accent)] bg-[var(--accent)]/10' : 'text-[var(--text)]'} ${isRTL ? 'text-right' : 'text-left'}`}
+                                className={`w-full px-5 py-3.5 text-sm font-bold rounded-xl transition-all flex items-center justify-between mb-1 last:mb-0
+                  ${value === opt.value
+                                        ? 'text-[var(--accent)] bg-[var(--accent)]/5'
+                                        : 'text-[var(--text)] hover:bg-[var(--surface2)]'} 
+                  ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
                             >
                                 <span>{opt.label}</span>
-                                {value === opt.value && <div className="h-2 w-2 bg-[var(--accent)] rounded-full shrink-0" />}
+                                {value === opt.value && <div className="h-1.5 w-1.5 bg-[var(--accent)] rounded-full shrink-0 shadow-[0_0_8px_var(--accent)]" />}
                             </button>
                         ))}
                     </motion.div>
@@ -142,12 +148,15 @@ export const CustomDatePicker: React.FC<DatePickerProps> = ({ value, onChange, p
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-full flex items-center justify-between px-5 py-4 bg-[var(--surface2)] border border-[var(--border)] rounded-2xl focus:ring-4 focus:ring-[var(--accent)]/10 focus:border-[var(--accent)] outline-none transition-all font-bold text-sm text-[var(--text)] shadow-sm hover:shadow-md ${isRTL ? 'text-right' : 'text-left'}`}
+                className={`w-full flex items-center justify-between px-6 py-4 bg-[var(--surface2)] border transition-all duration-300 rounded-2xl outline-none font-bold text-sm text-[var(--text)]
+          ${isOpen ? 'border-[var(--accent)] ring-4 ring-[var(--accent)]/5 shadow-md' : 'border-[var(--border)] shadow-sm hover:shadow-md'}
+          ${isRTL ? 'text-right' : 'text-left'}`}
             >
-                <div className="flex items-center gap-3 overflow-hidden">
-                    <CalendarIcon className="h-4 w-4 text-[var(--text2)] shrink-0" />
+                <div className={`flex items-center gap-3 overflow-hidden ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <CalendarIcon className={`h-4 w-4 transition-colors ${isOpen ? 'text-[var(--accent)]' : 'text-[var(--text2)]'} shrink-0`} />
                     <span className="truncate">{value || ct?.selectDate || placeholder}</span>
                 </div>
+                <ChevronDown className={`h-4 w-4 transition-all duration-300 ${isOpen ? 'rotate-180 text-[var(--accent)]' : 'text-[var(--text2)]'}`} />
             </button>
 
             <AnimatePresence>

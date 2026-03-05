@@ -16,7 +16,7 @@ import { ModalWrap, EditNewsForm, EditHeroForm, EditSchoolForm, EditJobForm } fr
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import NISLogo from '@/components/common/NISLogo';
-import { CustomDatePicker, ImageUpload } from '@/components/common/FormControls';
+import { CustomSelect, CustomDatePicker, ImageUpload } from '@/components/common/FormControls';
 import { useSiteData } from '@/context/DataContext';
 
 // ─── Initial Data Helpers ─────────────────────────────────────────────────────────────
@@ -1056,11 +1056,14 @@ const Dashboard: React.FC = () => {
                     )}
                     <div>
                       <label className="dash-label">{u.status}</label>
-                      <select className="dash-input" value={selectedApplicant.status} onChange={e => setSelectedApplicant(a => a ? { ...a, status: e.target.value as any } : null)}>
-                        {['Pending', 'Interview', 'Rejected', 'Hired', 'On Hold'].map(st => (
-                          <option key={st} value={st}>{u[st.toLowerCase() as keyof typeof u] || st}</option>
-                        ))}
-                      </select>
+                      <CustomSelect
+                        value={selectedApplicant.status}
+                        onChange={val => setSelectedApplicant(a => a ? { ...a, status: val as any } : null)}
+                        options={['Pending', 'Interview', 'Rejected', 'Hired', 'On Hold'].map(st => ({
+                          value: st,
+                          label: u[st.toLowerCase() as keyof typeof u] || st
+                        }))}
+                      />
                     </div>
                     <div>
                       <label className="dash-label">{u.notes}</label>
@@ -1397,13 +1400,19 @@ const Dashboard: React.FC = () => {
                         <div>
                           <label className="text-[11px] font-bold text-[var(--text2)] uppercase tracking-widest mb-2 block">{lang === 'ar' ? 'من يوم - إلى يوم' : 'From - To Day'}</label>
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                            <select className="dash-input !py-2 text-center" value={whForm.startDay} onChange={e => setWhForm(p => ({ ...p, startDay: parseInt(e.target.value) }))}>
-                              {(lang === 'ar' ? DAYS_AR : DAYS_EN).map((d, i) => <option key={i} value={i}>{d}</option>)}
-                            </select>
+                            <CustomSelect
+                              className="!w-32"
+                              value={whForm.startDay.toString()}
+                              onChange={val => setWhForm(p => ({ ...p, startDay: parseInt(val) }))}
+                              options={(lang === 'ar' ? DAYS_AR : DAYS_EN).map((d, i) => ({ value: i.toString(), label: d }))}
+                            />
                             <span className="text-[var(--border)] font-medium hidden sm:block">-</span>
-                            <select className="dash-input !py-2 text-center" value={whForm.endDay} onChange={e => setWhForm(p => ({ ...p, endDay: parseInt(e.target.value) }))}>
-                              {(lang === 'ar' ? DAYS_AR : DAYS_EN).map((d, i) => <option key={i} value={i}>{d}</option>)}
-                            </select>
+                            <CustomSelect
+                              className="!w-32"
+                              value={whForm.endDay.toString()}
+                              onChange={val => setWhForm(p => ({ ...p, endDay: parseInt(val) }))}
+                              options={(lang === 'ar' ? DAYS_AR : DAYS_EN).map((d, i) => ({ value: i.toString(), label: d }))}
+                            />
                           </div>
                         </div>
                         <div>
@@ -1470,20 +1479,15 @@ const Dashboard: React.FC = () => {
                       />
                     </div>
                     <div style={{ width: 1, height: 20, background: 'var(--border)', margin: '0 8px' }}></div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, position: 'relative' }}>
-                      <Filter style={{ width: 14, height: 14, color: 'var(--text2)' }} />
-                      <select
-                        style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 13, color: 'var(--text)', cursor: 'pointer', WebkitAppearance: 'none', width: 130, paddingRight: isRTL ? 0 : 20, paddingLeft: isRTL ? 20 : 0, fontWeight: 500 }}
-                        value={complaintsFilterType}
-                        onChange={e => setComplaintsFilterType(e.target.value)}
-                      >
-                        <option value="All">{lang === 'ar' ? 'جميع الأنواع' : 'All Types'}</option>
-                        {(translationsRoot?.complaints?.types || []).map((type: string) => (
-                          <option key={type} value={type}>{type}</option>
-                        ))}
-                      </select>
-                      <ChevronDown style={{ width: 14, height: 14, color: 'var(--text2)', position: 'absolute', pointerEvents: 'none', right: isRTL ? 'auto' : 0, left: isRTL ? 0 : 'auto' }} />
-                    </div>
+                    <CustomSelect
+                      className="!w-40"
+                      value={complaintsFilterType}
+                      onChange={val => setComplaintsFilterType(val)}
+                      options={[
+                        { value: 'All', label: lang === 'ar' ? 'جميع الأنواع' : 'All Types' },
+                        ...(translationsRoot?.complaints?.types || []).map((type: string) => ({ value: type, label: type }))
+                      ]}
+                    />
                   </div>
                 </div>
               </div>
@@ -1698,11 +1702,14 @@ const Dashboard: React.FC = () => {
             <p>{selectedComplaint.message}</p>
             <div>
               <label className="dash-label">{u.status}</label>
-              <select className="dash-input" value={selectedComplaint.status || 'Pending'} onChange={e => setSelectedComplaint(c => c ? { ...c, status: e.target.value } : null)}>
-                {['Pending', 'In Progress', 'Responded'].map(st => (
-                  <option key={st} value={st}>{u[st.toLowerCase().replace(/ /g, '') as keyof typeof u] || st}</option>
-                ))}
-              </select>
+              <CustomSelect
+                value={selectedComplaint.status || 'Pending'}
+                onChange={val => setSelectedComplaint(c => c ? { ...c, status: val } : null)}
+                options={['Pending', 'In Progress', 'Responded'].map(st => ({
+                  value: st,
+                  label: u[st.toLowerCase().replace(/ /g, '') as keyof typeof u] || st
+                }))}
+              />
             </div>
             <div className="dash-form-actions">
               <button className="dash-btn dash-btn-primary" onClick={() => {

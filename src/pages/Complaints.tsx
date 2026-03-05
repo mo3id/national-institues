@@ -183,35 +183,28 @@ const Complaints: React.FC = () => {
                         <label className={`block font-bold text-slate-700 ${isRTL ? 'text-sm' : 'text-xs uppercase tracking-wider'}`}>
                           {t?.complaints?.messageType}
                         </label>
-                        <select
-                          name="messageType"
+                        <CustomSelect
                           value={formData.messageType}
-                          onChange={handleChange}
-                          className={`w-full bg-slate-50 border ${errors.messageType ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-[#1e3a8a]'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${isRTL ? 'text-right' : 'text-left'}`}
-                        >
-                          {messageTypes.map((type: string) => (
-                            <option key={type} value={type}>{type}</option>
-                          ))}
-                        </select>
+                          onChange={val => handleChange({ target: { name: 'messageType', value: val } } as any)}
+                          options={messageTypes.map((type: string) => ({ value: type, label: type }))}
+                          className={errors.messageType ? 'border-red-500 text-red-500' : ''}
+                        />
                         {errors.messageType && <p className="text-red-500 text-xs font-bold mt-1">{errors.messageType}</p>}
                       </div>
                       <div className="space-y-2">
                         <label className={`block font-bold text-slate-700 ${isRTL ? 'text-sm' : 'text-xs uppercase tracking-wider'}`}>
                           {t?.complaints?.school} <span className="text-red-500">*</span>
                         </label>
-                        <select
-                          name="school"
+                        <CustomSelect
                           value={formData.school}
-                          onChange={handleChange}
-                          className={`w-full bg-slate-50 border ${errors.school ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-[#1e3a8a]'} rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${isRTL ? 'text-right' : 'text-left'}`}
-                        >
-                          <option value="">{t?.complaints?.placeholders?.school}</option>
-                          {SCHOOLS.map(school => (
-                            <option key={school.id} value={school.name}>
-                              {lang === 'ar' ? school.nameAr : school.name}
-                            </option>
-                          ))}
-                        </select>
+                          placeholder={t?.complaints?.placeholders?.school}
+                          onChange={val => handleChange({ target: { name: 'school', value: val } } as any)}
+                          options={SCHOOLS.map(school => ({
+                            value: school.name,
+                            label: lang === 'ar' ? school.nameAr : school.name
+                          }))}
+                          className={errors.school ? 'border-red-500 text-red-500' : ''}
+                        />
                         {errors.school && <p className="text-red-500 text-xs font-bold mt-1">{errors.school}</p>}
                       </div>
                     </div>
