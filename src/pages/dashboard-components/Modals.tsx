@@ -72,6 +72,7 @@ export const EditNewsForm: React.FC<EditNewsProps> = ({ article, lang, onSave, o
             e.preventDefault();
             const res = getDashNewsSchema().safeParse(d);
             if (!res.success) {
+                console.error("News validation failed:", res.error.issues); // <-- ADDED DEBUGGING
                 const errs: Record<string, string> = {};
                 res.error.issues.forEach(i => errs[i.path[0] as string] = i.message);
                 setErrors(errs);
