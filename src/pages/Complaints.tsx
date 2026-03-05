@@ -34,6 +34,7 @@ const Complaints: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
     const validationResult = getComplaintSchema(lang).safeParse(formData);
     if (!validationResult.success) {
@@ -238,7 +239,7 @@ const Complaints: React.FC = () => {
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className={`w-full md:w-auto bg-[#1e3a8a] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-900 hover:shadow-lg transition-all flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}
+                        className={`w-full md:w-auto bg-[#1e3a8a] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-900 hover:shadow-lg transition-all flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''} disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none`}
                       >
                         {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />}
                         <span>{isSubmitting ? (lang === 'ar' ? 'جاري الإرسال...' : 'Sending...') : t?.complaints?.submit}</span>

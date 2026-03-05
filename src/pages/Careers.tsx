@@ -32,6 +32,7 @@ const Careers: React.FC = () => {
 
   const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     const validationResult = getJobApplicationSchema(lang).safeParse({
       ...formData,
       job: selectedJob || '',
@@ -280,7 +281,7 @@ const Careers: React.FC = () => {
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full bg-[#1e3a8a] text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-blue-900/20 hover:bg-blue-800 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                        className="w-full bg-[#1e3a8a] text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-blue-900/20 hover:bg-blue-800 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none disabled:pointer-events-none"
                       >
                         {isSubmitting ? (
                           <>

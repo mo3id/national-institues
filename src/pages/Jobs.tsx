@@ -42,6 +42,7 @@ const Jobs: React.FC = () => {
 
     const handleApply = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSubmitting) return;
         const res = getJobApplicationSchema(lang).safeParse({ ...formData, file: selectedFile, job: selectedJob?.title || '' });
         if (!res.success) {
             const newErrs: Record<string, string> = {};
@@ -99,7 +100,10 @@ const Jobs: React.FC = () => {
         setFilter(t.allDepts);
     }, [lang, t.allDepts]);
 
-    const departments = [t.allDepts, ...Array.from(new Set(JOBS_DATA.map(job => lang === 'ar' ? job.departmentAr : job.department)))];
+    const departments = [
+        t.allDepts,
+        ...(siteData.jobDepartments || []).map(dep => lang === 'ar' ? dep.nameAr : dep.nameEn)
+    ];
 
     const filteredJobs = JOBS_DATA.filter(job => {
         if (filter === t.allDepts) return true;
@@ -351,7 +355,7 @@ const Jobs: React.FC = () => {
 
                                         <div className="pt-4 flex flex-col items-end gap-3 w-full">
                                             {submitError && <p className="text-red-500 font-bold">{submitError}</p>}
-                                            <button type="submit" disabled={isSubmitting} className={`w-full md:w-auto bg-[#1e3a8a] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-900 hover:shadow-lg transition-all flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''} disabled:opacity-70 disabled:cursor-not-allowed`}>
+                                            <button type="submit" disabled={isSubmitting} className={`w-full md:w-auto bg-[#1e3a8a] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-900 hover:shadow-lg transition-all flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''} disabled:opacity-70 disabled:cursor-not-allowed disabled:pointer-events-none`}>
                                                 {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>{t.submit}</span>}
                                                 {!isSubmitting && <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />}
                                             </button>

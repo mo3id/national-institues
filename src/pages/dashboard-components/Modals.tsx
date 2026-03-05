@@ -322,17 +322,17 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.rating}</label>
-                <input className={`dash-input ${errors.rating ? 'border-red-500' : ''}`} value={d.rating || ''} onChange={e => { setD(p => ({ ...p, rating: e.target.value })); if (errors.rating) setErrors(p => ({ ...p, rating: '' })) }} onKeyDown={e => { if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault() }} type="number" step="0.1" min="0" max="5" placeholder="e.g. 4.9" />
+                <input className={`dash-input ${errors.rating ? 'border-red-500' : ''}`} value={d.rating || ''} onChange={e => { setD(p => ({ ...p, rating: e.target.value })); if (errors.rating) setErrors(p => ({ ...p, rating: '' })) }} onKeyDown={e => { if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault() }} type="number" step="0.1" min="0" max="5" placeholder={lang === 'ar' ? 'مثال: ٤.٩' : 'e.g. 4.9'} />
                 {errors.rating && <span className="text-red-500 text-xs mt-1 block">{errors.rating}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.studentCount}</label>
-                <input className={`dash-input ${errors.studentCount ? 'border-red-500' : ''}`} value={d.studentCount || ''} onChange={e => { setD(p => ({ ...p, studentCount: e.target.value })); if (errors.studentCount) setErrors(p => ({ ...p, studentCount: '' })) }} onKeyDown={e => { if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault() }} type="number" min="0" placeholder="e.g. 2500" />
+                <input className={`dash-input ${errors.studentCount ? 'border-red-500' : ''}`} value={d.studentCount || ''} onChange={e => { setD(p => ({ ...p, studentCount: e.target.value })); if (errors.studentCount) setErrors(p => ({ ...p, studentCount: '' })) }} onKeyDown={e => { if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault() }} type="number" min="0" placeholder={lang === 'ar' ? 'مثال: ٢٥٠٠' : 'e.g. 2500'} />
                 {errors.studentCount && <span className="text-red-500 text-xs mt-1 block">{errors.studentCount}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.foundedYear}</label>
-                <input className={`dash-input ${errors.foundedYear ? 'border-red-500' : ''}`} value={d.foundedYear || ''} onChange={e => { setD(p => ({ ...p, foundedYear: e.target.value })); if (errors.foundedYear) setErrors(p => ({ ...p, foundedYear: '' })) }} onKeyDown={e => { if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault() }} type="number" min="1900" max={new Date().getFullYear()} placeholder="e.g. 1995" />
+                <input className={`dash-input ${errors.foundedYear ? 'border-red-500' : ''}`} value={d.foundedYear || ''} onChange={e => { setD(p => ({ ...p, foundedYear: e.target.value })); if (errors.foundedYear) setErrors(p => ({ ...p, foundedYear: '' })) }} onKeyDown={e => { if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault() }} type="number" min="1900" max={new Date().getFullYear()} placeholder={lang === 'ar' ? 'مثال: ١٩٩٥' : 'e.g. 1995'} />
                 {errors.foundedYear && <span className="text-red-500 text-xs mt-1 block">{errors.foundedYear}</span>}
             </div>
             <div className="form-full">

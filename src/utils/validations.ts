@@ -69,7 +69,7 @@ export const getDashSchoolSchema = () => z.object({
     about: z.string().nullish(),
     aboutAr: z.string().nullish(),
     phone: z.string().nullish(),
-    email: z.string().nullish(),
+    email: z.string().email({ message: 'Invalid email' }).or(z.literal('')).nullish(),
     website: z.string().nullish(),
     rating: z.any().nullish(),
     studentCount: z.any().nullish(),
