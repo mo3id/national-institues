@@ -1387,7 +1387,7 @@ const Dashboard: React.FC = () => {
                     <div><label className="dash-label">{lang === 'ar' ? 'الهاتف' : 'Phone'}</label><input className="dash-input" value={contactData?.phone || ''} onChange={e => setContactData((p: any) => ({ ...p, phone: e.target.value }))} /></div>
                     <div><label className="dash-label">{lang === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label><input className="dash-input" value={contactData?.email || ''} onChange={e => setContactData((p: any) => ({ ...p, email: e.target.value }))} /></div>
                     <div className="pt-2 border-t border-slate-100">
-                      <label className="dash-label mb-3">{lang === 'ar' ? 'أيام وساعات العمل (تلقائي)' : 'Working Days & Hours (Dynamic)'}</label>
+                      <label className="dash-label mb-3">{lang === 'ar' ? 'أيام وساعات العمل' : 'Working Days & Hours'}</label>
                       <div className="flex flex-col gap-4 bg-slate-50 border border-slate-100 p-4 rounded-xl">
                         <div>
                           <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{lang === 'ar' ? 'من يوم - إلى يوم' : 'From - To Day'}</label>

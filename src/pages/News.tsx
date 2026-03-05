@@ -18,7 +18,7 @@ const News: React.FC = () => {
     return activeNews.filter(n => (n.title + (n.titleAr || '') + (n.summary || '') + (n.summaryAr || '')).toLowerCase().includes(q));
   }, [query, siteData.news]);
 
-  const featured = filtered[0];
+  const featured = filtered.find(n => n.featured) || filtered[0];
 
   return (
     <PageTransition>

@@ -38,8 +38,11 @@ export const getDashNewsSchema = () => z.object({
     titleAr: z.string().min(3, { message: 'Arabic title is too short' }),
     summary: z.string().min(5, { message: 'Summary is too short' }),
     summaryAr: z.string().min(5, { message: 'Arabic summary is too short' }),
+    content: z.string().optional(),
+    contentAr: z.string().optional(),
     date: z.string().min(1, { message: 'Date is required' }),
     image: z.string().min(1, { message: 'Image is required' }),
+    featured: z.boolean().optional(),
 });
 
 export const getDashHeroSchema = () => z.object({

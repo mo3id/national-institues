@@ -9,8 +9,11 @@ export interface DashNewsItem {
     date: string;
     summary: string;
     summaryAr: string;
+    content?: string;
+    contentAr?: string;
     image: string;
     published: boolean;
+    featured?: boolean;
 }
 
 export interface DashSchool {
@@ -119,8 +122,8 @@ export const UI: Record<Lang, Record<string, string>> = {
         logout: 'Logout', addArticle: 'Add Article', editSection: 'Edit Section',
         save: 'Save Changes', cancel: 'Cancel', delete: 'Delete', edit: 'Edit',
         published: 'Published', draft: 'Draft', search: 'Search...',
-        titleEn: 'Title (EN)', titleAr: 'Title (AR)', summaryEn: 'Summary (EN)',
-        summaryAr: 'Summary (AR)', date: 'Date', imageUrl: 'Image URL',
+        titleEn: 'Title (EN)', titleAr: 'Title (AR)', summaryEn: 'Short Summary (EN)',
+        summaryAr: 'Short Summary (AR)', contentEn: 'Full Content (EN)', contentAr: 'Full Content (AR)', date: 'Date', imageUrl: 'Image URL',
         publishNow: 'Publish immediately', chairmanName: 'Chairman Name',
         role: 'Role / Title', quote: 'Quote', description: 'Description',
         keyPoints: 'Key Points (comma separated)', slideTitle: 'Title',
@@ -139,6 +142,7 @@ export const UI: Record<Lang, Record<string, string>> = {
         aboutManage: "Manage the chairman's message and about section",
         schoolsManage: 'Browse and edit all schools in the network',
         jobsManage: 'Manage current job openings and applications',
+        featuredNews: 'Featured News',
         newsManage: 'articles', profileSaved: 'Profile saved!', settingsSaved: 'Settings saved!',
         articleSaved: 'Article saved successfully', articleDeleted: 'Article deleted',
         articleAdded: 'New article added!', slideSaved: 'Hero slide saved',
@@ -225,8 +229,8 @@ export const UI: Record<Lang, Record<string, string>> = {
         logout: 'تسجيل الخروج', addArticle: 'إضافة مقال', editSection: 'تعديل القسم',
         save: 'حفظ التغييرات', cancel: 'إلغاء', delete: 'حذف', edit: 'تعديل',
         published: 'منشور', draft: 'مسودة', search: 'بحث...',
-        titleEn: 'العنوان (إنجليزي)', titleAr: 'العنوان (عربي)', summaryEn: 'الملخص (إنجليزي)',
-        summaryAr: 'الملخص (عربي)', date: 'التاريخ', imageUrl: 'رابط الصورة',
+        titleEn: 'العنوان (إنجليزي)', titleAr: 'العنوان (عربي)', summaryEn: 'الملخص المختصر (إنجليزي)',
+        summaryAr: 'الملخص المختصر (عربي)', contentEn: 'تفاصيل الخبر (إنجليزي)', contentAr: 'تفاصيل الخبر (عربي)', date: 'التاريخ', imageUrl: 'رابط الصورة',
         publishNow: 'نشر فوراً', chairmanName: 'اسم الرئيس',
         role: 'الدور / اللقب', quote: 'الاقتباس', description: 'الوصف',
         keyPoints: 'النقاط الرئيسية (مفصولة بفاصلة)', slideTitle: 'العنوان',
@@ -245,6 +249,7 @@ export const UI: Record<Lang, Record<string, string>> = {
         aboutManage: 'إدارة رسالة الرئيس وقسم التعريف',
         schoolsManage: 'استعراض وتعديل جميع المدارس في الشبكة',
         jobsManage: 'إدارة الوظائف الشاغرة والفرص المتاحة',
+        featuredNews: 'خبر مميز',
         home: 'الصفحة الرئيسية',
         homeManage: 'إدارة محتوى الصفحة الرئيسية والشركاء',
         newsManage: 'مقالات', profileSaved: 'تم حفظ الملف الشخصي!', settingsSaved: 'تم حفظ الإعدادات!',

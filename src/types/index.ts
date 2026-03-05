@@ -30,8 +30,11 @@ export interface NewsItem {
   date: string;
   summary: string;
   summaryAr: string;
+  content?: string;
+  contentAr?: string;
   image: string;
   published?: boolean;
+  featured?: boolean;
 }
 
 export interface JobVacancy {

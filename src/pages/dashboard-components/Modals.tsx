@@ -66,6 +66,14 @@ export const EditNewsForm: React.FC<EditNewsProps> = ({ article, lang, onSave, o
                 <textarea className={`dash-input dash-ta ${errors.summaryAr ? 'border-red-500' : ''}`} dir="rtl" value={d.summaryAr} onChange={e => { setD(p => ({ ...p, summaryAr: e.target.value })); if (errors.summaryAr) setErrors(p => ({ ...p, summaryAr: '' })) }} />
                 {errors.summaryAr && <span className="text-red-500 text-xs mt-1 block">{errors.summaryAr}</span>}
             </div>
+            <div className="form-full">
+                <label className="dash-label">{u.contentEn}</label>
+                <textarea className="dash-input dash-ta" style={{ minHeight: 180 }} placeholder="Full content of the news..." value={d.content || ''} onChange={e => setD(p => ({ ...p, content: e.target.value }))} />
+            </div>
+            <div className="form-full">
+                <label className="dash-label">{u.contentAr}</label>
+                <textarea className="dash-input dash-ta" style={{ minHeight: 180 }} placeholder="تفاصيل الخبر بالكامل..." dir="rtl" value={d.contentAr || ''} onChange={e => setD(p => ({ ...p, contentAr: e.target.value }))} />
+            </div>
             <div>
                 <label className="dash-label">{u.date}</label>
                 <div className={errors.date ? 'border border-red-500 rounded' : ''}>
@@ -79,9 +87,15 @@ export const EditNewsForm: React.FC<EditNewsProps> = ({ article, lang, onSave, o
                 </div>
                 {errors.image && <span className="text-red-500 text-xs mt-1 block">{errors.image}</span>}
             </div>
-            <div className="form-full flex items-center gap-3">
-                <input type="checkbox" id="ep" checked={d.published} onChange={e => setD(p => ({ ...p, published: e.target.checked }))} className="dash-cb" />
-                <label htmlFor="ep" className="dash-cb-label">{u.publishNow}</label>
+            <div className="form-full flex gap-4 mt-2 mb-2">
+                <div className="flex items-center gap-2">
+                    <input type="checkbox" id="ep" checked={d.published} onChange={e => setD(p => ({ ...p, published: e.target.checked }))} className="dash-cb" />
+                    <label htmlFor="ep" className="dash-cb-label">{u.publishNow}</label>
+                </div>
+                <div className="flex items-center gap-2">
+                    <input type="checkbox" id="ef" checked={d.featured || false} onChange={e => setD(p => ({ ...p, featured: e.target.checked }))} className="dash-cb" />
+                    <label htmlFor="ef" className="dash-cb-label">{u.featuredNews}</label>
+                </div>
             </div>
             <div className="form-full dash-form-actions">
                 <button type="submit" className="dash-btn dash-btn-primary"><Save className="w-4 h-4" />{u.save}</button>

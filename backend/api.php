@@ -122,6 +122,18 @@ try {
             $pdo->exec("UPDATE schools SET type = 'Arabic' WHERE type = 'National'");
             $pdo->exec("UPDATE schools SET type = 'Languages' WHERE type = 'Language'");
             $pdo->exec("UPDATE schools SET type = 'American' WHERE type = 'International'");
+            
+            // Automatic migration: add content and featured columns to news
+            try {
+                $pdo->exec("ALTER TABLE news ADD COLUMN content longtext, ADD COLUMN contentAr longtext");
+            } catch (PDOException $e) {
+                // Ignore if columns already exist
+            }
+            try {
+                $pdo->exec("ALTER TABLE news ADD COLUMN featured tinyint(1) DEFAULT 0");
+            } catch (PDOException $e) {
+                // Ignore if columns already exist
+            }
 
             // Fetch schools
             $stmt = $pdo->query("SELECT * FROM schools");
@@ -138,6 +150,7 @@ try {
             $news = $stmt->fetchAll();
             foreach ($news as &$item) {
                 $item['published'] = (bool)$item['published'];
+                $item['featured'] = (bool)($item['featured'] ?? false);
             }
 
             // Fetch jobs
@@ -203,9 +216,9 @@ try {
                 }
             } elseif ($category === 'news') {
                 $pdo->exec("DELETE FROM news");
-                $stmt = $pdo->prepare("INSERT INTO news (id, title, titleAr, date, summary, summaryAr, image, published) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt = $pdo->prepare("INSERT INTO news (id, title, titleAr, date, summary, summaryAr, content, contentAr, image, published, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 foreach ($newData as $n) {
-                    $stmt->execute([$n['id'], $n['title'], $n['titleAr'], $n['date'], $n['summary'], $n['summaryAr'], $n['image'], $n['published'] ? 1 : 0]);
+                    $stmt->execute([$n['id'], $n['title'], $n['titleAr'], $n['date'], $n['summary'], $n['summaryAr'], $n['content'] ?? '', $n['contentAr'] ?? '', $n['image'], $n['published'] ? 1 : 0, !empty($n['featured']) ? 1 : 0]);
                 }
             } elseif ($category === 'jobs') {
                 $pdo->exec("DELETE FROM jobs");

@@ -100,31 +100,43 @@ const NewsDetail: React.FC = () => {
                             <ScrollReveal delay={0.2}>
                                 <div className={`prose prose-lg prose-slate max-w-none prose-headings:text-[#1e3a8a] prose-a:text-red-600 ${isRTL ? 'text-right' : 'text-left'}`}>
                                     {lang === 'ar' ? (
-                                        <>
-                                            <p className="text-gray-700 leading-loose">هذا النص التوضيحي يهدف إلى إعطاء نظرة أعمق وأشمل للأخبار المتعلقة بالمعاهد القومية. نحرص دائما على إبقاء الطلاب وأولياء الأمور والمعلمين وكل شركاء العملية التعليمية على اطلاع دائم بآخر التطورات والإنجازات التي تتم على مستوى جميع فروعنا.</p>
-                                            <p className="text-gray-700 leading-loose mt-4">نعمل بجد واجتهاد لتوفير بيئة تعليمية آمنة ومحفزة تساند وتتبنى أحدث الوسائل التكنولوجية إيمانا منّا بأن التعليم والمواكبة العصرية هما الأساس لبناء قادة المستقبل وصناع الأمل. وفي إطار حرصنا على تفعيل الأنشطة الصفية واللاصفية، يأتي هذا الخبر كاستكمال لمسيرة من النجاح الممتد على مدار العقود الماضية.</p>
+                                        newsItem.contentAr ? (
+                                            newsItem.contentAr.split('\n').map((paragraph, idx) => (
+                                                paragraph.trim() ? <p key={idx} className="text-gray-700 leading-loose whitespace-pre-line mb-4">{paragraph}</p> : null
+                                            ))
+                                        ) : (
+                                            <>
+                                                <p className="text-gray-700 leading-loose">هذا النص التوضيحي يهدف إلى إعطاء نظرة أعمق وأشمل للأخبار المتعلقة بالمعاهد القومية. نحرص دائما على إبقاء الطلاب وأولياء الأمور والمعلمين وكل شركاء العملية التعليمية على اطلاع دائم بآخر التطورات والإنجازات التي تتم على مستوى جميع فروعنا.</p>
+                                                <p className="text-gray-700 leading-loose mt-4">نعمل بجد واجتهاد لتوفير بيئة تعليمية آمنة ومحفزة تساند وتتبنى أحدث الوسائل التكنولوجية إيمانا منّا بأن التعليم والمواكبة العصرية هما الأساس لبناء قادة المستقبل وصناع الأمل. وفي إطار حرصنا على تفعيل الأنشطة الصفية واللاصفية، يأتي هذا الخبر كاستكمال لمسيرة من النجاح الممتد على مدار العقود الماضية.</p>
 
-                                            <div className="my-12 relative">
-                                                <div className="absolute inset-0 bg-blue-50 transform -skew-y-2 rounded-3xl"></div>
-                                                <div className="relative p-8 md:p-12 text-center">
-                                                    <h3 className="text-2xl font-black text-blue-900 mb-4">آفاق مستقبلية واعدة</h3>
-                                                    <p className="text-blue-800/80 leading-relaxed">نخطط لمزيد من التوسعات والمبادرات الإيجابية في العام الدراسي المقبل وفق الرؤية الاستراتيجية التربوية، حيث نسعى جنباً إلى جنب مع كفاءاتنا التعليمية والإدارية لرسم مسار جديد يضع معايير الجودة العالمية في مقدمة أولوياتنا.</p>
+                                                <div className="my-12 relative">
+                                                    <div className="absolute inset-0 bg-blue-50 transform -skew-y-2 rounded-3xl"></div>
+                                                    <div className="relative p-8 md:p-12 text-center">
+                                                        <h3 className="text-2xl font-black text-blue-900 mb-4">آفاق مستقبلية واعدة</h3>
+                                                        <p className="text-blue-800/80 leading-relaxed">نخطط لمزيد من التوسعات والمبادرات الإيجابية في العام الدراسي المقبل وفق الرؤية الاستراتيجية التربوية، حيث نسعى جنباً إلى جنب مع كفاءاتنا التعليمية والإدارية لرسم مسار جديد يضع معايير الجودة العالمية في مقدمة أولوياتنا.</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </>
+                                            </>
+                                        )
                                     ) : (
-                                        <>
-                                            <p className="text-gray-700 leading-loose">This explanatory text aims to provide a deeper and more comprehensive insight into the news regarding the National Institutes. We consistently strive to keep our students, parents, faculty, and all educational partners fully informed about the latest developments and achievements across our campuses.</p>
-                                            <p className="text-gray-700 leading-loose mt-4">We work diligently to foster a safe and motivating learning environment that adopts the latest technological tools, believing firmly that contemporary education is the foundation for building future leaders and creators of hope. As part of our commitment to both curricular and extracurricular activities, this update continues a decades-long trajectory of success.</p>
+                                        newsItem.content ? (
+                                            newsItem.content.split('\n').map((paragraph, idx) => (
+                                                paragraph.trim() ? <p key={idx} className="text-gray-700 leading-loose whitespace-pre-line mb-4">{paragraph}</p> : null
+                                            ))
+                                        ) : (
+                                            <>
+                                                <p className="text-gray-700 leading-loose">This explanatory text aims to provide a deeper and more comprehensive insight into the news regarding the National Institutes. We consistently strive to keep our students, parents, faculty, and all educational partners fully informed about the latest developments and achievements across our campuses.</p>
+                                                <p className="text-gray-700 leading-loose mt-4">We work diligently to foster a safe and motivating learning environment that adopts the latest technological tools, believing firmly that contemporary education is the foundation for building future leaders and creators of hope. As part of our commitment to both curricular and extracurricular activities, this update continues a decades-long trajectory of success.</p>
 
-                                            <div className="my-12 relative">
-                                                <div className="absolute inset-0 bg-blue-50 transform -skew-y-2 rounded-3xl"></div>
-                                                <div className="relative p-8 md:p-12 text-center">
-                                                    <h3 className="text-2xl font-black text-blue-900 mb-4">Promising Future Horizons</h3>
-                                                    <p className="text-blue-800/80 leading-relaxed">We are planning further expansions and positive initiatives for the upcoming academic year in accordance with our strategic educational vision. Hand in hand with our skilled educational and administrative professionals, we are charting a new path where global quality standards remain our foremost priority.</p>
+                                                <div className="my-12 relative">
+                                                    <div className="absolute inset-0 bg-blue-50 transform -skew-y-2 rounded-3xl"></div>
+                                                    <div className="relative p-8 md:p-12 text-center">
+                                                        <h3 className="text-2xl font-black text-blue-900 mb-4">Promising Future Horizons</h3>
+                                                        <p className="text-blue-800/80 leading-relaxed">We are planning further expansions and positive initiatives for the upcoming academic year in accordance with our strategic educational vision. Hand in hand with our skilled educational and administrative professionals, we are charting a new path where global quality standards remain our foremost priority.</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </>
+                                            </>
+                                        )
                                     )}
                                 </div>
                             </ScrollReveal>
