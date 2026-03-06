@@ -73,9 +73,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         queryKey: ['siteData'],
         queryFn: fetchSiteData,
 
-        staleTime: 5 * 60 * 1000,          // 5 minutes (Safe for shared hosting)
-        refetchOnWindowFocus: false,       // STOP aggressive refetching
-        refetchInterval: 10 * 60 * 1000,   // Polling every 10m
+        staleTime: 30 * 1000,              // 30 seconds
+        refetchOnWindowFocus: true,        // Refetch when user comes back to the site
+        refetchInterval: 2 * 60 * 1000,    // Poll every 2 minutes
         refetchIntervalInBackground: false,
         retry: 3,                          // Retry 3 times on failure
         retryDelay: 2000,                  // 2s delay between retries

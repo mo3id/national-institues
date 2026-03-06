@@ -125,7 +125,11 @@ const Home: React.FC = () => {
                       <div key={`chunk-${i}`} className="w-full flex-shrink-0">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12 items-center justify-items-center">
                           {chunk.map((school) => (
-                            <div key={school.id} className="flex items-center justify-center cursor-pointer opacity-70 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300">
+                            <Link
+                              to={`/schools/${school.id}`}
+                              key={school.id}
+                              className="flex items-center justify-center cursor-pointer opacity-70 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300 transform hover:scale-110"
+                            >
                               <img
                                 src={school.logo}
                                 alt={school.name}
@@ -135,7 +139,7 @@ const Home: React.FC = () => {
                                 width="140"
                                 height="70"
                               />
-                            </div>
+                            </Link>
                           ))}
                         </div>
                       </div>

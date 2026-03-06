@@ -250,6 +250,14 @@ const CSS = `
   .glow-dot { width: 10px; height: 10px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981; animation: pulse2 2s infinite; }
   @keyframes pulse2 { 0%,100%{opacity: 1; transform: scale(1)} 50%{opacity: 0.5; transform: scale(1.4)} }
 
+  .pagination-container { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 32px; padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-sm); width: fit-content; margin-inline: auto; }
+  .pagination-btn { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 700; font-size: 13px; }
+  .pagination-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: rgba(79,70,229,0.05); transform: translateY(-2px); }
+  .pagination-btn:disabled { opacity: 0.3; cursor: not-allowed; background: var(--surface2); }
+  .pagination-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 12px rgba(79,70,229,0.3); }
+  .pagination-info { font-size: 12px; font-weight: 700; color: var(--text2); margin: 0 16px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
+  .pagination-info span { color: var(--text); font-size: 14px; }
+
   @media (max-width: 1024px) {
     .dash-sidebar { transform: translateX(0); z-index: 100; box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
     .dash-root.rtl .dash-sidebar { transform: translateX(0); box-shadow: -4px 0 24px rgba(0,0,0,0.5); }
@@ -364,7 +372,7 @@ const Pagination: React.FC<{
   for (let i = start; i <= end; i++) pages.push(i);
 
   return (
-    <div className="flex items-center justify-center gap-2 mt-8 py-4 px-6 bg-[var(--surface2)]/50 rounded-2xl border border-[var(--border)]">
+    <div className="pagination-container">
       <button
         className="pagination-btn"
         onClick={() => onChange(1)}
@@ -381,19 +389,24 @@ const Pagination: React.FC<{
         <ChevronLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
       </button>
 
-      {start > 1 && <span className="text-[var(--text2)] px-1">...</span>}
+      <div className="pagination-info mobile-hide">
+        {lang === 'ar' ? 'صفحة' : 'Page'}
+        <span>{isRTL ? getArNumber(current) : current} / {isRTL ? getArNumber(total) : total}</span>
+      </div>
 
-      {pages.map(p => (
-        <button
-          key={p}
-          className={`pagination-btn ${current === p ? 'active' : ''}`}
-          onClick={() => onChange(p)}
-        >
-          {p}
-        </button>
-      ))}
-
-      {end < total && <span className="text-[var(--text2)] px-1">...</span>}
+      <div className="flex items-center gap-1.5">
+        {start > 1 && <span className="text-[var(--text2)] px-1">...</span>}
+        {pages.map(p => (
+          <button
+            key={p}
+            className={`pagination-btn ${current === p ? 'active' : ''}`}
+            onClick={() => onChange(p)}
+          >
+            {isRTL ? getArNumber(p) : p}
+          </button>
+        ))}
+        {end < total && <span className="text-[var(--text2)] px-1">...</span>}
+      </div>
 
       <button
         className="pagination-btn"
@@ -531,6 +544,20 @@ const Dashboard: React.FC = () => {
   };
 
   // ── Fetching Paginated Data ──────────────────────────────────────────────
+  // ── Polling for new arrivals (Auto-refresh every 30s for active section) ───
+  useEffect(() => {
+    let interval: any;
+    if (['complaints', 'contactMessages', 'recruitment', 'news'].includes(section)) {
+      interval = setInterval(() => {
+        if (section === 'complaints') fetchComplaints();
+        if (section === 'contactMessages') fetchMessages();
+        if (section === 'recruitment') fetchApplicants();
+        if (section === 'news') fetchNews();
+      }, 30000); // 30 seconds polling
+    }
+    return () => { if (interval) clearInterval(interval); };
+  }, [section, complaintPage, messagePage, applicantPage, newsPage, debouncedComplaintSearch, debouncedNewsSearch, complaintsFilterType, selectedRecruitmentJobId]);
+
   useEffect(() => {
     if (section === 'complaints') fetchComplaints();
   }, [section, complaintPage, debouncedComplaintSearch, complaintsFilterType]);
@@ -546,6 +573,18 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     if (section === 'news') fetchNews();
   }, [section, newsPage, debouncedNewsSearch]);
+
+  useEffect(() => {
+    if (section === 'schools') fetchSchools();
+  }, [section, debouncedSchoolSearch]);
+
+  useEffect(() => {
+    if (section === 'jobs') fetchJobs();
+  }, [section, debouncedJobSearch]);
+
+  useEffect(() => {
+    if (section === 'departments') fetchDepartments();
+  }, [section]);
 
   const fetchComplaints = async () => {
     setIsTableLoading(true);
@@ -595,6 +634,39 @@ const Dashboard: React.FC = () => {
     finally { setIsTableLoading(false); }
   };
 
+  const fetchSchools = async () => {
+    setIsTableLoading(true);
+    try {
+      const res = await getPaginatedEntries({ type: 'schools', page: 1, limit: 100, search: debouncedSchoolSearch });
+      if (res.status === 'success') {
+        setSchools(res.data.items);
+      }
+    } catch (err) { console.error(err); }
+    finally { setIsTableLoading(false); }
+  };
+
+  const fetchJobs = async () => {
+    setIsTableLoading(true);
+    try {
+      const res = await getPaginatedEntries({ type: 'jobs', page: 1, limit: 100, search: debouncedJobSearch });
+      if (res.status === 'success') {
+        setJobs(res.data.items);
+      }
+    } catch (err) { console.error(err); }
+    finally { setIsTableLoading(false); }
+  };
+
+  const fetchDepartments = async () => {
+    setIsTableLoading(true);
+    try {
+      const res = await getPaginatedEntries({ type: 'jobDepartments', page: 1, limit: 100 });
+      if (res.status === 'success') {
+        setDepartments(res.data.items);
+      }
+    } catch (err) { console.error(err); }
+    finally { setIsTableLoading(false); }
+  };
+
   // Listen for data context errors
   useEffect(() => {
     const handleApiError = (e: any) => {
@@ -617,22 +689,24 @@ const Dashboard: React.FC = () => {
   const deleteNews = (id: string) => {
     setConfirmAction({
       message: lang === 'ar' ? 'هل أنت متأكد من حذف هذا الخبر؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this news article? This cannot be undone.',
-      onConfirm: () => {
+      onConfirm: async () => {
         const updated = newsList.filter(n => n.id !== id);
         setNewsList(updated);
-        updateData('news', updated);
+        await updateData('news', updated);
         showToast(u.articleDeleted, 'error');
+        fetchNews();
       }
     });
   };
-  const saveNews = (a: DashNewsItem) => {
+  const saveNews = async (a: DashNewsItem) => {
     const updated = newsList.map(n => n.id === a.id ? a : n);
     setNewsList(updated);
-    updateData('news', updated);
+    await updateData('news', updated);
     setEditNewsId(null);
     showToast(u.articleSaved);
+    fetchNews();
   };
-  const addNews = (n: DashNewsItem) => {
+  const addNews = async (n: DashNewsItem) => {
     const newEntry = {
       ...n,
       id: String(Date.now()),
@@ -641,10 +715,11 @@ const Dashboard: React.FC = () => {
     };
     const updated = [newEntry, ...newsList];
     setNewsList(updated);
-    updateData('news', updated);
+    await updateData('news', updated);
     setAddNewsOpen(false);
     setNewsSearch('');
     showToast(u.articleAdded);
+    fetchNews();
   };
   const saveHero = (s: HeroSlide) => {
     const updated = hero.map(h => h.id === s.id ? s : h);
@@ -653,78 +728,84 @@ const Dashboard: React.FC = () => {
     setEditHeroId(null);
     showToast(u.slideSaved);
   };
-  const saveSchool = (s: DashSchool) => {
+  const saveSchool = async (s: DashSchool) => {
     const updated = schools.map(sc => sc.id === s.id ? s : sc);
     setSchools(updated);
-    updateData('schools', updated);
+    await updateData('schools', updated);
     setEditSchoolId(null);
-    setSchoolSearch('');
     showToast(u.schoolSaved);
+    fetchSchools();
   };
-  const addSchool = (s: DashSchool) => {
+  const addSchool = async (s: DashSchool) => {
     const newEntry = { ...s, id: String(Date.now()) };
     const updated = [newEntry, ...schools];
     setSchools(updated);
-    updateData('schools', updated);
+    await updateData('schools', updated);
     setAddSchoolOpen(false);
     setNewSchool({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '', address: '', addressAr: '' });
     setSchoolSearch('');
     showToast(u.schoolSaved);
+    fetchSchools();
   };
   const deleteSchool = (id: string) => {
     setConfirmAction({
       message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه المدرسة؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this school? This cannot be undone.',
-      onConfirm: () => {
+      onConfirm: async () => {
         const updated = schools.filter(s => s.id !== id);
         setSchools(updated);
-        updateData('schools', updated);
+        await updateData('schools', updated);
         showToast('School deleted', 'error');
+        fetchSchools();
       }
     });
   };
 
-  const saveJob = (j: DashJob) => {
+  const saveJob = async (j: DashJob) => {
     const updated = jobs.map(jb => jb.id === j.id ? j : jb);
     setJobs(updated);
-    updateData('jobs', updated);
+    await updateData('jobs', updated);
     setEditJobId(null);
     showToast(u.jobSaved);
+    fetchJobs();
   };
 
   const deleteJob = (id: string) => {
     setConfirmAction({
       message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه الوظيفة؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this job? This cannot be undone.',
-      onConfirm: () => {
+      onConfirm: async () => {
         const updated = jobs.filter(j => j.id !== id);
         setJobs(updated);
-        updateData('jobs', updated);
+        await updateData('jobs', updated);
         showToast(u.jobDeleted, 'error');
+        fetchJobs();
       }
     });
   };
 
-  const addJob = (j: DashJob) => {
+  const addJob = async (j: DashJob) => {
     const newEntry: DashJob = {
       ...j,
       id: String(Date.now()),
     };
     const updated = [newEntry, ...jobs];
     setJobs(updated);
-    updateData('jobs', updated);
+    await updateData('jobs', updated);
     setAddJobOpen(false);
     setJobSearch('');
     showToast(u.jobAdded);
+    fetchJobs();
   };
 
-  const addDepartment = () => {
+  const addDepartment = async () => {
     if (!newDepartment.nameEn || !newDepartment.nameAr) return showToast(lang === 'ar' ? 'الرجاء إدخال اسم القسم باللغتين' : 'Please enter department name in both languages', 'error');
     const newEntry = { id: String(Date.now()), nameEn: newDepartment.nameEn, nameAr: newDepartment.nameAr };
     const updated = [newEntry, ...departments];
     setDepartments(updated);
-    updateData('jobDepartments', updated);
+    await updateData('jobDepartments', updated);
     setAddDepartmentOpen(false);
     setNewDepartment({ nameEn: '', nameAr: '' });
     showToast(lang === 'ar' ? 'تم إضافة القسم' : 'Department added');
+    fetchDepartments();
   };
 
   const deleteDepartment = (id: string) => {
@@ -737,11 +818,12 @@ const Dashboard: React.FC = () => {
     }
     setConfirmAction({
       message: lang === 'ar' ? 'هل أنت متأكد من حذف هذا القسم؟' : 'Are you sure you want to delete this department?',
-      onConfirm: () => {
+      onConfirm: async () => {
         const updated = departments.filter(d => d.id !== id);
         setDepartments(updated);
-        updateData('jobDepartments', updated);
+        await updateData('jobDepartments', updated);
         showToast(lang === 'ar' ? 'تم الحذف بنجاح' : 'Deleted successfully', 'error');
+        fetchDepartments();
       }
     });
   };
@@ -789,9 +871,9 @@ const Dashboard: React.FC = () => {
     showToast(u.homeUpdated);
   };
 
-  const filtered = newsList.filter(n => n.title.toLowerCase().includes(newsSearch.toLowerCase()) || n.titleAr.includes(newsSearch));
-  const filteredSchools = schools.filter(s => s.name.toLowerCase().includes(schoolSearch.toLowerCase()) || s.governorate.toLowerCase().includes(schoolSearch.toLowerCase()));
-  const filteredJobs = jobs.filter(j => j.title.toLowerCase().includes(jobSearch.toLowerCase()) || j.titleAr.includes(jobSearch) || j.department.toLowerCase().includes(jobSearch.toLowerCase()));
+  const filteredNews = newsList;
+  const filteredSchools = schools;
+  const filteredJobs = jobs;
 
   // These are now filtered on the backend
   const filteredApplications = applications;
@@ -1034,21 +1116,28 @@ const Dashboard: React.FC = () => {
                 <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 14, right: isRTL ? 14 : 'auto', top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: 'var(--text2)' }} />
                 <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={schoolSearch} onChange={e => setSchoolSearch(e.target.value)} />
               </div>
-              <div className="school-grid">
-                {filteredSchools.map(s => (
-                  <div key={s.id} className="school-card">
-                    <img src={s.logo || undefined} style={{ width: 52, height: 52, borderRadius: 12, objectFit: 'cover', background: 'var(--surface2)', flexShrink: 0 }} alt={s.name} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{s.name}</p>
-                      <p style={{ fontSize: 11, color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}><MapPin style={{ width: 11, height: 11 }} />{s.location}, {s.governorate}</p>
-                      <span style={{ marginTop: 6, display: 'inline-block', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(79,70,229,0.1)', color: 'var(--accent)' }}>{s.type}</span>
-                    </div>
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      <button className="dash-icon-btn" onClick={() => setEditSchoolId(s.id)} title={u.edit}><Pencil style={{ width: 15, height: 15, color: 'var(--accent)' }} /></button>
-                      <button className="dash-icon-btn" onClick={() => deleteSchool(s.id)} title={u.delete}><Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} /></button>
-                    </div>
+              <div style={{ position: 'relative' }}>
+                {isTableLoading && (
+                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-2xl">
+                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
                   </div>
-                ))}
+                )}
+                <div className="school-grid">
+                  {filteredSchools.map(s => (
+                    <div key={s.id} className="school-card">
+                      <img src={s.logo || undefined} style={{ width: 52, height: 52, borderRadius: 12, objectFit: 'cover', background: 'var(--surface2)', flexShrink: 0 }} alt={s.name} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{s.name}</p>
+                        <p style={{ fontSize: 11, color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}><MapPin style={{ width: 11, height: 11 }} />{s.location}, {s.governorate}</p>
+                        <span style={{ marginTop: 6, display: 'inline-block', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(79,70,229,0.1)', color: 'var(--accent)' }}>{s.type}</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        <button className="dash-icon-btn" onClick={() => setEditSchoolId(s.id)} title={u.edit}><Pencil style={{ width: 15, height: 15, color: 'var(--accent)' }} /></button>
+                        <button className="dash-icon-btn" onClick={() => deleteSchool(s.id)} title={u.delete}><Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -1060,7 +1149,12 @@ const Dashboard: React.FC = () => {
                 <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{lang === 'ar' ? 'أقسام الوظائف' : 'Job Departments'}</h2></div>
                 <button className="dash-btn dash-btn-primary" onClick={() => setAddDepartmentOpen(true)}><Plus style={{ width: 15, height: 15 }} />{lang === 'ar' ? 'بناء قسم جديد' : 'New Department'}</button>
               </div>
-              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
+              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
+                {isTableLoading && (
+                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
                 <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
@@ -1097,7 +1191,12 @@ const Dashboard: React.FC = () => {
                 <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 14, right: isRTL ? 14 : 'auto', top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: 'var(--text2)' }} />
                 <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={jobSearch} onChange={e => setJobSearch(e.target.value)} />
               </div>
-              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
+              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
+                {isTableLoading && (
+                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
                 <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>

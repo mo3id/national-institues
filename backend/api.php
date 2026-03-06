@@ -47,7 +47,7 @@ header("Pragma: no-cache");
 // TTL: 60 seconds. Busted immediately on any write action (update_category, etc.)
 // ═══════════════════════════════════════════════════════════════════════════
 define('CACHE_FILE', __DIR__ . '/cache/site_data.json');
-define('CACHE_TTL', 300); // reduced frequency of expensive DB queries (5 minutes)
+define('CACHE_TTL', 60); // refresh DB data every 60 seconds (prevents long stale data)
 
 function serveFromCache(): bool {
     if (!file_exists(CACHE_FILE)) return false;
@@ -397,11 +397,43 @@ try {
 
             $data = [];
             if ($type === 'schools') {
-                $stmt = $pdo->query("SELECT * FROM schools");
+                $q = "SELECT * FROM schools WHERE 1=1";
+                $params = [];
+                if ($search) {
+                    $q .= " AND (name LIKE ? OR location LIKE ? OR governorate LIKE ? OR principal LIKE ?)";
+                    $term = "%$search%";
+                    $params = [$term, $term, $term, $term];
+                }
+                $stmt = $pdo->prepare($q);
+                $stmt->execute($params);
                 $data = $stmt->fetchAll();
             } elseif ($type === 'news') {
-                $stmt = $pdo->query("SELECT * FROM news ORDER BY date DESC");
+                $q = "SELECT * FROM news WHERE 1=1";
+                $params = [];
+                if ($search) {
+                    $q .= " AND (title LIKE ? OR titleAr LIKE ? OR summary LIKE ? OR summaryAr LIKE ?)";
+                    $term = "%$search%";
+                    $params = [$term, $term, $term, $term];
+                }
+                $q .= " ORDER BY date DESC";
+                $stmt = $pdo->prepare($q);
+                $stmt->execute($params);
                 $data = $stmt->fetchAll();
+            } elseif ($type === 'jobs') {
+                $q = "SELECT * FROM jobs WHERE 1=1";
+                $params = [];
+                if ($search) {
+                    $q .= " AND (title LIKE ? OR titleAr LIKE ? OR department LIKE ? OR location LIKE ?)";
+                    $term = "%$search%";
+                    $params = [$term, $term, $term, $term];
+                }
+                $stmt = $pdo->prepare($q);
+                $stmt->execute($params);
+                $data = $stmt->fetchAll();
+            } elseif ($type === 'jobDepartments') {
+                $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'jobDepartments'");
+                $row = $stmt->fetch();
+                $data = $row ? json_decode($row['setting_value'], true) : [];
             } elseif (in_array($type, ['complaints', 'contactMessages', 'jobApplications'])) {
                 $stmt = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = ?");
                 $stmt->execute([$type]);
