@@ -632,7 +632,7 @@ const Dashboard: React.FC = () => {
 
   const filteredComplaints = complaints.filter(c => {
     const term = complaintsSearch.toLowerCase();
-    const matchesSearch = c.fullName?.toLowerCase().includes(term) || c.phone?.toLowerCase().includes(term) || c.school?.toLowerCase().includes(term);
+    const matchesSearch = c.fullName?.toLowerCase().includes(term) || c.phone?.toLowerCase().includes(term) || c.school?.toLowerCase().includes(term) || c.id?.toLowerCase().includes(term);
     const matchesType = complaintsFilterType === 'All' || c.messageType === complaintsFilterType;
     return matchesSearch && matchesType;
   });
@@ -1508,6 +1508,7 @@ const Dashboard: React.FC = () => {
                 <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{lang === 'ar' ? 'رقم الشكوى' : 'ID'}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.senderName}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.phone}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.school}</th>
@@ -1520,6 +1521,9 @@ const Dashboard: React.FC = () => {
                   <tbody>
                     {filteredComplaints.length > 0 ? filteredComplaints.map((c, i) => (
                       <tr key={i} style={{ borderBottom: i === filteredComplaints.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onClick={() => { setSelectedComplaint(c); setComplaintModalOpen(true); }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                        <td style={{ padding: '16px 24px', color: 'var(--accent)', fontWeight: 800, fontSize: 12, fontFamily: 'monospace', cursor: 'pointer' }}>
+                          {c.id || '—'}
+                        </td>
                         <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
                           <p>{c.fullName}</p>
                           <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2 }}>{c.createdAt ? new Date(c.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB') : ''}</p>
@@ -1546,7 +1550,7 @@ const Dashboard: React.FC = () => {
                       </tr>
                     )) : (
                       <tr>
-                        <td colSpan={7} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}>
+                        <td colSpan={8} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}>
                           <MessageSquare style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} />
                           <p style={{ fontWeight: 600 }}>{u.noResults}</p>
                         </td>
