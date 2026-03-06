@@ -47,7 +47,7 @@ header("Pragma: no-cache");
 // TTL: 60 seconds. Busted immediately on any write action (update_category, etc.)
 // ═══════════════════════════════════════════════════════════════════════════
 define('CACHE_FILE', __DIR__ . '/cache/site_data.json');
-define('CACHE_TTL', 60); // seconds
+define('CACHE_TTL', 300); // reduced frequency of expensive DB queries (5 minutes)
 
 function serveFromCache(): bool {
     if (!file_exists(CACHE_FILE)) return false;

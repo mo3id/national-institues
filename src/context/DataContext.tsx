@@ -73,10 +73,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         queryKey: ['siteData'],
         queryFn: fetchSiteData,
 
-        staleTime: 1 * 60 * 1000,          // 1 minute (Safe for shared hosting)
+        staleTime: 5 * 60 * 1000,          // 5 minutes (Safe for shared hosting)
         refetchOnWindowFocus: false,       // STOP aggressive refetching
-        refetchInterval: 2 * 60 * 1000,    // Polling every 2m
+        refetchInterval: 10 * 60 * 1000,   // Polling every 10m
         refetchIntervalInBackground: false,
+        retry: 3,                          // Retry 3 times on failure
+        retryDelay: 2000,                  // 2s delay between retries
     });
 
     // ── Apply fetched data to Zustand store ───────────────────────────────
