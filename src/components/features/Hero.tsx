@@ -41,7 +41,7 @@ const Hero: React.FC = () => {
           <div
             className="absolute inset-0 bg-cover bg-center rounded-[24px] lg:rounded-none transform-gpu"
             style={{
-              backgroundImage: `url('${slide.image}')`,
+              backgroundImage: `url('${slide.image || "/layer-1-small.webp"}')`,
               transform: isRTL ? 'scaleX(-1) translateZ(0)' : 'translateZ(0)',
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden'

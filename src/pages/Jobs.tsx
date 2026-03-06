@@ -175,7 +175,7 @@ const Jobs: React.FC = () => {
                                         {/* Background Cover Image with margin */}
                                         <div className="relative h-40 w-full rounded-[20px] overflow-hidden bg-gray-50 mb-6">
                                             <img
-                                                src={job.image || "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80"}
+                                                src={job.image || "/layer-1-small.webp"}
                                                 alt="Cover"
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                                 loading="lazy"

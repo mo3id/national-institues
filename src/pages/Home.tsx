@@ -37,7 +37,7 @@ const Home: React.FC = () => {
     gatewayDescAr: 'انضم إلى آلاف الطلاب في جميع أنحاء مصر في شبكة معاهدنا القومية المتخصصة.',
     gatewayCTA: 'View Schools',
     gatewayCTAAr: 'عرض المدارس',
-    mapImage: '/nano-banana-17717977008341.webp',
+    mapImage: '/layer-1-small.webp',
     ctaTitle: 'Join the NIS Family Today',
     ctaTitleAr: 'انضم لعائلة المعاهد القومية اليوم',
     ctaDesc: 'Become part of Egypt\'s leading educational network and shape your child\'s future.',
@@ -193,7 +193,7 @@ const Home: React.FC = () => {
             <ScrollReveal delay={0.3}>
               <div className="w-full flex justify-center mt-8 md:mt-12 overflow-visible md:overflow-visible">
                 <img
-                  src={(h.mapImage && h.mapImage.replace('.png', '.webp')) || '/nano-banana-17717977008341.webp'}
+                  src={(h.mapImage && h.mapImage.replace('.png', '.webp')) || '/layer-1-small.webp'}
                   alt="Global Network"
                   loading="lazy"
                   width="1152"

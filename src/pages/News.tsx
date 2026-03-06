@@ -66,7 +66,7 @@ const News: React.FC = () => {
             <ScrollReveal direction="up">
               <Link to={`/news/${featured.id}`} className="bg-white rounded-[40px] shadow-[0_15px_50px_-12px_rgb(0,0,0,0.08)] border border-slate-100/50 overflow-hidden grid grid-cols-1 lg:grid-cols-2 mb-24 group transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgb(0,0,0,0.12)] hover:-translate-y-1">
                 <div className="relative h-80 lg:h-[500px] overflow-hidden">
-                  <img src={featured.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={featured.title} />
+                  <img src={featured.image || "/layer-1-small.webp"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={featured.title} />
                   <div className={`absolute top-8 ${isRTL ? 'right-8' : 'left-8'} bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold text-slate-700 shadow-xl flex items-center gap-2 border border-white/20`}>
                     <Calendar className="w-4 h-4 text-red-600" />
                     {featured.date}
@@ -100,7 +100,7 @@ const News: React.FC = () => {
                   {/* Image with container margin like SchoolCard */}
                   <div className="relative h-48 w-full rounded-[20px] overflow-hidden bg-gray-50">
                     <img
-                      src={item.image}
+                      src={item.image || "/layer-1-small.webp"}
                       alt={item.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       loading="lazy"

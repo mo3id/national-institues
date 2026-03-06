@@ -16,7 +16,7 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
       {/* Background Cover Image with margin */}
       <div className="relative h-40 w-full rounded-[20px] overflow-hidden bg-gray-50">
         <img
-          src={school.mainImage || "/nano-banana-1771806527783.png"}
+          src={school.mainImage || "/layer-1-small.webp"}
           alt="Cover"
           className="w-full h-full object-cover"
           loading="lazy"
@@ -157,7 +157,7 @@ const Schools: React.FC = () => {
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: `url('/nano-banana-1771806527783.png')`
+                backgroundImage: `url('/layer-1-small.webp')`
               }}
             />
             {/* Gradient overlay */}

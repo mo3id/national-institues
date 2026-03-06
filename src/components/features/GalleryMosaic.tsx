@@ -22,10 +22,8 @@ const GalleryMosaic: React.FC = () => {
     ? ['تـعلـم', 'تـقـدم', 'كـن قـائدًا', 'تـمـيز', 'إلـهـام', 'إبـداع']
     : ['LEARN', 'GROW', 'LEAD', 'EXCEL', 'INSPIRE', 'CREATE'];
 
-  const dynamicImages = siteData.galleryImages || [
-    'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=600&q=80'
+  const dynamicImages = siteData.galleryImages && siteData.galleryImages.length > 0 ? siteData.galleryImages : [
+    '/layer-1-small.webp'
   ];
 
   const baseRows = [

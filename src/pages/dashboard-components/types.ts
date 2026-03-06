@@ -345,7 +345,7 @@ export const UI: Record<Lang, Record<string, string>> = {
 };
 
 export const HERO_IMAGES = [
-    'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=2070&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1544531696-9348411883aa?q=80&w=2069&auto=format&fit=crop',
+    '/layer-1-small.webp',
+    '/layer-1-small.webp',
+    '/layer-1-small.webp',
 ];

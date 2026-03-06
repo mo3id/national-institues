@@ -49,7 +49,7 @@ export const en = {
             {
                 title: "Innovating Today to Build a Better Future for Our Children",
                 description: "Advanced educational curricula that keep pace with the times, aiming to develop critical thinking and creativity skills in students from a young age.",
-                image: "/nano-banana-1771792169108.webp"
+                image: "/layer-1-small.webp"
             }
         ]
     },

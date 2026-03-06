@@ -716,6 +716,12 @@ const Dashboard: React.FC = () => {
     const updated = [newEntry, ...newsList];
     setNewsList(updated);
     await updateData('news', updated);
+    setNewArt({
+      title: '', titleAr: '', summary: '', summaryAr: '',
+      image: '', content: '', contentAr: '',
+      highlightTitle: '', highlightTitleAr: '',
+      highlightContent: '', highlightContentAr: ''
+    });
     setAddNewsOpen(false);
     setNewsSearch('');
     showToast(u.articleAdded);
@@ -741,6 +747,12 @@ const Dashboard: React.FC = () => {
     const updated = [newEntry, ...schools];
     setSchools(updated);
     await updateData('schools', updated);
+    setNewSchool({
+      name: '', nameAr: '', principal: '', principalAr: '',
+      address: '', addressAr: '', phone: '', email: '',
+      website: '', location: '', locationAr: '', about: '', aboutAr: '',
+      mainImage: '', logo: '', gallery: []
+    });
     setAddSchoolOpen(false);
     setNewSchool({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '', address: '', addressAr: '' });
     setSchoolSearch('');
@@ -790,6 +802,11 @@ const Dashboard: React.FC = () => {
     const updated = [newEntry, ...jobs];
     setJobs(updated);
     await updateData('jobs', updated);
+    setNewJob({
+      title: '', titleAr: '', department: '', departmentAr: '',
+      location: '', locationAr: '', type: '', typeAr: '',
+      description: '', descriptionAr: '', image: ''
+    });
     setAddJobOpen(false);
     setJobSearch('');
     showToast(u.jobAdded);
