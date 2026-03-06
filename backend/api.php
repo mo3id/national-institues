@@ -170,55 +170,109 @@ try {
             $newData = $input['newData'] ?? [];
             if (!$category) throw new Exception("Category required");
 
-            if ($category === 'schools') {
-                $pdo->exec("DELETE FROM schools");
-                $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, foundedYear, address, addressAr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                foreach ($newData as $s) {
-                    $stmt->execute([
-                        $s['id'] ?? '',
-                        $s['name'] ?? '',
-                        $s['nameAr'] ?? ($s['name'] ?? ''),
-                        $s['location'] ?? '',
-                        $s['locationAr'] ?? ($s['location'] ?? ''),
-                        $s['governorate'] ?? '',
-                        $s['governorateAr'] ?? ($s['governorate'] ?? ''),
-                        $s['principal'] ?? '',
-                        $s['principalAr'] ?? ($s['principal'] ?? ''),
-                        $s['logo'] ?? '',
-                        $s['type'] ?? '',
-                        $s['mainImage'] ?? '',
-                        json_encode($s['gallery'] ?? []),
-                        $s['about'] ?? '',
-                        $s['aboutAr'] ?? '',
-                        $s['phone'] ?? '',
-                        $s['email'] ?? '',
-                        $s['website'] ?? '',
-                        $s['rating'] ?? '',
-                        $s['studentCount'] ?? '',
-                        $s['foundedYear'] ?? '',
-                        $s['address'] ?? '',
-                        $s['addressAr'] ?? ''
-                    ]);
+            $pdo->beginTransaction();
+            try {
+                if ($category === 'schools') {
+                    // ── Ensure schema is up to date ──
+                    $cols = $pdo->query("DESCRIBE schools")->fetchAll(PDO::FETCH_COLUMN);
+                    if (!in_array('about', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN about text");
+                    if (!in_array('aboutAr', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN aboutAr text");
+                    if (!in_array('phone', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN phone varchar(50)");
+                    if (!in_array('email', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN email varchar(100)");
+                    if (!in_array('website', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN website text");
+                    if (!in_array('rating', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN rating varchar(20)");
+                    if (!in_array('studentCount', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN studentCount varchar(20)");
+                    if (!in_array('foundedYear', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN foundedYear varchar(20)");
+
+                    $pdo->exec("DELETE FROM schools");
+                    $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, foundedYear, address, addressAr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    foreach ($newData as $s) {
+                        $stmt->execute([
+                            $s['id'] ?? '',
+                            $s['name'] ?? '',
+                            $s['nameAr'] ?? ($s['name'] ?? ''),
+                            $s['location'] ?? '',
+                            $s['locationAr'] ?? ($s['location'] ?? ''),
+                            $s['governorate'] ?? '',
+                            $s['governorateAr'] ?? ($s['governorate'] ?? ''),
+                            $s['principal'] ?? '',
+                            $s['principalAr'] ?? ($s['principal'] ?? ''),
+                            $s['logo'] ?? '',
+                            $s['type'] ?? '',
+                            $s['mainImage'] ?? '',
+                            json_encode($s['gallery'] ?? []),
+                            $s['about'] ?? '',
+                            $s['aboutAr'] ?? '',
+                            $s['phone'] ?? '',
+                            $s['email'] ?? '',
+                            $s['website'] ?? '',
+                            $s['rating'] ?? '',
+                            $s['studentCount'] ?? '',
+                            $s['foundedYear'] ?? '',
+                            $s['address'] ?? '',
+                            $s['addressAr'] ?? ''
+                        ]);
+                    }
+                } elseif ($category === 'news') {
+                    // ── Ensure schema is up to date ──
+                    $cols = $pdo->query("DESCRIBE news")->fetchAll(PDO::FETCH_COLUMN);
+                    if (!in_array('highlightTitle', $cols)) $pdo->exec("ALTER TABLE news ADD COLUMN highlightTitle varchar(255) DEFAULT NULL");
+                    if (!in_array('highlightTitleAr', $cols)) $pdo->exec("ALTER TABLE news ADD COLUMN highlightTitleAr varchar(255) DEFAULT NULL");
+                    if (!in_array('highlightContent', $cols)) $pdo->exec("ALTER TABLE news ADD COLUMN highlightContent longtext DEFAULT NULL");
+                    if (!in_array('highlightContentAr', $cols)) $pdo->exec("ALTER TABLE news ADD COLUMN highlightContentAr longtext DEFAULT NULL");
+                    if (!in_array('featured', $cols)) $pdo->exec("ALTER TABLE news ADD COLUMN featured tinyint(1) DEFAULT 0");
+                    if (!in_array('published', $cols)) $pdo->exec("ALTER TABLE news ADD COLUMN published tinyint(1) DEFAULT 1");
+
+                    $pdo->exec("DELETE FROM news");
+                    $stmt = $pdo->prepare("INSERT INTO news (id, title, titleAr, date, summary, summaryAr, content, contentAr, highlightTitle, highlightTitleAr, highlightContent, highlightContentAr, image, published, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    foreach ($newData as $n) {
+                        $stmt->execute([
+                            $n['id'] ?? uniqid(),
+                            $n['title'] ?? '',
+                            $n['titleAr'] ?? '',
+                            $n['date'] ?? date('Y-m-d'),
+                            $n['summary'] ?? '',
+                            $n['summaryAr'] ?? '',
+                            $n['content'] ?? '',
+                            $n['contentAr'] ?? '',
+                            $n['highlightTitle'] ?? '',
+                            $n['highlightTitleAr'] ?? '',
+                            $n['highlightContent'] ?? '',
+                            $n['highlightContentAr'] ?? '',
+                            $n['image'] ?? '',
+                            !empty($n['published']) ? 1 : 0,
+                            !empty($n['featured']) ? 1 : 0
+                        ]);
+                    }
+                } elseif ($category === 'jobs') {
+                    $pdo->exec("DELETE FROM jobs");
+                    $stmt = $pdo->prepare("INSERT INTO jobs (id, title, titleAr, department, departmentAr, location, locationAr, type, typeAr, description, descriptionAr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    foreach ($newData as $j) {
+                        $stmt->execute([
+                            $j['id'] ?? uniqid(),
+                            $j['title'] ?? '',
+                            $j['titleAr'] ?? '',
+                            $j['department'] ?? '',
+                            $j['departmentAr'] ?? '',
+                            $j['location'] ?? '',
+                            $j['locationAr'] ?? '',
+                            $j['type'] ?? '',
+                            $j['typeAr'] ?? '',
+                            $j['description'] ?? '',
+                            $j['descriptionAr'] ?? ''
+                        ]);
+                    }
+                } else {
+                    $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES (?, ?)");
+                    $stmt->execute([$category, json_encode($newData, JSON_UNESCAPED_UNICODE)]);
                 }
-            } elseif ($category === 'news') {
-                $pdo->exec("DELETE FROM news");
-                $stmt = $pdo->prepare("INSERT INTO news (id, title, titleAr, date, summary, summaryAr, content, contentAr, highlightTitle, highlightTitleAr, highlightContent, highlightContentAr, image, published, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                foreach ($newData as $n) {
-                    $stmt->execute([$n['id'], $n['title'], $n['titleAr'], $n['date'], $n['summary'], $n['summaryAr'], $n['content'] ?? '', $n['contentAr'] ?? '', $n['highlightTitle'] ?? '', $n['highlightTitleAr'] ?? '', $n['highlightContent'] ?? '', $n['highlightContentAr'] ?? '', $n['image'], $n['published'] ? 1 : 0, !empty($n['featured']) ? 1 : 0]);
-                }
-            } elseif ($category === 'jobs') {
-                $pdo->exec("DELETE FROM jobs");
-                $stmt = $pdo->prepare("INSERT INTO jobs (id, title, titleAr, department, departmentAr, location, locationAr, type, typeAr, description, descriptionAr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                foreach ($newData as $j) {
-                    $stmt->execute([$j['id'], $j['title'], $j['titleAr'], $j['department'], $j['departmentAr'], $j['location'], $j['locationAr'], $j['type'], $j['typeAr'], $j['description'], $j['descriptionAr']]);
-                }
-            } else {
-                // Save JSON for other components: heroSlides, aboutData, jobApplications, complaints, contactMessages...
-                $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES (?, ?)");
-                $stmt->execute([$category, json_encode($newData)]);
+                $pdo->commit();
+                bustCache();
+                echo json_encode(["status" => "success", "message" => "Updated successfully.", "category" => $category]);
+            } catch (Exception $ex) {
+                $pdo->rollBack();
+                throw $ex; 
             }
-            bustCache(); // Invalidate cache so next read fetches fresh data
-            echo json_encode(["status" => "success", "message" => "Updated successfully.", "category" => $category]);
             break;
 
         case 'add_complaint':
@@ -334,12 +388,136 @@ try {
              echo json_encode(["status" => "success", "message" => "Application submitted successfully.", "data" => $input]);
              break;
 
+        case 'get_entries':
+            $type = $_GET['type'] ?? '';
+            $page = max(1, (int)($_GET['page'] ?? 1));
+            $limit = max(1, (int)($_GET['limit'] ?? 12));
+            $search = $_GET['search'] ?? '';
+            $filterType = $_GET['filterType'] ?? 'All';
+
+            $data = [];
+            if ($type === 'schools') {
+                $stmt = $pdo->query("SELECT * FROM schools");
+                $data = $stmt->fetchAll();
+            } elseif ($type === 'news') {
+                $stmt = $pdo->query("SELECT * FROM news ORDER BY date DESC");
+                $data = $stmt->fetchAll();
+            } elseif (in_array($type, ['complaints', 'contactMessages', 'jobApplications'])) {
+                $stmt = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = ?");
+                $stmt->execute([$type]);
+                $row = $stmt->fetch();
+                $data = $row ? json_decode($row['setting_value'], true) : [];
+                
+                // Primary Sort: Sort by date descending
+                usort($data, function($a, $b) {
+                    $dateA = $a['createdAt'] ?? $a['appliedAt'] ?? $a['date'] ?? '';
+                    $dateB = $b['createdAt'] ?? $b['appliedAt'] ?? $b['date'] ?? '';
+                    return strcmp($dateB, $dateA);
+                });
+            }
+
+            // Backend Filtering
+            if ($search || $filterType !== 'All') {
+                $term = strtolower($search);
+                $data = array_filter($data, function($item) use ($term, $filterType) {
+                    // Filter by Message Type
+                    if ($filterType !== 'All' && ($item['messageType'] ?? '') !== $filterType) {
+                        return false;
+                    }
+                    // Filter by Search Term
+                    if ($term) {
+                        $searchable = strtolower(implode(' ', [
+                            $item['fullName'] ?? '',
+                            $item['id'] ?? '',
+                            $item['phone'] ?? '',
+                            $item['email'] ?? '',
+                            $item['school'] ?? '',
+                            $item['subject'] ?? '',
+                            $item['message'] ?? ''
+                        ]));
+                        return strpos($searchable, $term) !== false;
+                    }
+                    return true;
+                });
+            }
+
+            $total = count($data);
+            $totalPages = ceil($total / $limit);
+            $offset = ($page - 1) * $limit;
+            $items = array_values(array_slice($data, $offset, $limit));
+
+            echo json_encode([
+                "status" => "success",
+                "data" => [
+                    "items" => $items,
+                    "total" => $total,
+                    "page" => $page,
+                    "limit" => $limit,
+                    "totalPages" => $totalPages
+                ]
+            ]);
+            break;
+
+        case 'update_complaint':
+            $input = json_decode(file_get_contents('php://input'), true);
+            $id = $input['id'] ?? '';
+            $status = $input['status'] ?? '';
+            $response = $input['response'] ?? '';
+            if (!$id) throw new Exception("ID required");
+            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'complaints'");
+            $row = $stmt->fetch();
+            $complaints = $row ? json_decode($row['setting_value'], true) : [];
+            $found = false;
+            foreach ($complaints as &$c) {
+                if (($c['id'] ?? '') === $id) {
+                    $c['status'] = $status;
+                    $c['response'] = $response;
+                    $found = true;
+                    break;
+                }
+            }
+            if ($found) {
+                $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('complaints', ?)");
+                $stmt->execute([json_encode($complaints, JSON_UNESCAPED_UNICODE)]);
+                bustCache();
+                echo json_encode(["status" => "success", "message" => "Updated successfully."]);
+            } else {
+                throw new Exception("Complaint not found");
+            }
+            break;
+
+        case 'update_job_application':
+            $input = json_decode(file_get_contents('php://input'), true);
+            $id = $input['id'] ?? '';
+            $status = $input['status'] ?? '';
+            if (!$id) throw new Exception("ID required");
+            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'jobApplications'");
+            $row = $stmt->fetch();
+            $apps = $row ? json_decode($row['setting_value'], true) : [];
+            $found = false;
+            foreach ($apps as &$a) {
+                if (($a['id'] ?? '') === $id) {
+                    $a['status'] = $status;
+                    $found = true;
+                    break;
+                }
+            }
+            if ($found) {
+                $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('jobApplications', ?)");
+                $stmt->execute([json_encode($apps, JSON_UNESCAPED_UNICODE)]);
+                bustCache();
+                echo json_encode(["status" => "success", "message" => "Updated successfully."]);
+            } else {
+                throw new Exception("Application not found");
+            }
+            break;
+
         case 'delete_entry':
             $input = json_decode(file_get_contents('php://input'), true);
             if (!is_array($input)) throw new Exception('Invalid JSON payload');
 
             // Whitelist allowed types — never expose arbitrary settings keys to the client
-            $allowedTypes = ['complaints', 'contactMessages'];
+            $allowedTypes = ['complaints', 'contactMessages', 'jobApplications'];
             $type = $input['type'] ?? '';
             $id   = $input['id']   ?? '';
 

@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { deleteEntry } from '@/services/api';
+import React, { useState, useEffect, useMemo } from 'react';
+import { getPaginatedEntries, updateComplaint, updateJobApplication, deleteEntry } from '@/services/api';
 import {
   LayoutDashboard, Newspaper, School, Image, Info, Settings,
   Plus, Pencil, Trash2, Eye, EyeOff, Save, X,
   Users, Home as HomeIcon, GraduationCap, MapPin, Bell, LogOut, Search,
   TrendingUp, CheckCircle, AlertCircle, Menu, Moon, Sun,
-  Globe, ChevronRight, Briefcase, MessageSquare, Mail, Filter, ChevronDown, Phone
+  Globe, ChevronRight, Briefcase, MessageSquare, Mail, Filter, ChevronDown, Phone,
+  ChevronLeft, ChevronsLeft, ChevronsRight
 } from 'lucide-react';
 import { NEWS, SCHOOLS } from '@/constants';
 import {
@@ -18,6 +19,16 @@ import { useLanguage } from '@/context/LanguageContext';
 import NISLogo from '@/components/common/NISLogo';
 import { CustomSelect, CustomDatePicker, ImageUpload } from '@/components/common/FormControls';
 import { useSiteData } from '@/context/DataContext';
+
+// ─── Custom Hooks ─────────────────────────────────────────────────────────────
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
 
 // ─── Initial Data Helpers ─────────────────────────────────────────────────────────────
 const prepareNews = (news: any[] = []) => (news || []).map((n, i) => ({ ...n, published: n.published ?? i < 8 }));
@@ -336,6 +347,73 @@ const buildWorkingHours = (form: any) => {
   return { en, ar };
 };
 
+// ─── Shared Components ─────────────────────────────────────────────────────────────
+const Pagination: React.FC<{
+  current: number;
+  total: number;
+  onChange: (page: number) => void;
+  lang: string;
+}> = ({ current, total, onChange, lang }) => {
+  const isRTL = lang === 'ar';
+  if (total <= 1) return null;
+
+  const pages = [];
+  const start = Math.max(1, current - 2);
+  const end = Math.min(total, current + 2);
+
+  for (let i = start; i <= end; i++) pages.push(i);
+
+  return (
+    <div className="flex items-center justify-center gap-2 mt-8 py-4 px-6 bg-[var(--surface2)]/50 rounded-2xl border border-[var(--border)]">
+      <button
+        className="pagination-btn"
+        onClick={() => onChange(1)}
+        disabled={current === 1}
+        title={lang === 'ar' ? 'البداية' : 'First Page'}
+      >
+        <ChevronsLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+      </button>
+      <button
+        className="pagination-btn"
+        onClick={() => onChange(current - 1)}
+        disabled={current === 1}
+      >
+        <ChevronLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+      </button>
+
+      {start > 1 && <span className="text-[var(--text2)] px-1">...</span>}
+
+      {pages.map(p => (
+        <button
+          key={p}
+          className={`pagination-btn ${current === p ? 'active' : ''}`}
+          onClick={() => onChange(p)}
+        >
+          {p}
+        </button>
+      ))}
+
+      {end < total && <span className="text-[var(--text2)] px-1">...</span>}
+
+      <button
+        className="pagination-btn"
+        onClick={() => onChange(current + 1)}
+        disabled={current === total}
+      >
+        <ChevronRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+      </button>
+      <button
+        className="pagination-btn"
+        onClick={() => onChange(total)}
+        disabled={current === total}
+        title={lang === 'ar' ? 'النهاية' : 'Last Page'}
+      >
+        <ChevronsRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+      </button>
+    </div>
+  );
+};
+
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
 const Dashboard: React.FC = () => {
   const { logout } = useAuth();
@@ -419,6 +497,20 @@ const Dashboard: React.FC = () => {
   const [newSchool, setNewSchool] = useState<Partial<DashSchool>>({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '', address: '', addressAr: '' });
   const [confirmAction, setConfirmAction] = useState<{ message: string, onConfirm: () => void } | null>(null);
 
+  // Pagination & Backend Fetching states
+  const [complaintPage, setComplaintPage] = useState(1);
+  const [complaintTotalPages, setComplaintTotalPages] = useState(1);
+  const [messagePage, setMessagePage] = useState(1);
+  const [messageTotalPages, setMessageTotalPages] = useState(1);
+  const [applicantPage, setApplicantPage] = useState(1);
+  const [applicantTotalPages, setApplicantTotalPages] = useState(1);
+  const [isTableLoading, setIsTableLoading] = useState(false);
+
+  const debouncedComplaintSearch = useDebounce(complaintsSearch, 500);
+  const debouncedSchoolSearch = useDebounce(schoolSearch, 500);
+  const debouncedNewsSearch = useDebounce(newsSearch, 500);
+  const debouncedJobSearch = useDebounce(jobSearch, 500);
+
   const u = UI[lang];
   const isRTL = lang === 'ar';
 
@@ -436,6 +528,67 @@ const Dashboard: React.FC = () => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   };
+
+  // ── Fetching Paginated Data ──────────────────────────────────────────────
+  useEffect(() => {
+    if (section === 'complaints') fetchComplaints();
+  }, [section, complaintPage, debouncedComplaintSearch, complaintsFilterType]);
+
+  useEffect(() => {
+    if (section === 'contactMessages') fetchMessages();
+  }, [section, messagePage]);
+
+  useEffect(() => {
+    if (section === 'recruitment') fetchApplicants();
+  }, [section, applicantPage, selectedRecruitmentJobId]);
+
+  const fetchComplaints = async () => {
+    setIsTableLoading(true);
+    try {
+      const res = await getPaginatedEntries({ type: 'complaints', page: complaintPage, limit: 12, search: debouncedComplaintSearch, filterType: complaintsFilterType });
+      if (res.status === 'success') {
+        setComplaints(res.data.items);
+        setComplaintTotalPages(res.data.totalPages);
+      }
+    } catch (err) { console.error(err); }
+    finally { setIsTableLoading(false); }
+  };
+
+  const fetchMessages = async () => {
+    setIsTableLoading(true);
+    try {
+      const res = await getPaginatedEntries({ type: 'contactMessages', page: messagePage, limit: 12 });
+      if (res.status === 'success') {
+        setContactMessages(res.data.items);
+        setMessageTotalPages(res.data.totalPages);
+      }
+    } catch (err) { console.error(err); }
+    finally { setIsTableLoading(false); }
+  };
+
+  const fetchApplicants = async () => {
+    setIsTableLoading(true);
+    try {
+      const res = await getPaginatedEntries({ type: 'jobApplications', page: applicantPage, limit: 12, filterType: selectedRecruitmentJobId || 'All' });
+      if (res.status === 'success') {
+        setApplications(res.data.items);
+        setApplicantTotalPages(res.data.totalPages);
+      }
+    } catch (err) { console.error(err); }
+    finally { setIsTableLoading(false); }
+  };
+
+  // Listen for data context errors
+  useEffect(() => {
+    const handleApiError = (e: any) => {
+      const { message, type } = e.detail;
+      if (type === 'SAVE_FAILED') {
+        showToast(lang === 'ar' ? `فشل الحفظ: ${message}` : `Save failed: ${message}`, 'error');
+      }
+    };
+    window.addEventListener('nis_api_error', handleApiError);
+    return () => window.removeEventListener('nis_api_error', handleApiError);
+  }, [lang]);
 
   // Handlers
   const togglePublish = (id: string) => {
@@ -580,11 +733,13 @@ const Dashboard: React.FC = () => {
     setConfirmAction({
       message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه الشكوى؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this complaint? This cannot be undone.',
       onConfirm: async () => {
-        const updated = complaints.filter(c => c.id !== id);
-        setComplaints(updated);
-        updateData('complaints', updated);
-        try { await deleteEntry('complaints', id); } catch { /* already updated locally */ }
-        showToast(lang === 'ar' ? 'تم حذف الشكوى' : 'Complaint deleted', 'error');
+        try {
+          await deleteEntry('complaints', id);
+          showToast(lang === 'ar' ? 'تم حذف الشكوى' : 'Complaint deleted', 'error');
+          fetchComplaints();
+        } catch (err) {
+          showToast(lang === 'ar' ? 'فشل الحذف' : 'Delete failed', 'error');
+        }
       }
     });
   };
@@ -593,11 +748,13 @@ const Dashboard: React.FC = () => {
     setConfirmAction({
       message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه الرسالة؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this message? This cannot be undone.',
       onConfirm: async () => {
-        const updated = contactMessages.filter(c => c.id !== id);
-        setContactMessages(updated);
-        updateData('contactMessages', updated);
-        try { await deleteEntry('contactMessages', id); } catch { /* already updated locally */ }
-        showToast(lang === 'ar' ? 'تم حذف الرسالة' : 'Message deleted', 'error');
+        try {
+          await deleteEntry('contactMessages', id);
+          showToast(lang === 'ar' ? 'تم حذف الرسالة' : 'Message deleted', 'error');
+          fetchMessages();
+        } catch {
+          showToast(lang === 'ar' ? 'فشل الحذف' : 'Delete failed', 'error');
+        }
       }
     });
   };
@@ -619,23 +776,9 @@ const Dashboard: React.FC = () => {
   const filteredSchools = schools.filter(s => s.name.toLowerCase().includes(schoolSearch.toLowerCase()) || s.governorate.toLowerCase().includes(schoolSearch.toLowerCase()));
   const filteredJobs = jobs.filter(j => j.title.toLowerCase().includes(jobSearch.toLowerCase()) || j.titleAr.includes(jobSearch) || j.department.toLowerCase().includes(jobSearch.toLowerCase()));
 
-  const filteredApplications = applications.filter(a => {
-    const matchesJob = (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'all') ? true : (a.job === selectedRecruitmentJobId || a.jobId === selectedRecruitmentJobId);
-    const term = jobSearch.toLowerCase();
-    const matchesSearch =
-      (a.fullName || '').toLowerCase().includes(term) ||
-      (a.jobTitle || '').toLowerCase().includes(term) ||
-      (a.email || '').toLowerCase().includes(term) ||
-      (a.phone || '').includes(term);
-    return matchesJob && matchesSearch;
-  });
-
-  const filteredComplaints = complaints.filter(c => {
-    const term = complaintsSearch.toLowerCase();
-    const matchesSearch = c.fullName?.toLowerCase().includes(term) || c.phone?.toLowerCase().includes(term) || c.school?.toLowerCase().includes(term) || c.id?.toLowerCase().includes(term);
-    const matchesType = complaintsFilterType === 'All' || c.messageType === complaintsFilterType;
-    return matchesSearch && matchesType;
-  });
+  // These are now filtered on the backend
+  const filteredApplications = applications;
+  const filteredComplaints = complaints;
 
   const publishedCount = newsList.filter(n => n.published).length;
 
@@ -1017,39 +1160,61 @@ const Dashboard: React.FC = () => {
               </div>
 
               {/* Applications Table */}
-              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
+              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
+                {isTableLoading && (
+                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
                 <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.applicants}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{lang === 'ar' ? 'الوظيفة المتقدم لها' : 'Applied Job'}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.applicationDate}</th>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.phone}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.status}</th>
+                      <th style={{ padding: '14px 12px', width: 48 }} />
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredApplications.map((app, i) => (
-                      <tr key={app.id} style={{ cursor: 'pointer', borderBottom: i === filteredApplications.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onClick={() => { setSelectedApplicant(app); setApplicantModalOpen(true); }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{app.fullName}</td>
+                    {filteredApplications.length > 0 ? filteredApplications.map((app, idx) => (
+                      <tr key={idx} style={{ cursor: 'pointer', borderBottom: idx === filteredApplications.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onClick={() => { setSelectedApplicant(app); setApplicantModalOpen(true); }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                        <td style={{ padding: '16px 24px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--accent)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
+                              {app.fullName.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)' }}>{app.fullName}</p>
+                              <p style={{ fontSize: 11, color: 'var(--text2)' }}>{app.email}</p>
+                            </div>
+                          </div>
+                        </td>
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, fontWeight: 600 }}>{app.jobTitle}</td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{new Date(app.appliedAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US')}</td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }} dir="ltr">{app.phone}</td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>
-                          <span className={`dash-badge ${app.status === 'Hired' ? 'badge-green' :
-                            app.status === 'Interview' ? 'badge-blue' :
-                              app.status === 'Rejected' ? 'badge-red' :
-                                app.status === 'On Hold' ? 'badge-orange' : 'badge-gray'
-                            }`}>
-                            {u[app.status?.toLowerCase() as keyof typeof u] || app.status || 'Pending'}
-                          </span>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 11 }}>{app.appliedAt ? new Date(app.appliedAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB') : ''}</td>
+                        <td style={{ padding: '16px 24px' }}>
+                          <span style={{
+                            padding: '4px 10px', borderRadius: 999, fontSize: 10, fontWeight: 800, textTransform: 'uppercase',
+                            background: app.status === 'Hired' ? 'rgba(16,185,129,0.12)' : app.status === 'Rejected' ? 'rgba(239,68,68,0.1)' : 'rgba(99,102,241,0.1)',
+                            color: app.status === 'Hired' ? '#10b981' : app.status === 'Rejected' ? '#ef4444' : 'var(--accent)',
+                          }}>{app.status}</span>
+                        </td>
+                        <td style={{ padding: '16px 12px' }}>
+                          <ChevronRight style={{ width: 16, height: 16, color: 'var(--border)', transform: isRTL ? 'rotate(180deg)' : 'none' }} />
                         </td>
                       </tr>
-                    ))}
-                    {filteredApplications.length === 0 && <tr><td colSpan={5} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><Briefcase style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></td></tr>}
+                    )) : (
+                      <tr>
+                        <td colSpan={5} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}>
+                          <Users style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} />
+                          <p style={{ fontWeight: 600 }}>{u.noResults}</p>
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
+              <Pagination current={applicantPage} total={applicantTotalPages} onChange={setApplicantPage} lang={lang} />
 
               {/* applicant detail modal */}
               {applicantModalOpen && selectedApplicant && (
@@ -1082,13 +1247,18 @@ const Dashboard: React.FC = () => {
                       <textarea className="dash-input dash-ta" value={selectedApplicant.notes || ''} onChange={e => setSelectedApplicant(a => a ? { ...a, notes: e.target.value } : null)} />
                     </div>
                     <div className="dash-form-actions" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                      <button className="dash-btn dash-btn-primary" onClick={() => {
+                      <button className="dash-btn dash-btn-primary" onClick={async () => {
                         if (!selectedApplicant) return;
-                        const updated = applications.map(a => a.id === selectedApplicant.id ? selectedApplicant : a);
-                        setApplications(updated);
-                        updateData('jobApplications', updated);
-                        setApplicantModalOpen(false);
-                        showToast(u.feedback + ' saved');
+                        try {
+                          const res = await updateJobApplication(selectedApplicant.id, selectedApplicant.status);
+                          if (res.status === 'success') {
+                            showToast(lang === 'ar' ? 'تم تحديث الحالة بنجاح' : 'Status updated successfully');
+                            fetchApplicants(); // Refetch paginated data
+                            setApplicantModalOpen(false);
+                          }
+                        } catch (err) {
+                          showToast(lang === 'ar' ? 'فشل التحديث' : 'Update failed', 'error');
+                        }
                       }}>{u.save}</button>
                       <button className="dash-btn dash-btn-ghost" onClick={() => setApplicantModalOpen(false)}>{u.cancel}</button>
                       <button
@@ -1097,12 +1267,15 @@ const Dashboard: React.FC = () => {
                         onClick={() => {
                           setConfirmAction({
                             message: lang === 'ar' ? 'هل أنت متأكد من حذف هذا المتقدم؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this applicant? This cannot be undone.',
-                            onConfirm: () => {
-                              const updated = applications.filter(a => a.id !== selectedApplicant?.id);
-                              setApplications(updated);
-                              updateData('jobApplications', updated);
-                              setApplicantModalOpen(false);
-                              showToast(lang === 'ar' ? 'تم الحذف بنجاح' : 'Deleted successfully');
+                            onConfirm: async () => {
+                              try {
+                                await deleteEntry('jobApplications', selectedApplicant.id);
+                                showToast(lang === 'ar' ? 'تم الحذف بنجاح' : 'Deleted successfully');
+                                fetchApplicants();
+                                setApplicantModalOpen(false);
+                              } catch (err) {
+                                showToast(lang === 'ar' ? 'فشل الحذف' : 'Delete failed', 'error');
+                              }
                             }
                           });
                         }}
@@ -1504,8 +1677,14 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
+              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
+                {isTableLoading && (
+                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
                 <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
+                  {/* ... same thead ... */}
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{lang === 'ar' ? 'رقم الشكوى' : 'ID'}</th>
@@ -1559,6 +1738,7 @@ const Dashboard: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+              <Pagination current={complaintPage} total={complaintTotalPages} onChange={setComplaintPage} lang={lang} />
             </div>
           )}
 
@@ -1569,7 +1749,12 @@ const Dashboard: React.FC = () => {
                 <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.contactMessages}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.contactMessagesManage}</p></div>
               </div>
 
-              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
+              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
+                {isTableLoading && (
+                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
                 <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
@@ -1608,6 +1793,7 @@ const Dashboard: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+              <Pagination current={messagePage} total={messageTotalPages} onChange={setMessagePage} lang={lang} />
             </div>
           )}
 
@@ -1737,13 +1923,22 @@ const Dashboard: React.FC = () => {
               />
             </div>
             <div className="dash-form-actions">
-              <button className="dash-btn dash-btn-primary" onClick={() => {
+              <button className="dash-btn dash-btn-primary" onClick={async () => {
                 if (!selectedComplaint) return;
-                const updated = complaints.map(c => c.id === selectedComplaint.id ? selectedComplaint : c);
-                setComplaints(updated);
-                updateData('complaints', updated);
-                setComplaintModalOpen(false);
-                showToast(u.status + ' updated');
+                try {
+                  const res = await updateComplaint(
+                    selectedComplaint.id,
+                    selectedComplaint.status,
+                    selectedComplaint.response || ''
+                  );
+                  if (res.status === 'success') {
+                    showToast(lang === 'ar' ? 'تم تحديث الشكوى بنجاح' : 'Complaint updated successfully');
+                    fetchComplaints(); // Refetch paginated data
+                    setComplaintModalOpen(false);
+                  }
+                } catch (err) {
+                  showToast(lang === 'ar' ? 'فشل التحديث' : 'Update failed', 'error');
+                }
               }}>{u.save}</button>
               <button className="dash-btn dash-btn-ghost" onClick={() => setComplaintModalOpen(false)}>{u.close || u.cancel}</button>
             </div>

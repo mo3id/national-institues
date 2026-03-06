@@ -95,7 +95,23 @@ export const submitJobApplication = async (applicationData: Record<string, any>)
     return data;
 };
 
-export const deleteEntry = async (type: 'complaints' | 'contactMessages', id: string): Promise<ApiResponse> => {
+export const getPaginatedEntries = async (params: { type: string, page: number, limit: number, search?: string, filterType?: string }): Promise<ApiResponse> => {
+    const { type, page, limit, search = '', filterType = 'All' } = params;
+    const { data } = await apiClient.get<ApiResponse>(`?action=get_entries&type=${type}&page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&filterType=${encodeURIComponent(filterType)}`);
+    return data;
+};
+
+export const updateComplaint = async (id: string, status: string, response: string): Promise<ApiResponse> => {
+    const { data } = await apiClient.post<ApiResponse>('?action=update_complaint', { id, status, response });
+    return data;
+};
+
+export const updateJobApplication = async (id: string, status: string): Promise<ApiResponse> => {
+    const { data } = await apiClient.post<ApiResponse>('?action=update_job_application', { id, status });
+    return data;
+};
+
+export const deleteEntry = async (type: 'complaints' | 'contactMessages' | 'jobApplications', id: string): Promise<ApiResponse> => {
     const { data } = await apiClient.post<ApiResponse>('?action=delete_entry', { type, id });
     if (data.status !== 'success') throw new Error(data.message || 'Failed to delete entry');
     return data;

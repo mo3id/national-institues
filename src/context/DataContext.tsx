@@ -133,7 +133,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
 
         onError: (err: any) => {
-            alert(`Dashboard save failed! Please upload the latest api.php to your server.\nError: ${err.message}`);
+            console.error('Update failed:', err);
+            window.dispatchEvent(new CustomEvent('nis_api_error', {
+                detail: {
+                    message: err.message,
+                    type: 'SAVE_FAILED'
+                }
+            }));
         },
     });
 
