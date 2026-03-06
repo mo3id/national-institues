@@ -4,7 +4,7 @@ import { SiteData } from '@/store/useDataStore';
 // Ensure the API base URL falls back to relative /api.php if VITE_API_BASE_URL is not provided or undefined
 // This uses Vite's string replacement for env variables.
 // Remove /api.php from base URL to handle paths cleanly
-const API_BASE_URL: string = ((import.meta as any).env.VITE_API_BASE_URL || '/api.php').replace(/\/api\.php\/?$/, '');
+const API_BASE_URL: string = ((import.meta as any).env.VITE_API_BASE_URL || '/backend/api.php').replace(/\/api\.php\/?$/, '');
 const SYNC_CHANNEL_NAME = 'nis_data_sync';
 
 // Cross-tab sync helper
@@ -29,7 +29,7 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(config => {
     // If the url is just query params (e.g. ?action=...), prepend /api.php
     if (config.url && config.url.startsWith('?')) {
-        config.url = `/api.php${config.url}`;
+        config.url = `/backend/api.php${config.url}`;
     }
     return config;
 });
