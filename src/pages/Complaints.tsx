@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
 import { SCHOOLS } from '@/constants';
-import { Phone, Mail, MessageSquare, CheckCircle, Store, GraduationCap, MapPin, Loader2, Send } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Phone, Mail, MessageSquare, CheckCircle, Store, GraduationCap, MapPin, Loader2, Send, Search, Clipboard, Check } from 'lucide-react';
 import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
 import { CustomSelect } from '@/components/common/FormControls';
@@ -25,6 +26,15 @@ const Complaints: React.FC = () => {
     message: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [complaintId, setComplaintId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = () => {
+    if (!complaintId) return;
+    navigator.clipboard.writeText(complaintId);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string, value: string } }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -52,11 +62,12 @@ const Complaints: React.FC = () => {
     setSubmitError(null);
 
     try {
-      await submitComplaint({ ...formData });
+      const result = await submitComplaint({ ...formData });
 
+      setComplaintId(result.data?.id || null);
       setSubmitted(true);
       setFormData({ fullName: '', phone: '', email: '', messageType: (t?.complaints?.types || [])[0] || '', school: '', message: '' });
-      setTimeout(() => setSubmitted(false), 5000);
+      // Remove the 5s timeout to let user see their ID
     } catch (err: any) {
       setSubmitError(lang === 'ar' ? 'فشل إرسال الشكوى، يرجى المحاولة مرة أخرى.' : err.message || 'Failed to submit complaint.');
     } finally {
@@ -87,6 +98,18 @@ const Complaints: React.FC = () => {
                 {t?.complaints?.subtitle}
               </p>
             </ScrollReveal>
+
+            <ScrollReveal delay={0.2} direction="up">
+              <div className="mt-10 flex justify-center">
+                <Link
+                  to="/complaints/inquiry"
+                  className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 px-8 py-3 rounded-full font-bold transition-all flex items-center gap-2 hover:gap-4 shadow-xl"
+                >
+                  <Search className="w-5 h-5" />
+                  <span>{t?.complaints?.inquiryTitle}</span>
+                </Link>
+              </div>
+            </ScrollReveal>
           </div>
         </section>
         {/* Form Section */}
@@ -97,19 +120,71 @@ const Complaints: React.FC = () => {
                 <div className={`absolute top-0 ${isRTL ? 'left-0' : 'right-0'} w-64 h-64 bg-blue-50 rounded-full blur-3xl -z-0 opacity-50`} />
 
                 {submitted ? (
-                  <div className="text-center py-16 space-y-6 relative z-10 animate-fade-in text-start">
+                  <div className="text-center py-10 space-y-8 relative z-10 animate-fade-in">
                     <div className="flex justify-center">
                       <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center animate-bounce">
                         <CheckCircle className="h-12 w-12 text-green-600" />
                       </div>
                     </div>
-                    <div>
-                      <h3 className={`text-3xl font-black text-gray-900 mb-2 uppercase tracking-tight`}>
-                        {t?.complaints?.successTitle}
-                      </h3>
-                      <p className={`text-gray-500 font-medium text-lg`}>
-                        {t?.complaints?.successDesc}
-                      </p>
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <h3 className="text-3xl font-black text-gray-900 mb-2 uppercase tracking-tight">
+                          {t?.complaints?.successTitle}
+                        </h3>
+                        <p className="text-slate-500 font-medium text-lg max-w-md mx-auto">
+                          {complaintId ? t?.complaints?.successWithId : t?.complaints?.successDesc}
+                        </p>
+                      </div>
+
+                      {complaintId && (
+                        <>
+                          <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 inline-block mx-auto min-w-[280px]">
+                            <div className="flex flex-col items-center gap-4">
+                              <span className="text-4xl font-black text-[#1e3a8a] tracking-widest font-mono">
+                                {complaintId}
+                              </span>
+                              <button
+                                onClick={copyToClipboard}
+                                className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-bold text-slate-600 hover:text-[#1e3a8a] hover:border-[#1e3a8a] transition-all shadow-sm"
+                              >
+                                {copied ? (
+                                  <>
+                                    <Check className="w-4 h-4 text-green-500" />
+                                    <span>{t?.complaints?.copied}</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Clipboard className="w-4 h-4" />
+                                    <span>{t?.complaints?.copyId}</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-slate-400 text-sm font-medium pt-4">
+                            {t?.complaints?.successDesc}
+                          </p>
+                        </>
+                      )}
+
+                      <div className="pt-6 flex flex-col sm:flex-row gap-4 justify-center">
+                        <Link
+                          to="/complaints/inquiry"
+                          className="bg-[#1e3a8a] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-900 hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                        >
+                          <Search className="w-5 h-5" />
+                          <span>{t?.complaints?.inquiryTitle}</span>
+                        </Link>
+                        <button
+                          onClick={() => {
+                            setSubmitted(false);
+                            setComplaintId(null);
+                          }}
+                          className="bg-slate-100 text-slate-700 px-8 py-3.5 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2"
+                        >
+                          {lang === 'ar' ? 'تقديم بلاغ آخر' : 'Submit another complaint'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ) : (

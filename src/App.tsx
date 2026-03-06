@@ -23,6 +23,7 @@ const SchoolProfile = lazy(() => import('./pages/SchoolProfile'));
 const News = lazy(() => import('./pages/News'));
 const NewsDetail = lazy(() => import('./pages/NewsDetail'));
 const Complaints = lazy(() => import('./pages/Complaints'));
+const ComplaintInquiry = lazy(() => import('./pages/ComplaintInquiry'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Login = lazy(() => import('./pages/Login'));
 const ContactUs = lazy(() => import('./pages/ContactUs'));
@@ -48,7 +49,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  const noPadPaths = ['/', '/login', '/about', '/complaints', '/dashboard', '/contact'];
+  const noPadPaths = ['/', '/login', '/about', '/complaints', '/complaints/inquiry', '/dashboard', '/contact'];
   const isNoPadding = noPadPaths.includes(location.pathname) ||
     location.pathname.startsWith('/schools') ||
     location.pathname.startsWith('/careers') ||
@@ -103,6 +104,7 @@ const App: React.FC = () => {
                           <Route path="/ai-studio" element={<AIStudio />} />
                           <Route path="/careers" element={<Jobs />} />
                           <Route path="/complaints" element={<Complaints />} />
+                          <Route path="/complaints/inquiry" element={<ComplaintInquiry />} />
                           <Route path="/contact" element={<ContactUs />} />
                           <Route path="*" element={<ErrorPage isNotFound={true} />} />
                         </Routes>

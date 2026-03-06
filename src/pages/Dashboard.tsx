@@ -1723,10 +1723,19 @@ const Dashboard: React.FC = () => {
                 }))}
               />
             </div>
+            <div>
+              <label className="dash-label">{lang === 'ar' ? 'رد الإدارة' : 'Admin Response'}</label>
+              <textarea
+                className="dash-input dash-ta"
+                value={selectedComplaint.response || ''}
+                onChange={e => setSelectedComplaint(c => c ? { ...c, response: e.target.value } : null)}
+                placeholder={lang === 'ar' ? 'اكتب الرد هنا...' : 'Write response here...'}
+              />
+            </div>
             <div className="dash-form-actions">
               <button className="dash-btn dash-btn-primary" onClick={() => {
                 if (!selectedComplaint) return;
-                const updated = complaints.map(c => c === selectedComplaint ? selectedComplaint : c);
+                const updated = complaints.map(c => c.id === selectedComplaint.id ? selectedComplaint : c);
                 setComplaints(updated);
                 updateData('complaints', updated);
                 setComplaintModalOpen(false);

@@ -231,14 +231,57 @@ try {
             $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'complaints'");
             $row = $stmt->fetch();
             $complaints = $row ? json_decode($row['setting_value'], true) : [];
-            $input['id']        = uniqid('cmp_', true);
+            
+            $msgType = $input['messageType'] ?? '';
+            // Only generate ID for Complaint (شكوى) and Inquiry (استفسار)
+            $shouldGenerateId = in_array($msgType, ['شكوى', 'استفسار', 'Complaint', 'Inquiry']);
+            
+            if ($shouldGenerateId) {
+                // Generate a readable ID: CMP-XXXX (e.g. CMP-5821)
+                $complaintNumber = 'CMP-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+                $input['id']        = $complaintNumber;
+                $input['status']    = 'Pending';
+                $input['response']  = '';
+            } else {
+                $input['id']        = null;
+            }
+            
             $input['createdAt'] = date('c');
-            $input['status']    = 'Pending';
+            
             $complaints[] = $input;
             $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('complaints', ?)");
             $stmt->execute([json_encode($complaints, JSON_UNESCAPED_UNICODE)]);
             bustCache();
             echo json_encode(["status" => "success", "message" => "Complaint added successfully.", "data" => $input]);
+            break;
+
+        case 'get_complaint_status':
+            $id = $_GET['complaintId'] ?? '';
+            if (!$id) throw new Exception("Complaint ID is required");
+
+            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'complaints'");
+            $row = $stmt->fetch();
+            $complaints = $row ? json_decode($row['setting_value'], true) : [];
+
+            $found = null;
+            foreach ($complaints as $c) {
+                if (($c['id'] ?? '') === $id) {
+                    $found = $c;
+                    break;
+                }
+            }
+
+            if (!$found) {
+                echo json_encode(["status" => "error", "message" => "Complaint not found."]);
+            } else {
+                echo json_encode(["status" => "success", "data" => [
+                    'id' => $found['id'],
+                    'status' => $found['status'],
+                    'response' => $found['response'] ?? '',
+                    'createdAt' => $found['createdAt'],
+                    'fullName' => $found['fullName'] ?? '***' // Mask name for privacy
+                ]]);
+            }
             break;
 
         case 'add_contact_message':

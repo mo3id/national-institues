@@ -115,7 +115,19 @@ export const en = {
             school: "Select a school",
             message: "Write your message here..."
         },
-        types: ['Complaint', 'Suggestion', 'Inquiry', 'Thanks']
+        types: ['Complaint', 'Suggestion', 'Inquiry', 'Thanks'],
+        inquiryTitle: "Complaint Inquiry",
+        inquirySubtitle: "Enter your complaint number to track its status and responses.",
+        complaintNumber: "Complaint Number",
+        inquire: "Inquire",
+        status: "Status",
+        response: "Admin Response",
+        createdAt: "Submitted At",
+        notFound: "No complaint found with this number.",
+        backToSubmit: "Back to Submit Complaint",
+        successWithId: "Complaint submitted successfully. Your complaint number is:",
+        copyId: "Copy Number",
+        copied: "Copied!"
     },
     gallery: {
         tag: "Visual Experience",
