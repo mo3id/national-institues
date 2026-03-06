@@ -497,13 +497,14 @@ const Dashboard: React.FC = () => {
   const [newSchool, setNewSchool] = useState<Partial<DashSchool>>({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '', address: '', addressAr: '' });
   const [confirmAction, setConfirmAction] = useState<{ message: string, onConfirm: () => void } | null>(null);
 
-  // Pagination & Backend Fetching states
   const [complaintPage, setComplaintPage] = useState(1);
   const [complaintTotalPages, setComplaintTotalPages] = useState(1);
   const [messagePage, setMessagePage] = useState(1);
   const [messageTotalPages, setMessageTotalPages] = useState(1);
   const [applicantPage, setApplicantPage] = useState(1);
   const [applicantTotalPages, setApplicantTotalPages] = useState(1);
+  const [newsPage, setNewsPage] = useState(1);
+  const [newsTotalPages, setNewsTotalPages] = useState(1);
   const [isTableLoading, setIsTableLoading] = useState(false);
 
   const debouncedComplaintSearch = useDebounce(complaintsSearch, 500);
@@ -542,6 +543,10 @@ const Dashboard: React.FC = () => {
     if (section === 'recruitment') fetchApplicants();
   }, [section, applicantPage, selectedRecruitmentJobId]);
 
+  useEffect(() => {
+    if (section === 'news') fetchNews();
+  }, [section, newsPage, debouncedNewsSearch]);
+
   const fetchComplaints = async () => {
     setIsTableLoading(true);
     try {
@@ -573,6 +578,18 @@ const Dashboard: React.FC = () => {
       if (res.status === 'success') {
         setApplications(res.data.items);
         setApplicantTotalPages(res.data.totalPages);
+      }
+    } catch (err) { console.error(err); }
+    finally { setIsTableLoading(false); }
+  };
+
+  const fetchNews = async () => {
+    setIsTableLoading(true);
+    try {
+      const res = await getPaginatedEntries({ type: 'news', page: newsPage, limit: 10, search: debouncedNewsSearch });
+      if (res.status === 'success') {
+        setNewsList(res.data.items);
+        setNewsTotalPages(res.data.totalPages);
       }
     } catch (err) { console.error(err); }
     finally { setIsTableLoading(false); }
@@ -964,7 +981,7 @@ const Dashboard: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                 <div>
                   <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.news}</h2>
-                  <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{filtered.length} {u.newsManage} · {publishedCount} {u.publishedCount}</p>
+                  <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{newsList.length} {u.newsManage} · {publishedCount} {u.publishedCount}</p>
                 </div>
                 <button className="dash-btn dash-btn-primary" onClick={() => setAddNewsOpen(true)}><Plus style={{ width: 15, height: 15 }} />{u.addArticle}</button>
               </div>
@@ -972,11 +989,16 @@ const Dashboard: React.FC = () => {
                 <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 14, right: isRTL ? 14 : 'auto', top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: 'var(--text2)' }} />
                 <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={newsSearch} onChange={e => setNewsSearch(e.target.value)} />
               </div>
-              <div className="dash-card" style={{ overflow: 'hidden' }}>
+              <div className="dash-card" style={{ overflow: 'hidden', position: 'relative' }}>
+                {isTableLoading && (
+                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
                 <div className="row-header">
                   <div /><p className="dash-label" style={{ margin: 0 }}>{u.title}</p><p className="dash-label" style={{ margin: 0 }}>{u.date}</p><p className="dash-label" style={{ margin: 0 }}>{u.status}</p><p className="dash-label" style={{ margin: 0 }}>{u.actions}</p>
                 </div>
-                {filtered.map(n => (
+                {newsList.map(n => (
                   <div key={n.id} className="news-row">
                     <img src={n.image || undefined} style={{ width: 52, height: 52, borderRadius: 10, objectFit: 'cover' }} alt="" />
                     <div style={{ minWidth: 0, position: 'relative' }}>
@@ -995,8 +1017,9 @@ const Dashboard: React.FC = () => {
                     </div>
                   </div>
                 ))}
-                {filtered.length === 0 && <div style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><Newspaper style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></div>}
+                {newsList.length === 0 && <div style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><Newspaper style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></div>}
               </div>
+              <Pagination current={newsPage} total={newsTotalPages} onChange={setNewsPage} lang={lang} />
             </div>
           )}
 
