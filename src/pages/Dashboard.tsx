@@ -505,7 +505,7 @@ const Dashboard: React.FC = () => {
   const [newJob, setNewJob] = useState<Partial<DashJob>>({ title: '', titleAr: '', department: '', departmentAr: '', location: '', locationAr: '', type: '', typeAr: '', description: '', descriptionAr: '', image: '' });
   const [profileDraft, setProfileDraft] = useState({ ...profile });
   const [addSchoolOpen, setAddSchoolOpen] = useState(false);
-  const [newSchool, setNewSchool] = useState<Partial<DashSchool>>({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '', address: '', addressAr: '' });
+  const [newSchool, setNewSchool] = useState<Partial<DashSchool>>({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '', address: '', addressAr: '', applicationLink: '' });
   const [confirmAction, setConfirmAction] = useState<{ message: string, onConfirm: () => void } | null>(null);
 
   const [complaintPage, setComplaintPage] = useState(1);
@@ -762,7 +762,7 @@ const Dashboard: React.FC = () => {
     // Optimistic Update
     setSchools(prev => [newEntry, ...prev]);
     setAddSchoolOpen(false);
-    setNewSchool({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '', address: '', addressAr: '' });
+    setNewSchool({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '', address: '', addressAr: '', applicationLink: '' });
     showToast(u.schoolSaved);
 
     await apiSaveSchool(newEntry);

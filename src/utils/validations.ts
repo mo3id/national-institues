@@ -78,6 +78,7 @@ export const getDashSchoolSchema = () => z.object({
     rating: z.string().min(1, { message: 'Rating is required' }),
     studentCount: z.string().min(1, { message: 'Student count is required' }),
     foundedYear: z.string().min(4, { message: 'Founded year is required' }),
+    applicationLink: z.string().optional().nullish(),
 });
 
 export const getDashJobSchema = () => z.object({

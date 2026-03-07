@@ -581,7 +581,7 @@ try {
         case 'save_school':
             $s = json_decode(file_get_contents('php://input'), true);
             if (!$s) throw new Exception("Data required");
-            $stmt = $pdo->prepare("REPLACE INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, foundedYear, address, addressAr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $pdo->prepare("REPLACE INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $s['id'] ?? uniqid(),
                 $s['name'] ?? '',
@@ -605,7 +605,8 @@ try {
                 $s['studentCount'] ?? '',
                 $s['foundedYear'] ?? '',
                 $s['address'] ?? '',
-                $s['addressAr'] ?? ''
+                $s['addressAr'] ?? '',
+                $s['applicationLink'] ?? ''
             ]);
             bustCache();
             echo json_encode(["status" => "success", "message" => "School saved successfully."]);

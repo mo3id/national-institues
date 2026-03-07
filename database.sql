@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS `schools` (
   `mainImage` text,
   `gallery` text,
   `address` text,
-  `addressAr` text
+  `addressAr` text,
+  `applicationLink` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `schools` (`id`, `name`, `nameAr`, `location`, `locationAr`, `governorate`, `governorateAr`, `principal`, `principalAr`, `logo`, `type`, `mainImage`, `gallery`) VALUES ('1', 'Port Said School', 'مدرسة بورسعيد', 'Zamalek', 'الزمالك', 'Cairo', 'القاهرة', 'Dr. Ahmed Ali', '', 'https://picsum.photos/seed/school1/100/100', 'Languages', 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=800&q=80', '[]');

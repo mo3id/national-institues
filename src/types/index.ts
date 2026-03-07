@@ -23,6 +23,7 @@ export interface School {
   rating?: string;
   studentCount?: string;
   foundedYear?: string;
+  applicationLink?: string;
 }
 
 export interface NewsItem {

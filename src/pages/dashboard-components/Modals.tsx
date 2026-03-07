@@ -361,6 +361,10 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
                 {errors.foundedYear && <span className="text-red-500 text-xs mt-1 block">{errors.foundedYear}</span>}
             </div>
             <div className="form-full">
+                <label className="dash-label">{lang === 'ar' ? 'رابط التقديم' : 'Application Link'}</label>
+                <input className="dash-input" placeholder={lang === 'ar' ? 'مثال: https://apply.school.edu.eg' : 'e.g. https://apply.school.edu.eg'} value={d.applicationLink || ''} onChange={e => setD(p => ({ ...p, applicationLink: e.target.value }))} />
+            </div>
+            <div className="form-full">
                 <div className={errors.mainImage ? 'border border-red-500 p-2 rounded' : ''}>
                     <ImageUpload label={u.mainImage} value={d.mainImage || ''} onChange={val => { setD(p => ({ ...p, mainImage: val })); if (errors.mainImage) setErrors(p => ({ ...p, mainImage: '' })) }} />
                 </div>

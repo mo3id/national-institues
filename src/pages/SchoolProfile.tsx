@@ -2,7 +2,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useSiteData } from '@/context/DataContext';
-import { ArrowLeft, MapPin, Phone, Mail, Globe, User, X, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, Mail, Globe, User, X, ChevronLeft, ChevronRight, Maximize2, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 import PageTransition from '@/components/common/PageTransition';
@@ -163,6 +163,23 @@ const SchoolProfile: React.FC = () => {
                         <div>
                           <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{t.schools.principal || (lang === 'ar' ? 'المدير' : 'Principal')}</p>
                           <p className="font-semibold text-slate-800 text-sm">{principalName}</p>
+                        </div>
+                      </div>
+
+                      {/* Application Link */}
+                      <div className="flex items-start gap-4 group">
+                        <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-[#1e3a8a] group-hover:text-white transition-all duration-300">
+                          <ExternalLink className="w-5 h-5 text-[#1e3a8a] group-hover:text-white transition-colors" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{lang === 'ar' ? 'رابط التقديم' : 'Application Link'}</p>
+                          {school?.applicationLink ? (
+                            <a href={school.applicationLink.startsWith('http') ? school.applicationLink : `https://${school.applicationLink}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-600 hover:text-blue-800 transition-colors text-sm truncate max-w-[200px] block">
+                              {lang === 'ar' ? 'اضغط هنا للتقديم' : 'Apply Here'}
+                            </a>
+                          ) : (
+                            <p className="font-semibold text-slate-500 text-sm">{t.common.notAvailable}</p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -330,8 +347,8 @@ const SchoolProfile: React.FC = () => {
                       setSelectedImageIndex(i);
                     }}
                     className={`relative flex-shrink-0 w-12 h-9 md:w-16 md:h-11 rounded-lg overflow-hidden transition-all duration-300 ${selectedImageIndex === i
-                        ? 'ring-2 ring-blue-500 scale-105 opacity-100'
-                        : 'opacity-20 hover:opacity-100 grayscale hover:grayscale-0'
+                      ? 'ring-2 ring-blue-500 scale-105 opacity-100'
+                      : 'opacity-20 hover:opacity-100 grayscale hover:grayscale-0'
                       }`}
                   >
                     <img src={src} className="w-full h-full object-cover" alt={`thumb-${i}`} />

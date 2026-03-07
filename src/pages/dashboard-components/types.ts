@@ -45,6 +45,7 @@ export interface DashSchool {
     rating?: string;
     studentCount?: string;
     foundedYear?: string;
+    applicationLink?: string;
 }
 
 export interface DashJob {
