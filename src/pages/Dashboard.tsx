@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  getPaginatedEntries, updateComplaint, updateJobApplication, deleteEntry,
+  getPaginatedEntries, updateComplaint, updateJobApplication, getJobApplicationDetails, deleteEntry,
   saveNews as apiSaveNews, deleteNews as apiDeleteNews,
   saveSchool as apiSaveSchool, deleteSchool as apiDeleteSchool,
   saveJob as apiSaveJob, deleteJob as apiDeleteJob
@@ -1332,7 +1332,22 @@ const Dashboard: React.FC = () => {
                   </thead>
                   <tbody>
                     {filteredApplications.length > 0 ? filteredApplications.map((app, idx) => (
-                      <tr key={idx} style={{ cursor: 'pointer', borderBottom: idx === filteredApplications.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onClick={() => { setSelectedApplicant(app); setApplicantModalOpen(true); }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                      <tr key={idx} style={{ cursor: 'pointer', borderBottom: idx === filteredApplications.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }}
+                        onClick={async () => {
+                          setIsTableLoading(true);
+                          try {
+                            const res = await getJobApplicationDetails(app.id);
+                            if (res.status === 'success') {
+                              setSelectedApplicant(res.data);
+                              setApplicantModalOpen(true);
+                            }
+                          } catch (err) {
+                            showToast(lang === 'ar' ? 'فشل تحميل الطلب' : 'Failed to load application', 'error');
+                          } finally {
+                            setIsTableLoading(false);
+                          }
+                        }}
+                        onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
                         <td style={{ padding: '16px 24px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--accent)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>

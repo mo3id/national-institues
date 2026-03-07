@@ -508,6 +508,13 @@ try {
             $totalPages = ceil($total / $limit);
             $offset = ($page - 1) * $limit;
             $items = array_values(array_slice($data, $offset, $limit));
+            
+            // Optimization: Remove heavy fields from list view to keep payload small
+            if ($type === 'jobApplications') {
+                foreach ($items as &$item) {
+                    unset($item['cvData']);
+                }
+            }
 
             echo json_encode([
                 "status" => "success",
@@ -519,6 +526,30 @@ try {
                     "totalPages" => $totalPages
                 ]
             ]);
+            break;
+
+        case 'get_job_application':
+            $id = $_GET['id'] ?? '';
+            if (!$id) throw new Exception("ID required");
+
+            $stmt = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'jobApplications'");
+            $stmt->execute();
+            $row = $stmt->fetch();
+            $apps = $row ? json_decode($row['setting_value'], true) : [];
+            
+            $found = null;
+            foreach ($apps as $app) {
+                if (($app['id'] ?? '') === $id) {
+                    $found = $app;
+                    break;
+                }
+            }
+            
+            if ($found) {
+                echo json_encode(["status" => "success", "data" => $found]);
+            } else {
+                throw new Exception("Application not found");
+            }
             break;
 
         case 'update_complaint':

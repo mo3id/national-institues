@@ -132,6 +132,11 @@ export const updateJobApplication = async (id: string, status: string): Promise<
     return data;
 };
 
+export const getJobApplicationDetails = async (id: string): Promise<ApiResponse> => {
+    const { data } = await apiClient.get<ApiResponse>(`?action=get_job_application&id=${id}`);
+    return data;
+};
+
 export const deleteEntry = async (type: 'complaints' | 'contactMessages' | 'jobApplications', id: string): Promise<ApiResponse> => {
     const { data } = await apiClient.post<ApiResponse>('?action=delete_entry', { type, id });
     if (data.status !== 'success') throw new Error(data.message || 'Failed to delete entry');
