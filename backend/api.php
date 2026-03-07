@@ -464,8 +464,24 @@ try {
                         if ($type === 'complaints') {
                             if (($item['messageType'] ?? '') !== $filterType) return false;
                         } elseif ($type === 'jobApplications') {
-                            // Applications are filtered by Job ID
-                            if (($item['job'] ?? '') !== $filterType) return false;
+                            // Applications are filtered by Job ID or Department name
+                            $jobId = $item['job'] ?? '';
+                            if ($jobId !== $filterType) {
+                                // Not an exact job ID match, check if filterType is a department name
+                                static $jobsMapping = null;
+                                if ($jobsMapping === null) {
+                                    global $pdo;
+                                    $stmt = $pdo->query("SELECT id, department, departmentAr FROM jobs");
+                                    $jobsMapping = [];
+                                    while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                        $jobsMapping[$r['id']] = $r;
+                                    }
+                                }
+                                $jobDetails = $jobsMapping[$jobId] ?? null;
+                                if (!$jobDetails || ($jobDetails['department'] !== $filterType && $jobDetails['departmentAr'] !== $filterType)) {
+                                    return false;
+                                }
+                            }
                         }
                     }
 

@@ -44,7 +44,7 @@ const Jobs: React.FC = () => {
     const handleApply = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isSubmitting) return;
-        const res = getJobApplicationSchema(lang).safeParse({ ...formData, file: selectedFile, job: selectedJob?.title || '' });
+        const res = getJobApplicationSchema(lang).safeParse({ ...formData, file: selectedFile, job: selectedJob?.id || '' });
         if (!res.success) {
             const newErrs: Record<string, string> = {};
             res.error.issues.forEach(i => newErrs[i.path[0] as string] = i.message);
@@ -60,7 +60,7 @@ const Jobs: React.FC = () => {
             // build application object
             const cvData = selectedFile ? await toBase64(selectedFile) : '';
             const newApp = {
-                jobId: selectedJob?.id || '',
+                job: selectedJob?.id || '',
                 jobTitle: lang === 'ar' ? selectedJob?.titleAr || '' : selectedJob?.title || '',
                 fullName: formData.fullName,
                 email: formData.email,
@@ -75,6 +75,10 @@ const Jobs: React.FC = () => {
             await submitJobApplication(newApp);
 
             setIsSubmitted(true);
+            // Clear form
+            setFormData({ fullName: '', email: '', phone: '', experience: '', coverLetter: '' });
+            setSelectedFile(null);
+            setErrors({});
         } catch (err: any) {
             setSubmitError(lang === 'ar' ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى.' : err.message || 'Failed to submit application.');
         } finally {

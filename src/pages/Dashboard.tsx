@@ -485,7 +485,7 @@ const Dashboard: React.FC = () => {
   const [addJobOpen, setAddJobOpen] = useState(false);
   const [addDepartmentOpen, setAddDepartmentOpen] = useState(false);
   const [newDepartment, setNewDepartment] = useState({ nameEn: '', nameAr: '' });
-  const [selectedRecruitmentJobId, setSelectedRecruitmentJobId] = useState<string | null>('all');
+  const [selectedRecruitmentJobId, setSelectedRecruitmentJobId] = useState<string | null>('All');
   const [selectedApplicant, setSelectedApplicant] = useState<DashJobApplication | null>(null);
   const [applicantModalOpen, setApplicantModalOpen] = useState(false);
 
@@ -566,7 +566,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (section === 'recruitment') fetchApplicants();
-  }, [section, applicantPage, selectedRecruitmentJobId]);
+  }, [section, applicantPage, selectedRecruitmentJobId, debouncedJobSearch]);
 
   useEffect(() => {
     if (section === 'news') fetchNews();
@@ -611,7 +611,13 @@ const Dashboard: React.FC = () => {
   const fetchApplicants = async () => {
     setIsTableLoading(true);
     try {
-      const res = await getPaginatedEntries({ type: 'jobApplications', page: applicantPage, limit: 12, filterType: selectedRecruitmentJobId || 'All' });
+      const res = await getPaginatedEntries({
+        type: 'jobApplications',
+        page: applicantPage,
+        limit: 12,
+        filterType: selectedRecruitmentJobId || 'All',
+        search: debouncedJobSearch
+      });
       if (res.status === 'success') {
         setApplications(res.data.items);
         setApplicantTotalPages(res.data.totalPages);
@@ -1251,7 +1257,7 @@ const Dashboard: React.FC = () => {
               {/* Tabs */}
               <div className="dash-card" style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '16px 20px', marginBottom: 24, whiteSpace: 'nowrap', alignItems: 'center' }}>
                 <button
-                  onClick={() => setSelectedRecruitmentJobId('all')}
+                  onClick={() => setSelectedRecruitmentJobId('All')}
                   style={{
                     padding: '8px 28px',
                     borderRadius: 12,
@@ -1259,19 +1265,19 @@ const Dashboard: React.FC = () => {
                     fontSize: 14,
                     cursor: 'pointer',
                     transition: 'all 0.2s',
-                    border: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'all') ? 'none' : '1px solid var(--border)',
-                    backgroundColor: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'all') ? '#111827' : 'var(--bg)',
-                    color: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'all') ? 'white' : 'var(--text2)',
+                    border: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'All') ? 'none' : '1px solid var(--border)',
+                    backgroundColor: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'All') ? '#111827' : 'var(--bg)',
+                    color: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'All') ? 'white' : 'var(--text2)',
                     flexShrink: 0,
-                    boxShadow: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'all') ? '0 4px 10px rgba(0,0,0,0.1)' : 'none'
+                    boxShadow: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'All') ? '0 4px 10px rgba(0,0,0,0.1)' : 'none'
                   }}
                 >
                   {lang === 'ar' ? 'الكل' : 'All'}
                 </button>
-                {jobs.map(job => (
+                {departments.map(dept => (
                   <button
-                    key={job.id}
-                    onClick={() => setSelectedRecruitmentJobId(job.id)}
+                    key={dept.id}
+                    onClick={() => setSelectedRecruitmentJobId(lang === 'ar' ? dept.nameAr : dept.nameEn)}
                     style={{
                       padding: '8px 24px',
                       borderRadius: 12,
@@ -1279,14 +1285,14 @@ const Dashboard: React.FC = () => {
                       fontSize: 14,
                       cursor: 'pointer',
                       transition: 'all 0.2s',
-                      border: selectedRecruitmentJobId === job.id ? 'none' : '1px solid var(--border)',
-                      backgroundColor: selectedRecruitmentJobId === job.id ? '#111827' : 'var(--bg)',
-                      color: selectedRecruitmentJobId === job.id ? 'white' : 'var(--text2)',
+                      border: selectedRecruitmentJobId === (lang === 'ar' ? dept.nameAr : dept.nameEn) ? 'none' : '1px solid var(--border)',
+                      backgroundColor: selectedRecruitmentJobId === (lang === 'ar' ? dept.nameAr : dept.nameEn) ? '#111827' : 'var(--bg)',
+                      color: selectedRecruitmentJobId === (lang === 'ar' ? dept.nameAr : dept.nameEn) ? 'white' : 'var(--text2)',
                       flexShrink: 0,
-                      boxShadow: selectedRecruitmentJobId === job.id ? '0 4px 10px rgba(0,0,0,0.1)' : 'none'
+                      boxShadow: selectedRecruitmentJobId === (lang === 'ar' ? dept.nameAr : dept.nameEn) ? '0 4px 10px rgba(0,0,0,0.1)' : 'none'
                     }}
                   >
-                    {lang === 'ar' ? job.titleAr : job.title}
+                    {lang === 'ar' ? dept.nameAr : dept.nameEn}
                   </button>
                 ))}
               </div>
