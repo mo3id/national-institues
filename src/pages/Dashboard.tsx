@@ -588,6 +588,10 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     fetchNews();
     fetchSchools();
+    fetchApplicants();
+    fetchDepartments();
+    fetchComplaints();
+    fetchMessages();
   }, []);
 
   const fetchComplaints = async () => {
