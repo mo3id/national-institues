@@ -138,24 +138,48 @@ const SchoolProfile: React.FC = () => {
                           <p className="font-semibold text-slate-800 text-sm">{school?.phone || t.common.notAvailable}</p>
                         </div>
                       </div>
-                      <div className="flex items-start gap-4 group">
-                        <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-[#1e3a8a] group-hover:text-white transition-all duration-300">
-                          <Mail className="w-5 h-5 text-[#1e3a8a] group-hover:text-white transition-colors" />
+                      {school?.email ? (
+                        <a href={`mailto:${school.email}`} className="flex items-start gap-4 group cursor-pointer">
+                          <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-[#1e3a8a] group-hover:text-white transition-all duration-300">
+                            <Mail className="w-5 h-5 text-[#1e3a8a] group-hover:text-white transition-colors" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{lang === 'ar' ? 'البريد الإلكتروني' : 'Email'}</p>
+                            <p className="font-semibold text-blue-600 group-hover:text-blue-800 transition-colors text-sm">{school.email}</p>
+                          </div>
+                        </a>
+                      ) : (
+                        <div className="flex items-start gap-4 group">
+                          <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-[#1e3a8a] group-hover:text-white transition-all duration-300">
+                            <Mail className="w-5 h-5 text-[#1e3a8a] group-hover:text-white transition-colors" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{lang === 'ar' ? 'البريد الإلكتروني' : 'Email'}</p>
+                            <p className="font-semibold text-slate-800 text-sm">{t.common.notAvailable}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{lang === 'ar' ? 'البريد الإلكتروني' : 'Email'}</p>
-                          <p className="font-semibold text-slate-800 text-sm">{school?.email || t.common.notAvailable}</p>
+                      )}
+                      {school?.website ? (
+                        <a href={school.website.startsWith('http') ? school.website : `https://${school.website}`} target="_blank" rel="noopener noreferrer" className="flex items-start gap-4 group cursor-pointer">
+                          <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-[#1e3a8a] group-hover:text-white transition-all duration-300">
+                            <Globe className="w-5 h-5 text-[#1e3a8a] group-hover:text-white transition-colors" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{lang === 'ar' ? 'الموقع الإلكتروني' : 'Website'}</p>
+                            <p className="font-semibold text-blue-600 group-hover:text-blue-800 transition-colors text-sm truncate max-w-[200px]">{school.website}</p>
+                          </div>
+                        </a>
+                      ) : (
+                        <div className="flex items-start gap-4 group">
+                          <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-[#1e3a8a] group-hover:text-white transition-all duration-300">
+                            <Globe className="w-5 h-5 text-[#1e3a8a] group-hover:text-white transition-colors" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{lang === 'ar' ? 'الموقع الإلكتروني' : 'Website'}</p>
+                            <p className="font-semibold text-slate-800 text-sm truncate max-w-[200px]">{t.common.notAvailable}</p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-start gap-4 group">
-                        <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-[#1e3a8a] group-hover:text-white transition-all duration-300">
-                          <Globe className="w-5 h-5 text-[#1e3a8a] group-hover:text-white transition-colors" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{lang === 'ar' ? 'الموقع الإلكتروني' : 'Website'}</p>
-                          <p className="font-semibold text-blue-600 hover:text-blue-800 transition-colors text-sm truncate max-w-[200px]">{school?.website || t.common.notAvailable}</p>
-                        </div>
-                      </div>
+                      )}
                       <div className="flex items-start gap-4 group">
                         <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-[#1e3a8a] group-hover:text-white transition-all duration-300">
                           <User className="w-5 h-5 text-[#1e3a8a] group-hover:text-white transition-colors" />
@@ -167,21 +191,30 @@ const SchoolProfile: React.FC = () => {
                       </div>
 
                       {/* Application Link */}
-                      <div className="flex items-start gap-4 group">
-                        <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-[#1e3a8a] group-hover:text-white transition-all duration-300">
-                          <ExternalLink className="w-5 h-5 text-[#1e3a8a] group-hover:text-white transition-colors" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{lang === 'ar' ? 'رابط التقديم' : 'Application Link'}</p>
-                          {school?.applicationLink ? (
-                            <a href={school.applicationLink.startsWith('http') ? school.applicationLink : `https://${school.applicationLink}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-600 hover:text-blue-800 transition-colors text-sm truncate max-w-[200px] block">
+                      {/* Application Link */}
+                      {school?.applicationLink ? (
+                        <a href={school.applicationLink.startsWith('http') ? school.applicationLink : `https://${school.applicationLink}`} target="_blank" rel="noopener noreferrer" className="flex items-start gap-4 group cursor-pointer">
+                          <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-[#1e3a8a] group-hover:text-white transition-all duration-300">
+                            <ExternalLink className="w-5 h-5 text-[#1e3a8a] group-hover:text-white transition-colors" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{lang === 'ar' ? 'رابط التقديم' : 'Application Link'}</p>
+                            <p className="font-semibold text-blue-600 group-hover:text-blue-800 transition-colors text-sm truncate max-w-[200px] block">
                               {lang === 'ar' ? 'اضغط هنا للتقديم' : 'Apply Here'}
-                            </a>
-                          ) : (
+                            </p>
+                          </div>
+                        </a>
+                      ) : (
+                        <div className="flex items-start gap-4 group">
+                          <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-[#1e3a8a] group-hover:text-white transition-all duration-300">
+                            <ExternalLink className="w-5 h-5 text-[#1e3a8a] group-hover:text-white transition-colors" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{lang === 'ar' ? 'رابط التقديم' : 'Application Link'}</p>
                             <p className="font-semibold text-slate-500 text-sm">{t.common.notAvailable}</p>
-                          )}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
 
                     <div className="mt-12 pt-8 border-t border-gray-100 flex justify-center">

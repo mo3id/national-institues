@@ -88,22 +88,35 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [apiData, setData]);
 
-    // ── BroadcastChannel: listen for changes from OTHER tabs ──────────────
+    // ── BroadcastChannel & Local Tab Sync ──────────────
     useEffect(() => {
-        if (typeof BroadcastChannel === 'undefined') return;
-
-        const channel = new BroadcastChannel(SYNC_CHANNEL_NAME);
-        channelRef.current = channel;
-
-        channel.onmessage = (event) => {
-            if (event.data?.type === 'DATA_UPDATED') {
-                queryClient.invalidateQueries({ queryKey: ['siteData'] });
-            }
+        const handleSync = () => {
+            queryClient.invalidateQueries({ queryKey: ['siteData'] });
         };
 
+        if (typeof window !== 'undefined') {
+            window.addEventListener('nis_data_sync_local', handleSync);
+        }
+
+        if (typeof BroadcastChannel !== 'undefined') {
+            const channel = new BroadcastChannel(SYNC_CHANNEL_NAME);
+            channelRef.current = channel;
+
+            channel.onmessage = (event) => {
+                if (event.data?.type === 'DATA_UPDATED') {
+                    handleSync();
+                }
+            };
+        }
+
         return () => {
-            channel.close();
-            channelRef.current = null;
+            if (typeof window !== 'undefined') {
+                window.removeEventListener('nis_data_sync_local', handleSync);
+            }
+            if (channelRef.current) {
+                channelRef.current.close();
+                channelRef.current = null;
+            }
         };
     }, [queryClient]);
 

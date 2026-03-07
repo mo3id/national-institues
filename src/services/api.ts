@@ -7,8 +7,11 @@ import { SiteData } from '@/store/useDataStore';
 const API_BASE_URL: string = ((import.meta as any).env.VITE_API_BASE_URL || '/api.php').replace(/\/api\.php\/?$/, '');
 const SYNC_CHANNEL_NAME = 'nis_data_sync';
 
-// Cross-tab sync helper
+// Cross-tab and local tab sync helper
 const notifyUpdate = () => {
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('nis_data_sync_local'));
+    }
     if (typeof BroadcastChannel !== 'undefined') {
         const channel = new BroadcastChannel(SYNC_CHANNEL_NAME);
         channel.postMessage({ type: 'DATA_UPDATED' });
