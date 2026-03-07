@@ -105,6 +105,32 @@ $action = $_GET['action'] ?? '';
 
 try {
     switch ($action) {
+        case 'get_dashboard_stats':
+            // Count news
+            $newsTotal = $pdo->query("SELECT COUNT(*) FROM news")->fetchColumn();
+            $newsPublished = $pdo->query("SELECT COUNT(*) FROM news WHERE published = 1")->fetchColumn();
+            
+            // Count schools and sum studentCount
+            $schoolsStmt = $pdo->query("SELECT id, studentCount FROM schools");
+            $schoolsData = $schoolsStmt->fetchAll();
+            $schoolsCount = count($schoolsData);
+            $totalStudents = 0;
+            foreach ($schoolsData as $s) {
+                $val = str_replace(',', '', $s['studentCount'] ?? '');
+                $totalStudents += (int)$val;
+            }
+            
+            echo json_encode([
+                "status" => "success",
+                "data" => [
+                    "totalNews" => (int)$newsTotal,
+                    "publishedNews" => (int)$newsPublished,
+                    "schoolsCount" => (int)$schoolsCount,
+                    "totalStudents" => (int)$totalStudents
+                ]
+            ]);
+            break;
+
         case 'get_site_data':
             // Serve from file cache if fresh (TTL: 60s) — avoids 4 SQL queries per request
             if (serveFromCache()) break;

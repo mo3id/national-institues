@@ -174,6 +174,11 @@ export const saveJob = async (job: any): Promise<ApiResponse> => {
     return data;
 };
 
+export const getDashboardStats = async (): Promise<ApiResponse> => {
+    const { data } = await apiClient.get<ApiResponse>('?action=get_dashboard_stats');
+    return data;
+};
+
 export const deleteJob = async (id: string): Promise<ApiResponse> => {
     const { data } = await apiClient.get<ApiResponse>(`?action=delete_job&id=${id}`);
     notifyUpdate();
