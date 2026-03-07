@@ -581,7 +581,7 @@ const Dashboard: React.FC = () => {
   }, [section, debouncedJobSearch]);
 
   useEffect(() => {
-    if (section === 'departments') fetchDepartments();
+    if (section === 'departments' || section === 'recruitment' || section === 'jobs') fetchDepartments();
   }, [section]);
 
   const fetchComplaints = async () => {
