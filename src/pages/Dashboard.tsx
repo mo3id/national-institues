@@ -305,6 +305,22 @@ const CSS = `
     background-color: var(--surface2);
     color: var(--text);
   }
+
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .animate-spin { animation: spin 1s linear infinite; }
+  .table-loader {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dash-root.dark .table-loader {
+    background: rgba(0, 0, 0, 0.5);
+  }
 `;
 
 const DAYS_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -1125,8 +1141,8 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="dash-card" style={{ overflow: 'hidden', position: 'relative' }}>
                 {isTableLoading && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
-                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+                  <div className="table-loader">
+                    <div style={{ width: 32, height: 32, border: '4px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin"></div>
                   </div>
                 )}
                 <div className="row-header">
@@ -1170,8 +1186,8 @@ const Dashboard: React.FC = () => {
               </div>
               <div style={{ position: 'relative' }}>
                 {isTableLoading && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-2xl">
-                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+                  <div className="table-loader" style={{ borderRadius: 24 }}>
+                    <div style={{ width: 32, height: 32, border: '4px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin"></div>
                   </div>
                 )}
                 <div className="school-grid">
@@ -1240,8 +1256,8 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
                 {isTableLoading && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
-                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+                  <div className="table-loader">
+                    <div style={{ width: 32, height: 32, border: '4px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin"></div>
                   </div>
                 )}
                 <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
@@ -1331,8 +1347,8 @@ const Dashboard: React.FC = () => {
               {/* Applications Table */}
               <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
                 {isTableLoading && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
-                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+                  <div className="table-loader">
+                    <div style={{ width: 32, height: 32, border: '4px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin"></div>
                   </div>
                 )}
                 <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
@@ -1930,8 +1946,8 @@ const Dashboard: React.FC = () => {
 
               <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
                 {isTableLoading && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
-                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+                  <div className="table-loader">
+                    <div style={{ width: 32, height: 32, border: '4px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin"></div>
                   </div>
                 )}
                 <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
