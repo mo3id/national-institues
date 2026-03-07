@@ -74,10 +74,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         queryFn: fetchSiteData,
 
         staleTime: 30 * 1000,              // 30 seconds
-        refetchOnWindowFocus: true,        // Refetch when user comes back to the site
-        refetchInterval: 2 * 60 * 1000,    // Poll every 2 minutes
+        refetchOnWindowFocus: false,       // DO NOT throw 500 errors when returning to tab
+        refetchInterval: false,            // Polling disabled
         refetchIntervalInBackground: false,
-        retry: 3,                          // Retry 3 times on failure
+        retry: 1,                          // Lowered to prevent chaining 500 errors
         retryDelay: 2000,                  // 2s delay between retries
     });
 

@@ -70,8 +70,8 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <DataProvider>
-        <LanguageProvider>
+      <LanguageProvider>
+        <DataProvider>
           <Router>
             <ScrollToTop />
             <Suspense fallback={<PageLoader />}>
@@ -115,8 +115,8 @@ const App: React.FC = () => {
               </AnimatePresence>
             </Suspense>
           </Router>
-        </LanguageProvider>
-      </DataProvider>
+        </DataProvider>
+      </LanguageProvider>
     </AuthProvider>
   );
 };
