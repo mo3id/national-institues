@@ -1109,6 +1109,11 @@ const Dashboard: React.FC = () => {
                 <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={newsSearch} onChange={e => setNewsSearch(e.target.value)} />
               </div>
               <div className="dash-card" style={{ overflow: 'hidden', position: 'relative' }}>
+                {isTableLoading && (
+                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
                 <div className="row-header">
                   <div /><p className="dash-label" style={{ margin: 0 }}>{u.title}</p><p className="dash-label" style={{ margin: 0 }}>{u.date}</p><p className="dash-label" style={{ margin: 0 }}>{u.status}</p><p className="dash-label" style={{ margin: 0 }}>{u.actions}</p>
                 </div>
@@ -1219,6 +1224,11 @@ const Dashboard: React.FC = () => {
                 <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={jobSearch} onChange={e => setJobSearch(e.target.value)} />
               </div>
               <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
+                {isTableLoading && (
+                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
                 <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
@@ -1305,6 +1315,11 @@ const Dashboard: React.FC = () => {
 
               {/* Applications Table */}
               <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
+                {isTableLoading && (
+                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
                 <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
