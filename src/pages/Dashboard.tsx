@@ -584,6 +584,12 @@ const Dashboard: React.FC = () => {
     if (section === 'departments' || section === 'recruitment' || section === 'jobs') fetchDepartments();
   }, [section]);
 
+  // Initial fetch for overview stats
+  useEffect(() => {
+    fetchNews();
+    fetchSchools();
+  }, []);
+
   const fetchComplaints = async () => {
     setIsTableLoading(true);
     try {
@@ -917,6 +923,11 @@ const Dashboard: React.FC = () => {
   const filteredComplaints = complaints;
 
   const publishedCount = newsList.filter(n => n.published).length;
+  const totalStudents = schools.reduce((acc, s) => {
+    const val = (s.studentCount || '').toString().replace(/,/g, '');
+    const num = parseInt(val, 10);
+    return acc + (isNaN(num) ? 0 : num);
+  }, 0);
 
   const navItems: { id: Section; label: string; icon: React.ElementType }[] = [
     { id: 'overview', label: u.overview, icon: LayoutDashboard },
@@ -1049,10 +1060,10 @@ const Dashboard: React.FC = () => {
             <div className="section-enter" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: 14 }}>
                 {[
-                  { icon: Newspaper, label: u.totalArticles, val: String(newsList.length), color: '#4f46e5', bg: 'rgba(79,70,229,0.1)' },
-                  { icon: CheckCircle, label: u.publishedCount, val: String(publishedCount), color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-                  { icon: School, label: u.schoolsCount, val: '25', color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
-                  { icon: Users, label: u.studentsCount, val: '120k+', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+                  { icon: Newspaper, label: u.totalArticles, val: isRTL ? getArNumber(newsList.length) : String(newsList.length), color: '#4f46e5', bg: 'rgba(79,70,229,0.1)' },
+                  { icon: CheckCircle, label: u.publishedCount, val: isRTL ? getArNumber(publishedCount) : String(publishedCount), color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+                  { icon: School, label: u.schoolsCount, val: isRTL ? getArNumber(schools.length) : String(schools.length), color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
+                  { icon: Users, label: u.studentsCount, val: isRTL ? getArNumber(totalStudents.toLocaleString()) : totalStudents.toLocaleString(), color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
                 ].map(({ icon: Icon, label, val, color, bg }) => (
                   <div key={label} className="stat-card">
                     <div className="stat-icon" style={{ background: bg }}><Icon style={{ width: 22, height: 22, color }} /></div>
