@@ -9,6 +9,17 @@ import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
 import { CustomSelect } from '@/components/common/FormControls';
 
+const formatStudentCount = (count: string | undefined) => {
+  if (!count) return '';
+  const num = parseInt(count.replace(/,/g, ''), 10);
+  if (isNaN(num)) return count;
+  if (num >= 1000) {
+    const formatted = (num / 1000).toFixed(1).replace(/\.0$/, '');
+    return `+${formatted}K`;
+  }
+  return `+${num}`;
+};
+
 const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, onView }: any) => (
   <ScrollReveal heightFull={true}>
     <div className="bg-white rounded-[24px] border border-gray-100/60 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] overflow-hidden transition-all duration-300 group flex flex-col h-full relative p-2">
@@ -83,7 +94,7 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
 
           <div className="text-center flex-1">
             <div className="text-[15px] font-bold text-gray-900 mb-0.5">
-              {school.studentCount ? `+${school.studentCount}` : common.notAvailable}
+              {school.studentCount ? formatStudentCount(school.studentCount) : common.notAvailable}
             </div>
             <span className="text-[12px] font-medium text-gray-400">{common.students || 'Students'}</span>
           </div>
