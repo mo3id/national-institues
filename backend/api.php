@@ -140,16 +140,14 @@ try {
             }
 
             // Construct response matching SiteData structure
+            // REMOVED: jobApplications, complaints, contactMessages to prevent exposing millions of bytes of private data to public visitors
             $response = [
                 'schools' => $schools,
                 'news' => $news,
                 'jobs' => $jobs,
-                'jobApplications' => $settings['jobApplications'] ?? [],
                 'jobDepartments' => $settings['jobDepartments'] ?? [],
                 'heroSlides' => $settings['heroSlides'] ?? [],
                 'aboutData' => $settings['aboutData'] ?? new stdClass(),
-                'complaints' => $settings['complaints'] ?? [],
-                'contactMessages' => $settings['contactMessages'] ?? [],
                 'stats' => $settings['stats'] ?? new stdClass(),
                 'homeData' => $settings['homeData'] ?? new stdClass(),
                 'partners' => $settings['partners'] ?? [],
@@ -460,11 +458,17 @@ try {
             // Backend Filtering
             if ($search || $filterType !== 'All') {
                 $term = strtolower($search);
-                $data = array_filter($data, function($item) use ($term, $filterType) {
-                    // Filter by Message Type
-                    if ($filterType !== 'All' && ($item['messageType'] ?? '') !== $filterType) {
-                        return false;
+                $data = array_filter($data, function($item) use ($term, $filterType, $type) {
+                    // Filter by Type-specific field
+                    if ($filterType !== 'All') {
+                        if ($type === 'complaints') {
+                            if (($item['messageType'] ?? '') !== $filterType) return false;
+                        } elseif ($type === 'jobApplications') {
+                            // Applications are filtered by Job ID
+                            if (($item['job'] ?? '') !== $filterType) return false;
+                        }
                     }
+
                     // Filter by Search Term
                     if ($term) {
                         $searchable = strtolower(implode(' ', [
@@ -474,7 +478,9 @@ try {
                             $item['email'] ?? '',
                             $item['school'] ?? '',
                             $item['subject'] ?? '',
-                            $item['message'] ?? ''
+                            $item['message'] ?? '',
+                            $item['job'] ?? '',
+                            $item['jobTitle'] ?? ''
                         ]));
                         return strpos($searchable, $term) !== false;
                     }

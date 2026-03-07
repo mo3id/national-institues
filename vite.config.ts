@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
         '/api.php': {
           target: 'https://gani.edu.eg',
           changeOrigin: true,
-          secure: true,
+          secure: false,
         },
       },
     },
@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => {
         '/api.php': {
           target: 'https://gani.edu.eg',
           changeOrigin: true,
-          secure: true,
+          secure: false,
         },
       },
     },
