@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { getPaginatedEntries, updateComplaint, updateJobApplication, deleteEntry } from '@/services/api';
+import {
+  getPaginatedEntries, updateComplaint, updateJobApplication, deleteEntry,
+  saveNews as apiSaveNews, deleteNews as apiDeleteNews,
+  saveSchool as apiSaveSchool, deleteSchool as apiDeleteSchool,
+  saveJob as apiSaveJob, deleteJob as apiDeleteJob
+} from '@/services/api';
 import {
   LayoutDashboard, Newspaper, School, Image, Info, Settings,
   Plus, Pencil, Trash2, Eye, EyeOff, Save, X,
@@ -457,13 +462,6 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (siteData) {
-      setNewsList(prepareNews(siteData.news || []));
-      setSchools((siteData.schools || []).map(s => ({ ...s })));
-      setJobs((siteData.jobs || []).map(j => ({ ...j })));
-      setDepartments((siteData.jobDepartments || []).map(d => ({ ...d })));
-      setApplications((siteData.jobApplications || []).map(a => ({ ...a })));
-      setComplaints(siteData.complaints || []);
-      setContactMessages(siteData.contactMessages || []);
       setHero(siteData.heroSlides || []);
       setAbout({
         ...(siteData.aboutData || {}),
@@ -680,42 +678,56 @@ const Dashboard: React.FC = () => {
   }, [lang]);
 
   // Handlers
-  const togglePublish = (id: string) => {
-    const updated = newsList.map(n => n.id === id ? { ...n, published: !n.published } : n);
-    setNewsList(updated);
-    updateData('news', updated);
+  const togglePublish = async (id: string) => {
+    const item = newsList.find(n => n.id === id);
+    if (!item) return;
+    const updatedItem = { ...item, published: !item.published };
+
+    // Optimistic Update
+    setNewsList(prev => prev.map(n => n.id === id ? updatedItem : n));
+
+    await apiSaveNews(updatedItem);
     showToast(u.articleSaved);
+    fetchNews(); // Silent sync
   };
   const deleteNews = (id: string) => {
     setConfirmAction({
       message: lang === 'ar' ? 'هل أنت متأكد من حذف هذا الخبر؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this news article? This cannot be undone.',
       onConfirm: async () => {
-        const updated = newsList.filter(n => n.id !== id);
-        setNewsList(updated);
-        await updateData('news', updated);
+        // Optimistic Update
+        setNewsList(prev => prev.filter(n => n.id !== id));
+
+        await apiDeleteNews(id);
         showToast(u.articleDeleted, 'error');
         fetchNews();
       }
     });
   };
   const saveNews = async (a: DashNewsItem) => {
-    const updated = newsList.map(n => n.id === a.id ? a : n);
-    setNewsList(updated);
-    await updateData('news', updated);
+    // Optimistic Update
+    setNewsList(prev => prev.map(n => n.id === a.id ? a : n));
     setEditNewsId(null);
+
+    await apiSaveNews(a);
     showToast(u.articleSaved);
     fetchNews();
   };
   const addNews = async (n: DashNewsItem) => {
     const newEntry = {
       ...n,
+      title: n.title?.trim() ? n.title : n.titleAr,
+      summary: n.summary?.trim() ? n.summary : n.summaryAr,
+      content: n.content?.trim() ? n.content : n.contentAr,
+      highlightTitle: n.highlightTitle?.trim() ? n.highlightTitle : n.highlightTitleAr,
+      highlightContent: n.highlightContent?.trim() ? n.highlightContent : n.highlightContentAr,
       id: String(Date.now()),
       image: n.image || `https://picsum.photos/seed/${Date.now()}/800/600`,
       published: n.published ?? true
     };
-    const updated = [newEntry, ...newsList];
-    setNewsList(updated);
-    await updateData('news', updated);
+
+    // Optimistic Update
+    setNewsList(prev => [newEntry, ...prev]);
+
     setNewArt({
       title: '', titleAr: '', summary: '', summaryAr: '',
       image: '', content: '', contentAr: '',
@@ -723,8 +735,9 @@ const Dashboard: React.FC = () => {
       highlightContent: '', highlightContentAr: ''
     });
     setAddNewsOpen(false);
-    setNewsSearch('');
     showToast(u.articleAdded);
+
+    await apiSaveNews(newEntry);
     fetchNews();
   };
   const saveHero = (s: HeroSlide) => {
@@ -735,37 +748,34 @@ const Dashboard: React.FC = () => {
     showToast(u.slideSaved);
   };
   const saveSchool = async (s: DashSchool) => {
-    const updated = schools.map(sc => sc.id === s.id ? s : sc);
-    setSchools(updated);
-    await updateData('schools', updated);
+    // Optimistic Update
+    setSchools(prev => prev.map(sc => sc.id === s.id ? s : sc));
     setEditSchoolId(null);
+
+    await apiSaveSchool(s);
     showToast(u.schoolSaved);
     fetchSchools();
   };
   const addSchool = async (s: DashSchool) => {
     const newEntry = { ...s, id: String(Date.now()) };
-    const updated = [newEntry, ...schools];
-    setSchools(updated);
-    await updateData('schools', updated);
-    setNewSchool({
-      name: '', nameAr: '', principal: '', principalAr: '',
-      address: '', addressAr: '', phone: '', email: '',
-      website: '', location: '', locationAr: '', about: '', aboutAr: '',
-      mainImage: '', logo: '', gallery: []
-    });
+
+    // Optimistic Update
+    setSchools(prev => [newEntry, ...prev]);
     setAddSchoolOpen(false);
     setNewSchool({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '', address: '', addressAr: '' });
-    setSchoolSearch('');
     showToast(u.schoolSaved);
+
+    await apiSaveSchool(newEntry);
     fetchSchools();
   };
   const deleteSchool = (id: string) => {
     setConfirmAction({
       message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه المدرسة؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this school? This cannot be undone.',
       onConfirm: async () => {
-        const updated = schools.filter(s => s.id !== id);
-        setSchools(updated);
-        await updateData('schools', updated);
+        // Optimistic Update
+        setSchools(prev => prev.filter(sc => sc.id !== id));
+
+        await apiDeleteSchool(id);
         showToast('School deleted', 'error');
         fetchSchools();
       }
@@ -773,10 +783,11 @@ const Dashboard: React.FC = () => {
   };
 
   const saveJob = async (j: DashJob) => {
-    const updated = jobs.map(jb => jb.id === j.id ? j : jb);
-    setJobs(updated);
-    await updateData('jobs', updated);
+    // Optimistic Update
+    setJobs(prev => prev.map(jb => jb.id === j.id ? j : jb));
     setEditJobId(null);
+
+    await apiSaveJob(j);
     showToast(u.jobSaved);
     fetchJobs();
   };
@@ -785,9 +796,10 @@ const Dashboard: React.FC = () => {
     setConfirmAction({
       message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه الوظيفة؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this job? This cannot be undone.',
       onConfirm: async () => {
-        const updated = jobs.filter(j => j.id !== id);
-        setJobs(updated);
-        await updateData('jobs', updated);
+        // Optimistic Update
+        setJobs(prev => prev.filter(jb => jb.id !== id));
+
+        await apiDeleteJob(id);
         showToast(u.jobDeleted, 'error');
         fetchJobs();
       }
@@ -799,17 +811,19 @@ const Dashboard: React.FC = () => {
       ...j,
       id: String(Date.now()),
     };
-    const updated = [newEntry, ...jobs];
-    setJobs(updated);
-    await updateData('jobs', updated);
+
+    // Optimistic Update
+    setJobs(prev => [newEntry, ...prev]);
+
     setNewJob({
       title: '', titleAr: '', department: '', departmentAr: '',
       location: '', locationAr: '', type: '', typeAr: '',
       description: '', descriptionAr: '', image: ''
     });
     setAddJobOpen(false);
-    setJobSearch('');
     showToast(u.jobAdded);
+
+    await apiSaveJob(newEntry);
     fetchJobs();
   };
 
@@ -1089,11 +1103,6 @@ const Dashboard: React.FC = () => {
                 <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={newsSearch} onChange={e => setNewsSearch(e.target.value)} />
               </div>
               <div className="dash-card" style={{ overflow: 'hidden', position: 'relative' }}>
-                {isTableLoading && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
-                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                )}
                 <div className="row-header">
                   <div /><p className="dash-label" style={{ margin: 0 }}>{u.title}</p><p className="dash-label" style={{ margin: 0 }}>{u.date}</p><p className="dash-label" style={{ margin: 0 }}>{u.status}</p><p className="dash-label" style={{ margin: 0 }}>{u.actions}</p>
                 </div>
@@ -1167,11 +1176,6 @@ const Dashboard: React.FC = () => {
                 <button className="dash-btn dash-btn-primary" onClick={() => setAddDepartmentOpen(true)}><Plus style={{ width: 15, height: 15 }} />{lang === 'ar' ? 'بناء قسم جديد' : 'New Department'}</button>
               </div>
               <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
-                {isTableLoading && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
-                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                )}
                 <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
@@ -1209,11 +1213,6 @@ const Dashboard: React.FC = () => {
                 <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={jobSearch} onChange={e => setJobSearch(e.target.value)} />
               </div>
               <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
-                {isTableLoading && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
-                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                )}
                 <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
@@ -1300,11 +1299,6 @@ const Dashboard: React.FC = () => {
 
               {/* Applications Table */}
               <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
-                {isTableLoading && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
-                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                )}
                 <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
@@ -1817,11 +1811,6 @@ const Dashboard: React.FC = () => {
               </div>
 
               <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
-                {isTableLoading && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
-                    <div className="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                )}
                 <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
                   {/* ... same thead ... */}
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
@@ -1982,7 +1971,12 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* ── Modals ── */}
-      {editNewsId && (() => { const a = newsList.find(n => n.id === editNewsId); return a ? <ModalWrap title={u.edit + ' — ' + a.title.slice(0, 30)} onClose={() => setEditNewsId(null)}><EditNewsForm article={a} lang={lang} onSave={saveNews} onCancel={() => setEditNewsId(null)} /></ModalWrap> : null; })()}
+      {editNewsId && newsList.find(n => String(n.id) === String(editNewsId)) && (() => {
+        const a = newsList.find(n => String(n.id) === String(editNewsId))!;
+        return <ModalWrap title={`${u.edit || 'Edit'} — ${(a.title || '').slice(0, 30)}`} onClose={() => setEditNewsId(null)}>
+          <EditNewsForm article={a} lang={lang} onSave={saveNews} onCancel={() => setEditNewsId(null)} />
+        </ModalWrap>;
+      })()}
 
       {addNewsOpen && (
         <ModalWrap title={u.addArticle} onClose={() => setAddNewsOpen(false)}>
@@ -1990,9 +1984,19 @@ const Dashboard: React.FC = () => {
         </ModalWrap>
       )}
 
-      {editHeroId !== null && (() => { const s = hero.find(h => h.id === editHeroId); return s ? <ModalWrap title={`${u.edit} — ${u.hero} ${s.id}`} onClose={() => setEditHeroId(null)}><EditHeroForm slide={s} lang={lang} onSave={saveHero} onCancel={() => setEditHeroId(null)} /></ModalWrap> : null; })()}
+      {editHeroId !== null && hero.find(h => String(h.id) === String(editHeroId)) && (() => {
+        const s = hero.find(h => String(h.id) === String(editHeroId))!;
+        return <ModalWrap title={`${u.edit || 'Edit'} — ${(u.hero || 'Hero')} ${s.id}`} onClose={() => setEditHeroId(null)}>
+          <EditHeroForm slide={s} lang={lang} onSave={saveHero} onCancel={() => setEditHeroId(null)} />
+        </ModalWrap>;
+      })()}
 
-      {editSchoolId && (() => { const s = schools.find(sc => sc.id === editSchoolId); return s ? <ModalWrap title={`${u.edit} — ${s.name}`} onClose={() => setEditSchoolId(null)}><EditSchoolForm school={s} lang={lang} onSave={saveSchool} onCancel={() => setEditSchoolId(null)} /></ModalWrap> : null; })()}
+      {editSchoolId && schools.find(sc => String(sc.id) === String(editSchoolId)) && (() => {
+        const s = schools.find(sc => String(sc.id) === String(editSchoolId))!;
+        return <ModalWrap title={`${u.edit || 'Edit'} — ${s.name || ''}`} onClose={() => setEditSchoolId(null)}>
+          <EditSchoolForm school={s} lang={lang} onSave={saveSchool} onCancel={() => setEditSchoolId(null)} />
+        </ModalWrap>;
+      })()}
 
       {addJobOpen && (
         <ModalWrap title={lang === 'ar' ? 'إضافة وظيفة جديدة' : 'Add New Vacancy'} onClose={() => setAddJobOpen(false)}>
@@ -2006,11 +2010,12 @@ const Dashboard: React.FC = () => {
         </ModalWrap>
       )}
 
-      {editJobId && (
-        <ModalWrap title={lang === 'ar' ? 'تعديل الوظيفة' : 'Edit Vacancy'} onClose={() => setEditJobId(null)}>
-          <EditJobForm job={jobs.find(j => j.id === editJobId)!} lang={lang} onSave={saveJob} onCancel={() => setEditJobId(null)} />
-        </ModalWrap>
-      )}
+      {editJobId && jobs.find(j => String(j.id) === String(editJobId)) && (() => {
+        const j = jobs.find(j => String(j.id) === String(editJobId))!;
+        return <ModalWrap title={lang === 'ar' ? 'تعديل الوظيفة' : 'Edit Vacancy'} onClose={() => setEditJobId(null)}>
+          <EditJobForm job={j} lang={lang} onSave={saveJob} onCancel={() => setEditJobId(null)} />
+        </ModalWrap>;
+      })()}
 
       {addDepartmentOpen && (
         <ModalWrap title={lang === 'ar' ? 'إضافة قسم جديد' : 'Add New Department'} onClose={() => setAddDepartmentOpen(false)}>

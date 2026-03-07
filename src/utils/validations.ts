@@ -34,19 +34,20 @@ export const getLoginSchema = (isRTL: boolean) => z.object({
 });
 
 export const getDashNewsSchema = () => z.object({
-    title: z.string().min(1, { message: 'Title is required' }),
-    titleAr: z.string().min(1, { message: 'Arabic title is required' }),
-    summary: z.string().nullish(),
-    summaryAr: z.string().nullish(),
-    content: z.string().nullish(),
-    contentAr: z.string().nullish(),
-    highlightTitle: z.string().nullish(),
-    highlightTitleAr: z.string().nullish(),
-    highlightContent: z.string().nullish(),
-    highlightContentAr: z.string().nullish(),
-    date: z.string().nullish(),
-    image: z.string().nullish(),
-    featured: z.boolean().nullish(),
+    titleAr: z.string().min(1, { message: 'العنوان العربي مطلوب' }),
+    summaryAr: z.string().min(1, { message: 'الملخص العربي مطلوب' }),
+    contentAr: z.string().min(1, { message: 'المحتوي العربي مطلوب' }),
+    title: z.string().optional().nullish(),
+    summary: z.string().optional().nullish(),
+    content: z.string().optional().nullish(),
+    date: z.string().min(1, { message: 'Date is required' }),
+    image: z.string().min(1, { message: 'Image is required' }),
+    highlightTitle: z.string().optional().nullish(),
+    highlightTitleAr: z.string().optional().nullish(),
+    highlightContent: z.string().optional().nullish(),
+    highlightContentAr: z.string().optional().nullish(),
+    featured: z.any().optional(),
+    published: z.any().optional(),
 });
 
 export const getDashHeroSchema = () => z.object({

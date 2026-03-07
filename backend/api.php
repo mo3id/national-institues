@@ -407,6 +407,15 @@ try {
                 $stmt = $pdo->prepare($q);
                 $stmt->execute($params);
                 $data = $stmt->fetchAll();
+                
+                // Decode JSON fields
+                foreach ($data as &$school) {
+                    if (!empty($school['gallery'])) {
+                        $school['gallery'] = json_decode($school['gallery'], true);
+                    } else {
+                        $school['gallery'] = [];
+                    }
+                }
             } elseif ($type === 'news') {
                 $q = "SELECT * FROM news WHERE 1=1";
                 $params = [];
@@ -542,6 +551,112 @@ try {
             } else {
                 throw new Exception("Application not found");
             }
+            break;
+
+        case 'save_news':
+            $n = json_decode(file_get_contents('php://input'), true);
+            if (!$n) throw new Exception("Data required");
+            $stmt = $pdo->prepare("REPLACE INTO news (id, title, titleAr, date, summary, summaryAr, content, contentAr, highlightTitle, highlightTitleAr, highlightContent, highlightContentAr, image, published, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([
+                $n['id'] ?? uniqid(),
+                $n['title'] ?? '',
+                $n['titleAr'] ?? '',
+                $n['date'] ?? date('Y-m-d'),
+                $n['summary'] ?? '',
+                $n['summaryAr'] ?? '',
+                $n['content'] ?? '',
+                $n['contentAr'] ?? '',
+                $n['highlightTitle'] ?? '',
+                $n['highlightTitleAr'] ?? '',
+                $n['highlightContent'] ?? '',
+                $n['highlightContentAr'] ?? '',
+                $n['image'] ?? '',
+                !empty($n['published']) ? 1 : 0,
+                !empty($n['featured']) ? 1 : 0
+            ]);
+            bustCache();
+            echo json_encode(["status" => "success", "message" => "News saved successfully."]);
+            break;
+
+        case 'save_school':
+            $s = json_decode(file_get_contents('php://input'), true);
+            if (!$s) throw new Exception("Data required");
+            $stmt = $pdo->prepare("REPLACE INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, foundedYear, address, addressAr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([
+                $s['id'] ?? uniqid(),
+                $s['name'] ?? '',
+                $s['nameAr'] ?? ($s['name'] ?? ''),
+                $s['location'] ?? '',
+                $s['locationAr'] ?? ($s['location'] ?? ''),
+                $s['governorate'] ?? '',
+                $s['governorateAr'] ?? ($s['governorate'] ?? ''),
+                $s['principal'] ?? '',
+                $s['principalAr'] ?? ($s['principal'] ?? ''),
+                $s['logo'] ?? '',
+                $s['type'] ?? '',
+                $s['mainImage'] ?? '',
+                json_encode($s['gallery'] ?? []),
+                $s['about'] ?? '',
+                $s['aboutAr'] ?? '',
+                $s['phone'] ?? '',
+                $s['email'] ?? '',
+                $s['website'] ?? '',
+                $s['rating'] ?? '',
+                $s['studentCount'] ?? '',
+                $s['foundedYear'] ?? '',
+                $s['address'] ?? '',
+                $s['addressAr'] ?? ''
+            ]);
+            bustCache();
+            echo json_encode(["status" => "success", "message" => "School saved successfully."]);
+            break;
+
+        case 'save_job':
+            $j = json_decode(file_get_contents('php://input'), true);
+            if (!$j) throw new Exception("Data required");
+            $stmt = $pdo->prepare("REPLACE INTO jobs (id, title, titleAr, department, departmentAr, location, locationAr, type, typeAr, description, descriptionAr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([
+                $j['id'] ?? uniqid(),
+                $j['title'] ?? '',
+                $j['titleAr'] ?? '',
+                $j['department'] ?? '',
+                $j['departmentAr'] ?? '',
+                $j['location'] ?? '',
+                $j['locationAr'] ?? '',
+                $j['type'] ?? '',
+                $j['typeAr'] ?? '',
+                $j['description'] ?? '',
+                $j['descriptionAr'] ?? ''
+            ]);
+            bustCache();
+            echo json_encode(["status" => "success", "message" => "Job saved successfully."]);
+            break;
+
+        case 'delete_news':
+            $id = $_GET['id'] ?? '';
+            if (!$id) throw new Exception("ID required");
+            $stmt = $pdo->prepare("DELETE FROM news WHERE id = ?");
+            $stmt->execute([$id]);
+            bustCache();
+            echo json_encode(["status" => "success", "message" => "Deleted."]);
+            break;
+
+        case 'delete_school':
+            $id = $_GET['id'] ?? '';
+            if (!$id) throw new Exception("ID required");
+            $stmt = $pdo->prepare("DELETE FROM schools WHERE id = ?");
+            $stmt->execute([$id]);
+            bustCache();
+            echo json_encode(["status" => "success", "message" => "Deleted."]);
+            break;
+
+        case 'delete_job':
+            $id = $_GET['id'] ?? '';
+            if (!$id) throw new Exception("ID required");
+            $stmt = $pdo->prepare("DELETE FROM jobs WHERE id = ?");
+            $stmt->execute([$id]);
+            bustCache();
+            echo json_encode(["status" => "success", "message" => "Deleted."]);
             break;
 
         case 'delete_entry':

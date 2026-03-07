@@ -116,3 +116,40 @@ export const deleteEntry = async (type: 'complaints' | 'contactMessages' | 'jobA
     if (data.status !== 'success') throw new Error(data.message || 'Failed to delete entry');
     return data;
 };
+
+// --- Specialized CRUD for real tables (News, Schools, Jobs) ---
+export const saveNews = async (news: any): Promise<ApiResponse> => {
+    const { data } = await apiClient.post<ApiResponse>('?action=save_news', news);
+    notifyUpdate();
+    return data;
+};
+
+export const deleteNews = async (id: string): Promise<ApiResponse> => {
+    const { data } = await apiClient.get<ApiResponse>(`?action=delete_news&id=${id}`);
+    notifyUpdate();
+    return data;
+};
+
+export const saveSchool = async (school: any): Promise<ApiResponse> => {
+    const { data } = await apiClient.post<ApiResponse>('?action=save_school', school);
+    notifyUpdate();
+    return data;
+};
+
+export const deleteSchool = async (id: string): Promise<ApiResponse> => {
+    const { data } = await apiClient.get<ApiResponse>(`?action=delete_school&id=${id}`);
+    notifyUpdate();
+    return data;
+};
+
+export const saveJob = async (job: any): Promise<ApiResponse> => {
+    const { data } = await apiClient.post<ApiResponse>('?action=save_job', job);
+    notifyUpdate();
+    return data;
+};
+
+export const deleteJob = async (id: string): Promise<ApiResponse> => {
+    const { data } = await apiClient.get<ApiResponse>(`?action=delete_job&id=${id}`);
+    notifyUpdate();
+    return data;
+};

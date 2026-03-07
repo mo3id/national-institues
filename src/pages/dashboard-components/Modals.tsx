@@ -78,7 +78,15 @@ export const EditNewsForm: React.FC<EditNewsProps> = ({ article, lang, onSave, o
                 setErrors(errs);
                 return;
             }
-            onSave(d);
+            const payloadToSave = {
+                ...d,
+                title: d.title?.trim() ? d.title : d.titleAr,
+                summary: d.summary?.trim() ? d.summary : d.summaryAr,
+                content: d.content?.trim() ? d.content : d.contentAr,
+                highlightTitle: d.highlightTitle?.trim() ? d.highlightTitle : d.highlightTitleAr,
+                highlightContent: d.highlightContent?.trim() ? d.highlightContent : d.highlightContentAr,
+            };
+            onSave(payloadToSave);
         }}>
             <div className="form-col">
                 <label className="dash-label">{u.titleEn}</label>
@@ -102,11 +110,13 @@ export const EditNewsForm: React.FC<EditNewsProps> = ({ article, lang, onSave, o
             </div>
             <div className="form-full">
                 <label className="dash-label">{u.contentEn}</label>
-                <textarea className="dash-input dash-ta" style={{ minHeight: 180 }} placeholder="Full content of the news..." value={d.content || ''} onChange={e => setD(p => ({ ...p, content: e.target.value }))} />
+                <textarea className={`dash-input dash-ta ${errors.content ? 'border-red-500' : ''}`} style={{ minHeight: 180 }} placeholder="Full content of the news..." value={d.content || ''} onChange={e => { setD(p => ({ ...p, content: e.target.value })); if (errors.content) setErrors(p => ({ ...p, content: '' })) }} />
+                {errors.content && <span className="text-red-500 text-xs mt-1 block">{errors.content}</span>}
             </div>
             <div className="form-full">
                 <label className="dash-label">{u.contentAr}</label>
-                <textarea className="dash-input dash-ta" style={{ minHeight: 180 }} placeholder="تفاصيل الخبر بالكامل..." dir="rtl" value={d.contentAr || ''} onChange={e => setD(p => ({ ...p, contentAr: e.target.value }))} />
+                <textarea className={`dash-input dash-ta ${errors.contentAr ? 'border-red-500' : ''}`} style={{ minHeight: 180 }} placeholder="تفاصيل الخبر بالكامل..." dir="rtl" value={d.contentAr || ''} onChange={e => { setD(p => ({ ...p, contentAr: e.target.value })); if (errors.contentAr) setErrors(p => ({ ...p, contentAr: '' })) }} />
+                {errors.contentAr && <span className="text-red-500 text-xs mt-1 block">{errors.contentAr}</span>}
             </div>
 
             <div className="form-full mt-4 pt-4 border-t border-[var(--border)]">
@@ -145,11 +155,11 @@ export const EditNewsForm: React.FC<EditNewsProps> = ({ article, lang, onSave, o
             </div>
             <div className="form-full flex gap-4 mt-2 mb-2">
                 <div className="flex items-center gap-2">
-                    <input type="checkbox" id="ep" checked={d.published} onChange={e => setD(p => ({ ...p, published: e.target.checked }))} className="dash-cb" />
+                    <input type="checkbox" id="ep" checked={Boolean(d.published)} onChange={e => setD(p => ({ ...p, published: e.target.checked }))} className="dash-cb" />
                     <label htmlFor="ep" className="dash-cb-label">{u.publishNow}</label>
                 </div>
                 <div className="flex items-center gap-2">
-                    <input type="checkbox" id="ef" checked={d.featured || false} onChange={e => setD(p => ({ ...p, featured: e.target.checked }))} className="dash-cb" />
+                    <input type="checkbox" id="ef" checked={Boolean(d.featured)} onChange={e => setD(p => ({ ...p, featured: e.target.checked }))} className="dash-cb" />
                     <label htmlFor="ef" className="dash-cb-label">{u.featuredNews}</label>
                 </div>
             </div>

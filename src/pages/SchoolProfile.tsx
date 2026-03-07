@@ -20,6 +20,7 @@ const SchoolProfile: React.FC = () => {
   const principalName = lang === 'ar' ? (school?.principalAr || school?.principal || '') : (school?.principal || '');
 
   const [selectedImageIndex, setSelectedImageIndex] = React.useState<number | null>(null);
+  const [direction, setDirection] = React.useState(0);
 
   const gallery = React.useMemo(() => {
     return (school?.gallery || []).filter(Boolean);
@@ -36,8 +37,6 @@ const SchoolProfile: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedImageIndex, isRTL, gallery.length]);
-
-  const [direction, setDirection] = React.useState(0);
 
   const navigateGallery = (newDirection: number) => {
     if (selectedImageIndex === null) return;
@@ -238,135 +237,106 @@ const SchoolProfile: React.FC = () => {
         </div>
       </div>
 
-      {/* Professional Lightbox Modal */}
+      {/* High-End Minimalist Gallery Lightbox */}
       <AnimatePresence initial={false} custom={direction}>
         {selectedImageIndex !== null && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-[#050608]/98 backdrop-blur-2xl transition-all select-none overflow-hidden"
+            className="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-slate-950/95 backdrop-blur-xl transition-all select-none overflow-hidden"
             onClick={() => setSelectedImageIndex(null)}
           >
-            {/* Animated Background Glows */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse" />
-              <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+            {/* Header */}
+            <div className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between text-white z-[1010]">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-blue-400 mb-1">
+                  {lang === 'ar' ? 'معرض الصور' : 'PHOTO GALLERY'}
+                </span>
+                <span className="text-sm font-medium opacity-60 tabular-nums">
+                  {selectedImageIndex + 1} / {gallery.length}
+                </span>
+              </div>
+
+              <button
+                className="w-12 h-12 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all active:scale-90"
+                onClick={() => setSelectedImageIndex(null)}
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
             </div>
 
-            {/* Header Area */}
-            <div className="absolute top-0 left-0 right-0 p-6 md:p-8 flex items-center justify-between text-white z-[1010] bg-gradient-to-b from-black/40 to-transparent">
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-black tracking-[0.4em] uppercase text-blue-400">
-                    {lang === 'ar' ? 'معرض الصور' : 'Gallery Experience'}
-                  </span>
-                  <span className="w-1 h-1 bg-white/20 rounded-full" />
-                  <span className="text-sm font-bold tabular-nums">
-                    {selectedImageIndex + 1} <span className="text-white/40 mx-1">/</span> {gallery.length}
-                  </span>
-                </div>
-                <h4 className="text-xs text-white/60 font-medium truncate max-w-[200px] md:max-w-md">
-                  {name}
-                </h4>
-              </div>
+            {/* Stage */}
+            <div className="relative w-full h-full flex items-center justify-center p-4 md:p-12 overflow-hidden">
+              {/* Ultra-Visible Thin Navigation Arrows */}
+              {gallery.length > 1 && (
+                <>
+                  <button
+                    className={`absolute ${isRTL ? 'right-4 md:right-8' : 'left-4 md:left-8'} top-1/2 -translate-y-1/2 w-16 h-16 flex items-center justify-center text-white/30 hover:text-white transition-all z-[1020] group pointer-events-auto`}
+                    onClick={(e) => { e.stopPropagation(); navigateGallery(-1); }}
+                  >
+                    <ChevronLeft className={`w-12 h-12 md:w-20 md:h-20 transition-transform group-hover:scale-110 drop-shadow-2xl ${isRTL ? 'rotate-180' : ''}`} />
+                  </button>
+                  <button
+                    className={`absolute ${isRTL ? 'left-4 md:left-8' : 'right-4 md:right-8'} top-1/2 -translate-y-1/2 w-16 h-16 flex items-center justify-center text-white/30 hover:text-white transition-all z-[1020] group pointer-events-auto`}
+                    onClick={(e) => { e.stopPropagation(); navigateGallery(1); }}
+                  >
+                    <ChevronRight className={`w-12 h-12 md:w-20 md:h-20 transition-transform group-hover:scale-110 drop-shadow-2xl ${isRTL ? 'rotate-180' : ''}`} />
+                  </button>
+                </>
+              )}
 
-              <div className="flex items-center gap-3">
-                <button
-                  className="group flex items-center gap-3 bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/40 px-6 py-3 rounded-full transition-all active:scale-95 text-white/70 hover:text-white"
-                  onClick={() => setSelectedImageIndex(null)}
-                >
-                  <span className="text-[11px] font-bold uppercase tracking-widest hidden md:inline">{lang === 'ar' ? 'إغلاق' : 'Close'}</span>
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Navigation Controls */}
-            {gallery.length > 1 && (
-              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-4 md:px-10 z-[1010] pointer-events-none">
-                <motion.button
-                  whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.15)' }}
-                  whileTap={{ scale: 0.9 }}
-                  className="w-14 h-14 md:w-20 md:h-20 flex items-center justify-center bg-white/5 border border-white/10 text-white rounded-full transition-shadow hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] pointer-events-auto backdrop-blur-md"
-                  onClick={(e) => { e.stopPropagation(); navigateGallery(-1); }}
-                >
-                  <ChevronLeft className={`w-8 h-8 md:w-10 md:h-10 ${isRTL ? 'rotate-180' : ''}`} />
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.15)' }}
-                  whileTap={{ scale: 0.9 }}
-                  className="w-14 h-14 md:w-20 md:h-20 flex items-center justify-center bg-white/5 border border-white/10 text-white rounded-full transition-shadow hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] pointer-events-auto backdrop-blur-md"
-                  onClick={(e) => { e.stopPropagation(); navigateGallery(1); }}
-                >
-                  <ChevronRight className={`w-8 h-8 md:w-10 md:h-10 ${isRTL ? 'rotate-180' : ''}`} />
-                </motion.button>
-              </div>
-            )}
-
-            {/* Main Stage */}
-            <div className="relative w-full h-full flex items-center justify-center px-4 md:px-24 py-32 overflow-hidden">
               <AnimatePresence initial={false} custom={direction}>
                 <motion.div
                   key={selectedImageIndex}
                   custom={direction}
                   variants={{
-                    enter: (d: number) => ({ x: d > 0 ? 1000 : -1000, opacity: 0, scale: 0.9 }),
+                    enter: (d: number) => ({ x: d > 0 ? 400 : -400, opacity: 0, scale: 0.96 }),
                     center: { zIndex: 1, x: 0, opacity: 1, scale: 1 },
-                    exit: (d: number) => ({ zIndex: 0, x: d < 0 ? 1000 : -1000, opacity: 0, scale: 0.9 })
+                    exit: (d: number) => ({ zIndex: 0, x: d < 0 ? 400 : -400, opacity: 0, scale: 0.96 })
                   }}
                   initial="enter"
                   animate="center"
                   exit="exit"
                   transition={{
-                    x: { type: 'spring', stiffness: 300, damping: 30 },
-                    opacity: { duration: 0.2 }
+                    x: { type: 'spring', stiffness: 280, damping: 28 },
+                    opacity: { duration: 0.25 }
                   }}
-                  className="absolute max-w-7xl w-full h-full flex items-center justify-center"
+                  className="absolute w-full h-full flex items-center justify-center px-16 md:px-40"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="relative group">
+                  <div className="relative">
                     <img
                       src={gallery[selectedImageIndex]}
-                      className="max-w-full max-h-[65vh] md:max-h-[75vh] object-contain rounded-2xl shadow-[0_50px_150px_rgba(0,0,0,0.9)] border border-white/10"
-                      alt={`Stage-${selectedImageIndex}`}
+                      className="max-w-full max-h-[70vh] md:max-h-[80vh] object-contain rounded-2xl shadow-[0_40px_130px_rgba(0,0,0,0.9)] border border-white/5 ring-1 ring-white/10"
+                      alt="Gallery view"
                     />
-                    <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10 pointer-events-none" />
                   </div>
                 </motion.div>
               </AnimatePresence>
             </div>
 
-            {/* High-End Thumbnail Reel */}
-            <div className="absolute bottom-0 left-0 right-0 p-8 flex flex-col items-center gap-6 bg-gradient-to-t from-black/60 to-transparent">
+            {/* Clean Thumbnail Reel */}
+            <div className="absolute bottom-8 left-0 right-0 p-4 flex flex-col items-center gap-6">
               <div
-                className="flex items-center gap-3 px-6 py-3 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 overflow-x-auto max-w-full no-scrollbar active:cursor-grabbing"
+                className="flex items-center gap-3 p-1.5 bg-white/5 backdrop-blur-2xl rounded-2xl border border-white/10 max-w-full overflow-x-auto no-scrollbar shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
               >
                 {gallery.map((src, i) => (
-                  <motion.button
+                  <button
                     key={i}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
                     onClick={() => {
                       setDirection(i > (selectedImageIndex || 0) ? 1 : -1);
                       setSelectedImageIndex(i);
                     }}
-                    className={`relative flex-shrink-0 w-16 h-12 md:w-24 md:h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 ${selectedImageIndex === i
-                        ? 'border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.5)] scale-110'
-                        : 'border-white/10 grayscale hover:grayscale-0 opacity-40 hover:opacity-100'
+                    className={`relative flex-shrink-0 w-12 h-9 md:w-16 md:h-11 rounded-lg overflow-hidden transition-all duration-300 ${selectedImageIndex === i
+                        ? 'ring-2 ring-blue-500 scale-105 opacity-100'
+                        : 'opacity-20 hover:opacity-100 grayscale hover:grayscale-0'
                       }`}
                   >
                     <img src={src} className="w-full h-full object-cover" alt={`thumb-${i}`} />
-                    {selectedImageIndex === i && (
-                      <div className="absolute inset-0 bg-blue-500/10" />
-                    )}
-                  </motion.button>
+                  </button>
                 ))}
-              </div>
-
-              <div className="text-[10px] text-white/30 font-bold uppercase tracking-[0.3em]">
-                {lang === 'ar' ? 'اضغط بجوار الصورة للإغلاق' : 'Click around image to exit'}
               </div>
             </div>
           </motion.div>
