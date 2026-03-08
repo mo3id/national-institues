@@ -13,11 +13,20 @@ CREATE TABLE IF NOT EXISTS schools (
     principal VARCHAR(255) NOT NULL,
     principalAr VARCHAR(255),
     logo TEXT,
-    type VARCHAR(50),
+    type VARCHAR(255),
     mainImage TEXT,
     gallery JSON,
+    about TEXT,
+    aboutAr TEXT,
+    phone VARCHAR(100),
+    email VARCHAR(255),
+    website TEXT,
+    rating VARCHAR(50),
+    studentCount VARCHAR(50),
+    foundedYear VARCHAR(50),
     address TEXT,
-    addressAr TEXT
+    addressAr TEXT,
+    applicationLink TEXT
 );
 
 CREATE TABLE IF NOT EXISTS news (
@@ -27,8 +36,15 @@ CREATE TABLE IF NOT EXISTS news (
     date DATE NOT NULL,
     summary TEXT,
     summaryAr TEXT,
+    content LONGTEXT,
+    contentAr LONGTEXT,
+    highlightTitle VARCHAR(255),
+    highlightTitleAr VARCHAR(255),
+    highlightContent LONGTEXT,
+    highlightContentAr LONGTEXT,
     image TEXT,
-    published BOOLEAN DEFAULT TRUE
+    published TINYINT(1) DEFAULT 1,
+    featured TINYINT(1) DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS jobs (

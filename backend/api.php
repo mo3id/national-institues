@@ -207,9 +207,10 @@ try {
                     if (!in_array('rating', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN rating varchar(20)");
                     if (!in_array('studentCount', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN studentCount varchar(20)");
                     if (!in_array('foundedYear', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN foundedYear varchar(20)");
+                    if (!in_array('applicationLink', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN applicationLink text");
 
                     $pdo->exec("DELETE FROM schools");
-                    $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, foundedYear, address, addressAr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     foreach ($newData as $s) {
                         $stmt->execute([
                             $s['id'] ?? '',
@@ -234,7 +235,8 @@ try {
                             $s['studentCount'] ?? '',
                             $s['foundedYear'] ?? '',
                             $s['address'] ?? '',
-                            $s['addressAr'] ?? ''
+                            $s['addressAr'] ?? '',
+                            $s['applicationLink'] ?? ''
                         ]);
                     }
                 } elseif ($category === 'news') {
@@ -244,9 +246,11 @@ try {
                     if (!in_array('highlightTitleAr', $cols)) $pdo->exec("ALTER TABLE news ADD COLUMN highlightTitleAr varchar(255) DEFAULT NULL");
                     if (!in_array('highlightContent', $cols)) $pdo->exec("ALTER TABLE news ADD COLUMN highlightContent longtext DEFAULT NULL");
                     if (!in_array('highlightContentAr', $cols)) $pdo->exec("ALTER TABLE news ADD COLUMN highlightContentAr longtext DEFAULT NULL");
+                    if (!in_array('content', $cols)) $pdo->exec("ALTER TABLE news ADD COLUMN content longtext DEFAULT NULL");
+                    if (!in_array('contentAr', $cols)) $pdo->exec("ALTER TABLE news ADD COLUMN contentAr longtext DEFAULT NULL");
                     if (!in_array('featured', $cols)) $pdo->exec("ALTER TABLE news ADD COLUMN featured tinyint(1) DEFAULT 0");
                     if (!in_array('published', $cols)) $pdo->exec("ALTER TABLE news ADD COLUMN published tinyint(1) DEFAULT 1");
-
+                    
                     $pdo->exec("DELETE FROM news");
                     $stmt = $pdo->prepare("INSERT INTO news (id, title, titleAr, date, summary, summaryAr, content, contentAr, highlightTitle, highlightTitleAr, highlightContent, highlightContentAr, image, published, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     foreach ($newData as $n) {
@@ -269,8 +273,12 @@ try {
                         ]);
                     }
                 } elseif ($category === 'jobs') {
+                    // ── Ensure schema is up to date ──
+                    $cols = $pdo->query("DESCRIBE jobs")->fetchAll(PDO::FETCH_COLUMN);
+                    if (!in_array('image', $cols)) $pdo->exec("ALTER TABLE jobs ADD COLUMN image text");
+
                     $pdo->exec("DELETE FROM jobs");
-                    $stmt = $pdo->prepare("INSERT INTO jobs (id, title, titleAr, department, departmentAr, location, locationAr, type, typeAr, description, descriptionAr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt = $pdo->prepare("INSERT INTO jobs (id, title, titleAr, department, departmentAr, location, locationAr, type, typeAr, description, descriptionAr, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     foreach ($newData as $j) {
                         $stmt->execute([
                             $j['id'] ?? uniqid(),
@@ -283,7 +291,8 @@ try {
                             $j['type'] ?? '',
                             $j['typeAr'] ?? '',
                             $j['description'] ?? '',
-                            $j['descriptionAr'] ?? ''
+                            $j['descriptionAr'] ?? '',
+                            $j['image'] ?? ''
                         ]);
                     }
                 } else {
