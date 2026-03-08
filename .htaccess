@@ -1,0 +1,15 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # Forward API requests directly to api.php
+  # This ensures they don't get caught by the SPA catch-all
+  RewriteRule ^api\.php$ - [L]
+
+  # SPA Routing: If requested file/dir doesn't exist, serve index.html
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-e
+  RewriteRule . /index.html [L]
+</IfModule>
