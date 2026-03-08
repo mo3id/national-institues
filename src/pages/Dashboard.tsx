@@ -504,6 +504,29 @@ const Dashboard: React.FC = () => {
   const [selectedRecruitmentJobId, setSelectedRecruitmentJobId] = useState<string | null>('All');
   const [selectedApplicant, setSelectedApplicant] = useState<DashJobApplication | null>(null);
   const [applicantModalOpen, setApplicantModalOpen] = useState(false);
+  const [cvBlobUrl, setCvBlobUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (selectedApplicant?.cvData) {
+      try {
+        const parts = selectedApplicant.cvData.split(',');
+        if (parts.length > 1) {
+          const mime = parts[0].match(/:(.*?);/)?.[1] || 'application/pdf';
+          const bstr = atob(parts[1]);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          while (n--) u8arr[n] = bstr.charCodeAt(n);
+          const blob = new Blob([u8arr], { type: mime });
+          const url = URL.createObjectURL(blob);
+          setCvBlobUrl(url);
+          return () => URL.revokeObjectURL(url);
+        }
+      } catch (e) {
+        console.error("PDF Preview Error:", e);
+      }
+    }
+    setCvBlobUrl(null);
+  }, [selectedApplicant]);
 
   const [selectedComplaint, setSelectedComplaint] = useState<any | null>(null);
   const [complaintModalOpen, setComplaintModalOpen] = useState(false);
@@ -1432,7 +1455,13 @@ const Dashboard: React.FC = () => {
                     {selectedApplicant.cvData && (
                       <div className="mt-2">
                         <p className="dash-label">{u.previewCV}</p>
-                        <iframe src={selectedApplicant.cvData} width="100%" height="400px" className="border" title="cv preview" />
+                        {cvBlobUrl ? (
+                          <iframe src={cvBlobUrl} width="100%" height="450px" className="border rounded-xl" title="cv preview" />
+                        ) : (
+                          <div className="p-10 border-2 border-dashed rounded-xl text-center text-slate-400 bg-slate-50">
+                            {lang === 'ar' ? 'جاري تجهيز المعاينة...' : 'Preparing preview...'}
+                          </div>
+                        )}
                       </div>
                     )}
                     <div>
