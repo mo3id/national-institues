@@ -99,12 +99,21 @@ const SchoolProfile: React.FC = () => {
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-8 leading-[1.2] text-white drop-shadow-2xl">
                 {name}
               </h1>
-              <div className="flex items-center justify-center">
+              <div className="flex flex-col items-center justify-center gap-4">
                 <div className={`flex items-center gap-3 font-semibold text-sm md:text-base tracking-wide bg-white/10 backdrop-blur-xl border border-white/20 text-white px-6 py-3 rounded-full shadow-2xl`}>
                   <MapPin className="w-5 h-5 text-blue-400" />
                   <span>
                     {gov} • {loc}
                   </span>
+                </div>
+
+                {/* School Types */}
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {(Array.isArray(school?.type) ? school.type : []).map((tValue: string) => (
+                    <span key={tValue} className="px-5 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 text-white text-[11px] font-bold uppercase tracking-[0.1em]">
+                      {t.schools.types[tValue as keyof typeof t.schools.types] || tValue}
+                    </span>
+                  ))}
                 </div>
               </div>
             </ScrollReveal>

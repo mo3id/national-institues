@@ -81,6 +81,104 @@ export const CustomSelect: React.FC<SelectProps> = ({ value, onChange, options, 
     );
 };
 
+// --- Custom Multi-Select Component ---
+interface MultiSelectProps {
+    value: string[];
+    onChange: (val: string[]) => void;
+    options: { value: string; label: string }[];
+    placeholder?: string;
+    icon?: React.ReactNode;
+    className?: string;
+}
+
+export const CustomMultiSelect: React.FC<MultiSelectProps> = ({ value = [], onChange, options, placeholder, icon, className }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const { isRTL } = useLanguage();
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const toggleOption = (optValue: string) => {
+        const newValue = value.includes(optValue)
+            ? value.filter(v => v !== optValue)
+            : [...value, optValue];
+        onChange(newValue);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const displayValue = value.length > 0
+        ? options.filter(o => value.includes(o.value)).map(o => o.label).join(', ')
+        : placeholder;
+
+    return (
+        <div className={`relative ${className}`} ref={containerRef}>
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className={`w-full flex items-center justify-between px-6 py-4 bg-[var(--surface2)] border transition-all duration-300 rounded-2xl outline-none font-bold text-sm text-[var(--text)]
+          ${isOpen ? 'border-[var(--accent)] ring-4 ring-[var(--accent)]/5 shadow-md' : 'border-[var(--border)] shadow-sm hover:shadow-md'}
+          ${isRTL ? 'text-right' : 'text-left'}`}
+            >
+                <div className="flex items-center gap-3 overflow-hidden">
+                    {icon && <span className={`${isOpen ? 'text-[var(--accent)]' : 'text-[var(--text2)]'} shrink-0 transition-colors`}>{icon}</span>}
+                    <span className="truncate">{displayValue}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    {value.length > 0 && (
+                        <span className="bg-[var(--accent)] text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-sm">
+                            {value.length}
+                        </span>
+                    )}
+                    <ChevronDown className={`h-4 w-4 transition-all duration-300 ${isOpen ? 'rotate-180 text-[var(--accent)]' : 'text-[var(--text2)]'}`} />
+                </div>
+            </button>
+
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 12, scale: 0.95 }}
+                        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                        className="absolute top-full left-0 right-0 z-[100] mt-2 bg-[var(--surface,#ffffff)] border border-[var(--border)] rounded-[1.5rem] shadow-2xl overflow-hidden max-h-60 overflow-y-auto p-2"
+                        style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
+                    >
+                        {options.map((opt) => {
+                            const isSelected = value.includes(opt.value);
+                            return (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => toggleOption(opt.value)}
+                                    className={`w-full px-5 py-3.5 text-sm font-bold rounded-xl transition-all flex items-center justify-between mb-1 last:mb-0
+                      ${isSelected
+                                            ? 'text-[var(--accent)] bg-[var(--accent)]/5'
+                                            : 'text-[var(--text)] hover:bg-[var(--surface2)]'}`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${isSelected ? 'bg-[var(--accent)] border-[var(--accent)]' : 'border-[var(--border)] bg-transparent'}`}>
+                                            {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                                        </div>
+                                        <span>{opt.label}</span>
+                                    </div>
+                                    {isSelected && <div className="h-1.5 w-1.5 bg-[var(--accent)] rounded-full shrink-0 shadow-[0_0_8px_var(--accent)]" />}
+                                </button>
+                            );
+                        })}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
 // --- Custom Date Picker Component ---
 interface DatePickerProps {
     value: string; // YYYY-MM-DD

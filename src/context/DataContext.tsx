@@ -50,11 +50,19 @@ function buildMergedData(apiData: SiteData): SiteData {
     // Normalize legacy school type values
     if (Array.isArray(merged.schools)) {
         merged.schools = merged.schools.map((s: any) => {
-            let type = s.type;
-            if (type === 'National') type = 'Arabic';
-            if (type === 'Language') type = 'Languages';
-            if (type === 'International') type = 'American';
-            return { ...s, type };
+            let t = s.type;
+            // Normalize JSON string or single string to array
+            let types = Array.isArray(t) ? t : (typeof t === 'string' && t.startsWith('[') ? JSON.parse(t) : [t]);
+
+            // Map legacy values
+            types = types.map((type: string) => {
+                if (type === 'National') return 'Arabic';
+                if (type === 'Language') return 'Languages';
+                if (type === 'International') return 'American';
+                return type;
+            });
+
+            return { ...s, type: types };
         });
     }
 

@@ -33,7 +33,7 @@ export interface DashSchool {
     principal: string;
     principalAr?: string;
     logo: string;
-    type: string;
+    type: string | string[];
     mainImage?: string;
     gallery?: string[];
     // New fields

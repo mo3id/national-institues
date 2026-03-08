@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Save, X, Plus } from 'lucide-react';
 import { DashNewsItem, HeroSlide, DashSchool, DashJob, Lang, UI } from './types';
-import { CustomSelect, CustomDatePicker, ImageUpload } from '../../components/common/FormControls';
+import { CustomSelect, CustomMultiSelect, CustomDatePicker, ImageUpload } from '../../components/common/FormControls';
 import { Filter, Calendar } from 'lucide-react';
 import { getDashNewsSchema, getDashHeroSchema, getDashSchoolSchema, getDashJobSchema } from '@/utils/validations';
 import { useSiteData } from '@/context/DataContext';
@@ -303,8 +303,8 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
             <div className="form-col">
                 <label className="dash-label">{u.type}</label>
                 <div className={errors.type ? 'border border-red-500 rounded' : ''}>
-                    <CustomSelect
-                        value={d.type || ''}
+                    <CustomMultiSelect
+                        value={Array.isArray(d.type) ? d.type : (d.type ? (d.type.startsWith('[') ? JSON.parse(d.type) : d.type.split(',')) : [])}
                         onChange={val => {
                             setD(p => ({ ...p, type: val }));
                             if (errors.type) setErrors(p => ({ ...p, type: '' }));

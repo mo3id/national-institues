@@ -33,14 +33,16 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
           loading="lazy"
         />
         {/* Type Badge on cover */}
-        <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'}`}>
-          <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border border-white/20 shadow-sm
-            ${school.type === 'American' || school.type === 'British' || school.type === 'French' ? 'bg-purple-500/80 text-white' :
-              school.type === 'Languages' ? 'bg-blue-500/80 text-white' :
-                'bg-emerald-500/80 text-white'
-            }`}>
-            {t.types[school.type as keyof typeof t.types] || school.type}
-          </span>
+        <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'} flex flex-wrap gap-1 justify-end`}>
+          {(Array.isArray(school.type) ? school.type : []).map((tValue: string) => (
+            <span key={tValue} className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border border-white/20 shadow-sm
+              ${tValue === 'American' || tValue === 'British' || tValue === 'French' ? 'bg-purple-500/80 text-white' :
+                tValue === 'Languages' ? 'bg-blue-500/80 text-white' :
+                  'bg-emerald-500/80 text-white'
+              }`}>
+              {t.types[tValue as keyof typeof t.types] || tValue}
+            </span>
+          ))}
         </div>
       </div>
 
@@ -139,7 +141,8 @@ const Schools: React.FC = () => {
       const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         location.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesGov = selectedGov === '' || school.governorate === selectedGov;
-      const matchesType = selectedType === '' || school.type === selectedType;
+      const matchesType = selectedType === '' || (Array.isArray(school.type) && school.type.includes(selectedType));
+
       return matchesSearch && matchesGov && matchesType;
     });
   }, [searchQuery, selectedGov, selectedType]);
