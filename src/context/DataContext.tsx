@@ -16,6 +16,58 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+// ─── Deep Translation Fallback Helper ──────────────────────────────────────────
+function applyFallbacks(obj: any): any {
+    if (!obj || typeof obj !== 'object') return obj;
+
+    if (Array.isArray(obj)) {
+        return obj.map(applyFallbacks);
+    }
+
+    const newObj = { ...obj };
+    const keys = Object.keys(newObj);
+
+    const isEmpty = (val: any) => {
+        if (val === null || val === undefined || val === '') return true;
+        if (Array.isArray(val) && val.length === 0) return true;
+        return false;
+    };
+
+    for (const key of keys) {
+        // Pattern 1: fieldName / fieldNameAr
+        if (key.endsWith('Ar')) {
+            const baseKey = key.slice(0, -2);
+            if (keys.includes(baseKey)) {
+                const enVal = newObj[baseKey];
+                const arVal = newObj[key];
+
+                if (isEmpty(enVal) && !isEmpty(arVal)) newObj[baseKey] = arVal;
+                if (isEmpty(arVal) && !isEmpty(enVal)) newObj[key] = enVal;
+            }
+        }
+
+        // Pattern 2: fieldEn / fieldAr
+        if (key.endsWith('En')) {
+            const baseKey = key.slice(0, -2);
+            const arKey = baseKey + 'Ar';
+            if (keys.includes(arKey)) {
+                const enVal = newObj[key];
+                const arVal = newObj[arKey];
+
+                if (isEmpty(enVal) && !isEmpty(arVal)) newObj[key] = arVal;
+                if (isEmpty(arVal) && !isEmpty(enVal)) newObj[arKey] = enVal;
+            }
+        }
+
+        // Recursively apply to children
+        if (newObj[key] && typeof newObj[key] === 'object') {
+            newObj[key] = applyFallbacks(newObj[key]);
+        }
+    }
+
+    return newObj;
+}
+
 // ─── Direct Merge Helper ───────────────────────────────────────────────────────
 function buildMergedData(apiData: SiteData): SiteData {
     const merged = { ...DEFAULT_SITE_DATA };
@@ -66,8 +118,11 @@ function buildMergedData(apiData: SiteData): SiteData {
         });
     }
 
+    // Apply Deep Fallbacks for all translation fields
+    const normalized = applyFallbacks(merged);
+
     // No local storage code anymore!
-    return merged;
+    return normalized;
 }
 
 // ─── Provider ─────────────────────────────────────────────────────────────────

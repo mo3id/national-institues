@@ -34,9 +34,9 @@ export const getLoginSchema = (isRTL: boolean) => z.object({
 });
 
 export const getDashNewsSchema = () => z.object({
-    titleAr: z.string().min(1, { message: 'العنوان العربي مطلوب' }),
-    summaryAr: z.string().min(1, { message: 'الملخص العربي مطلوب' }),
-    contentAr: z.string().min(1, { message: 'المحتوي العربي مطلوب' }),
+    titleAr: z.string().optional().nullish(),
+    summaryAr: z.string().optional().nullish(),
+    contentAr: z.string().optional().nullish(),
     title: z.string().optional().nullish(),
     summary: z.string().optional().nullish(),
     content: z.string().optional().nullish(),
@@ -48,30 +48,35 @@ export const getDashNewsSchema = () => z.object({
     highlightContentAr: z.string().optional().nullish(),
     featured: z.any().optional(),
     published: z.any().optional(),
-});
+}).refine(d => d.title || d.titleAr, { message: 'Title is required in at least one language', path: ['titleAr'] })
+    .refine(d => d.summary || d.summaryAr, { message: 'Summary is required in at least one language', path: ['summaryAr'] })
+    .refine(d => d.content || d.contentAr, { message: 'Content is required in at least one language', path: ['contentAr'] });
 
 export const getDashHeroSchema = () => z.object({
-    title: z.string().min(3, { message: 'Title is required' }),
-    subtitle: z.string().min(3, { message: 'Subtitle is required' }),
-    description: z.string().min(5, { message: 'Description is required' }),
+    title: z.string().optional().nullish(),
+    titleAr: z.string().optional().nullish(),
+    subtitle: z.string().optional().nullish(),
+    subtitleAr: z.string().optional().nullish(),
+    description: z.string().optional().nullish(),
+    descriptionAr: z.string().optional().nullish(),
     image: z.string().min(1, { message: 'Image is required' })
-});
+}).refine(d => d.title || d.titleAr, { message: 'Title is required', path: ['title'] });
 
 export const getDashSchoolSchema = () => z.object({
-    name: z.string().min(1, { message: 'School name is required' }),
-    nameAr: z.string().min(1, { message: 'Arabic name is required' }),
-    location: z.string().min(1, { message: 'Location is required' }),
-    locationAr: z.string().min(1, { message: 'Arabic location is required' }),
+    name: z.string().optional().nullish(),
+    nameAr: z.string().optional().nullish(),
+    location: z.string().optional().nullish(),
+    locationAr: z.string().optional().nullish(),
     governorate: z.string().min(1, { message: 'Governorate is required' }),
-    address: z.string().min(1, { message: 'Address is required' }),
-    addressAr: z.string().min(1, { message: 'Arabic address is required' }),
-    principal: z.string().min(1, { message: 'Principal is required' }),
-    principalAr: z.string().min(1, { message: 'Arabic principal is required' }),
-    type: z.string().min(1, { message: 'Type is required' }),
+    address: z.string().optional().nullish(),
+    addressAr: z.string().optional().nullish(),
+    principal: z.string().optional().nullish(),
+    principalAr: z.string().optional().nullish(),
+    type: z.any().optional(), // Can be string or array
     mainImage: z.string().min(1, { message: 'Main image is required' }),
     logo: z.string().min(1, { message: 'Logo is required' }),
-    about: z.string().min(1, { message: 'About section is required' }),
-    aboutAr: z.string().min(1, { message: 'Arabic about section is required' }),
+    about: z.string().optional().nullish(),
+    aboutAr: z.string().optional().nullish(),
     phone: z.string().min(1, { message: 'Phone is required' }),
     email: z.string().email({ message: 'Valid email is required' }),
     website: z.string().min(1, { message: 'Website is required' }),
@@ -79,17 +84,20 @@ export const getDashSchoolSchema = () => z.object({
     studentCount: z.string().min(1, { message: 'Student count is required' }),
     foundedYear: z.string().min(4, { message: 'Founded year is required' }),
     applicationLink: z.string().optional().nullish(),
-});
+}).refine(d => d.name || d.nameAr, { message: 'School name is required', path: ['name'] })
+    .refine(d => d.location || d.locationAr, { message: 'Location is required', path: ['location'] })
+    .refine(d => d.about || d.aboutAr, { message: 'About section is required', path: ['about'] });
 
 export const getDashJobSchema = () => z.object({
-    title: z.string().min(3, { message: 'Title is required' }),
-    titleAr: z.string().min(3, { message: 'Arabic title is required' }),
-    department: z.string().min(2, { message: 'Department is required' }),
-    departmentAr: z.string().min(2, { message: 'Arabic department is required' }),
-    location: z.string().min(2, { message: 'Location is required' }),
-    locationAr: z.string().min(2, { message: 'Arabic location is required' }),
+    title: z.string().optional().nullish(),
+    titleAr: z.string().optional().nullish(),
+    department: z.string().optional().nullish(),
+    departmentAr: z.string().optional().nullish(),
+    location: z.string().optional().nullish(),
+    locationAr: z.string().optional().nullish(),
     type: z.string().min(1, { message: 'Type is required' }),
-    description: z.string().min(10, { message: 'Description is required' }),
-    descriptionAr: z.string().min(10, { message: 'Arabic description is required' }),
+    description: z.string().optional().nullish(),
+    descriptionAr: z.string().optional().nullish(),
     image: z.string().min(1, { message: 'Image is required' }).optional()
-});
+}).refine(d => d.title || d.titleAr, { message: 'Title is required', path: ['title'] })
+    .refine(d => d.description || d.descriptionAr, { message: 'Description is required', path: ['description'] });
