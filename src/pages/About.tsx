@@ -95,8 +95,8 @@ const About: React.FC = () => {
                                             <Award className="w-8 h-8" />
                                         </div>
                                         <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
-                                            <span className="text-4xl font-black text-slate-900">40+</span>
-                                            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">{translationsRoot.stats.schools}</span>
+                                            <span className="text-4xl font-black text-slate-900">{lang === 'ar' ? (d.schoolCountAr || '٤٠+') : (d.schoolCount || '40+')}</span>
+                                            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">{lang === 'ar' ? (d.schoolCountLabelAr || translationsRoot.stats.schools) : (d.schoolCountLabel || translationsRoot.stats.schools)}</span>
                                         </div>
                                     </div>
                                 </div>

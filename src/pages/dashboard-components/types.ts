@@ -115,6 +115,11 @@ export interface AboutData {
     visionDesc: string;
     visionDescAr: string;
     values: { title: string; titleAr: string; desc: string; descAr: string; }[];
+    storyImage?: string;
+    schoolCount?: string;
+    schoolCountAr?: string;
+    schoolCountLabel?: string;
+    schoolCountLabelAr?: string;
 }
 
 export interface AdminProfile {
@@ -232,6 +237,8 @@ export const UI: Record<Lang, Record<string, string>> = {
         downloadCV: 'Download CV',
         close: 'Close',
         print: 'Print',
+        storyImage: 'Story Image',
+        schoolCount: 'School Count',
     },
     ar: {
         overview: 'نظرة عامة', news: 'الأخبار', schools: 'المدارس', jobs: 'الوظائف الشاغرة',
@@ -342,6 +349,8 @@ export const UI: Record<Lang, Record<string, string>> = {
         downloadCV: 'تحميل السيرة الذاتية',
         close: 'إغلاق',
         print: 'طباعة',
+        storyImage: 'صورة القصة',
+        schoolCount: 'عدد المدارس',
     }
 };
 

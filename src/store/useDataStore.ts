@@ -89,7 +89,10 @@ export const DEFAULT_SITE_DATA: SiteData = {
         storyTitle: '', storyTitleAr: '', storyDesc: '', storyDescAr: '',
         missionTitle: '', missionTitleAr: '', missionDesc: '', missionDescAr: '',
         visionTitle: '', visionTitleAr: '', visionDesc: '', visionDescAr: '',
-        values: []
+        values: [],
+        storyImage: '',
+        schoolCount: '', schoolCountAr: '',
+        schoolCountLabel: '', schoolCountLabelAr: ''
     },
     stats: {
         journeyInNumbers: '', journeyInNumbersAr: '', items: []
