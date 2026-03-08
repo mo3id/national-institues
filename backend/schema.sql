@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS jobs (
     type VARCHAR(50) NOT NULL,
     typeAr VARCHAR(50) NOT NULL,
     description TEXT,
-    descriptionAr TEXT
+    descriptionAr TEXT,
+    image TEXT
 );
 
 CREATE TABLE IF NOT EXISTS settings (

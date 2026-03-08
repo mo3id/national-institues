@@ -694,7 +694,15 @@ try {
         case 'save_job':
             $j = json_decode(file_get_contents('php://input'), true);
             if (!$j) throw new Exception("Data required");
-            $stmt = $pdo->prepare("REPLACE INTO jobs (id, title, titleAr, department, departmentAr, location, locationAr, type, typeAr, description, descriptionAr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            
+            // Migration: Ensure image column exists
+            try {
+                $pdo->query("SELECT image FROM jobs LIMIT 1");
+            } catch (Exception $e) {
+                $pdo->exec("ALTER TABLE jobs ADD COLUMN image TEXT NULL");
+            }
+
+            $stmt = $pdo->prepare("REPLACE INTO jobs (id, title, titleAr, department, departmentAr, location, locationAr, type, typeAr, description, descriptionAr, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $j['id'] ?? uniqid(),
                 $j['title'] ?? '',
@@ -706,7 +714,8 @@ try {
                 $j['type'] ?? '',
                 $j['typeAr'] ?? '',
                 $j['description'] ?? '',
-                $j['descriptionAr'] ?? ''
+                $j['descriptionAr'] ?? '',
+                $j['image'] ?? ''
             ]);
             bustCache();
             echo json_encode(["status" => "success", "message" => "Job saved successfully."]);
