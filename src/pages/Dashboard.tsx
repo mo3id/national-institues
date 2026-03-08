@@ -1299,7 +1299,17 @@ const Dashboard: React.FC = () => {
                   <tbody>
                     {filteredJobs.map((job, i) => (
                       <tr key={job.id} style={{ borderBottom: i === filteredJobs.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{lang === 'ar' ? job.titleAr : job.title}</td>
+                        <td style={{ padding: '16px 24px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <div style={{ width: 42, height: 42, borderRadius: 10, overflow: 'hidden', background: 'var(--surface2)', flexShrink: 0, border: '1px solid var(--border)' }}>
+                              <img src={job.image || "/layer-1-small.webp"} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            </div>
+                            <div>
+                              <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)' }}>{lang === 'ar' ? job.titleAr : job.title}</p>
+                              <p style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 500 }}>{lang === 'ar' ? job.typeAr : job.type}</p>
+                            </div>
+                          </div>
+                        </td>
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{lang === 'ar' ? job.departmentAr : job.department}</td>
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{lang === 'ar' ? job.locationAr : job.location}</td>
                         <td style={{ padding: '16px 24px', display: 'flex', gap: 4 }}>
