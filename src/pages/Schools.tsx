@@ -1,7 +1,13 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SCHOOLS, GOVERNORATES } from '@/constants';
-import { Search, MapPin, Filter, User, ArrowRight, Star, GraduationCap } from 'lucide-react';
+import Search from 'lucide-react/dist/esm/icons/search';
+import MapPin from 'lucide-react/dist/esm/icons/map-pin';
+import Filter from 'lucide-react/dist/esm/icons/filter';
+import User from 'lucide-react/dist/esm/icons/user';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import Star from 'lucide-react/dist/esm/icons/star';
+import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
 import NISLogo from '@/components/common/NISLogo';
@@ -48,6 +54,7 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
           alt="Cover"
           className="w-full h-full object-cover"
           loading="lazy"
+          decoding="async"
         />
         {/* Type Badge on cover */}
         <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'} flex flex-wrap gap-1 justify-end`}>
@@ -67,7 +74,7 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
       <div className={`absolute top-28 ${isRTL ? 'right-6' : 'left-6'} z-10`}>
         <div className="w-20 h-20 bg-white rounded-full p-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-gray-50">
           <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center p-2.5">
-            <img src={school.logo || "/layer-1-small.webp"} alt="NIS Logo" className="w-full h-full object-contain" loading="lazy" />
+            <img src={school.logo || "/layer-1-small.webp"} alt="NIS Logo" className="w-full h-full object-contain" loading="lazy" decoding="async" />
           </div>
         </div>
       </div>
@@ -187,7 +194,7 @@ const Schools: React.FC = () => {
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: `url('/our-schools.png')`
+                backgroundImage: `url('/our-schools.webp')`
               }}
             />
             <div className="absolute inset-0 z-10 bg-black/40" />

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Save, X, Plus } from 'lucide-react';
+import Save from 'lucide-react/dist/esm/icons/save';
+import X from 'lucide-react/dist/esm/icons/x';
+import Plus from 'lucide-react/dist/esm/icons/plus';
 import { DashNewsItem, HeroSlide, DashSchool, DashJob, Lang, UI } from './types';
 import { CustomSelect, CustomMultiSelect, CustomDatePicker, ImageUpload } from '../../components/common/FormControls';
-import { Filter, Calendar } from 'lucide-react';
 import { getDashNewsSchema, getDashHeroSchema, getDashSchoolSchema, getDashJobSchema } from '@/utils/validations';
 import { useSiteData } from '@/context/DataContext';
 

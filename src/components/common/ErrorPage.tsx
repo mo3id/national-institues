@@ -1,5 +1,9 @@
 import React from 'react';
-import { ShieldAlert, RefreshCw, Home, WifiOff, ServerCrash } from 'lucide-react';
+import ShieldAlert from 'lucide-react/dist/esm/icons/shield-alert';
+import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
+import Home from 'lucide-react/dist/esm/icons/home';
+import WifiOff from 'lucide-react/dist/esm/icons/wifi-off';
+import ServerCrash from 'lucide-react/dist/esm/icons/server-crash';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface ErrorPageProps {

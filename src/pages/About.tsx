@@ -2,16 +2,14 @@ import { useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
 import { motion } from 'framer-motion';
-import {
-    BookOpen,
-    Lightbulb,
-    ShieldCheck,
-    Users,
-    Target,
-    Award,
-    Globe2,
-    ChevronRight
-} from 'lucide-react';
+import BookOpen from 'lucide-react/dist/esm/icons/book-open';
+import Lightbulb from 'lucide-react/dist/esm/icons/lightbulb';
+import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
+import Users from 'lucide-react/dist/esm/icons/users';
+import Target from 'lucide-react/dist/esm/icons/target';
+import Award from 'lucide-react/dist/esm/icons/award';
+import Globe2 from 'lucide-react/dist/esm/icons/globe-2';
+import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
 

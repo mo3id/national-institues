@@ -1,6 +1,12 @@
 
 import React, { useState } from 'react';
-import { Briefcase, MapPin, Clock, ArrowRight, Upload, CheckCircle, Loader2 } from 'lucide-react';
+import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
+import MapPin from 'lucide-react/dist/esm/icons/map-pin';
+import Clock from 'lucide-react/dist/esm/icons/clock';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import Upload from 'lucide-react/dist/esm/icons/upload';
+import CheckCircle from 'lucide-react/dist/esm/icons/check-circle';
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
 import PageTransition from '@/components/common/PageTransition';

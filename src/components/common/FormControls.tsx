@@ -1,7 +1,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
+import CalendarIcon from 'lucide-react/dist/esm/icons/calendar';
+import ChevronLeft from 'lucide-react/dist/esm/icons/chevron-left';
+import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
+import Upload from 'lucide-react/dist/esm/icons/upload';
+import LinkIcon from 'lucide-react/dist/esm/icons/link';
+import XIcon from 'lucide-react/dist/esm/icons/x';
 import { useLanguage } from '@/context/LanguageContext';
 
 // --- Custom Select Component ---
@@ -326,8 +332,6 @@ interface ImageUploadProps {
     className?: string;
 }
 
-import { Upload, Link as LinkIcon, X as XIcon } from 'lucide-react';
-
 export const ImageUpload: React.FC<ImageUploadProps> = React.memo(({ value, onChange, label, className }) => {
     const [mode, setMode] = useState<'url' | 'file'>(() => {
         if (!value) return 'file';
@@ -381,22 +385,44 @@ export const ImageUpload: React.FC<ImageUploadProps> = React.memo(({ value, onCh
             {label && <label className="block text-sm font-black text-[var(--text)] mb-2 uppercase tracking-tight">{label}</label>}
 
             <div className="flex p-1 bg-[var(--surface2)] rounded-xl w-fit mb-2">
-                <button
-                    type="button"
-                    onClick={() => setMode('file')}
-                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'file' ? 'bg-[var(--surface)] shadow-sm text-[var(--accent)]' : 'text-[var(--text2)]'}`}
+                <div 
+                    className="relative group/tooltip inline-block"
+                    title={value && mode === 'url' ? (isRTL ? 'يرجى مسح الرابط أولاً للتمكن من رفع ملف' : 'Please clear the URL first to upload a file') : undefined}
+                    style={value && mode === 'url' ? { cursor: 'not-allowed' } : undefined}
                 >
-                    <Upload className="h-3 w-3 inline-block me-2" />
-                    {isRTL ? 'رفع ملف' : 'Upload File'}
-                </button>
-                <button
-                    type="button"
-                    onClick={() => setMode('url')}
-                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'url' ? 'bg-[var(--surface)] shadow-sm text-[var(--accent)]' : 'text-[var(--text2)]'}`}
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (!(value && mode === 'url')) {
+                                setMode('file');
+                            }
+                        }}
+                        disabled={!!value && mode === 'url'}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'file' ? 'bg-[var(--surface)] shadow-sm text-[var(--accent)]' : 'text-[var(--text2)]'} ${!!value && mode === 'url' ? 'opacity-50 pointer-events-none' : ''}`}
+                    >
+                        <Upload className="h-3 w-3 inline-block me-2" />
+                        {isRTL ? 'رفع ملف' : 'Upload File'}
+                    </button>
+                </div>
+                <div 
+                    className="relative group/tooltip inline-block"
+                    title={value && mode === 'file' ? (isRTL ? 'يرجى حذف الصورة المرفوعة أولاً للتمكن من إضافة رابط مباشر' : 'Please delete the uploaded image first to add a direct link') : undefined}
+                    style={value && mode === 'file' ? { cursor: 'not-allowed' } : undefined}
                 >
-                    <LinkIcon className="h-3 w-3 inline-block me-2" />
-                    {isRTL ? 'رابط مباشر' : 'Direct Link'}
-                </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (!(value && mode === 'file')) {
+                                setMode('url');
+                            }
+                        }}
+                        disabled={!!value && mode === 'file'}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'url' ? 'bg-[var(--surface)] shadow-sm text-[var(--accent)]' : 'text-[var(--text2)]'} ${!!value && mode === 'file' ? 'opacity-50 pointer-events-none' : ''}`}
+                    >
+                        <LinkIcon className="h-3 w-3 inline-block me-2" />
+                        {isRTL ? 'رابط مباشر' : 'Direct Link'}
+                    </button>
+                </div>
             </div>
 
             {mode === 'url' ? (
@@ -406,8 +432,18 @@ export const ImageUpload: React.FC<ImageUploadProps> = React.memo(({ value, onCh
                         value={value}
                         onChange={e => onChange(e.target.value)}
                         placeholder="https://images.unsplash.com/..."
-                        className="w-full px-5 py-4 bg-[var(--surface2)] border border-[var(--border)] rounded-2xl focus:ring-4 focus:ring-[var(--accent)]/10 focus:border-[var(--accent)] outline-none transition-all font-medium text-sm text-[var(--text)] shadow-sm"
+                        className="w-full px-5 py-4 bg-[var(--surface2)] border border-[var(--border)] rounded-2xl focus:ring-4 focus:ring-[var(--accent)]/10 focus:border-[var(--accent)] outline-none transition-all font-medium text-sm text-[var(--text)] shadow-sm pr-12"
                     />
+                    {value && (
+                        <button
+                            type="button"
+                            onClick={() => onChange('')}
+                            className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'left-4' : 'right-4'} p-1.5 text-[var(--text2)] hover:text-red-500 hover:bg-red-50 rounded-full transition-colors`}
+                            title={isRTL ? 'مسح الرابط' : 'Clear URL'}
+                        >
+                            <XIcon className="h-4 w-4" />
+                        </button>
+                    )}
                 </div>
             ) : (
                 <div

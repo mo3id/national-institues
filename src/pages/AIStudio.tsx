@@ -1,5 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, Image as ImageIcon, Video, Search, BrainCircuit, Mic, Wand2, FileSearch, Loader2 } from 'lucide-react';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import ImageIcon from 'lucide-react/dist/esm/icons/image';
+import Video from 'lucide-react/dist/esm/icons/video';
+import Search from 'lucide-react/dist/esm/icons/search';
+import BrainCircuit from 'lucide-react/dist/esm/icons/brain-circuit';
+import Mic from 'lucide-react/dist/esm/icons/mic';
+import Wand2 from 'lucide-react/dist/esm/icons/wand-2';
+import FileSearch from 'lucide-react/dist/esm/icons/file-search';
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import { geminiService } from '../services/geminiService';
 import { AspectRatio, ImageSize } from '@/types';
 import PageTransition from '@/components/common/PageTransition';

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
-import { Send, CheckCircle2, Loader2 } from 'lucide-react';
+import Send from 'lucide-react/dist/esm/icons/send';
+import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import { getContactSchema } from '@/utils/validations';
 import { submitContactMessage } from '@/services/api';
 

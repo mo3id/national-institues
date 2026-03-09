@@ -4,7 +4,10 @@ import { useSiteData } from '@/context/DataContext';
 import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
 import ContactForm from '@/components/features/ContactForm';
-import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import MapPin from 'lucide-react/dist/esm/icons/map-pin';
+import Phone from 'lucide-react/dist/esm/icons/phone';
+import Mail from 'lucide-react/dist/esm/icons/mail';
+import Clock from 'lucide-react/dist/esm/icons/clock';
 
 const ContactUs: React.FC = () => {
     const { lang, isRTL, t: translationsRoot } = useLanguage();

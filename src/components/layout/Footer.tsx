@@ -1,6 +1,10 @@
 
 import React from 'react';
-import { Twitter, Instagram, Linkedin, Github, Facebook } from 'lucide-react';
+import Twitter from 'lucide-react/dist/esm/icons/twitter';
+import Instagram from 'lucide-react/dist/esm/icons/instagram';
+import Linkedin from 'lucide-react/dist/esm/icons/linkedin';
+import Github from 'lucide-react/dist/esm/icons/github';
+import Facebook from 'lucide-react/dist/esm/icons/facebook';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';

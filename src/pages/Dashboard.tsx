@@ -5,14 +5,43 @@ import {
   saveSchool as apiSaveSchool, deleteSchool as apiDeleteSchool,
   saveJob as apiSaveJob, deleteJob as apiDeleteJob
 } from '@/services/api';
-import {
-  LayoutDashboard, Newspaper, School, Image, Info, Settings,
-  Plus, Pencil, Trash2, Eye, EyeOff, Save, X,
-  Users, Home as HomeIcon, GraduationCap, MapPin, Bell, LogOut, Search,
-  TrendingUp, CheckCircle, AlertCircle, Menu, Moon, Sun,
-  Globe, ChevronRight, Briefcase, MessageSquare, Mail, Filter, ChevronDown, Phone,
-  ChevronLeft, ChevronsLeft, ChevronsRight
-} from 'lucide-react';
+import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
+import Newspaper from 'lucide-react/dist/esm/icons/newspaper';
+import School from 'lucide-react/dist/esm/icons/school';
+import Image from 'lucide-react/dist/esm/icons/image';
+import Info from 'lucide-react/dist/esm/icons/info';
+import Settings from 'lucide-react/dist/esm/icons/settings';
+import Plus from 'lucide-react/dist/esm/icons/plus';
+import Pencil from 'lucide-react/dist/esm/icons/pencil';
+import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
+import Eye from 'lucide-react/dist/esm/icons/eye';
+import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
+import Save from 'lucide-react/dist/esm/icons/save';
+import X from 'lucide-react/dist/esm/icons/x';
+import Users from 'lucide-react/dist/esm/icons/users';
+import HomeIcon from 'lucide-react/dist/esm/icons/home';
+import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
+import MapPin from 'lucide-react/dist/esm/icons/map-pin';
+import Bell from 'lucide-react/dist/esm/icons/bell';
+import LogOut from 'lucide-react/dist/esm/icons/log-out';
+import Search from 'lucide-react/dist/esm/icons/search';
+import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import CheckCircle from 'lucide-react/dist/esm/icons/check-circle';
+import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
+import Menu from 'lucide-react/dist/esm/icons/menu';
+import Moon from 'lucide-react/dist/esm/icons/moon';
+import Sun from 'lucide-react/dist/esm/icons/sun';
+import Globe from 'lucide-react/dist/esm/icons/globe';
+import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
+import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
+import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
+import Mail from 'lucide-react/dist/esm/icons/mail';
+import Filter from 'lucide-react/dist/esm/icons/filter';
+import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
+import Phone from 'lucide-react/dist/esm/icons/phone';
+import ChevronLeft from 'lucide-react/dist/esm/icons/chevron-left';
+import ChevronsLeft from 'lucide-react/dist/esm/icons/chevrons-left';
+import ChevronsRight from 'lucide-react/dist/esm/icons/chevrons-right';
 import { NEWS, SCHOOLS } from '@/constants';
 import {
   Section, Theme, Lang, DashNewsItem, DashSchool, DashJob, DashJobApplication, HeroSlide, AboutData, AdminProfile,

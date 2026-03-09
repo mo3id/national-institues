@@ -2,7 +2,17 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useSiteData } from '@/context/DataContext';
-import { ArrowLeft, MapPin, Phone, Mail, Globe, User, X, ChevronLeft, ChevronRight, Maximize2, ExternalLink } from 'lucide-react';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
+import MapPin from 'lucide-react/dist/esm/icons/map-pin';
+import Phone from 'lucide-react/dist/esm/icons/phone';
+import Mail from 'lucide-react/dist/esm/icons/mail';
+import Globe from 'lucide-react/dist/esm/icons/globe';
+import User from 'lucide-react/dist/esm/icons/user';
+import X from 'lucide-react/dist/esm/icons/x';
+import ChevronLeft from 'lucide-react/dist/esm/icons/chevron-left';
+import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
+import Maximize2 from 'lucide-react/dist/esm/icons/maximize-2';
+import ExternalLink from 'lucide-react/dist/esm/icons/external-link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 import PageTransition from '@/components/common/PageTransition';

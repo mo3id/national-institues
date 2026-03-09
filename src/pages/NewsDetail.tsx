@@ -2,7 +2,10 @@ import React, { useMemo, useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
-import { Calendar, ArrowRight, Share2, ArrowLeft } from 'lucide-react';
+import Calendar from 'lucide-react/dist/esm/icons/calendar';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import Share2 from 'lucide-react/dist/esm/icons/share-2';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
 const NewsDetail: React.FC = () => {
