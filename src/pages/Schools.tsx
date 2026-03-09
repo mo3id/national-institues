@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SCHOOLS, GOVERNORATES } from '@/constants';
+import { GOVERNORATES } from '@/constants';
 import Search from 'lucide-react/dist/esm/icons/search';
 import MapPin from 'lucide-react/dist/esm/icons/map-pin';
 import Filter from 'lucide-react/dist/esm/icons/filter';

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
-import { SCHOOLS } from '@/constants';
 import { Link } from 'react-router-dom';
 import Phone from 'lucide-react/dist/esm/icons/phone';
 import Mail from 'lucide-react/dist/esm/icons/mail';
@@ -286,9 +285,9 @@ const Complaints: React.FC = () => {
                           value={formData.school}
                           placeholder={t?.complaints?.placeholders?.school}
                           onChange={val => handleChange({ target: { name: 'school', value: val } } as any)}
-                          options={SCHOOLS.map(school => ({
+                          options={(siteData.schools || []).map(school => ({
                             value: school.name,
-                            label: lang === 'ar' ? school.nameAr : school.name
+                            label: lang === 'ar' ? (school.nameAr || school.name) : school.name
                           }))}
                           className={errors.school ? 'border-red-500 text-red-500' : ''}
                         />
