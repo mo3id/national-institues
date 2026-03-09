@@ -171,6 +171,12 @@ try {
             break;
 
         case 'get_dashboard_stats':
+            // Ensure teachersCount column exists before querying (just in case)
+            $cols = $pdo->query("DESCRIBE schools")->fetchAll(PDO::FETCH_COLUMN);
+            if (!in_array('teachersCount', $cols)) {
+                $pdo->exec("ALTER TABLE schools ADD COLUMN teachersCount varchar(20) DEFAULT '0'");
+            }
+
             // Count news
             $newsTotal = $pdo->query("SELECT COUNT(*) FROM news")->fetchColumn();
             $newsPublished = $pdo->query("SELECT COUNT(*) FROM news WHERE published = 1")->fetchColumn();
@@ -785,12 +791,13 @@ try {
             if (!in_array('website', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN website text");
             if (!in_array('rating', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN rating varchar(20)");
             if (!in_array('studentCount', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN studentCount varchar(20)");
+            if (!in_array('teachersCount', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN teachersCount varchar(20)");
             if (!in_array('foundedYear', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN foundedYear varchar(20)");
             if (!in_array('address', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN address text");
             if (!in_array('addressAr', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN addressAr text");
             if (!in_array('applicationLink', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN applicationLink text");
 
-            $stmt = $pdo->prepare("REPLACE INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $pdo->prepare("REPLACE INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, teachersCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $s['id'] ?? uniqid(),
                 $s['name'] ?? '',
@@ -812,6 +819,7 @@ try {
                 $s['website'] ?? '',
                 $s['rating'] ?? '',
                 $s['studentCount'] ?? '',
+                $s['teachersCount'] ?? '',
                 $s['foundedYear'] ?? '',
                 $s['address'] ?? '',
                 $s['addressAr'] ?? '',

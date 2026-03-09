@@ -23,6 +23,9 @@ const StatsSection: React.FC = () => {
         const response = await getLiveStats();
         if (response.status === 'success') {
           setLiveStats(response.data);
+        } else {
+          console.warn('Live stats API returned error:', response);
+          throw new Error(response.message || 'API Error');
         }
       } catch (error) {
         console.error('Failed to fetch live stats:', error);
@@ -59,7 +62,7 @@ const StatsSection: React.FC = () => {
   const stats = liveStats ? [
     {
       number: formatNumber(liveStats.yearsOfService),
-      label: lang === 'ar' ? 'عقود من العطاء' : 'Decades of Service',
+      label: lang === 'ar' ? 'أعوام من العطاء' : 'Years of Service',
       color: 'bg-emerald-400',
       shape: 'rounded-[30%_70%_70%_30%/30%_30%_70%_70%]'
     },

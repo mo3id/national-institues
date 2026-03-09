@@ -1170,11 +1170,11 @@ const Dashboard: React.FC = () => {
             <div className="section-enter" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: 14 }}>
                 {[
-                  { icon: Newspaper, label: u.totalArticles, val: isRTL ? getArNumber(dashStats.totalNews) : String(dashStats.totalNews), color: '#4f46e5', bg: 'rgba(79,70,229,0.1)' },
-                  { icon: CheckCircle, label: u.publishedCount, val: isRTL ? getArNumber(dashStats.publishedNews) : String(dashStats.publishedNews), color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-                  { icon: School, label: u.schoolsCount, val: isRTL ? getArNumber(dashStats.schoolsCount) : String(dashStats.schoolsCount), color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
-                  { icon: Users, label: lang === 'ar' ? 'إجمالي المعلمين' : 'Total Teachers', val: isRTL ? getArNumber(dashStats.totalTeachers.toLocaleString()) : dashStats.totalTeachers.toLocaleString(), color: '#0ea5e9', bg: 'rgba(14,165,233,0.1)' },
-                  { icon: Users, label: u.studentsCount, val: isRTL ? getArNumber(dashStats.totalStudents.toLocaleString()) : dashStats.totalStudents.toLocaleString(), color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+                  { icon: Newspaper, label: u.totalArticles, val: isRTL ? getArNumber((dashStats.totalNews || 0).toString()) : (dashStats.totalNews || 0).toString(), color: '#4f46e5', bg: 'rgba(79,70,229,0.1)' },
+                  { icon: CheckCircle, label: u.publishedCount, val: isRTL ? getArNumber((dashStats.publishedNews || 0).toString()) : (dashStats.publishedNews || 0).toString(), color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+                  { icon: School, label: u.schoolsCount, val: isRTL ? getArNumber((dashStats.schoolsCount || 0).toString()) : (dashStats.schoolsCount || 0).toString(), color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
+                  { icon: Users, label: lang === 'ar' ? 'إجمالي المعلمين' : 'Total Teachers', val: isRTL ? getArNumber((dashStats.totalTeachers || 0).toLocaleString()) : (dashStats.totalTeachers || 0).toLocaleString(), color: '#0ea5e9', bg: 'rgba(14,165,233,0.1)' },
+                  { icon: Users, label: u.studentsCount, val: isRTL ? getArNumber((dashStats.totalStudents || 0).toLocaleString()) : (dashStats.totalStudents || 0).toLocaleString(), color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
                 ].map(({ icon: Icon, label, val, color, bg }) => (
                   <div key={label} className="stat-card">
                     <div className="stat-icon" style={{ background: bg }}><Icon style={{ width: 22, height: 22, color }} /></div>
