@@ -669,6 +669,21 @@ try {
         case 'save_school':
             $s = json_decode(file_get_contents('php://input'), true);
             if (!$s) throw new Exception("Data required");
+
+            // ── Ensure schema is up to date (prevents HTTP 500 on older DB schemas) ──
+            $cols = $pdo->query("DESCRIBE schools")->fetchAll(PDO::FETCH_COLUMN);
+            if (!in_array('about', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN about text");
+            if (!in_array('aboutAr', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN aboutAr text");
+            if (!in_array('phone', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN phone varchar(50)");
+            if (!in_array('email', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN email varchar(100)");
+            if (!in_array('website', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN website text");
+            if (!in_array('rating', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN rating varchar(20)");
+            if (!in_array('studentCount', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN studentCount varchar(20)");
+            if (!in_array('foundedYear', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN foundedYear varchar(20)");
+            if (!in_array('address', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN address text");
+            if (!in_array('addressAr', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN addressAr text");
+            if (!in_array('applicationLink', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN applicationLink text");
+
             $stmt = $pdo->prepare("REPLACE INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $s['id'] ?? uniqid(),

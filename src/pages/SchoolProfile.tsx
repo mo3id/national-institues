@@ -86,7 +86,7 @@ const SchoolProfile: React.FC = () => {
             <div
               className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 scale-105"
               style={{
-                backgroundImage: `url('${school?.mainImage || '/layer-1-small.webp'}')`,
+                backgroundImage: `url('${school?.mainImage || (school as any)?.mainimage || '/layer-1-small.webp'}')`,
                 transform: 'scale(1.05)'
               }}
             />

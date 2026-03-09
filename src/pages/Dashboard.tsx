@@ -549,7 +549,7 @@ const Dashboard: React.FC = () => {
   const [newJob, setNewJob] = useState<Partial<DashJob>>({ title: '', titleAr: '', department: '', departmentAr: '', location: '', locationAr: '', type: '', typeAr: '', description: '', descriptionAr: '', image: '' });
   const [profileDraft, setProfileDraft] = useState({ ...profile });
   const [addSchoolOpen, setAddSchoolOpen] = useState(false);
-  const [newSchool, setNewSchool] = useState<Partial<DashSchool>>({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '', address: '', addressAr: '', applicationLink: '' });
+  const [newSchool, setNewSchool] = useState<Partial<DashSchool>>({ name: '', location: '', governorate: '', principal: '', logo: '', type: [], mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '', address: '', addressAr: '', applicationLink: '' });
   const [confirmAction, setConfirmAction] = useState<{ message: string, onConfirm: () => void } | null>(null);
 
   const [complaintPage, setComplaintPage] = useState(1);
@@ -812,22 +812,59 @@ const Dashboard: React.FC = () => {
     setEditHeroId(null);
     showToast(u.slideSaved);
   };
+
+  const normalizeSchoolType = (type: DashSchool['type']): string[] => {
+    const allowed = new Set(['Arabic', 'Languages', 'American', 'British', 'French']);
+    const toArray = (t: any): string[] => {
+      if (Array.isArray(t)) return t;
+      if (typeof t === 'string' && t.trim()) {
+        const trimmed = t.trim();
+        if (trimmed.startsWith('[')) {
+          try {
+            const parsed = JSON.parse(trimmed);
+            return Array.isArray(parsed) ? parsed : [String(parsed)];
+          } catch {
+            return [trimmed];
+          }
+        }
+        return trimmed.split(',').map(x => x.trim()).filter(Boolean);
+      }
+      return [];
+    };
+
+    const mapped = toArray(type).map((v) => {
+      if (v === 'National') return 'Arabic';
+      if (v === 'Language') return 'Languages';
+      if (v === 'International') return 'American';
+      return v;
+    });
+
+    return Array.from(new Set(mapped)).filter(v => allowed.has(v));
+  };
+
+  const normalizeSchoolPayload = (s: DashSchool): DashSchool => ({
+    ...s,
+    type: normalizeSchoolType(s.type),
+    gallery: (s.gallery || []).filter(Boolean),
+  });
+
   const saveSchool = async (s: DashSchool) => {
+    const normalized = normalizeSchoolPayload(s);
     // Optimistic Update
-    setSchools(prev => prev.map(sc => sc.id === s.id ? s : sc));
+    setSchools(prev => prev.map(sc => sc.id === normalized.id ? normalized : sc));
     setEditSchoolId(null);
 
-    await apiSaveSchool(s);
+    await apiSaveSchool(normalized);
     showToast(u.schoolSaved);
     fetchSchools();
   };
   const addSchool = async (s: DashSchool) => {
-    const newEntry = { ...s, id: String(Date.now()) };
+    const newEntry = normalizeSchoolPayload({ ...s, id: String(Date.now()) });
 
     // Optimistic Update
     setSchools(prev => [newEntry, ...prev]);
     setAddSchoolOpen(false);
-    setNewSchool({ name: '', location: '', governorate: '', principal: '', logo: '', type: 'Language', mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '', address: '', addressAr: '', applicationLink: '' });
+    setNewSchool({ name: '', location: '', governorate: '', principal: '', logo: '', type: [], mainImage: '', gallery: [], about: '', aboutAr: '', phone: '', email: '', website: '', rating: '', studentCount: '', foundedYear: '', address: '', addressAr: '', applicationLink: '' });
     showToast(u.schoolSaved);
 
     await apiSaveSchool(newEntry);

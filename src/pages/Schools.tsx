@@ -20,6 +20,23 @@ const formatStudentCount = (count: string | undefined) => {
   return `+${num}`;
 };
 
+const normalizeSchoolTypes = (type: any): string[] => {
+  if (Array.isArray(type)) return type;
+  if (typeof type === 'string' && type.trim()) {
+    const trimmed = type.trim();
+    if (trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        return Array.isArray(parsed) ? parsed : [String(parsed)];
+      } catch {
+        return [trimmed];
+      }
+    }
+    return trimmed.split(',').map(x => x.trim()).filter(Boolean);
+  }
+  return [];
+};
+
 const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, onView }: any) => (
   <ScrollReveal heightFull={true}>
     <div className="bg-white rounded-[24px] border border-gray-100/60 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] overflow-hidden transition-all duration-300 group flex flex-col h-full relative p-2">
@@ -27,14 +44,14 @@ const SchoolCard = React.memo(({ school, isRTL, translations: t, common, lang, o
       {/* Background Cover Image with margin */}
       <div className="relative h-40 w-full rounded-[20px] overflow-hidden bg-gray-50">
         <img
-          src={school.mainImage || "/layer-1-small.webp"}
+          src={school.mainImage || school.mainimage || "/layer-1-small.webp"}
           alt="Cover"
           className="w-full h-full object-cover"
           loading="lazy"
         />
         {/* Type Badge on cover */}
         <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'} flex flex-wrap gap-1 justify-end`}>
-          {(Array.isArray(school.type) ? school.type : []).map((tValue: string) => (
+          {normalizeSchoolTypes(school.type).map((tValue: string) => (
             <span key={tValue} className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border border-white/20 shadow-sm
               ${tValue === 'American' || tValue === 'British' || tValue === 'French' ? 'bg-purple-500/80 text-white' :
                 tValue === 'Languages' ? 'bg-blue-500/80 text-white' :
@@ -141,7 +158,7 @@ const Schools: React.FC = () => {
       const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         location.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesGov = selectedGov === '' || school.governorate === selectedGov;
-      const matchesType = selectedType === '' || (Array.isArray(school.type) && school.type.includes(selectedType));
+      const matchesType = selectedType === '' || normalizeSchoolTypes(school.type).includes(selectedType);
 
       return matchesSearch && matchesGov && matchesType;
     });
@@ -171,7 +188,7 @@ const Schools: React.FC = () => {
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: `url('/layer-1-small.webp')`
+                backgroundImage: `url('/our-schools.png')`
               }}
             />
             {/* Gradient overlay */}
