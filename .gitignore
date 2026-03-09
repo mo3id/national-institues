@@ -33,3 +33,6 @@ backend/.env
 playwright-report/
 test-results/
 coverage/
+
+# ── Deployment artifacts ───────────────────────────────────────────
+deployment.zip
