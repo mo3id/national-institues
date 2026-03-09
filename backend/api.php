@@ -9,6 +9,11 @@ if (!ob_start('ob_gzhandler')) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// IMAGE UPLOAD HANDLER — Convert base64 to file paths
+// ═══════════════════════════════════════════════════════════════════════════
+require_once __DIR__ . '/upload_handler.php';
+
+// ═══════════════════════════════════════════════════════════════════════════
 // CORS — Allowed Origins Whitelist (never use * in production)
 // ═══════════════════════════════════════════════════════════════════════════
 $allowedOrigins = [
@@ -146,8 +151,17 @@ try {
             // Serve from file cache if fresh (TTL: 60s) — avoids 4 SQL queries per request
             if (serveFromCache()) break;
 
-            // Fetch schools
-            $stmt = $pdo->query("SELECT * FROM schools");
+            // Pagination support
+            $schoolsLimit = isset($_GET['schools_limit']) ? (int)$_GET['schools_limit'] : 1000;
+            $schoolsOffset = isset($_GET['schools_offset']) ? (int)$_GET['schools_offset'] : 0;
+            $newsLimit = isset($_GET['news_limit']) ? (int)$_GET['news_limit'] : 1000;
+            $newsOffset = isset($_GET['news_offset']) ? (int)$_GET['news_offset'] : 0;
+
+            // Fetch schools with pagination
+            $stmt = $pdo->prepare("SELECT * FROM schools LIMIT :limit OFFSET :offset");
+            $stmt->bindValue(':limit', $schoolsLimit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $schoolsOffset, PDO::PARAM_INT);
+            $stmt->execute();
             $schools = $stmt->fetchAll();
             foreach ($schools as &$school) {
                 // Decode gallery JSON
@@ -156,8 +170,11 @@ try {
                 }
             }
 
-            // Fetch news
-            $stmt = $pdo->query("SELECT * FROM news WHERE published = 1 ORDER BY date DESC");
+            // Fetch news with pagination
+            $stmt = $pdo->prepare("SELECT * FROM news WHERE published = 1 ORDER BY date DESC LIMIT :limit OFFSET :offset");
+            $stmt->bindValue(':limit', $newsLimit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $newsOffset, PDO::PARAM_INT);
+            $stmt->execute();
             $news = $stmt->fetchAll();
             foreach ($news as &$item) {
                 $item['published'] = (bool)$item['published'];
@@ -231,6 +248,18 @@ try {
                     $pdo->exec("DELETE FROM schools");
                     $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     foreach ($newData as $s) {
+                        // Convert base64 images to file paths
+                        $logo = processImageField($s['logo'] ?? '', 'school_logo');
+                        $mainImage = processImageField($s['mainImage'] ?? '', 'school_main');
+                        
+                        // Process gallery images
+                        $gallery = $s['gallery'] ?? [];
+                        if (is_array($gallery)) {
+                            foreach ($gallery as &$galleryImg) {
+                                $galleryImg = processImageField($galleryImg, 'school_gallery');
+                            }
+                        }
+                        
                         $stmt->execute([
                             $s['id'] ?? '',
                             $s['name'] ?? '',
@@ -241,10 +270,10 @@ try {
                             $s['governorateAr'] ?? ($s['governorate'] ?? ''),
                             $s['principal'] ?? '',
                             $s['principalAr'] ?? ($s['principal'] ?? ''),
-                            $s['logo'] ?? '',
+                            $logo,
                             is_array($s['type'] ?? '') ? json_encode($s['type']) : ($s['type'] ?? ''),
-                            $s['mainImage'] ?? '',
-                            json_encode($s['gallery'] ?? []),
+                            $mainImage,
+                            json_encode($gallery),
                             $s['about'] ?? '',
                             $s['aboutAr'] ?? '',
                             $s['phone'] ?? '',
@@ -273,6 +302,9 @@ try {
                     $pdo->exec("DELETE FROM news");
                     $stmt = $pdo->prepare("INSERT INTO news (id, title, titleAr, date, summary, summaryAr, content, contentAr, highlightTitle, highlightTitleAr, highlightContent, highlightContentAr, image, published, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     foreach ($newData as $n) {
+                        // Convert base64 image to file path
+                        $image = processImageField($n['image'] ?? '', 'news');
+                        
                         $stmt->execute([
                             $n['id'] ?? uniqid(),
                             $n['title'] ?? '',
@@ -286,7 +318,7 @@ try {
                             $n['highlightTitleAr'] ?? '',
                             $n['highlightContent'] ?? '',
                             $n['highlightContentAr'] ?? '',
-                            $n['image'] ?? '',
+                            $image,
                             !empty($n['published']) ? 1 : 0,
                             !empty($n['featured']) ? 1 : 0
                         ]);
