@@ -72,11 +72,7 @@ const initAbout: AboutData = {
   visionDesc: 'To be the benchmark for educational excellence...',
   visionDescAr: 'أن نكون المعيار للتميز التعليمي...',
   values: [],
-  storyImage: '/layer-1-small.webp',
-  schoolCount: '40+',
-  schoolCountAr: '٤٠+',
-  schoolCountLabel: 'Schools',
-  schoolCountLabelAr: 'مدرسة'
+  storyImage: '/layer-1-small.webp'
 };
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
@@ -1665,10 +1661,6 @@ const Dashboard: React.FC = () => {
                       <img src={about.storyImage} alt="" className="w-48 h-32 rounded-2xl object-cover border border-var(--border) mt-2" />
                     )}
                   </div>
-                  <div className="dash-card" style={{ padding: 18 }}>
-                    <p className="dash-label">{u.schoolCount}</p>
-                    <p style={{ fontWeight: 700 }}>{lang === 'ar' ? about.schoolCountAr : about.schoolCount} {lang === 'ar' ? about.schoolCountLabelAr : about.schoolCountLabel}</p>
-                  </div>
                   <div className="dash-card" style={{ padding: 18 }}><p className="dash-label">{u.mission}</p><p style={{ fontWeight: 700 }}>{lang === 'ar' ? about.missionTitleAr : about.missionTitle}</p><p style={{ fontSize: 13, color: 'var(--text2)' }}>{lang === 'ar' ? about.missionDescAr : about.missionDesc}</p></div>
                   <div className="dash-card" style={{ padding: 18 }}><p className="dash-label">{u.vision}</p><p style={{ fontWeight: 700 }}>{lang === 'ar' ? about.visionTitleAr : about.visionTitle}</p><p style={{ fontSize: 13, color: 'var(--text2)' }}>{lang === 'ar' ? about.visionDescAr : about.visionDesc}</p></div>
                 </div>
@@ -1681,10 +1673,6 @@ const Dashboard: React.FC = () => {
                     <div className="form-full">
                       <ImageUpload label={u.storyImage} value={about.storyImage || ''} onChange={val => setAbout(a => ({ ...a, storyImage: val }))} />
                     </div>
-                    <div className="form-col"><label className="dash-label">{u.schoolCount} (EN)</label><input className="dash-input" value={about.schoolCount} onChange={e => setAbout(a => ({ ...a, schoolCount: e.target.value }))} /></div>
-                    <div className="form-col"><label className="dash-label">{u.schoolCount} (AR)</label><input className="dash-input" dir="rtl" value={about.schoolCountAr} onChange={e => setAbout(a => ({ ...a, schoolCountAr: e.target.value }))} /></div>
-                    <div className="form-col"><label className="dash-label">Count Label (e.g. Schools) (EN)</label><input className="dash-input" value={about.schoolCountLabel} onChange={e => setAbout(a => ({ ...a, schoolCountLabel: e.target.value }))} /></div>
-                    <div className="form-col"><label className="dash-label">تسمية العدد (مثلاً مدرسة) (عربي)</label><input className="dash-input" dir="rtl" value={about.schoolCountLabelAr} onChange={e => setAbout(a => ({ ...a, schoolCountLabelAr: e.target.value }))} /></div>
                     <div className="form-full"><label className="dash-label">Story Description (EN)</label><textarea className="dash-input dash-ta" value={about.storyDesc} onChange={e => setAbout(a => ({ ...a, storyDesc: e.target.value }))} /></div>
                     <div className="form-full"><label className="dash-label">وصف القصة (عربي)</label><textarea className="dash-input dash-ta" dir="rtl" value={about.storyDescAr} onChange={e => setAbout(a => ({ ...a, storyDescAr: e.target.value }))} /></div>
 

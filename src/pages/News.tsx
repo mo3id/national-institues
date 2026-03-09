@@ -43,7 +43,6 @@ const News: React.FC = () => {
       <div className="overflow-x-hidden">
         {/* Unified Hero Header */}
         <section className="m-[10px] rounded-[20px] relative min-h-[50vh] flex items-center justify-center overflow-hidden">
-          {/* Background Image */}
           <div className="absolute inset-0 z-0">
             <div
               className="absolute inset-0 bg-cover bg-center"
@@ -51,10 +50,8 @@ const News: React.FC = () => {
                 backgroundImage: `url('/news_list_hero.png')`
               }}
             />
-            {/* Overlay for readability */}
             <div className="absolute inset-0 z-10 bg-black/45" />
           </div>
-
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-20 py-20 flex flex-col items-center">
             <ScrollReveal direction="down">
               <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 tracking-tight text-white leading-tight drop-shadow-lg">

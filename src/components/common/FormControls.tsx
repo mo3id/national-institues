@@ -328,10 +328,21 @@ interface ImageUploadProps {
 
 import { Upload, Link as LinkIcon, X as XIcon } from 'lucide-react';
 
-export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label, className }) => {
-    const [mode, setMode] = useState<'url' | 'file'>(value && !value.startsWith('data:') ? 'url' : 'file');
+export const ImageUpload: React.FC<ImageUploadProps> = React.memo(({ value, onChange, label, className }) => {
+    const [mode, setMode] = useState<'url' | 'file'>(() => {
+        if (!value) return 'file';
+        return value.startsWith('data:') ? 'file' : 'url';
+    });
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { isRTL } = useLanguage();
+
+    React.useEffect(() => {
+        if (!value) return;
+        const newMode = value.startsWith('data:') ? 'file' : 'url';
+        if (newMode !== mode) {
+            setMode(newMode);
+        }
+    }, [value, mode]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -437,4 +448,4 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label
             )}
         </div>
     );
-};
+});

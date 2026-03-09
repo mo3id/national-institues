@@ -2,9 +2,9 @@ import React, { useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
 import PageTransition from '@/components/common/PageTransition';
+import ScrollReveal from '@/components/common/ScrollReveal';
 import ContactForm from '@/components/features/ContactForm';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
-import ScrollReveal from '@/components/common/ScrollReveal';
 
 const ContactUs: React.FC = () => {
     const { lang, isRTL, t: translationsRoot } = useLanguage();

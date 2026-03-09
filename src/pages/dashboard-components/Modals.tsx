@@ -225,6 +225,15 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
     const [d, setD] = useState({ ...school });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const u = UI[lang];
+    
+    React.useEffect(() => {
+        // Handle both mainImage and mainimage (case sensitivity issue)
+        const normalizedSchool = {
+            ...school,
+            mainImage: school.mainImage || (school as any).mainimage || ''
+        };
+        setD(normalizedSchool);
+    }, [school]);
     const governorates = [
         { value: 'Cairo', label: lang === 'ar' ? 'القاهرة' : 'Cairo' },
         { value: 'Alexandria', label: lang === 'ar' ? 'الإسكندرية' : 'Alexandria' },
@@ -347,7 +356,7 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.rating}</label>
-                <input className={`dash-input ${errors.rating ? 'border-red-500' : ''}`} value={d.rating || ''} onChange={e => { setD(p => ({ ...p, rating: e.target.value })); if (errors.rating) setErrors(p => ({ ...p, rating: '' })) }} onKeyDown={e => { if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault() }} type="number" step="0.1" min="0" max="5" placeholder={lang === 'ar' ? 'مثال: ٤.٩' : 'e.g. 4.9'} />
+                <input className={`dash-input ${errors.rating ? 'border-red-500' : ''}`} value={d.rating || ''} onChange={e => { const val = e.target.value; if (val === '' || (parseFloat(val) >= 0 && parseFloat(val) <= 5)) { setD(p => ({ ...p, rating: val })); if (errors.rating) setErrors(p => ({ ...p, rating: '' })) } }} onKeyDown={e => { if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault() }} type="number" step="0.1" min="0" max="5" placeholder={lang === 'ar' ? 'مثال: ٤.٩' : 'e.g. 4.9'} />
                 {errors.rating && <span className="text-red-500 text-xs mt-1 block">{errors.rating}</span>}
             </div>
             <div className="form-col">

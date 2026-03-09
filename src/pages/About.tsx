@@ -20,6 +20,12 @@ const About: React.FC = () => {
     const { data: siteData } = useSiteData();
     const d = siteData.aboutData || {};
     const t = translationsRoot?.aboutPage || ({} as any);
+    
+    // Calculate actual school count from data
+    const actualSchoolCount = siteData.schools?.length || 0;
+    const schoolCountDisplay = lang === 'ar' 
+        ? actualSchoolCount.toLocaleString('ar-EG') 
+        : actualSchoolCount.toString();
 
     // Localized values
     const storyTitle = (lang === 'ar' ? d.storyTitleAr : d.storyTitle) || translationsRoot.common.notAvailable;
@@ -95,8 +101,8 @@ const About: React.FC = () => {
                                             <Award className="w-8 h-8" />
                                         </div>
                                         <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
-                                            <span className="text-4xl font-black text-slate-900">{lang === 'ar' ? (d.schoolCountAr || '٤٠+') : (d.schoolCount || '40+')}</span>
-                                            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">{lang === 'ar' ? (d.schoolCountLabelAr || translationsRoot.stats.schools) : (d.schoolCountLabel || translationsRoot.stats.schools)}</span>
+                                            <span className="text-4xl font-black text-slate-900">{schoolCountDisplay}</span>
+                                            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">{translationsRoot.stats.schools}</span>
                                         </div>
                                     </div>
                                 </div>

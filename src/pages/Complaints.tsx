@@ -106,7 +106,8 @@ const Complaints: React.FC = () => {
                   className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 px-8 py-3 rounded-full font-bold transition-all flex items-center gap-2 hover:gap-4 shadow-xl"
                 >
                   <Search className="w-5 h-5" />
-                  <span>{t?.complaints?.inquiryTitle}</span>
+                  {lang === 'ar' ? 'الاستعلام عن شكوى' : 'Track Complaint'}
+                  <span className={`transform transition-transform ${isRTL ? 'rotate-180' : ''}`}>→</span>
                 </Link>
               </div>
             </ScrollReveal>

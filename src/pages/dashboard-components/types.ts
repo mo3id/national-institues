@@ -1,4 +1,4 @@
-export type Section = 'overview' | 'news' | 'schools' | 'departments' | 'jobs' | 'recruitment' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'contact' | 'complaints' | 'contactMessages' | 'settings';
+export type Section = 'overview' | 'news' | 'schools' | 'departments' | 'jobs' | 'recruitment' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'contact' | 'complaints' | 'contactMessages' | 'heroBackgrounds' | 'settings';
 export type Theme = 'light' | 'dark';
 export type Lang = 'en' | 'ar';
 
@@ -351,8 +351,31 @@ export const UI: Record<Lang, Record<string, string>> = {
         print: 'طباعة',
         storyImage: 'صورة القصة',
         schoolCount: 'عدد المدارس',
+        heroBackgrounds: 'خلفيات الهيرو',
+        heroBackgroundsManage: 'تخصيص خلفيات قسم الهيرو لكل صفحة',
+        pageHeroSettings: 'إعدادات هيرو الصفحات',
+        backgroundType: 'نوع الخلفية',
+        backgroundColor: 'لون الخلفية',
+        backgroundImage: 'صورة الخلفية',
+        colorMode: 'لون ثابت',
+        imageMode: 'صورة',
     }
 };
+
+export interface PageHeroSettings {
+    backgroundType: 'color' | 'image';
+    backgroundColor?: string;
+    backgroundImage?: string;
+}
+
+export interface PagesHeroSettings {
+    about: PageHeroSettings;
+    schools: PageHeroSettings;
+    news: PageHeroSettings;
+    jobs: PageHeroSettings;
+    complaints: PageHeroSettings;
+    contact: PageHeroSettings;
+}
 
 export const HERO_IMAGES = [
     '/layer-1-small.webp',

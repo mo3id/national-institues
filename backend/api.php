@@ -17,8 +17,12 @@ if (in_array($origin, $allowedOrigins, true)) {
     header("Access-Control-Allow-Origin: {$origin}");
     header("Vary: Origin");
 } else {
-    // Deny cross-origin requests from unknown origins silently
-    // (Do not send Allow-Origin header — browser will block automatically)
+    // For development, allow localhost on any port
+    if (preg_match('/^http:\/\/localhost(:\d+)?$/', $origin)) {
+        header("Access-Control-Allow-Origin: {$origin}");
+        header("Vary: Origin");
+    }
+    // Otherwise deny cross-origin requests from unknown origins silently
 }
 
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
@@ -174,6 +178,14 @@ try {
                 'jobDepartments' => $settings['jobDepartments'] ?? [],
                 'heroSlides' => $settings['heroSlides'] ?? [],
                 'aboutData' => $settings['aboutData'] ?? new stdClass(),
+                'pagesHeroSettings' => $settings['pagesHeroSettings'] ?? [
+                    'about' => ['backgroundType' => 'color', 'backgroundColor' => '#0f172a'],
+                    'schools' => ['backgroundType' => 'color', 'backgroundColor' => '#0f172a'],
+                    'news' => ['backgroundType' => 'color', 'backgroundColor' => '#0f172a'],
+                    'jobs' => ['backgroundType' => 'color', 'backgroundColor' => '#0f172a'],
+                    'complaints' => ['backgroundType' => 'color', 'backgroundColor' => '#0f172a'],
+                    'contact' => ['backgroundType' => 'color', 'backgroundColor' => '#0f172a']
+                ],
                 'stats' => $settings['stats'] ?? new stdClass(),
                 'homeData' => $settings['homeData'] ?? new stdClass(),
                 'partners' => $settings['partners'] ?? [],

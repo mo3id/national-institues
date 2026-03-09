@@ -183,7 +183,6 @@ const Schools: React.FC = () => {
       <div className="min-h-screen bg-gray-50 pb-24">
         {/* Header / Hero Section */}
         <section className="m-[10px] rounded-[20px] relative h-[60vh] flex items-center justify-center overflow-hidden">
-          {/* Background Image */}
           <div className="absolute inset-0 z-0">
             <div
               className="absolute inset-0 bg-cover bg-center"
@@ -191,16 +190,12 @@ const Schools: React.FC = () => {
                 backgroundImage: `url('/our-schools.png')`
               }}
             />
-            {/* Gradient overlay */}
             <div className="absolute inset-0 z-10 bg-black/40" />
           </div>
-
-          {/* Main Content - Centered */}
           <div className="relative z-20 text-center max-w-4xl mx-auto px-6 md:px-12" dir={isRTL ? 'rtl' : 'ltr'}>
             <h1 className="text-5xl lg:text-7xl font-extrabold text-white leading-[1.4] mb-8 animate-fade-in">
               {t.title}
             </h1>
-
             <p className="text-lg lg:text-xl text-white/90 max-w-2xl mx-auto mb-12 leading-relaxed font-medium animate-fade-in" style={{ animationDelay: '0.1s' }}>
               {t.subtitle}
             </p>

@@ -12,6 +12,14 @@ export interface SiteData {
     aboutData: any;
     complaints: any[];
     contactMessages: any[];
+    pagesHeroSettings: {
+        about: { backgroundType: 'color' | 'image'; backgroundColor?: string; backgroundImage?: string; };
+        schools: { backgroundType: 'color' | 'image'; backgroundColor?: string; backgroundImage?: string; };
+        news: { backgroundType: 'color' | 'image'; backgroundColor?: string; backgroundImage?: string; };
+        jobs: { backgroundType: 'color' | 'image'; backgroundColor?: string; backgroundImage?: string; };
+        complaints: { backgroundType: 'color' | 'image'; backgroundColor?: string; backgroundImage?: string; };
+        contact: { backgroundType: 'color' | 'image'; backgroundColor?: string; backgroundImage?: string; };
+    };
     stats: {
         journeyInNumbers: string;
         journeyInNumbersAr: string;
@@ -93,6 +101,14 @@ export const DEFAULT_SITE_DATA: SiteData = {
         storyImage: '',
         schoolCount: '', schoolCountAr: '',
         schoolCountLabel: '', schoolCountLabelAr: ''
+    },
+    pagesHeroSettings: {
+        about: { backgroundType: 'color', backgroundColor: '#0f172a' },
+        schools: { backgroundType: 'color', backgroundColor: '#0f172a' },
+        news: { backgroundType: 'color', backgroundColor: '#0f172a' },
+        jobs: { backgroundType: 'color', backgroundColor: '#0f172a' },
+        complaints: { backgroundType: 'color', backgroundColor: '#0f172a' },
+        contact: { backgroundType: 'color', backgroundColor: '#0f172a' }
     },
     stats: {
         journeyInNumbers: '', journeyInNumbersAr: '', items: []

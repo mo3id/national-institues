@@ -98,6 +98,7 @@ function buildMergedData(apiData: SiteData): SiteData {
     merged.homeData = pick('homeData', false);
     merged.formSettings = pick('formSettings', false);
     merged.contactData = pick('contactData', false);
+    merged.pagesHeroSettings = pick('pagesHeroSettings', false);
 
     // Normalize legacy school type values
     if (Array.isArray(merged.schools)) {
