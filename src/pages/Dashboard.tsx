@@ -586,7 +586,7 @@ const Dashboard: React.FC = () => {
   const [newsPage, setNewsPage] = useState(1);
   const [newsTotalPages, setNewsTotalPages] = useState(1);
   const [isTableLoading, setIsTableLoading] = useState(false);
-  const [dashStats, setDashStats] = useState({ totalNews: 0, publishedNews: 0, schoolsCount: 0, totalStudents: 0 });
+  const [dashStats, setDashStats] = useState({ totalNews: 0, publishedNews: 0, schoolsCount: 0, totalStudents: 0, totalTeachers: 0 });
 
   const debouncedComplaintSearch = useDebounce(complaintsSearch, 500);
   const debouncedSchoolSearch = useDebounce(schoolSearch, 500);
@@ -1173,6 +1173,7 @@ const Dashboard: React.FC = () => {
                   { icon: Newspaper, label: u.totalArticles, val: isRTL ? getArNumber(dashStats.totalNews) : String(dashStats.totalNews), color: '#4f46e5', bg: 'rgba(79,70,229,0.1)' },
                   { icon: CheckCircle, label: u.publishedCount, val: isRTL ? getArNumber(dashStats.publishedNews) : String(dashStats.publishedNews), color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
                   { icon: School, label: u.schoolsCount, val: isRTL ? getArNumber(dashStats.schoolsCount) : String(dashStats.schoolsCount), color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
+                  { icon: Users, label: lang === 'ar' ? 'إجمالي المعلمين' : 'Total Teachers', val: isRTL ? getArNumber(dashStats.totalTeachers.toLocaleString()) : dashStats.totalTeachers.toLocaleString(), color: '#0ea5e9', bg: 'rgba(14,165,233,0.1)' },
                   { icon: Users, label: u.studentsCount, val: isRTL ? getArNumber(dashStats.totalStudents.toLocaleString()) : dashStats.totalStudents.toLocaleString(), color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
                 ].map(({ icon: Icon, label, val, color, bg }) => (
                   <div key={label} className="stat-card">
@@ -1750,16 +1751,6 @@ const Dashboard: React.FC = () => {
                     <p style={{ fontWeight: 700 }}>{partners.length} Partners, {siteData.galleryImages?.length || 0} Gallery Images</p>
                   </div>
                   <div className="dash-card" style={{ padding: 18 }}>
-                    <p className="dash-label">{lang === 'ar' ? 'الإحصائيات' : 'Statistics'}</p>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
-                      {siteData.stats?.items?.map((s, i) => (
-                        <div key={i} className="text-sm">
-                          <span className="font-bold">{s.number}</span> <span className="text-slate-400">{s.label}</span>
-                        </div>
-                      )) || <p className="text-xs text-slate-400">{u.loading}</p>}
-                    </div>
-                  </div>
-                  <div className="dash-card" style={{ padding: 18 }}>
                     <p className="dash-label">{u.bottomCTA}</p>
                     <p style={{ fontWeight: 700 }}>{homeData.ctaTitle}</p>
                     <p style={{ fontSize: 13, color: 'var(--text2)' }}>{homeData.ctaDesc}</p>
@@ -1788,22 +1779,6 @@ const Dashboard: React.FC = () => {
                     <div className="form-full">
                       <ImageUpload label={u.mapImageLabel} value={homeData.mapImage} onChange={val => setHomeData(p => ({ ...p, mapImage: val }))} />
                     </div>
-
-                    <h4 className="form-full font-bold border-b pb-2 mb-2 mt-6 text-slate-400 uppercase text-xs tracking-widest">{lang === 'ar' ? 'الإحصائيات' : 'Statistics'}</h4>
-                    {homeData && siteData.stats?.items?.map((item, idx) => (
-                      <React.Fragment key={idx}>
-                        <div className="form-col"><label className="dash-label">Stat {idx + 1} Number</label><input className="dash-input" value={siteData.stats.items[idx].number} onChange={e => {
-                          const newItems = [...siteData.stats.items];
-                          newItems[idx].number = e.target.value;
-                          updateData('stats', { ...siteData.stats, items: newItems });
-                        }} /></div>
-                        <div className="form-col"><label className="dash-label">Stat {idx + 1} Label (EN)</label><input className="dash-input" value={siteData.stats.items[idx].label} onChange={e => {
-                          const newItems = [...siteData.stats.items];
-                          newItems[idx].label = e.target.value;
-                          updateData('stats', { ...siteData.stats, items: newItems });
-                        }} /></div>
-                      </React.Fragment>
-                    ))}
 
                     <h4 className="form-full font-bold border-b pb-2 mb-2 mt-6 text-slate-400 uppercase text-xs tracking-widest">{u.partnersGallery}</h4>
                     <div className="form-full">

@@ -179,6 +179,11 @@ export const getDashboardStats = async (): Promise<ApiResponse> => {
     return data;
 };
 
+export const getLiveStats = async (): Promise<ApiResponse> => {
+    const { data } = await apiClient.get<ApiResponse>('?action=get_live_stats');
+    return data;
+};
+
 export const deleteJob = async (id: string): Promise<ApiResponse> => {
     const { data } = await apiClient.get<ApiResponse>(`?action=delete_job&id=${id}`);
     notifyUpdate();

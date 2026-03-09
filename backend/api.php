@@ -122,7 +122,12 @@ $action = $_GET['action'] ?? '';
 try {
     switch ($action) {
         case 'get_live_stats':
-            // Live stats for homepage "رحلتنا في أرقام"
+            // Ensure teachersCount column exists before querying
+            $cols = $pdo->query("DESCRIBE schools")->fetchAll(PDO::FETCH_COLUMN);
+            if (!in_array('teachersCount', $cols)) {
+                $pdo->exec("ALTER TABLE schools ADD COLUMN teachersCount varchar(20) DEFAULT '0'");
+            }
+
             // Count schools
             $schoolsCount = $pdo->query("SELECT COUNT(*) FROM schools")->fetchColumn();
             
@@ -133,17 +138,16 @@ try {
             $totalTeachers = 0;
             
             foreach ($schoolsData as $s) {
-                $studentsVal = str_replace(',', '', $s['studentCount'] ?? '');
-                $teachersVal = str_replace(',', '', $s['teachersCount'] ?? '');
+                $studentsVal = str_replace(',', '', $s['studentCount'] ?? '0');
+                $teachersVal = str_replace(',', '', $s['teachersCount'] ?? '0');
                 $totalStudents += (int)$studentsVal;
                 $totalTeachers += (int)$teachersVal;
             }
             
-            // Calculate years of service (current year - foundation year)
+            // Calculate years of service
             $currentYear = (int)date('Y');
-            $foundationYear = 1985; // Default foundation year
+            $foundationYear = 1985;
             
-            // Try to get foundation year from settings
             $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'aboutData'");
             $aboutDataRow = $stmt->fetch();
             if ($aboutDataRow) {

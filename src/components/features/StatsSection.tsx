@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
 import ScrollReveal from '@/components/common/ScrollReveal';
-import axios from 'axios';
+import { getLiveStats } from '@/services/api';
 
 interface LiveStats {
   schoolsCount: number;
@@ -20,9 +20,9 @@ const StatsSection: React.FC = () => {
     // Fetch live stats from API
     const fetchLiveStats = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api.php?action=get_live_stats');
-        if (response.data.status === 'success') {
-          setLiveStats(response.data.data);
+        const response = await getLiveStats();
+        if (response.status === 'success') {
+          setLiveStats(response.data);
         }
       } catch (error) {
         console.error('Failed to fetch live stats:', error);
