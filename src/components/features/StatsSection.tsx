@@ -1,27 +1,92 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
 import ScrollReveal from '@/components/common/ScrollReveal';
+import axios from 'axios';
+
+interface LiveStats {
+  schoolsCount: number;
+  totalStudents: number;
+  totalTeachers: number;
+  yearsOfService: number;
+}
 
 const StatsSection: React.FC = () => {
   const { lang } = useLanguage();
   const { data: siteData } = useSiteData();
-  const s = siteData.stats || {
-    journeyInNumbers: "Our Journey in Numbers",
-    journeyInNumbersAr: "رحلتنا في أرقام",
-    items: []
+  const [liveStats, setLiveStats] = useState<LiveStats | null>(null);
+  
+  useEffect(() => {
+    // Fetch live stats from API
+    const fetchLiveStats = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api.php?action=get_live_stats');
+        if (response.data.status === 'success') {
+          setLiveStats(response.data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch live stats:', error);
+        // Fallback to default stats if API fails
+        setLiveStats({
+          schoolsCount: 39,
+          totalStudents: 120000,
+          totalTeachers: 18000,
+          yearsOfService: 41
+        });
+      }
+    };
+    
+    fetchLiveStats();
+  }, []);
+
+  // Format number with + prefix and support Arabic numerals
+  const formatNumber = (num: number): string => {
+    if (!num) return '+0';
+    
+    const formatted = num >= 1000 ? `${Math.floor(num / 1000)}k` : num.toString();
+    
+    if (lang === 'ar') {
+      // Convert to Arabic numerals
+      const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+      const arabicFormatted = formatted.replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
+      return `+${arabicFormatted}`;
+    }
+    
+    return `+${formatted}`;
   };
 
-  const items = s.items || [];
+  // Build stats array from live data
+  const stats = liveStats ? [
+    {
+      number: formatNumber(liveStats.yearsOfService),
+      label: lang === 'ar' ? 'عقود من العطاء' : 'Decades of Service',
+      color: 'bg-emerald-400',
+      shape: 'rounded-[30%_70%_70%_30%/30%_30%_70%_70%]'
+    },
+    {
+      number: formatNumber(liveStats.totalTeachers),
+      label: lang === 'ar' ? 'معلم خبير' : 'Expert Teachers',
+      color: 'bg-yellow-400',
+      shape: 'rounded-full'
+    },
+    {
+      number: formatNumber(liveStats.totalStudents),
+      label: lang === 'ar' ? 'طالب وطالبة' : 'Students',
+      color: 'bg-blue-400',
+      shape: 'rounded-[60%_40%_30%_70%/60%_30%_70%_40%]'
+    },
+    {
+      number: formatNumber(liveStats.schoolsCount),
+      label: lang === 'ar' ? 'مؤسسة تعليمية' : 'Educational Institutions',
+      color: 'bg-pink-400',
+      shape: 'rounded-2xl rotate-12'
+    }
+  ] : [];
 
-  const stats = items.map((item, idx) => ({
-    ...item,
-    label: lang === 'ar' ? item.labelAr : item.label,
-    shape: idx === 0 ? 'rounded-[30%_70%_70%_30%/30%_30%_70%_70%]' :
-      idx === 1 ? 'rounded-full' :
-        idx === 2 ? 'rounded-[60%_40%_30%_70%/60%_30%_70%_40%]' :
-          'rounded-2xl rotate-12'
-  }));
+  const s = siteData.stats || {
+    journeyInNumbers: "Our Journey in Numbers",
+    journeyInNumbersAr: "رحلتنا في أرقام"
+  };
 
   return (
     <section className="w-[90%] lg:w-[80%] mx-auto my-30 py-24 bg-slate-50 overflow-hidden rounded-[40px]">

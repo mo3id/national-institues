@@ -362,8 +362,13 @@ export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.studentCount}</label>
-                <input className={`dash-input ${errors.studentCount ? 'border-red-500' : ''}`} value={d.studentCount || ''} onChange={e => { setD(p => ({ ...p, studentCount: e.target.value })); if (errors.studentCount) setErrors(p => ({ ...p, studentCount: '' })) }} onKeyDown={e => { if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault() }} type="number" min="0" placeholder={lang === 'ar' ? 'مثال: ٢٥٠٠' : 'e.g. 2500'} />
+                <input className={`dash-input ${errors.studentCount ? 'border-red-500' : ''}`} value={d.studentCount || ''} onChange={e => { setD(p => ({ ...p, studentCount: e.target.value })); if (errors.studentCount) setErrors(p => ({ ...p, studentCount: '' })) }} onKeyDown={e => { if (['e', 'E', '+', '-', '.', '*', '/', '^', ';'].includes(e.key)) e.preventDefault() }} type="number" min="0" placeholder={lang === 'ar' ? 'مثال: ٢٥٠٠' : 'e.g. 2500'} />
                 {errors.studentCount && <span className="text-red-500 text-xs mt-1 block">{errors.studentCount}</span>}
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{lang === 'ar' ? 'عدد المعلمين' : 'Teachers Count'}</label>
+                <input className={`dash-input ${errors.teachersCount ? 'border-red-500' : ''}`} value={d.teachersCount || ''} onChange={e => { setD(p => ({ ...p, teachersCount: e.target.value })); if (errors.teachersCount) setErrors(p => ({ ...p, teachersCount: '' })) }} onKeyDown={e => { if (['e', 'E', '+', '-', '.', '*', '/', '^', ';'].includes(e.key)) e.preventDefault() }} type="number" min="0" placeholder={lang === 'ar' ? 'مثال: ١٥٠' : 'e.g. 150'} />
+                {errors.teachersCount && <span className="text-red-500 text-xs mt-1 block">{errors.teachersCount}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.foundedYear}</label>

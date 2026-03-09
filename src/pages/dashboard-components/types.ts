@@ -44,6 +44,7 @@ export interface DashSchool {
     website?: string;
     rating?: string;
     studentCount?: string;
+    teachersCount?: string;
     foundedYear?: string;
     applicationLink?: string;
 }

@@ -121,19 +121,67 @@ $action = $_GET['action'] ?? '';
 
 try {
     switch ($action) {
+        case 'get_live_stats':
+            // Live stats for homepage "رحلتنا في أرقام"
+            // Count schools
+            $schoolsCount = $pdo->query("SELECT COUNT(*) FROM schools")->fetchColumn();
+            
+            // Sum students and teachers
+            $schoolsStmt = $pdo->query("SELECT studentCount, teachersCount FROM schools");
+            $schoolsData = $schoolsStmt->fetchAll();
+            $totalStudents = 0;
+            $totalTeachers = 0;
+            
+            foreach ($schoolsData as $s) {
+                $studentsVal = str_replace(',', '', $s['studentCount'] ?? '');
+                $teachersVal = str_replace(',', '', $s['teachersCount'] ?? '');
+                $totalStudents += (int)$studentsVal;
+                $totalTeachers += (int)$teachersVal;
+            }
+            
+            // Calculate years of service (current year - foundation year)
+            $currentYear = (int)date('Y');
+            $foundationYear = 1985; // Default foundation year
+            
+            // Try to get foundation year from settings
+            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'aboutData'");
+            $aboutDataRow = $stmt->fetch();
+            if ($aboutDataRow) {
+                $aboutData = json_decode($aboutDataRow['setting_value'], true);
+                if (isset($aboutData['foundationYear'])) {
+                    $foundationYear = (int)$aboutData['foundationYear'];
+                }
+            }
+            
+            $yearsOfService = $currentYear - $foundationYear;
+            
+            echo json_encode([
+                "status" => "success",
+                "data" => [
+                    "schoolsCount" => (int)$schoolsCount,
+                    "totalStudents" => (int)$totalStudents,
+                    "totalTeachers" => (int)$totalTeachers,
+                    "yearsOfService" => (int)$yearsOfService
+                ]
+            ]);
+            break;
+
         case 'get_dashboard_stats':
             // Count news
             $newsTotal = $pdo->query("SELECT COUNT(*) FROM news")->fetchColumn();
             $newsPublished = $pdo->query("SELECT COUNT(*) FROM news WHERE published = 1")->fetchColumn();
             
             // Count schools and sum studentCount
-            $schoolsStmt = $pdo->query("SELECT id, studentCount FROM schools");
+            $schoolsStmt = $pdo->query("SELECT id, studentCount, teachersCount FROM schools");
             $schoolsData = $schoolsStmt->fetchAll();
             $schoolsCount = count($schoolsData);
             $totalStudents = 0;
+            $totalTeachers = 0;
             foreach ($schoolsData as $s) {
-                $val = str_replace(',', '', $s['studentCount'] ?? '');
-                $totalStudents += (int)$val;
+                $studentsVal = str_replace(',', '', $s['studentCount'] ?? '');
+                $teachersVal = str_replace(',', '', $s['teachersCount'] ?? '');
+                $totalStudents += (int)$studentsVal;
+                $totalTeachers += (int)$teachersVal;
             }
             
             echo json_encode([
@@ -142,7 +190,8 @@ try {
                     "totalNews" => (int)$newsTotal,
                     "publishedNews" => (int)$newsPublished,
                     "schoolsCount" => (int)$schoolsCount,
-                    "totalStudents" => (int)$totalStudents
+                    "totalStudents" => (int)$totalStudents,
+                    "totalTeachers" => (int)$totalTeachers
                 ]
             ]);
             break;
@@ -242,11 +291,12 @@ try {
                     if (!in_array('website', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN website text");
                     if (!in_array('rating', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN rating varchar(20)");
                     if (!in_array('studentCount', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN studentCount varchar(20)");
+                    if (!in_array('teachersCount', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN teachersCount varchar(20)");
                     if (!in_array('foundedYear', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN foundedYear varchar(20)");
                     if (!in_array('applicationLink', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN applicationLink text");
 
                     $pdo->exec("DELETE FROM schools");
-                    $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, teachersCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     foreach ($newData as $s) {
                         // Convert base64 images to file paths
                         $logo = processImageField($s['logo'] ?? '', 'school_logo');
@@ -281,6 +331,7 @@ try {
                             $s['website'] ?? '',
                             $s['rating'] ?? '',
                             $s['studentCount'] ?? '',
+                            $s['teachersCount'] ?? '',
                             $s['foundedYear'] ?? '',
                             $s['address'] ?? '',
                             $s['addressAr'] ?? '',
