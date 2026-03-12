@@ -21,9 +21,7 @@ const About: React.FC = () => {
     
     // Calculate actual school count from data
     const actualSchoolCount = siteData.schools?.length || 0;
-    const schoolCountDisplay = lang === 'ar' 
-        ? actualSchoolCount.toLocaleString('ar-EG') 
-        : actualSchoolCount.toString();
+    const schoolCountDisplay = actualSchoolCount.toString();
 
     // Localized values
     const storyTitle = (lang === 'ar' ? d.storyTitleAr : d.storyTitle) || translationsRoot.common.notAvailable;

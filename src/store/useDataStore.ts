@@ -7,6 +7,7 @@ export interface SiteData {
     news: NewsItem[];
     jobs: JobVacancy[];
     jobDepartments: { id: string; nameEn: string; nameAr: string }[];
+    governorates: { id: string; name: string; nameAr: string }[];
     jobApplications: JobApplication[];
     heroSlides: any[];
     aboutData: any;
@@ -85,6 +86,7 @@ export const DEFAULT_SITE_DATA: SiteData = {
     news: [],
     jobs: [],
     jobDepartments: [],
+    governorates: [],
     jobApplications: [],
     complaints: [],
     contactMessages: [],

@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
+import { useSiteData } from '@/context/DataContext';
+import { DashNewsItem, DashSchool, DashJob, HeroSlide } from './types';
+import { CustomSelect, CustomMultiSelect, ImageUpload, CustomDatePicker } from '@/components/common/FormControls';
+import { getDashNewsSchema, getDashSchoolSchema, getDashJobSchema } from '@/utils/validations';
 import Save from 'lucide-react/dist/esm/icons/save';
 import X from 'lucide-react/dist/esm/icons/x';
 import Plus from 'lucide-react/dist/esm/icons/plus';
-import { DashNewsItem, HeroSlide, DashSchool, DashJob, Lang, UI } from './types';
-import { CustomSelect, CustomMultiSelect, CustomDatePicker, ImageUpload } from '../../components/common/FormControls';
-import { getDashNewsSchema, getDashHeroSchema, getDashSchoolSchema, getDashJobSchema } from '@/utils/validations';
-import { useSiteData } from '@/context/DataContext';
+import { Lang, UI } from './types';
+import { getDashHeroSchema } from '@/utils/validations';
 
 // helper to convert File to base64 string
 // helper to convert File to base64 string with automatic client-side compression
@@ -222,26 +225,24 @@ export const EditHeroForm: React.FC<EditHeroProps> = ({ slide, lang, onSave, onC
 
 // ── Edit School ───────────────────────────────────────────────────────────────
 interface EditSchoolProps { school: Partial<DashSchool>; lang: Lang; onSave: (s: DashSchool) => void; onCancel: () => void; }
-export const EditSchoolForm: React.FC<EditSchoolProps> = ({ school, lang, onSave, onCancel }) => {
-    const [d, setD] = useState({ ...school });
-    const [errors, setErrors] = useState<Record<string, string>>({});
+export const EditSchoolForm: React.FC<{ school: DashSchool; lang: Lang; onSave: (s: DashSchool) => void; onCancel: () => void }> = ({ school, lang, onSave, onCancel }) => {
     const u = UI[lang];
-    
-    React.useEffect(() => {
-        // Handle both mainImage and mainimage (case sensitivity issue)
+    const { data: siteData } = useSiteData();
+    const [d, setD] = useState<Partial<DashSchool>>(school);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    useEffect(() => {
         const normalizedSchool = {
             ...school,
-            mainImage: school.mainImage || (school as any).mainimage || ''
+            type: Array.isArray(school.type) ? school.type : (school.type ? [school.type] : [])
         };
         setD(normalizedSchool);
     }, [school]);
-    const governorates = [
-        { value: 'Cairo', label: lang === 'ar' ? 'القاهرة' : 'Cairo' },
-        { value: 'Alexandria', label: lang === 'ar' ? 'الإسكندرية' : 'Alexandria' },
-        { value: 'Giza', label: lang === 'ar' ? 'الجيزة' : 'Giza' },
-        { value: 'Dakahlia', label: lang === 'ar' ? 'الدقهلية' : 'Dakahlia' },
-        { value: 'Gharbia', label: lang === 'ar' ? 'الغربية' : 'Gharbia' },
-    ];
+
+    const governorates = (siteData.governorates || []).map(gov => ({
+        value: gov.name,
+        label: lang === 'ar' ? gov.nameAr : gov.name
+    }));
 
     return (
         <form className="form-grid" noValidate onSubmit={e => {

@@ -1,4 +1,4 @@
-export type Section = 'overview' | 'news' | 'schools' | 'departments' | 'jobs' | 'recruitment' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'contact' | 'complaints' | 'contactMessages' | 'heroBackgrounds' | 'settings';
+export type Section = 'overview' | 'news' | 'schools' | 'departments' | 'jobs' | 'recruitment' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'contact' | 'complaints' | 'contactMessages' | 'heroBackgrounds' | 'governorates' | 'settings';
 export type Theme = 'light' | 'dark';
 export type Lang = 'en' | 'ar';
 
@@ -121,6 +121,7 @@ export interface AboutData {
     schoolCountAr?: string;
     schoolCountLabel?: string;
     schoolCountLabelAr?: string;
+    foundationYear?: number;
 }
 
 export interface AdminProfile {

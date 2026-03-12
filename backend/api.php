@@ -244,6 +244,10 @@ try {
             $stmt = $pdo->query("SELECT * FROM jobs");
             $jobs = $stmt->fetchAll();
 
+            // Fetch governorates
+            $stmt = $pdo->query("SELECT * FROM governorates ORDER BY name");
+            $governorates = $stmt->fetchAll();
+
             // Fetch settings
             $stmt = $pdo->query("SELECT * FROM settings");
             $settingsRows = $stmt->fetchAll();
@@ -259,6 +263,7 @@ try {
                 'news' => $news,
                 'jobs' => $jobs,
                 'jobDepartments' => $settings['jobDepartments'] ?? [],
+                'governorates' => $governorates,
                 'heroSlides' => $settings['heroSlides'] ?? [],
                 'aboutData' => $settings['aboutData'] ?? new stdClass(),
                 'pagesHeroSettings' => $settings['pagesHeroSettings'] ?? [
@@ -910,6 +915,34 @@ try {
 
             bustCache();
             echo json_encode(["status" => "success", "message" => "Entry deleted successfully."]);
+            break;
+
+        case 'save_governorate':
+            $gov = json_decode(file_get_contents('php://input'), true);
+            if (!$gov) throw new Exception("Data required");
+            
+            $id = $gov['id'] ?? uniqid('gov_');
+            $name = $gov['name'] ?? '';
+            $nameAr = $gov['nameAr'] ?? '';
+            
+            if (!$name || !$nameAr) throw new Exception("Name and Arabic name are required");
+            
+            $stmt = $pdo->prepare("REPLACE INTO governorates (id, name, nameAr) VALUES (?, ?, ?)");
+            $stmt->execute([$id, $name, $nameAr]);
+            
+            bustCache();
+            echo json_encode(["status" => "success", "message" => "Governorate saved successfully."]);
+            break;
+
+        case 'delete_governorate':
+            $id = $_GET['id'] ?? '';
+            if (!$id) throw new Exception("ID required");
+            
+            $stmt = $pdo->prepare("DELETE FROM governorates WHERE id = ?");
+            $stmt->execute([$id]);
+            
+            bustCache();
+            echo json_encode(["status" => "success", "message" => "Governorate deleted successfully."]);
             break;
 
         default:

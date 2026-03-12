@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GOVERNORATES } from '@/constants';
 import Search from 'lucide-react/dist/esm/icons/search';
 import MapPin from 'lucide-react/dist/esm/icons/map-pin';
 import Filter from 'lucide-react/dist/esm/icons/filter';
@@ -234,7 +233,7 @@ const Schools: React.FC = () => {
                     onChange={setSelectedGov}
                     options={[
                       { value: '', label: t.filterGov },
-                      ...GOVERNORATES.map(gov => ({ value: gov.name, label: lang === 'ar' && (gov as any).nameAr ? (gov as any).nameAr : gov.name }))
+                      ...(siteData.governorates || []).map(gov => ({ value: gov.name, label: lang === 'ar' ? gov.nameAr : gov.name }))
                     ]}
                     icon={<MapPin className="h-4 w-4" />}
                   />

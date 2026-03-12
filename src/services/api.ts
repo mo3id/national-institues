@@ -184,6 +184,18 @@ export const getLiveStats = async (): Promise<ApiResponse> => {
     return data;
 };
 
+export const saveGovernorate = async (governorate: any): Promise<ApiResponse> => {
+    const { data } = await apiClient.post<ApiResponse>('?action=save_governorate', governorate);
+    notifyUpdate();
+    return data;
+};
+
+export const deleteGovernorate = async (id: string): Promise<ApiResponse> => {
+    const { data } = await apiClient.get<ApiResponse>(`?action=delete_governorate&id=${id}`);
+    notifyUpdate();
+    return data;
+};
+
 export const deleteJob = async (id: string): Promise<ApiResponse> => {
     const { data } = await apiClient.get<ApiResponse>(`?action=delete_job&id=${id}`);
     notifyUpdate();

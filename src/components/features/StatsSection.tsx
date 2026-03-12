@@ -42,27 +42,31 @@ const StatsSection: React.FC = () => {
     fetchLiveStats();
   }, []);
 
-  // Format number with + prefix and support Arabic numerals
+  // Format number with + prefix - always use English digits
   const formatNumber = (num: number): string => {
     if (!num) return '+0';
     
     const formatted = num >= 1000 ? `${Math.floor(num / 1000)}k` : num.toString();
     
-    if (lang === 'ar') {
-      // Convert to Arabic numerals
-      const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-      const arabicFormatted = formatted.replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
-      return `+${arabicFormatted}`;
-    }
-    
     return `+${formatted}`;
+  };
+
+  // Get Arabic pluralized label for years of service
+  const getYearsLabel = (years: number): string => {
+    if (lang === 'en') return 'Years of Service';
+    
+    // Arabic pluralization rules
+    if (years === 1) return 'عام من العطاء';
+    if (years === 2) return 'عامان من العطاء';
+    if (years >= 3 && years <= 10) return 'أعوام من العطاء';
+    return 'عاماً من العطاء';
   };
 
   // Build stats array from live data
   const stats = liveStats ? [
     {
       number: formatNumber(liveStats.yearsOfService),
-      label: lang === 'ar' ? 'أعوام من العطاء' : 'Years of Service',
+      label: getYearsLabel(liveStats.yearsOfService),
       color: 'bg-emerald-400',
       shape: 'rounded-[30%_70%_70%_30%/30%_30%_70%_70%]'
     },

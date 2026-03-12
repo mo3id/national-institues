@@ -95,6 +95,18 @@ INSERT INTO `jobs` (`id`, `title`, `titleAr`, `department`, `departmentAr`, `loc
 INSERT INTO `jobs` (`id`, `title`, `titleAr`, `department`, `departmentAr`, `location`, `locationAr`, `type`, `typeAr`, `description`, `descriptionAr`) VALUES ('4', 'Physical Education Coach', 'مدرب تربية رياضية', 'Sports', 'أنشطة رياضية', 'Tanta, Gharbia', 'طنطا، الغربية', 'Full-time', 'دوام كامل', 'Lead sports programs and manage inter-school athletic competitions.', 'قيادة البرامج الرياضية وإدارة المسابقات الرياضية بين المدارس.');
 INSERT INTO `jobs` (`id`, `title`, `titleAr`, `department`, `departmentAr`, `location`, `locationAr`, `type`, `typeAr`, `description`, `descriptionAr`) VALUES ('5', 'English Literature Specialist', 'أخصائي أدب إنجليزي', 'Academic', 'أكاديمي', 'Nasr City, Cairo', 'مدينة نصر، القاهرة', 'Full-time', 'دوام كامل', 'Advanced literature instruction for secondary levels.', 'تعليم متقدم للأدب للمراحل الثانوية.');
 
+CREATE TABLE IF NOT EXISTS `governorates` (
+  `id` varchar(50) NOT NULL PRIMARY KEY,
+  `name` varchar(100) NOT NULL,
+  `nameAr` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `governorates` (`id`, `name`, `nameAr`) VALUES ('1', 'Cairo', 'القاهرة');
+INSERT INTO `governorates` (`id`, `name`, `nameAr`) VALUES ('2', 'Alexandria', 'الإسكندرية');
+INSERT INTO `governorates` (`id`, `name`, `nameAr`) VALUES ('3', 'Giza', 'الجيزة');
+INSERT INTO `governorates` (`id`, `name`, `nameAr`) VALUES ('4', 'Dakahlia', 'الدقهلية');
+INSERT INTO `governorates` (`id`, `name`, `nameAr`) VALUES ('5', 'Gharbia', 'الغربية');
+
 CREATE TABLE IF NOT EXISTS `settings` (
   `setting_key` varchar(100) NOT NULL PRIMARY KEY,
   `setting_value` longtext

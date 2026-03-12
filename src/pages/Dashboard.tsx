@@ -3,7 +3,8 @@ import {
   getPaginatedEntries, updateComplaint, updateJobApplication, getJobApplicationDetails, getDashboardStats, deleteEntry,
   saveNews as apiSaveNews, deleteNews as apiDeleteNews,
   saveSchool as apiSaveSchool, deleteSchool as apiDeleteSchool,
-  saveJob as apiSaveJob, deleteJob as apiDeleteJob
+  saveJob as apiSaveJob, deleteJob as apiDeleteJob,
+  saveGovernorate, deleteGovernorate as apiDeleteGovernorate
 } from '@/services/api';
 import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
 import Newspaper from 'lucide-react/dist/esm/icons/newspaper';
@@ -356,7 +357,6 @@ const CSS = `
 const DAYS_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const DAYS_AR = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
-const getArNumber = (n: number | string) => n.toString().replace(/\d/g, (d: any) => '٠١٢٣٤٥٦٧٨٩'[d]);
 
 const formatTimeString = (time24: string, isAr: boolean) => {
   if (!time24) return '';
@@ -366,8 +366,8 @@ const formatTimeString = (time24: string, isAr: boolean) => {
   const ampmEn = h >= 12 ? 'PM' : 'AM';
   const ampmAr = h >= 12 ? 'مساءً' : 'صباحاً';
   h = h % 12 || 12;
-  const hDisplay = isAr ? getArNumber(h) : h.toString();
-  const mDisplay = isAr ? getArNumber(m.toString().padStart(2, '0')) : m.toString().padStart(2, '0');
+  const hDisplay = h.toString();
+  const mDisplay = m.toString().padStart(2, '0');
 
   if (isAr) return `${hDisplay}:${mDisplay} ${ampmAr}`;
   return `${hDisplay}:${mDisplay} ${ampmEn}`;
@@ -442,7 +442,7 @@ const Pagination: React.FC<{
 
       <div className="pagination-info mobile-hide">
         {lang === 'ar' ? 'صفحة' : 'Page'}
-        <span>{isRTL ? getArNumber(current) : current} / {isRTL ? getArNumber(total) : total}</span>
+        <span>{current} / {total}</span>
       </div>
 
       <div className="flex items-center gap-1.5">
@@ -453,7 +453,7 @@ const Pagination: React.FC<{
             className={`pagination-btn ${current === p ? 'active' : ''}`}
             onClick={() => onChange(p)}
           >
-            {isRTL ? getArNumber(p) : p}
+            {p}
           </button>
         ))}
         {end < total && <span className="text-[var(--text2)] px-1">...</span>}
@@ -491,6 +491,7 @@ const Dashboard: React.FC = () => {
   const [schools, setSchools] = useState<DashSchool[]>([]);
   const [jobs, setJobs] = useState<DashJob[]>([]);
   const [departments, setDepartments] = useState<{ id: string, nameEn: string, nameAr: string }[]>([]);
+  const [governorates, setGovernorates] = useState<{ id: string, name: string, nameAr: string }[]>([]);
   const [applications, setApplications] = useState<DashJobApplication[]>([]);
   const [hero, setHero] = useState<HeroSlide[]>([]);
   const [complaints, setComplaints] = useState<any[]>([]);
@@ -519,6 +520,7 @@ const Dashboard: React.FC = () => {
       setFormSettings(siteData.formSettings || {});
       setContactData(siteData.contactData || {});
       setWhForm(parseWorkingHoursStr(siteData.contactData?.workingHours || ''));
+      setGovernorates(siteData.governorates || []);
     }
   }, [siteData]);
 
@@ -531,6 +533,8 @@ const Dashboard: React.FC = () => {
   const [addJobOpen, setAddJobOpen] = useState(false);
   const [addDepartmentOpen, setAddDepartmentOpen] = useState(false);
   const [newDepartment, setNewDepartment] = useState({ nameEn: '', nameAr: '' });
+  const [addGovernorateOpen, setAddGovernorateOpen] = useState(false);
+  const [newGovernorate, setNewGovernorate] = useState({ name: '', nameAr: '' });
   const [selectedRecruitmentJobId, setSelectedRecruitmentJobId] = useState<string | null>('All');
   const [selectedApplicant, setSelectedApplicant] = useState<DashJobApplication | null>(null);
   const [applicantModalOpen, setApplicantModalOpen] = useState(false);
@@ -652,6 +656,10 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (section === 'departments' || section === 'recruitment' || section === 'jobs') fetchDepartments();
+  }, [section]);
+
+  useEffect(() => {
+    if (section === 'governorates') fetchGovernorates();
   }, [section]);
 
   // Initial fetch for overview stats
@@ -986,6 +994,46 @@ const Dashboard: React.FC = () => {
     });
   };
 
+  const addGovernorate = async () => {
+    if (!newGovernorate.name || !newGovernorate.nameAr) return showToast(lang === 'ar' ? 'الرجاء إدخال اسم المحافظة باللغتين' : 'Please enter governorate name in both languages', 'error');
+    const newEntry = { id: String(Date.now()), name: newGovernorate.name, nameAr: newGovernorate.nameAr };
+    try {
+      await saveGovernorate(newEntry);
+      setAddGovernorateOpen(false);
+      setNewGovernorate({ name: '', nameAr: '' });
+      showToast(lang === 'ar' ? 'تم إضافة المحافظة' : 'Governorate added');
+      fetchGovernorates();
+    } catch (error) {
+      showToast(lang === 'ar' ? 'حدث خطأ أثناء الإضافة' : 'Error adding governorate', 'error');
+    }
+  };
+
+  const handleDeleteGovernorate = (id: string) => {
+    const gov = governorates.find(g => g.id === id);
+    if (!gov) return;
+    const isUsed = schools.some(s => s.governorate === gov.name || s.governorateAr === gov.nameAr);
+    if (isUsed) {
+      showToast(lang === 'ar' ? 'لا يمكن حذف المحافظة لوجود مدارس مرتبطة بها' : 'Cannot delete governorate as it contains schools', 'error');
+      return;
+    }
+    setConfirmAction({
+      message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه المحافظة؟' : 'Are you sure you want to delete this governorate?',
+      onConfirm: async () => {
+        try {
+          await apiDeleteGovernorate(id);
+          showToast(lang === 'ar' ? 'تم الحذف بنجاح' : 'Deleted successfully', 'error');
+          fetchGovernorates();
+        } catch (error) {
+          showToast(lang === 'ar' ? 'حدث خطأ أثناء الحذف' : 'Error deleting governorate', 'error');
+        }
+      }
+    });
+  };
+
+  const fetchGovernorates = () => {
+    setGovernorates(siteData.governorates || []);
+  };
+
   const deleteComplaint = (id: string) => {
     setConfirmAction({
       message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه الشكوى؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this complaint? This cannot be undone.',
@@ -1046,6 +1094,7 @@ const Dashboard: React.FC = () => {
     { id: 'chairman', label: u.chairman, icon: Users },
     { id: 'institute', label: u.institute, icon: Info },
     { id: 'schools', label: u.schools, icon: School },
+    { id: 'governorates', label: lang === 'ar' ? 'المحافظات' : 'Governorates', icon: MapPin },
     { id: 'news', label: u.news, icon: Newspaper },
     { id: 'recruitment', label: u.recruitmentPortal, icon: Briefcase },
     { id: 'departments', label: lang === 'ar' ? 'أقسام الوظائف' : 'Job Departments', icon: LayoutDashboard },
@@ -1170,11 +1219,11 @@ const Dashboard: React.FC = () => {
             <div className="section-enter" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: 14 }}>
                 {[
-                  { icon: Newspaper, label: u.totalArticles, val: isRTL ? getArNumber((dashStats.totalNews || 0).toString()) : (dashStats.totalNews || 0).toString(), color: '#4f46e5', bg: 'rgba(79,70,229,0.1)' },
-                  { icon: CheckCircle, label: u.publishedCount, val: isRTL ? getArNumber((dashStats.publishedNews || 0).toString()) : (dashStats.publishedNews || 0).toString(), color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-                  { icon: School, label: u.schoolsCount, val: isRTL ? getArNumber((dashStats.schoolsCount || 0).toString()) : (dashStats.schoolsCount || 0).toString(), color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
-                  { icon: Users, label: lang === 'ar' ? 'إجمالي المعلمين' : 'Total Teachers', val: isRTL ? getArNumber((dashStats.totalTeachers || 0).toLocaleString()) : (dashStats.totalTeachers || 0).toLocaleString(), color: '#0ea5e9', bg: 'rgba(14,165,233,0.1)' },
-                  { icon: Users, label: u.studentsCount, val: isRTL ? getArNumber((dashStats.totalStudents || 0).toLocaleString()) : (dashStats.totalStudents || 0).toLocaleString(), color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+                  { icon: Newspaper, label: u.totalArticles, val: (dashStats.totalNews || 0).toString(), color: '#4f46e5', bg: 'rgba(79,70,229,0.1)' },
+                  { icon: CheckCircle, label: u.publishedCount, val: (dashStats.publishedNews || 0).toString(), color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+                  { icon: School, label: u.schoolsCount, val: (dashStats.schoolsCount || 0).toString(), color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
+                  { icon: Users, label: lang === 'ar' ? 'إجمالي المعلمين' : 'Total Teachers', val: (dashStats.totalTeachers || 0).toString(), color: '#0ea5e9', bg: 'rgba(14,165,233,0.1)' },
+                  { icon: Users, label: u.studentsCount, val: (dashStats.totalStudents || 0).toString(), color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
                 ].map(({ icon: Icon, label, val, color, bg }) => (
                   <div key={label} className="stat-card">
                     <div className="stat-icon" style={{ background: bg }}><Icon style={{ width: 22, height: 22, color }} /></div>
@@ -1332,6 +1381,39 @@ const Dashboard: React.FC = () => {
                       </tr>
                     ))}
                     {departments.length === 0 && <tr><td colSpan={3} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><LayoutDashboard style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* ── Governorates ── */}
+          {section === 'governorates' && (
+            <div className="section-enter">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{lang === 'ar' ? 'المحافظات' : 'Governorates'}</h2></div>
+                <button className="dash-btn dash-btn-primary" onClick={() => setAddGovernorateOpen(true)}><Plus style={{ width: 15, height: 15 }} />{lang === 'ar' ? 'إضافة محافظة جديدة' : 'New Governorate'}</button>
+              </div>
+              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
+                <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
+                  <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
+                    <tr>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{lang === 'ar' ? 'الاسم (EN)' : 'Name (EN)'}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{lang === 'ar' ? 'الاسم (عربي)' : 'Name (AR)'}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.actions}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {governorates.map((gov, i) => (
+                      <tr key={gov.id} style={{ borderBottom: i === governorates.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{gov.name}</td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontSize: 13 }}>{gov.nameAr}</td>
+                        <td style={{ padding: '16px 24px' }}>
+                          <button className="dash-icon-btn" onClick={() => handleDeleteGovernorate(gov.id)} title={u.delete}><Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} /></button>
+                        </td>
+                      </tr>
+                    ))}
+                    {governorates.length === 0 && <tr><td colSpan={3} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><MapPin style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -1716,6 +1798,23 @@ const Dashboard: React.FC = () => {
                     <div className="form-col"><label className="dash-label">Vision Title (AR)</label><input className="dash-input" dir="rtl" value={about.visionTitleAr} onChange={e => setAbout(a => ({ ...a, visionTitleAr: e.target.value }))} /></div>
                     <div className="form-full"><label className="dash-label">Vision Description (EN)</label><textarea className="dash-input dash-ta" value={about.visionDesc} onChange={e => setAbout(a => ({ ...a, visionDesc: e.target.value }))} /></div>
                     <div className="form-full"><label className="dash-label">Vision Description (AR)</label><textarea className="dash-input dash-ta" dir="rtl" value={about.visionDescAr} onChange={e => setAbout(a => ({ ...a, visionDescAr: e.target.value }))} /></div>
+
+                    <h4 className="form-full font-bold border-b pb-2 mb-2 mt-4 text-slate-400 uppercase text-xs tracking-widest">{lang === 'ar' ? 'سنة التأسيس' : 'Foundation Year'}</h4>
+                    <div className="form-col">
+                      <label className="dash-label">{lang === 'ar' ? 'سنة التأسيس' : 'Foundation Year'}</label>
+                      <input 
+                        type="number" 
+                        className="dash-input" 
+                        value={about.foundationYear || ''} 
+                        onChange={e => setAbout(a => ({ ...a, foundationYear: parseInt(e.target.value) || undefined }))} 
+                        min="1900"
+                        max={new Date().getFullYear()}
+                        placeholder={lang === 'ar' ? 'مثال: 1985' : 'e.g., 1985'}
+                      />
+                      <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 4 }}>
+                        {lang === 'ar' ? 'يستخدم لحساب "أعوام من العطاء" في قسم الإحصائيات' : 'Used to calculate "Years of Service" in stats section'}
+                      </p>
+                    </div>
 
                     <div className="form-full dash-form-actions">
                       <button className="dash-btn dash-btn-primary" onClick={saveAbout}><Save style={{ width: 14, height: 14 }} />{u.save}</button>
@@ -2167,7 +2266,7 @@ const Dashboard: React.FC = () => {
 
       {addSchoolOpen && (
         <ModalWrap title={lang === 'ar' ? 'إضافة مدرسة جديدة' : 'Add New School'} onClose={() => setAddSchoolOpen(false)}>
-          <EditSchoolForm school={newSchool} lang={lang} onSave={addSchool} onCancel={() => setAddSchoolOpen(false)} />
+          <EditSchoolForm school={newSchool as DashSchool} lang={lang} onSave={addSchool} onCancel={() => setAddSchoolOpen(false)} />
         </ModalWrap>
       )}
 
@@ -2183,15 +2282,34 @@ const Dashboard: React.FC = () => {
           <div className="form-grid">
             <div className="form-col">
               <label className="dash-label">Department Name (EN)</label>
-              <input className="dash-input" value={newDepartment.nameEn} onChange={e => setNewDepartment(p => ({ ...p, nameEn: e.target.value }))} />
+              <input className="dash-input" value={newDepartment.nameEn} onChange={e => setNewDepartment({ ...newDepartment, nameEn: e.target.value })} />
             </div>
             <div className="form-col">
-              <label className="dash-label">اسم القسم (AR)</label>
-              <input className="dash-input" dir="rtl" value={newDepartment.nameAr} onChange={e => setNewDepartment(p => ({ ...p, nameAr: e.target.value }))} />
+              <label className="dash-label">اسم القسم (عربي)</label>
+              <input className="dash-input" dir="rtl" value={newDepartment.nameAr} onChange={e => setNewDepartment({ ...newDepartment, nameAr: e.target.value })} />
             </div>
             <div className="form-full dash-form-actions">
               <button className="dash-btn dash-btn-primary" onClick={addDepartment}><Save className="w-4 h-4" />{u.save}</button>
               <button className="dash-btn dash-btn-ghost" onClick={() => setAddDepartmentOpen(false)}>{u.cancel}</button>
+            </div>
+          </div>
+        </ModalWrap>
+      )}
+
+      {addGovernorateOpen && (
+        <ModalWrap title={lang === 'ar' ? 'إضافة محافظة جديدة' : 'Add New Governorate'} onClose={() => setAddGovernorateOpen(false)}>
+          <div className="form-grid">
+            <div className="form-col">
+              <label className="dash-label">{lang === 'ar' ? 'اسم المحافظة (EN)' : 'Governorate Name (EN)'}</label>
+              <input className="dash-input" value={newGovernorate.name} onChange={e => setNewGovernorate({ ...newGovernorate, name: e.target.value })} placeholder="e.g., Cairo" />
+            </div>
+            <div className="form-col">
+              <label className="dash-label">{lang === 'ar' ? 'اسم المحافظة (عربي)' : 'Governorate Name (AR)'}</label>
+              <input className="dash-input" dir="rtl" value={newGovernorate.nameAr} onChange={e => setNewGovernorate({ ...newGovernorate, nameAr: e.target.value })} placeholder="مثال: القاهرة" />
+            </div>
+            <div className="form-full dash-form-actions">
+              <button className="dash-btn dash-btn-primary" onClick={addGovernorate}><Save className="w-4 h-4" />{u.save}</button>
+              <button className="dash-btn dash-btn-ghost" onClick={() => setAddGovernorateOpen(false)}>{u.cancel}</button>
             </div>
           </div>
         </ModalWrap>
@@ -2258,7 +2376,7 @@ const Dashboard: React.FC = () => {
             <p><strong>{u.senderName}:</strong> {selectedContact.fullName}</p>
             <p><strong>{u.email}:</strong> {selectedContact.email}</p>
             <p><strong>{u.subject}:</strong> {selectedContact.subject}</p>
-            <p><strong>{u.date}:</strong> {selectedContact.createdAt ? new Date(selectedContact.createdAt).toLocaleString(lang === 'ar' ? 'ar-EG' : 'en-GB') : selectedContact.date || '—'}</p>
+            <p><strong>{u.date}:</strong> {selectedContact.createdAt ? new Date(selectedContact.createdAt).toLocaleString('en-GB') : selectedContact.date || '—'}</p>
             <p><strong>{u.message}:</strong></p>
             <p>{selectedContact.message}</p>
             <div className="flex gap-2 mt-4">
