@@ -7,7 +7,7 @@ export const useNavbarScroll = () => {
     useEffect(() => {
         const handleScroll = () => {
             const scrollY = window.scrollY;
-            setScrolled(scrollY > 50);
+            setScrolled(scrollY > 10);
             setIsPastHero(scrollY > window.innerHeight - 150);
         };
         window.addEventListener('scroll', handleScroll, { passive: true });

@@ -440,15 +440,21 @@ try {
             // Only generate ID for Complaint (شكوى) and Inquiry (استفسار)
             $shouldGenerateId = in_array($msgType, ['شكوى', 'استفسار', 'Complaint', 'Inquiry']);
             
-            if ($shouldGenerateId) {
-                // Generate a readable ID: CMP-XXXX (e.g. CMP-5821)
-                $complaintNumber = 'CMP-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
-                $input['id']        = $complaintNumber;
-                $input['status']    = 'Pending';
-                $input['response']  = '';
-            } else {
-                $input['id']        = null;
-            }
+            // Assign a distinctive prefix per message type
+            $prefixMap = [
+                'شكوى'      => 'CMP',
+                'Complaint' => 'CMP',
+                'استفسار'   => 'EXPL',
+                'Inquiry'   => 'EXPL',
+                'اقتراح'    => 'SUGG',
+                'Suggestion'=> 'SUGG',
+                'شكر'       => 'THX',
+                'Thanks'    => 'THX',
+            ];
+            $prefix = $prefixMap[$msgType] ?? 'MSG';
+            $input['id']       = $prefix . '-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+            $input['status']   = $shouldGenerateId ? 'Pending' : '';
+            $input['response'] = '';
             
             $input['createdAt'] = date('c');
             
@@ -598,7 +604,22 @@ try {
                 $stmt->execute([$type]);
                 $row = $stmt->fetch();
                 $data = $row ? json_decode($row['setting_value'], true) : [];
-                
+
+                // Auto-migrate: assign unique id to any entries with null/empty id
+                $migrated = false;
+                foreach ($data as &$entry) {
+                    if (empty($entry['id'])) {
+                        $entry['id'] = 'MSG-' . uniqid();
+                        $migrated = true;
+                    }
+                }
+                unset($entry);
+                if ($migrated) {
+                    $stmtMig = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES (?, ?)");
+                    $stmtMig->execute([$type, json_encode($data, JSON_UNESCAPED_UNICODE)]);
+                    bustCache();
+                }
+
                 // Primary Sort: Sort by date descending
                 usort($data, function($a, $b) {
                     $dateA = $a['createdAt'] ?? $a['appliedAt'] ?? $a['date'] ?? '';
@@ -908,7 +929,9 @@ try {
             $entries = $row ? json_decode($row['setting_value'], true) : [];
 
             // Filter out the entry whose id matches
-            $updated = array_values(array_filter($entries, fn($e) => ($e['id'] ?? '') !== $id));
+            $updated = array_values(array_filter($entries, function($e) use ($id) {
+                return ($e['id'] ?? '') !== $id;
+            }));
 
             $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES (?, ?)");
             $stmt->execute([$type, json_encode($updated, JSON_UNESCAPED_UNICODE)]);

@@ -230,11 +230,22 @@ export const EditSchoolForm: React.FC<{ school: DashSchool; lang: Lang; onSave: 
     const { data: siteData } = useSiteData();
     const [d, setD] = useState<Partial<DashSchool>>(school);
     const [errors, setErrors] = useState<Record<string, string>>({});
-
     useEffect(() => {
         const normalizedSchool = {
             ...school,
-            type: Array.isArray(school.type) ? school.type : (school.type ? [school.type] : [])
+            type: (() => {
+                const t = school.type;
+                if (Array.isArray(t)) return t.filter((v: string) => v && v.trim() !== '');
+                if (typeof t !== 'string' || !t.trim()) return [];
+                const trimmed = t.trim();
+                if (trimmed.startsWith('[')) {
+                    try { const parsed = JSON.parse(trimmed); return Array.isArray(parsed) ? parsed.filter(Boolean) : []; }
+                    catch { return []; }
+                }
+                return trimmed.split(',').map((x: string) => x.trim()).filter(Boolean);
+            })(),
+            mainImage: school.mainimage || '',
+            logo: school.logo || ''
         };
         setD(normalizedSchool);
     }, [school]);

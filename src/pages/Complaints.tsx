@@ -76,10 +76,12 @@ const Complaints: React.FC = () => {
 
       setComplaintId(result.data?.id || null);
       setSubmitted(true);
+      // Store the submitted message type to use in success screen
+      (window as any)._lastSubmittedType = formData.messageType;
       setFormData({ fullName: '', phone: '', email: '', messageType: (t?.complaints?.types || [])[0] || '', school: '', message: '' });
       // Remove the 5s timeout to let user see their ID
     } catch (err: any) {
-      setSubmitError(lang === 'ar' ? 'فشل إرسال الشكوى، يرجى المحاولة مرة أخرى.' : err.message || 'Failed to submit complaint.');
+      setSubmitError(lang === 'ar' ? 'فشل الإرسال، يرجى المحاولة مرة أخرى.' : err.message || 'Failed to submit request.');
     } finally {
       setIsSubmitting(false);
     }
@@ -116,7 +118,7 @@ const Complaints: React.FC = () => {
                   className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 px-8 py-3 rounded-full font-bold transition-all flex items-center gap-2 hover:gap-4 shadow-xl"
                 >
                   <Search className="w-5 h-5" />
-                  {lang === 'ar' ? 'الاستعلام عن شكوى' : 'Track Complaint'}
+                  {lang === 'ar' ? 'الاستعلام عن طلب' : 'Track Request'}
                   <span className={`transform transition-transform ${isRTL ? 'rotate-180' : ''}`}>→</span>
                 </Link>
               </div>
@@ -143,7 +145,9 @@ const Complaints: React.FC = () => {
                           {t?.complaints?.successTitle}
                         </h3>
                         <p className="text-slate-500 font-medium text-lg max-w-md mx-auto">
-                          {complaintId ? t?.complaints?.successWithId : t?.complaints?.successDesc}
+                          {complaintId 
+                            ? (t?.complaints?.successWithId || '').replace(/{type}/g, (window as any)._lastSubmittedType || (lang === 'ar' ? 'الطلب' : 'Request'))
+                            : t?.complaints?.successDesc}
                         </p>
                       </div>
 
@@ -193,7 +197,7 @@ const Complaints: React.FC = () => {
                           }}
                           className="bg-slate-100 text-slate-700 px-8 py-3.5 rounded-xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2"
                         >
-                          {lang === 'ar' ? 'تقديم بلاغ آخر' : 'Submit another complaint'}
+                          {lang === 'ar' ? 'تقديم طلب آخر' : 'Submit another request'}
                         </button>
                       </div>
                     </div>

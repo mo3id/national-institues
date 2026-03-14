@@ -48,11 +48,15 @@ const Navbar: React.FC = () => {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="fixed top-[10px] left-[10px] right-[10px] z-[100] py-4 xl:py-6 px-6 xl:px-10 flex items-center justify-between rounded-[20px] bg-transparent"
+            className={`fixed z-[100] transition-all duration-500 ${
+              scrolled 
+                ? 'top-0 left-0 right-0 py-3 px-6 xl:px-6 rounded-none' 
+                : 'top-[20px] left-[20px] right-[20px] py-4 xl:py-6 px-6 xl:px-10 rounded-[20px] bg-transparent'
+            } flex items-center justify-between`}
           >
             {/* LOGO */}
             <Link to="/" className="flex items-center shrink-0">
-              <img src="/layer-1-small.webp" alt="National Institutes" className="h-9 md:h-11 xl:h-14 object-contain" width="134" height="56" fetchPriority="high" decoding="async" />
+              <img src="/layer-1-small.webp" alt="National Institutes" className="h-9 md:h-11 xl:h-14 object-contain w-fit" width="134" height="56" fetchPriority="high" decoding="async" />
             </Link>
 
             {/* NAV LINKS - Middle */}

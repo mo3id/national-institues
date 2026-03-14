@@ -32,14 +32,14 @@ function saveBase64Image($base64Data, $prefix = 'img') {
     }
     
     // Return relative URL path
-    return '/backend/uploads/' . $filename;
+    return '/uploads/' . $filename;
 }
 
 function deleteImageFile($imagePath) {
     if (empty($imagePath)) return true;
     
     // Only delete if it's in our uploads folder
-    if (strpos($imagePath, '/backend/uploads/') === 0) {
+    if (strpos($imagePath, '/uploads/') === 0) {
         $filePath = __DIR__ . '/uploads/' . basename($imagePath);
         if (file_exists($filePath)) {
             return unlink($filePath);
@@ -52,7 +52,7 @@ function processImageField($value, $prefix = 'img') {
     if (empty($value)) return '';
     
     // If it's already a URL path, return as is
-    if (strpos($value, '/backend/uploads/') === 0 || strpos($value, 'http') === 0) {
+    if (strpos($value, '/uploads/') === 0 || strpos($value, 'http') === 0) {
         return $value;
     }
     

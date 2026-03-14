@@ -426,24 +426,39 @@ export const ImageUpload: React.FC<ImageUploadProps> = React.memo(({ value, onCh
             </div>
 
             {mode === 'url' ? (
-                <div className="relative">
-                    <input
-                        type="text"
-                        value={value}
-                        onChange={e => onChange(e.target.value)}
-                        placeholder="https://images.unsplash.com/..."
-                        className="w-full px-5 py-4 bg-[var(--surface2)] border border-[var(--border)] rounded-2xl focus:ring-4 focus:ring-[var(--accent)]/10 focus:border-[var(--accent)] outline-none transition-all font-medium text-sm text-[var(--text)] shadow-sm pr-12"
-                    />
+                <div className="space-y-3">
                     {value && (
-                        <button
-                            type="button"
-                            onClick={() => onChange('')}
-                            className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'left-4' : 'right-4'} p-1.5 text-[var(--text2)] hover:text-red-500 hover:bg-red-50 rounded-full transition-colors`}
-                            title={isRTL ? 'مسح الرابط' : 'Clear URL'}
-                        >
-                            <XIcon className="h-4 w-4" />
-                        </button>
+                        <div className="relative w-full h-40 bg-[var(--surface2)] border-2 border-[var(--border)] rounded-2xl overflow-hidden">
+                            <img src={value} className="w-full h-full object-contain p-2" alt="Preview" />
+                            <button
+                                type="button"
+                                onClick={() => onChange('')}
+                                className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 transition-colors"
+                                title={isRTL ? 'حذف الصورة' : 'Delete Image'}
+                            >
+                                <XIcon className="h-4 w-4" />
+                            </button>
+                        </div>
                     )}
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={value}
+                            onChange={e => onChange(e.target.value)}
+                            placeholder="https://images.unsplash.com/..."
+                            className="w-full px-5 py-4 bg-[var(--surface2)] border border-[var(--border)] rounded-2xl focus:ring-4 focus:ring-[var(--accent)]/10 focus:border-[var(--accent)] outline-none transition-all font-medium text-sm text-[var(--text)] shadow-sm pr-12"
+                        />
+                        {value && (
+                            <button
+                                type="button"
+                                onClick={() => onChange('')}
+                                className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'left-4' : 'right-4'} p-1.5 text-[var(--text2)] hover:text-red-500 hover:bg-red-50 rounded-full transition-colors`}
+                                title={isRTL ? 'مسح الرابط' : 'Clear URL'}
+                            >
+                                <XIcon className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
                 </div>
             ) : (
                 <div

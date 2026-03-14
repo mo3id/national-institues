@@ -101,7 +101,7 @@ function buildMergedData(apiData: SiteData): SiteData {
     merged.contactData = pick('contactData', false);
     merged.pagesHeroSettings = pick('pagesHeroSettings', false);
 
-    // Normalize legacy school type values
+    // Normalize legacy school type values + MySQL lowercase field names
     if (Array.isArray(merged.schools)) {
         merged.schools = merged.schools.map((s: any) => {
             let t = s.type;
@@ -114,9 +114,24 @@ function buildMergedData(apiData: SiteData): SiteData {
                 if (type === 'Language') return 'Languages';
                 if (type === 'International') return 'American';
                 return type;
-            });
+            }).filter((type: string) => type && type.trim() !== '');
 
-            return { ...s, type: types };
+            // Normalize MySQL lowercase column names to camelCase
+            return {
+                ...s,
+                type: types,
+                mainImage: s.mainImage || s.mainimage || '',
+                nameAr: s.nameAr || s.namear || '',
+                locationAr: s.locationAr || s.locationar || '',
+                governorateAr: s.governorateAr || s.governoratear || '',
+                principalAr: s.principalAr || s.principalar || '',
+                aboutAr: s.aboutAr || s.aboutar || '',
+                addressAr: s.addressAr || s.addressar || '',
+                studentCount: s.studentCount || s.studentcount || '',
+                teachersCount: s.teachersCount || s.teacherscount || '',
+                foundedYear: s.foundedYear || s.foundedyear || '',
+                applicationLink: s.applicationLink || s.applicationlink || '',
+            };
         });
     }
 

@@ -414,6 +414,7 @@ const Pagination: React.FC<{
   lang: string;
 }> = ({ current, total, onChange, lang }) => {
   const isRTL = lang === 'ar';
+  const u = UI[lang as Lang];
   if (total <= 1) return null;
 
   const pages = [];
@@ -428,7 +429,7 @@ const Pagination: React.FC<{
         className="pagination-btn"
         onClick={() => onChange(1)}
         disabled={current === 1}
-        title={lang === 'ar' ? 'البداية' : 'First Page'}
+        title={u.firstPage}
       >
         <ChevronsLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
       </button>
@@ -441,7 +442,7 @@ const Pagination: React.FC<{
       </button>
 
       <div className="pagination-info mobile-hide">
-        {lang === 'ar' ? 'صفحة' : 'Page'}
+        {u.page}
         <span>{current} / {total}</span>
       </div>
 
@@ -470,7 +471,7 @@ const Pagination: React.FC<{
         className="pagination-btn"
         onClick={() => onChange(total)}
         disabled={current === total}
-        title={lang === 'ar' ? 'النهاية' : 'Last Page'}
+        title={u.lastPage}
       >
         <ChevronsRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
       </button>
@@ -599,6 +600,15 @@ const Dashboard: React.FC = () => {
 
   const u = UI[lang];
   const isRTL = lang === 'ar';
+
+  const getMessageTypeLabel = (type: string) => {
+    const t = type?.toLowerCase() || '';
+    if (t.includes('شكوى') || t.includes('complaint')) return u.complaint;
+    if (t.includes('اقتراح') || t.includes('suggestion')) return u.suggestion;
+    if (t.includes('استفسار') || t.includes('inquiry')) return u.inquiry;
+    if (t.includes('شكر') || t.includes('thanks')) return u.thanks;
+    return type;
+  };
 
   useEffect(() => {
     localStorage.setItem('dash-theme', theme);
@@ -768,7 +778,7 @@ const Dashboard: React.FC = () => {
     const handleApiError = (e: any) => {
       const { message, type } = e.detail;
       if (type === 'SAVE_FAILED') {
-        showToast(lang === 'ar' ? `فشل الحفظ: ${message}` : `Save failed: ${message}`, 'error');
+        showToast(u.saveFailed.replace('{message}', message), 'error');
       }
     };
     window.addEventListener('nis_api_error', handleApiError);
@@ -789,8 +799,10 @@ const Dashboard: React.FC = () => {
     fetchNews(); // Silent sync
   };
   const deleteNews = (id: string) => {
+    const item = newsList.find(n => n.id === id);
+    const title = lang === 'ar' ? (item?.titleAr || item?.title) : (item?.title || item?.titleAr);
     setConfirmAction({
-      message: lang === 'ar' ? 'هل أنت متأكد من حذف هذا الخبر؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this news article? This cannot be undone.',
+      message: u.deleteConfirm.replace('{type}', title || (lang === 'ar' ? 'هذا الخبر' : 'this news article')),
       onConfirm: async () => {
         // Optimistic Update
         setNewsList(prev => prev.filter(n => n.id !== id));
@@ -904,8 +916,10 @@ const Dashboard: React.FC = () => {
     fetchSchools();
   };
   const deleteSchool = (id: string) => {
+    const item = schools.find(s => s.id === id);
+    const name = lang === 'ar' ? (item?.nameAr || item?.name) : (item?.name || item?.nameAr);
     setConfirmAction({
-      message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه المدرسة؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this school? This cannot be undone.',
+      message: u.deleteConfirm.replace('{type}', name || (lang === 'ar' ? 'هذه المدرسة' : 'this school')),
       onConfirm: async () => {
         // Optimistic Update
         setSchools(prev => prev.filter(sc => sc.id !== id));
@@ -928,8 +942,10 @@ const Dashboard: React.FC = () => {
   };
 
   const deleteJob = (id: string) => {
+    const item = jobs.find(j => j.id === id);
+    const title = lang === 'ar' ? (item?.titleAr || item?.title) : (item?.title || item?.titleAr);
     setConfirmAction({
-      message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه الوظيفة؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this job? This cannot be undone.',
+      message: u.deleteConfirm.replace('{type}', title || (lang === 'ar' ? 'هذه الوظيفة' : 'this job')),
       onConfirm: async () => {
         // Optimistic Update
         setJobs(prev => prev.filter(jb => jb.id !== id));
@@ -963,14 +979,14 @@ const Dashboard: React.FC = () => {
   };
 
   const addDepartment = async () => {
-    if (!newDepartment.nameEn || !newDepartment.nameAr) return showToast(lang === 'ar' ? 'الرجاء إدخال اسم القسم باللغتين' : 'Please enter department name in both languages', 'error');
+    if (!newDepartment.nameEn || !newDepartment.nameAr) return showToast(u.enterDeptBoth, 'error');
     const newEntry = { id: String(Date.now()), nameEn: newDepartment.nameEn, nameAr: newDepartment.nameAr };
     const updated = [newEntry, ...departments];
     setDepartments(updated);
     await updateData('jobDepartments', updated);
     setAddDepartmentOpen(false);
     setNewDepartment({ nameEn: '', nameAr: '' });
-    showToast(lang === 'ar' ? 'تم إضافة القسم' : 'Department added');
+    showToast(u.deptAdded);
     fetchDepartments();
   };
 
@@ -979,32 +995,32 @@ const Dashboard: React.FC = () => {
     if (!dep) return;
     const isUsed = jobs.some(j => j.department === dep.nameEn || j.departmentAr === dep.nameAr);
     if (isUsed) {
-      showToast(lang === 'ar' ? 'لا يمكن حذف القسم لأنه يحتوي على وظائف مسجلة.' : 'Cannot delete department as it contains active jobs.', 'error');
+      showToast(u.cantDeleteDept, 'error');
       return;
     }
     setConfirmAction({
-      message: lang === 'ar' ? 'هل أنت متأكد من حذف هذا القسم؟' : 'Are you sure you want to delete this department?',
+      message: u.deleteConfirm.replace('{type}', lang === 'ar' ? 'هذا القسم' : 'this department').replace('? This cannot be undone.', '?'),
       onConfirm: async () => {
         const updated = departments.filter(d => d.id !== id);
         setDepartments(updated);
         await updateData('jobDepartments', updated);
-        showToast(lang === 'ar' ? 'تم الحذف بنجاح' : 'Deleted successfully', 'error');
+        showToast(u.deletedSuccess, 'error');
         fetchDepartments();
       }
     });
   };
 
   const addGovernorate = async () => {
-    if (!newGovernorate.name || !newGovernorate.nameAr) return showToast(lang === 'ar' ? 'الرجاء إدخال اسم المحافظة باللغتين' : 'Please enter governorate name in both languages', 'error');
+    if (!newGovernorate.name || !newGovernorate.nameAr) return showToast(u.enterGovBoth, 'error');
     const newEntry = { id: String(Date.now()), name: newGovernorate.name, nameAr: newGovernorate.nameAr };
     try {
       await saveGovernorate(newEntry);
       setAddGovernorateOpen(false);
       setNewGovernorate({ name: '', nameAr: '' });
-      showToast(lang === 'ar' ? 'تم إضافة المحافظة' : 'Governorate added');
+      showToast(u.govAdded);
       fetchGovernorates();
     } catch (error) {
-      showToast(lang === 'ar' ? 'حدث خطأ أثناء الإضافة' : 'Error adding governorate', 'error');
+      showToast(u.errAddingGov, 'error');
     }
   };
 
@@ -1013,18 +1029,18 @@ const Dashboard: React.FC = () => {
     if (!gov) return;
     const isUsed = schools.some(s => s.governorate === gov.name || s.governorateAr === gov.nameAr);
     if (isUsed) {
-      showToast(lang === 'ar' ? 'لا يمكن حذف المحافظة لوجود مدارس مرتبطة بها' : 'Cannot delete governorate as it contains schools', 'error');
+      showToast(u.cantDeleteGov, 'error');
       return;
     }
     setConfirmAction({
-      message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه المحافظة؟' : 'Are you sure you want to delete this governorate?',
+      message: u.deleteConfirm.replace('{type}', lang === 'ar' ? 'هذه المحافظة' : 'this governorate').replace('? This cannot be undone.', '?'),
       onConfirm: async () => {
         try {
           await apiDeleteGovernorate(id);
-          showToast(lang === 'ar' ? 'تم الحذف بنجاح' : 'Deleted successfully', 'error');
+          showToast(u.deletedSuccess, 'error');
           fetchGovernorates();
         } catch (error) {
-          showToast(lang === 'ar' ? 'حدث خطأ أثناء الحذف' : 'Error deleting governorate', 'error');
+          showToast(u.errDeletingGov, 'error');
         }
       }
     });
@@ -1034,16 +1050,18 @@ const Dashboard: React.FC = () => {
     setGovernorates(siteData.governorates || []);
   };
 
-  const deleteComplaint = (id: string) => {
+  const deleteComplaint = (item: any) => {
+    const id = item.id;
+    const typeLabel = getMessageTypeLabel(item.messageType);
     setConfirmAction({
-      message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه الشكوى؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this complaint? This cannot be undone.',
+      message: u.deleteConfirm.replace('{type}', typeLabel),
       onConfirm: async () => {
         try {
           await deleteEntry('complaints', id);
-          showToast(lang === 'ar' ? 'تم حذف الشكوى' : 'Complaint deleted', 'error');
+          showToast(u.deleteSuccess.replace('{type}', typeLabel), 'error');
           fetchComplaints();
         } catch (err) {
-          showToast(lang === 'ar' ? 'فشل الحذف' : 'Delete failed', 'error');
+          showToast(u.deleteFailed, 'error');
         }
       }
     });
@@ -1051,14 +1069,14 @@ const Dashboard: React.FC = () => {
 
   const deleteContactMessage = (id: string) => {
     setConfirmAction({
-      message: lang === 'ar' ? 'هل أنت متأكد من حذف هذه الرسالة؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this message? This cannot be undone.',
+      message: u.confirmDeleteMessage,
       onConfirm: async () => {
         try {
           await deleteEntry('contactMessages', id);
-          showToast(lang === 'ar' ? 'تم حذف الرسالة' : 'Message deleted', 'error');
+          showToast(u.messageDeleted, 'error');
           fetchMessages();
         } catch {
-          showToast(lang === 'ar' ? 'فشل الحذف' : 'Delete failed', 'error');
+          showToast(u.deleteFailed, 'error');
         }
       }
     });
@@ -1094,10 +1112,10 @@ const Dashboard: React.FC = () => {
     { id: 'chairman', label: u.chairman, icon: Users },
     { id: 'institute', label: u.institute, icon: Info },
     { id: 'schools', label: u.schools, icon: School },
-    { id: 'governorates', label: lang === 'ar' ? 'المحافظات' : 'Governorates', icon: MapPin },
+    { id: 'governorates', label: u.governorates, icon: MapPin },
     { id: 'news', label: u.news, icon: Newspaper },
     { id: 'recruitment', label: u.recruitmentPortal, icon: Briefcase },
-    { id: 'departments', label: lang === 'ar' ? 'أقسام الوظائف' : 'Job Departments', icon: LayoutDashboard },
+    { id: 'departments', label: u.jobDepartments, icon: LayoutDashboard },
     { id: 'jobs', label: u.jobs, icon: Briefcase },
     { id: 'complaints', label: u.complaints, icon: MessageSquare },
     { id: 'contact', label: u.contactSettings || 'Contact Info', icon: Phone },
@@ -1114,23 +1132,23 @@ const Dashboard: React.FC = () => {
   const saveContactData = () => {
     // Basic validations
     if (contactData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactData.email)) {
-      showToast(isRTL ? 'تنسيق البريد الإلكتروني غير صالح' : 'Invalid email format', 'error');
+      showToast(u.invalidEmail, 'error');
       return;
     }
 
     // Check URLs
     const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
     if (contactData.facebook && !urlPattern.test(contactData.facebook)) {
-      showToast(isRTL ? 'رابط فيسبوك غير صالح' : 'Invalid Facebook URL', 'error'); return;
+      showToast(u.invalidFacebook, 'error'); return;
     }
     if (contactData.twitter && !urlPattern.test(contactData.twitter)) {
-      showToast(isRTL ? 'رابط تويتر غير صالح' : 'Invalid Twitter URL', 'error'); return;
+      showToast(u.invalidTwitter, 'error'); return;
     }
     if (contactData.instagram && !urlPattern.test(contactData.instagram)) {
-      showToast(isRTL ? 'رابط انستجرام غير صالح' : 'Invalid Instagram URL', 'error'); return;
+      showToast(u.invalidInstagram, 'error'); return;
     }
     if (contactData.linkedin && !urlPattern.test(contactData.linkedin)) {
-      showToast(isRTL ? 'رابط لينكد إن غير صالح' : 'Invalid LinkedIn URL', 'error'); return;
+      showToast(u.invalidLinkedIn, 'error'); return;
     }
 
     // Auto prepend https if missing and valid
@@ -1186,7 +1204,9 @@ const Dashboard: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <button className="dash-icon-btn" onClick={() => setCollapsed(!collapsed)}><Menu style={{ width: 20, height: 20 }} /></button>
             <div className="mobile-hide">
-              <p style={{ fontWeight: 800, fontSize: 16, color: 'var(--text)', lineHeight: 1.2 }}>{section === 'departments' ? (lang === 'ar' ? 'أقسام الوظائف' : 'Job Departments') : (u[section as keyof typeof u] as string)}</p>
+              <p style={{ fontWeight: 800, fontSize: 16, color: 'var(--text)', lineHeight: 1.2 }}>
+                {section === 'departments' ? u.jobDepartments : (section === 'governorates' ? u.governorates : (u[section as keyof typeof u] as string))}
+              </p>
               <p style={{ fontSize: 11, color: 'var(--text2)' }}>National Institutes Schools Portal</p>
             </div>
           </div>
@@ -1206,7 +1226,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="sm-show" style={{ display: 'flex', flexDirection: 'column' }}>
                 <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', lineHeight: 1.2 }}>{profile.name}</p>
-                <p style={{ fontSize: 11, color: 'var(--text2)' }}>{lang === 'ar' ? 'مسؤول النظام' : 'Super Admin'}</p>
+                <p style={{ fontSize: 11, color: 'var(--text2)' }}>{u.superAdmin}</p>
               </div>
             </div>
           </div>
@@ -1222,7 +1242,7 @@ const Dashboard: React.FC = () => {
                   { icon: Newspaper, label: u.totalArticles, val: (dashStats.totalNews || 0).toString(), color: '#4f46e5', bg: 'rgba(79,70,229,0.1)' },
                   { icon: CheckCircle, label: u.publishedCount, val: (dashStats.publishedNews || 0).toString(), color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
                   { icon: School, label: u.schoolsCount, val: (dashStats.schoolsCount || 0).toString(), color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
-                  { icon: Users, label: lang === 'ar' ? 'إجمالي المعلمين' : 'Total Teachers', val: (dashStats.totalTeachers || 0).toString(), color: '#0ea5e9', bg: 'rgba(14,165,233,0.1)' },
+                  { icon: Users, label: u.totalTeachers, val: (dashStats.totalTeachers || 0).toString(), color: '#0ea5e9', bg: 'rgba(14,165,233,0.1)' },
                   { icon: Users, label: u.studentsCount, val: (dashStats.totalStudents || 0).toString(), color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
                 ].map(({ icon: Icon, label, val, color, bg }) => (
                   <div key={label} className="stat-card">
@@ -1230,7 +1250,7 @@ const Dashboard: React.FC = () => {
                     <div>
                       <p style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 600 }}>{label}</p>
                       <p style={{ fontSize: 26, fontWeight: 900, color: 'var(--text)', lineHeight: 1.1 }}>{val}</p>
-                      <p style={{ fontSize: 11, color: '#10b981', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}><TrendingUp style={{ width: 12, height: 12 }} />{lang === 'ar' ? 'هذا العام' : 'This year'}</p>
+                      <p style={{ fontSize: 11, color: '#10b981', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}><TrendingUp style={{ width: 12, height: 12 }} />{u.thisYear}</p>
                     </div>
                   </div>
                 ))}
@@ -1294,7 +1314,7 @@ const Dashboard: React.FC = () => {
                     <div style={{ minWidth: 0, position: 'relative' }}>
                       <p style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         {n.title}
-                        {n.featured && <span style={{ fontSize: '10px', background: '#eab308', color: 'white', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', fontWeight: 'bold' }}>⭐ المميز</span>}
+                        {n.featured && <span style={{ fontSize: '10px', background: '#eab308', color: 'white', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', fontWeight: 'bold' }}>⭐ {u.featured}</span>}
                       </p>
                       <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{n.titleAr}</p>
                     </div>
@@ -1358,15 +1378,15 @@ const Dashboard: React.FC = () => {
           {section === 'departments' && (
             <div className="section-enter">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{lang === 'ar' ? 'أقسام الوظائف' : 'Job Departments'}</h2></div>
-                <button className="dash-btn dash-btn-primary" onClick={() => setAddDepartmentOpen(true)}><Plus style={{ width: 15, height: 15 }} />{lang === 'ar' ? 'بناء قسم جديد' : 'New Department'}</button>
+                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.jobDepartmentsTitle}</h2></div>
+                <button className="dash-btn dash-btn-primary" onClick={() => setAddDepartmentOpen(true)}><Plus style={{ width: 15, height: 15 }} />{u.newDept}</button>
               </div>
               <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
                 <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.title} (EN)</th>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.titleAr || 'الاسم (AR)'}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.nameEn}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.nameAr}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.actions}</th>
                     </tr>
                   </thead>
@@ -1391,15 +1411,15 @@ const Dashboard: React.FC = () => {
           {section === 'governorates' && (
             <div className="section-enter">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{lang === 'ar' ? 'المحافظات' : 'Governorates'}</h2></div>
-                <button className="dash-btn dash-btn-primary" onClick={() => setAddGovernorateOpen(true)}><Plus style={{ width: 15, height: 15 }} />{lang === 'ar' ? 'إضافة محافظة جديدة' : 'New Governorate'}</button>
+                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.governoratesTitle}</h2></div>
+                <button className="dash-btn dash-btn-primary" onClick={() => setAddGovernorateOpen(true)}><Plus style={{ width: 15, height: 15 }} />{u.newGov}</button>
               </div>
               <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
                 <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{lang === 'ar' ? 'الاسم (EN)' : 'Name (EN)'}</th>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{lang === 'ar' ? 'الاسم (عربي)' : 'Name (AR)'}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.nameEn}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.nameAr}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.actions}</th>
                     </tr>
                   </thead>
@@ -1485,27 +1505,30 @@ const Dashboard: React.FC = () => {
               {/* Tabs */}
               <div className="dash-card" style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '16px 20px', marginBottom: 24, whiteSpace: 'nowrap', alignItems: 'center' }}>
                 <button
+                  key="All"
                   onClick={() => setSelectedRecruitmentJobId('All')}
+                  className="dash-btn"
                   style={{
-                    padding: '8px 28px',
+                    padding: '8px 24px',
                     borderRadius: 12,
                     fontWeight: 700,
                     fontSize: 14,
                     cursor: 'pointer',
                     transition: 'all 0.2s',
-                    border: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'All') ? 'none' : '1px solid var(--border)',
-                    backgroundColor: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'All') ? '#111827' : 'var(--bg)',
-                    color: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'All') ? 'white' : 'var(--text2)',
+                    border: selectedRecruitmentJobId === 'All' ? 'none' : '1px solid var(--border)',
+                    backgroundColor: selectedRecruitmentJobId === 'All' ? '#111827' : 'var(--bg)',
+                    color: selectedRecruitmentJobId === 'All' ? 'white' : 'var(--text2)',
                     flexShrink: 0,
-                    boxShadow: (!selectedRecruitmentJobId || selectedRecruitmentJobId === 'All') ? '0 4px 10px rgba(0,0,0,0.1)' : 'none'
+                    boxShadow: selectedRecruitmentJobId === 'All' ? '0 4px 10px rgba(0,0,0,0.1)' : 'none'
                   }}
                 >
-                  {lang === 'ar' ? 'الكل' : 'All'}
+                  {u.all}
                 </button>
                 {departments.map(dept => (
                   <button
                     key={dept.id}
                     onClick={() => setSelectedRecruitmentJobId(lang === 'ar' ? dept.nameAr : dept.nameEn)}
+                    className="dash-btn"
                     style={{
                       padding: '8px 24px',
                       borderRadius: 12,
@@ -1542,7 +1565,7 @@ const Dashboard: React.FC = () => {
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.applicants}</th>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{lang === 'ar' ? 'الوظيفة المتقدم لها' : 'Applied Job'}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.appliedJob}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.applicationDate}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.status}</th>
                       <th style={{ padding: '14px 12px', width: 48 }} />
@@ -1560,7 +1583,7 @@ const Dashboard: React.FC = () => {
                               setApplicantModalOpen(true);
                             }
                           } catch (err) {
-                            showToast(lang === 'ar' ? 'فشل تحميل الطلب' : 'Failed to load application', 'error');
+                            showToast(u.failedToLoadApp, 'error');
                           } finally {
                             setIsTableLoading(false);
                           }
@@ -1619,7 +1642,7 @@ const Dashboard: React.FC = () => {
                           <iframe src={cvBlobUrl} width="100%" height="450px" className="border rounded-xl" title="cv preview" />
                         ) : (
                           <div className="p-10 border-2 border-dashed rounded-xl text-center text-slate-400 bg-slate-50">
-                            {lang === 'ar' ? 'جاري تجهيز المعاينة...' : 'Preparing preview...'}
+                            {u.preparingPreview}
                           </div>
                         )}
                       </div>
@@ -1645,12 +1668,12 @@ const Dashboard: React.FC = () => {
                         try {
                           const res = await updateJobApplication(selectedApplicant.id, selectedApplicant.status);
                           if (res.status === 'success') {
-                            showToast(lang === 'ar' ? 'تم تحديث الحالة بنجاح' : 'Status updated successfully');
+                            showToast(u.statusUpdated);
                             fetchApplicants(); // Refetch paginated data
                             setApplicantModalOpen(false);
                           }
                         } catch (err) {
-                          showToast(lang === 'ar' ? 'فشل التحديث' : 'Update failed', 'error');
+                          showToast(u.updateFailed, 'error');
                         }
                       }}>{u.save}</button>
                       <button className="dash-btn dash-btn-ghost" onClick={() => setApplicantModalOpen(false)}>{u.cancel}</button>
@@ -1659,15 +1682,15 @@ const Dashboard: React.FC = () => {
                         style={{ marginInlineStart: 'auto' }}
                         onClick={() => {
                           setConfirmAction({
-                            message: lang === 'ar' ? 'هل أنت متأكد من حذف هذا المتقدم؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this applicant? This cannot be undone.',
+                            message: u.deleteConfirm.replace('{type}', u.applicant),
                             onConfirm: async () => {
                               try {
                                 await deleteEntry('jobApplications', selectedApplicant.id);
-                                showToast(lang === 'ar' ? 'تم الحذف بنجاح' : 'Deleted successfully');
+                                showToast(u.deletedSuccess);
                                 fetchApplicants();
                                 setApplicantModalOpen(false);
                               } catch (err) {
-                                showToast(lang === 'ar' ? 'فشل الحذف' : 'Delete failed', 'error');
+                                showToast(u.deleteFailed, 'error');
                               }
                             }
                           });
@@ -1780,28 +1803,28 @@ const Dashboard: React.FC = () => {
                 <div className="dash-card" style={{ padding: 24 }}>
                   <div className="form-grid">
                     <h4 className="form-full font-bold border-b pb-2 mb-2 text-slate-400 uppercase text-xs tracking-widest">{u.story}</h4>
-                    <div className="form-col"><label className="dash-label">Story Title (EN)</label><input className="dash-input" value={about.storyTitle} onChange={e => setAbout(a => ({ ...a, storyTitle: e.target.value }))} /></div>
-                    <div className="form-col"><label className="dash-label">عنوان القصة (عربي)</label><input className="dash-input" dir="rtl" value={about.storyTitleAr} onChange={e => setAbout(a => ({ ...a, storyTitleAr: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.storyTitleLabel} (EN)</label><input className="dash-input" value={about.storyTitle} onChange={e => setAbout(a => ({ ...a, storyTitle: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.storyTitleLabel} (AR)</label><input className="dash-input" dir="rtl" value={about.storyTitleAr} onChange={e => setAbout(a => ({ ...a, storyTitleAr: e.target.value }))} /></div>
                     <div className="form-full">
                       <ImageUpload label={u.storyImage} value={about.storyImage || ''} onChange={val => setAbout(a => ({ ...a, storyImage: val }))} />
                     </div>
-                    <div className="form-full"><label className="dash-label">Story Description (EN)</label><textarea className="dash-input dash-ta" value={about.storyDesc} onChange={e => setAbout(a => ({ ...a, storyDesc: e.target.value }))} /></div>
-                    <div className="form-full"><label className="dash-label">وصف القصة (عربي)</label><textarea className="dash-input dash-ta" dir="rtl" value={about.storyDescAr} onChange={e => setAbout(a => ({ ...a, storyDescAr: e.target.value }))} /></div>
+                    <div className="form-full"><label className="dash-label">{u.storyDescLabel} (EN)</label><textarea className="dash-input dash-ta" value={about.storyDesc} onChange={e => setAbout(a => ({ ...a, storyDesc: e.target.value }))} /></div>
+                    <div className="form-full"><label className="dash-label">{u.storyDescLabel} (AR)</label><textarea className="dash-input dash-ta" dir="rtl" value={about.storyDescAr} onChange={e => setAbout(a => ({ ...a, storyDescAr: e.target.value }))} /></div>
 
                     <h4 className="form-full font-bold border-b pb-2 mb-2 mt-4 text-slate-400 uppercase text-xs tracking-widest">{u.mission} & {u.vision}</h4>
-                    <div className="form-col"><label className="dash-label">Mission Title (EN)</label><input className="dash-input" value={about.missionTitle} onChange={e => setAbout(a => ({ ...a, missionTitle: e.target.value }))} /></div>
-                    <div className="form-col"><label className="dash-label">Mission Title (AR)</label><input className="dash-input" dir="rtl" value={about.missionTitleAr} onChange={e => setAbout(a => ({ ...a, missionTitleAr: e.target.value }))} /></div>
-                    <div className="form-full"><label className="dash-label">Mission Description (EN)</label><textarea className="dash-input dash-ta" value={about.missionDesc} onChange={e => setAbout(a => ({ ...a, missionDesc: e.target.value }))} /></div>
-                    <div className="form-full"><label className="dash-label">Mission Description (AR)</label><textarea className="dash-input dash-ta" dir="rtl" value={about.missionDescAr} onChange={e => setAbout(a => ({ ...a, missionDescAr: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.missionTitleLabel} (EN)</label><input className="dash-input" value={about.missionTitle} onChange={e => setAbout(a => ({ ...a, missionTitle: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.missionTitleLabel} (AR)</label><input className="dash-input" dir="rtl" value={about.missionTitleAr} onChange={e => setAbout(a => ({ ...a, missionTitleAr: e.target.value }))} /></div>
+                    <div className="form-full"><label className="dash-label">{u.missionDescLabel} (EN)</label><textarea className="dash-input dash-ta" value={about.missionDesc} onChange={e => setAbout(a => ({ ...a, missionDesc: e.target.value }))} /></div>
+                    <div className="form-full"><label className="dash-label">{u.missionDescLabel} (AR)</label><textarea className="dash-input dash-ta" dir="rtl" value={about.missionDescAr} onChange={e => setAbout(a => ({ ...a, missionDescAr: e.target.value }))} /></div>
 
-                    <div className="form-col"><label className="dash-label">Vision Title (EN)</label><input className="dash-input" value={about.visionTitle} onChange={e => setAbout(a => ({ ...a, visionTitle: e.target.value }))} /></div>
-                    <div className="form-col"><label className="dash-label">Vision Title (AR)</label><input className="dash-input" dir="rtl" value={about.visionTitleAr} onChange={e => setAbout(a => ({ ...a, visionTitleAr: e.target.value }))} /></div>
-                    <div className="form-full"><label className="dash-label">Vision Description (EN)</label><textarea className="dash-input dash-ta" value={about.visionDesc} onChange={e => setAbout(a => ({ ...a, visionDesc: e.target.value }))} /></div>
-                    <div className="form-full"><label className="dash-label">Vision Description (AR)</label><textarea className="dash-input dash-ta" dir="rtl" value={about.visionDescAr} onChange={e => setAbout(a => ({ ...a, visionDescAr: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.visionTitleLabel} (EN)</label><input className="dash-input" value={about.visionTitle} onChange={e => setAbout(a => ({ ...a, visionTitle: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.visionTitleLabel} (AR)</label><input className="dash-input" dir="rtl" value={about.visionTitleAr} onChange={e => setAbout(a => ({ ...a, visionTitleAr: e.target.value }))} /></div>
+                    <div className="form-full"><label className="dash-label">{u.visionDescLabel} (EN)</label><textarea className="dash-input dash-ta" value={about.visionDesc} onChange={e => setAbout(a => ({ ...a, visionDesc: e.target.value }))} /></div>
+                    <div className="form-full"><label className="dash-label">{u.visionDescLabel} (AR)</label><textarea className="dash-input dash-ta" dir="rtl" value={about.visionDescAr} onChange={e => setAbout(a => ({ ...a, visionDescAr: e.target.value }))} /></div>
 
-                    <h4 className="form-full font-bold border-b pb-2 mb-2 mt-4 text-slate-400 uppercase text-xs tracking-widest">{lang === 'ar' ? 'سنة التأسيس' : 'Foundation Year'}</h4>
+                    <h4 className="form-full font-bold border-b pb-2 mb-2 mt-4 text-slate-400 uppercase text-xs tracking-widest">{u.foundationYear}</h4>
                     <div className="form-col">
-                      <label className="dash-label">{lang === 'ar' ? 'سنة التأسيس' : 'Foundation Year'}</label>
+                      <label className="dash-label">{u.foundationYear}</label>
                       <input 
                         type="number" 
                         className="dash-input" 
@@ -1809,10 +1832,10 @@ const Dashboard: React.FC = () => {
                         onChange={e => setAbout(a => ({ ...a, foundationYear: parseInt(e.target.value) || undefined }))} 
                         min="1900"
                         max={new Date().getFullYear()}
-                        placeholder={lang === 'ar' ? 'مثال: 1985' : 'e.g., 1985'}
+                        placeholder={u.exampleYear}
                       />
                       <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 4 }}>
-                        {lang === 'ar' ? 'يستخدم لحساب "أعوام من العطاء" في قسم الإحصائيات' : 'Used to calculate "Years of Service" in stats section'}
+                        {u.foundationYearDesc}
                       </p>
                     </div>
 
@@ -1859,22 +1882,22 @@ const Dashboard: React.FC = () => {
                 <div className="dash-card" style={{ padding: 24 }}>
                   <div className="form-grid">
                     <h4 className="form-full font-bold border-b pb-2 mb-2 text-slate-400 uppercase text-xs tracking-widest">{u.introduction}</h4>
-                    <div className="form-col"><label className="dash-label">Title (EN)</label><input className="dash-input" value={homeData.trustedTitle} onChange={e => setHomeData(p => ({ ...p, trustedTitle: e.target.value }))} /></div>
-                    <div className="form-col"><label className="dash-label">العنوان (عربي)</label><input className="dash-input" dir="rtl" value={homeData.trustedTitleAr} onChange={e => setHomeData(p => ({ ...p, trustedTitleAr: e.target.value }))} /></div>
-                    <div className="form-col"><label className="dash-label">Highlight (EN)</label><input className="dash-input" value={homeData.trustedHighlight} onChange={e => setHomeData(p => ({ ...p, trustedHighlight: e.target.value }))} /></div>
-                    <div className="form-col"><label className="dash-label">التظليل (عربي)</label><input className="dash-input" dir="rtl" value={homeData.trustedHighlightAr} onChange={e => setHomeData(p => ({ ...p, trustedHighlightAr: e.target.value }))} /></div>
-                    <div className="form-full"><label className="dash-label">Description (EN)</label><textarea className="dash-input dash-ta" value={homeData.trustedDesc} onChange={e => setHomeData(p => ({ ...p, trustedDesc: e.target.value }))} /></div>
-                    <div className="form-full"><label className="dash-label">الوصف (عربي)</label><textarea className="dash-input dash-ta" dir="rtl" value={homeData.trustedDescAr} onChange={e => setHomeData(p => ({ ...p, trustedDescAr: e.target.value }))} /></div>
-                    <div className="form-col"><label className="dash-label">Button Text (EN)</label><input className="dash-input" value={homeData.trustedCTA} onChange={e => setHomeData(p => ({ ...p, trustedCTA: e.target.value }))} /></div>
-                    <div className="form-col"><label className="dash-label">نص الزر (عربي)</label><input className="dash-input" dir="rtl" value={homeData.trustedCTAAr} onChange={e => setHomeData(p => ({ ...p, trustedCTAAr: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.nameEn}</label><input className="dash-input" value={homeData.trustedTitle} onChange={e => setHomeData(p => ({ ...p, trustedTitle: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.nameAr}</label><input className="dash-input" dir="rtl" value={homeData.trustedTitleAr} onChange={e => setHomeData(p => ({ ...p, trustedTitleAr: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.highlightEnLabel}</label><input className="dash-input" value={homeData.trustedHighlight} onChange={e => setHomeData(p => ({ ...p, trustedHighlight: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.highlightArLabel}</label><input className="dash-input" dir="rtl" value={homeData.trustedHighlightAr} onChange={e => setHomeData(p => ({ ...p, trustedHighlightAr: e.target.value }))} /></div>
+                    <div className="form-full"><label className="dash-label">{u.descriptionEnLabel}</label><textarea className="dash-input dash-ta" value={homeData.trustedDesc} onChange={e => setHomeData(p => ({ ...p, trustedDesc: e.target.value }))} /></div>
+                    <div className="form-full"><label className="dash-label">{u.descArLabel}</label><textarea className="dash-input dash-ta" dir="rtl" value={homeData.trustedDescAr} onChange={e => setHomeData(p => ({ ...p, trustedDescAr: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.ctaTextEn}</label><input className="dash-input" value={homeData.trustedCTA} onChange={e => setHomeData(p => ({ ...p, trustedCTA: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.ctaTextAr}</label><input className="dash-input" dir="rtl" value={homeData.trustedCTAAr} onChange={e => setHomeData(p => ({ ...p, trustedCTAAr: e.target.value }))} /></div>
 
                     <h4 className="form-full font-bold border-b pb-2 mb-2 mt-6 text-slate-400 uppercase text-xs tracking-widest">{u.map}</h4>
-                    <div className="form-col"><label className="dash-label">Gateway Title (EN)</label><input className="dash-input" value={homeData.gatewayTitle} onChange={e => setHomeData(p => ({ ...p, gatewayTitle: e.target.value }))} /></div>
-                    <div className="form-col"><label className="dash-label">عنوان البوابة (عربي)</label><input className="dash-input" dir="rtl" value={homeData.gatewayTitleAr} onChange={e => setHomeData(p => ({ ...p, gatewayTitleAr: e.target.value }))} /></div>
-                    <div className="form-col"><label className="dash-label">Gateway Highlight (EN)</label><input className="dash-input" value={homeData.gatewayHighlight} onChange={e => setHomeData(p => ({ ...p, gatewayHighlight: e.target.value }))} /></div>
-                    <div className="form-col"><label className="dash-label">تظليل البوابة (عربي)</label><input className="dash-input" dir="rtl" value={homeData.gatewayHighlightAr} onChange={e => setHomeData(p => ({ ...p, gatewayHighlightAr: e.target.value }))} /></div>
-                    <div className="form-full"><label className="dash-label">Gateway Desc (EN)</label><textarea className="dash-input dash-ta" value={homeData.gatewayDesc} onChange={e => setHomeData(p => ({ ...p, gatewayDesc: e.target.value }))} /></div>
-                    <div className="form-full"><label className="dash-label">وصف البوابة (عربي)</label><textarea className="dash-input dash-ta" dir="rtl" value={homeData.gatewayDescAr} onChange={e => setHomeData(p => ({ ...p, gatewayDescAr: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.gatewayTitleEnLabel}</label><input className="dash-input" value={homeData.gatewayTitle} onChange={e => setHomeData(p => ({ ...p, gatewayTitle: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.titleArLabel}</label><input className="dash-input" dir="rtl" value={homeData.gatewayTitleAr} onChange={e => setHomeData(p => ({ ...p, gatewayTitleAr: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.gatewayHighlightEnLabel}</label><input className="dash-input" value={homeData.gatewayHighlight} onChange={e => setHomeData(p => ({ ...p, gatewayHighlight: e.target.value }))} /></div>
+                    <div className="form-col"><label className="dash-label">{u.highlightArLabel}</label><input className="dash-input" dir="rtl" value={homeData.gatewayHighlightAr} onChange={e => setHomeData(p => ({ ...p, gatewayHighlightAr: e.target.value }))} /></div>
+                    <div className="form-full"><label className="dash-label">{u.gatewayDescEnLabel}</label><textarea className="dash-input dash-ta" value={homeData.gatewayDesc} onChange={e => setHomeData(p => ({ ...p, gatewayDesc: e.target.value }))} /></div>
+                    <div className="form-full"><label className="dash-label">{u.descArLabel}</label><textarea className="dash-input dash-ta" dir="rtl" value={homeData.gatewayDescAr} onChange={e => setHomeData(p => ({ ...p, gatewayDescAr: e.target.value }))} /></div>
                     <div className="form-full">
                       <ImageUpload label={u.mapImageLabel} value={homeData.mapImage} onChange={val => setHomeData(p => ({ ...p, mapImage: val }))} />
                     </div>
@@ -1890,13 +1913,13 @@ const Dashboard: React.FC = () => {
                               setPartners(newP);
                               updateData('partners', newP);
                             }} />
-                            <p className="text-[10px] text-center mt-2 text-slate-400 font-bold">{p.name || `Partner ${i + 1}`}</p>
+                            <p className="text-[10px] text-center mt-2 text-slate-400 font-bold">{p.name || `${u.partner} ${i + 1}`}</p>
                           </div>
                         ))}
                       </div>
                     </div>
 
-                    <h4 className="form-full font-bold border-b pb-2 mb-2 mt-6 text-slate-400 uppercase text-xs tracking-widest">Gallery Mosaic Images</h4>
+                    <h4 className="form-full font-bold border-b pb-2 mb-2 mt-6 text-slate-400 uppercase text-xs tracking-widest">{u.galleryMosaic}</h4>
                     <div className="form-full">
                       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                         {(siteData.galleryImages || []).map((img, i) => (
@@ -1936,21 +1959,21 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="dash-card" style={{ padding: 24 }}>
-                  <h3 className="font-bold mb-4 text-[var(--text)]">{lang === 'ar' ? 'نموذج التواصل' : 'Contact Form'}</h3>
+                  <h3 className="font-bold mb-4 text-[var(--text)]">{u.contactForm}</h3>
                   <div className="space-y-4">
                     <div><label className="dash-label">Title (EN)</label><input className="dash-input" value={formSettings?.contactFormTitle || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormTitle: e.target.value }))} /></div>
-                    <div><label className="dash-label">العنوان (عربي)</label><input className="dash-input" dir="rtl" value={formSettings?.contactFormTitleAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormTitleAr: e.target.value }))} /></div>
-                    <div><label className="dash-label">Desc (EN)</label><textarea className="dash-input" value={formSettings?.contactFormDesc || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormDesc: e.target.value }))} /></div>
-                    <div><label className="dash-label">الوصف (عربي)</label><textarea className="dash-input" dir="rtl" value={formSettings?.contactFormDescAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormDescAr: e.target.value }))} /></div>
+                    <div><label className="dash-label">{u.titleArLabel}</label><input className="dash-input" dir="rtl" value={formSettings?.contactFormTitleAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormTitleAr: e.target.value }))} /></div>
+                    <div><label className="dash-label">{u.descriptionEnLabel}</label><textarea className="dash-input" value={formSettings?.contactFormDesc || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormDesc: e.target.value }))} /></div>
+                    <div><label className="dash-label">{u.descArLabel}</label><textarea className="dash-input" dir="rtl" value={formSettings?.contactFormDescAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormDescAr: e.target.value }))} /></div>
                   </div>
                 </div>
                 <div className="dash-card" style={{ padding: 24 }}>
-                  <h3 className="font-bold mb-4 text-[var(--text)]">{lang === 'ar' ? 'نموذج الوظائف' : 'Careers Form'}</h3>
+                  <h3 className="font-bold mb-4 text-[var(--text)]">{u.careersForm}</h3>
                   <div className="space-y-4">
                     <div><label className="dash-label">Title (EN)</label><input className="dash-input" value={formSettings?.jobFormTitle || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormTitle: e.target.value }))} /></div>
-                    <div><label className="dash-label">العنوان (عربي)</label><input className="dash-input" dir="rtl" value={formSettings?.jobFormTitleAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormTitleAr: e.target.value }))} /></div>
-                    <div><label className="dash-label">Desc (EN)</label><textarea className="dash-input" value={formSettings?.jobFormDesc || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormDesc: e.target.value }))} /></div>
-                    <div><label className="dash-label">الوصف (عربي)</label><textarea className="dash-input" dir="rtl" value={formSettings?.jobFormDescAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormDescAr: e.target.value }))} /></div>
+                    <div><label className="dash-label">{u.titleArLabel}</label><input className="dash-input" dir="rtl" value={formSettings?.jobFormTitleAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormTitleAr: e.target.value }))} /></div>
+                    <div><label className="dash-label">{u.descriptionEnLabel}</label><textarea className="dash-input" value={formSettings?.jobFormDesc || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormDesc: e.target.value }))} /></div>
+                    <div><label className="dash-label">{u.descArLabel}</label><textarea className="dash-input" dir="rtl" value={formSettings?.jobFormDescAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormDescAr: e.target.value }))} /></div>
                   </div>
                 </div>
               </div>
@@ -1966,17 +1989,17 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="dash-card" style={{ padding: 24 }}>
-                  <h3 className="font-bold mb-4 text-[var(--text)]">{lang === 'ar' ? 'معلومات أساسية' : 'Basic Info'}</h3>
+                  <h3 className="font-bold mb-4 text-[var(--text)]">{u.basicInfo}</h3>
                   <div className="space-y-4">
-                    <div><label className="dash-label">{lang === 'ar' ? 'العنوان' : 'Address'}</label><input className="dash-input" value={contactData?.address || ''} onChange={e => setContactData((p: any) => ({ ...p, address: e.target.value }))} /></div>
-                    <div><label className="dash-label">{lang === 'ar' ? 'العنوان (عربي)' : 'Address (AR)'}</label><input className="dash-input" dir="rtl" value={contactData?.addressAr || ''} onChange={e => setContactData((p: any) => ({ ...p, addressAr: e.target.value }))} /></div>
-                    <div><label className="dash-label">{lang === 'ar' ? 'الهاتف' : 'Phone'}</label><input className="dash-input" value={contactData?.phone || ''} onChange={e => setContactData((p: any) => ({ ...p, phone: e.target.value }))} /></div>
-                    <div><label className="dash-label">{lang === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label><input className="dash-input" value={contactData?.email || ''} onChange={e => setContactData((p: any) => ({ ...p, email: e.target.value }))} /></div>
+                    <div><label className="dash-label">{u.addressLabel}</label><input className="dash-input" value={contactData?.address || ''} onChange={e => setContactData((p: any) => ({ ...p, address: e.target.value }))} /></div>
+                    <div><label className="dash-label">{u.addressAr}</label><input className="dash-input" dir="rtl" value={contactData?.addressAr || ''} onChange={e => setContactData((p: any) => ({ ...p, addressAr: e.target.value }))} /></div>
+                    <div><label className="dash-label">{u.phone}</label><input className="dash-input" value={contactData?.phone || ''} onChange={e => setContactData((p: any) => ({ ...p, phone: e.target.value }))} /></div>
+                    <div><label className="dash-label">{u.email}</label><input className="dash-input" value={contactData?.email || ''} onChange={e => setContactData((p: any) => ({ ...p, email: e.target.value }))} /></div>
                     <div className="pt-2 border-t border-[var(--border)]">
-                      <label className="dash-label mb-3">{lang === 'ar' ? 'أيام وساعات العمل' : 'Working Days & Hours'}</label>
+                      <label className="dash-label mb-3">{u.workingHoursLabel}</label>
                       <div className="flex flex-col gap-4 bg-[var(--surface2)] border border-[var(--border)] p-4 rounded-xl">
                         <div>
-                          <label className="text-[11px] font-bold text-[var(--text2)] uppercase tracking-widest mb-2 block">{lang === 'ar' ? 'من يوم - إلى يوم' : 'From - To Day'}</label>
+                          <label className="text-[11px] font-bold text-[var(--text2)] uppercase tracking-widest mb-2 block">{u.fromToDay}</label>
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                             <CustomSelect
                               className="!w-32"
@@ -1994,7 +2017,7 @@ const Dashboard: React.FC = () => {
                           </div>
                         </div>
                         <div>
-                          <label className="text-[11px] font-bold text-[var(--text2)] uppercase tracking-widest mb-2 block">{lang === 'ar' ? 'من ساعة - إلى ساعة' : 'From - To Time'}</label>
+                          <label className="text-[11px] font-bold text-[var(--text2)] uppercase tracking-widest mb-2 block">{u.fromToTime}</label>
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                             <input type="time" className="dash-input !py-2 text-center w-full" value={whForm.startTime} onChange={e => setWhForm(p => ({ ...p, startTime: e.target.value }))} />
                             <span className="text-[var(--border)] font-medium hidden sm:block">-</span>
@@ -2013,7 +2036,7 @@ const Dashboard: React.FC = () => {
 
                 <div className="flex flex-col gap-6">
                   <div className="dash-card" style={{ padding: 24 }}>
-                    <h3 className="font-bold mb-4 text-[var(--text)]">{lang === 'ar' ? 'التواصل الاجتماعي' : 'Social Media'}</h3>
+                    <h3 className="font-bold mb-4 text-[var(--text)]">{u.socialMedia}</h3>
                     <div className="space-y-4">
                       <div><label className="dash-label">Facebook</label><input className="dash-input" value={contactData?.facebook || ''} onChange={e => setContactData((p: any) => ({ ...p, facebook: e.target.value }))} /></div>
                       <div><label className="dash-label">Twitter / X</label><input className="dash-input" value={contactData?.twitter || ''} onChange={e => setContactData((p: any) => ({ ...p, twitter: e.target.value }))} /></div>
@@ -2023,10 +2046,10 @@ const Dashboard: React.FC = () => {
                   </div>
 
                   <div className="dash-card" style={{ padding: 24 }}>
-                    <h3 className="font-bold mb-4 text-[var(--text)]">{lang === 'ar' ? 'نصوص الفوتر' : 'Footer Texts'}</h3>
+                    <h3 className="font-bold mb-4 text-[var(--text)]">{u.footerTexts}</h3>
                     <div className="space-y-4">
                       <div><label className="dash-label">Footer Description (EN)</label><textarea className="dash-input dash-ta" value={contactData?.footerDesc || ''} onChange={e => setContactData((p: any) => ({ ...p, footerDesc: e.target.value }))} /></div>
-                      <div><label className="dash-label">وصف الفوتر (عربي)</label><textarea className="dash-input dash-ta" dir="rtl" value={contactData?.footerDescAr || ''} onChange={e => setContactData((p: any) => ({ ...p, footerDescAr: e.target.value }))} /></div>
+                      <div><label className="dash-label">{u.descArLabel}</label><textarea className="dash-input dash-ta" dir="rtl" value={contactData?.footerDescAr || ''} onChange={e => setContactData((p: any) => ({ ...p, footerDescAr: e.target.value }))} /></div>
                     </div>
                   </div>
                 </div>
@@ -2062,7 +2085,7 @@ const Dashboard: React.FC = () => {
                       value={complaintsFilterType}
                       onChange={val => setComplaintsFilterType(val)}
                       options={[
-                        { value: 'All', label: lang === 'ar' ? 'جميع الأنواع' : 'All Types' },
+                        { value: 'All', label: u.allTypes },
                         ...(translationsRoot?.complaints?.types || []).map((type: string) => ({ value: type, label: type }))
                       ]}
                     />
@@ -2075,7 +2098,7 @@ const Dashboard: React.FC = () => {
                   {/* ... same thead ... */}
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{lang === 'ar' ? 'رقم الشكوى' : 'ID'}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.requestId}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.senderName}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.phone}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.school}</th>
@@ -2097,7 +2120,7 @@ const Dashboard: React.FC = () => {
                         </td>
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, cursor: 'pointer' }} dir="ltr">{c.phone}</td>
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, cursor: 'pointer' }}>{c.school}</td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, cursor: 'pointer' }}><span style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--surface2)', fontSize: 11, fontWeight: 700 }}>{c.messageType}</span></td>
+                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, cursor: 'pointer' }}><span style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--surface2)', fontSize: 11, fontWeight: 700 }}>{getMessageTypeLabel(c.messageType)}</span></td>
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, maxWidth: 300, cursor: 'pointer' }}>
                           <p style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={c.message}>{c.message}</p>
                           <p style={{ fontSize: 11, color: 'var(--accent)', marginTop: 4 }}>{c.email}</p>
@@ -2110,7 +2133,7 @@ const Dashboard: React.FC = () => {
                           }}>{c.status || 'Pending'}</span>
                         </td>
                         <td style={{ padding: '16px 12px' }} onClick={e => e.stopPropagation()}>
-                          <button className="dash-icon-btn" title={lang === 'ar' ? 'حذف' : 'Delete'} onClick={() => deleteComplaint(c.id)}>
+                          <button className="dash-icon-btn" title={u.delete} onClick={() => deleteComplaint(c)}>
                             <Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} />
                           </button>
                         </td>
@@ -2165,7 +2188,7 @@ const Dashboard: React.FC = () => {
                         </td>
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 12, fontWeight: 600 }}>{c.createdAt ? new Date(c.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB') : c.date || '—'}</td>
                         <td style={{ padding: '16px 12px' }} onClick={e => e.stopPropagation()}>
-                          <button className="dash-icon-btn" title={lang === 'ar' ? 'حذف' : 'Delete'} onClick={() => deleteContactMessage(c.id)}>
+                          <button className="dash-icon-btn" title={u.delete} onClick={() => deleteContactMessage(c.id)}>
                             <Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} />
                           </button>
                         </td>
@@ -2259,33 +2282,33 @@ const Dashboard: React.FC = () => {
       })()}
 
       {addJobOpen && (
-        <ModalWrap title={lang === 'ar' ? 'إضافة وظيفة جديدة' : 'Add New Vacancy'} onClose={() => setAddJobOpen(false)}>
+        <ModalWrap title={u.addJobTitle} onClose={() => setAddJobOpen(false)}>
           <EditJobForm job={newJob} lang={lang} onSave={addJob} onCancel={() => setAddJobOpen(false)} />
         </ModalWrap>
       )}
 
       {addSchoolOpen && (
-        <ModalWrap title={lang === 'ar' ? 'إضافة مدرسة جديدة' : 'Add New School'} onClose={() => setAddSchoolOpen(false)}>
+        <ModalWrap title={u.addSchoolTitle} onClose={() => setAddSchoolOpen(false)}>
           <EditSchoolForm school={newSchool as DashSchool} lang={lang} onSave={addSchool} onCancel={() => setAddSchoolOpen(false)} />
         </ModalWrap>
       )}
 
       {editJobId && jobs.find(j => String(j.id) === String(editJobId)) && (() => {
         const j = jobs.find(j => String(j.id) === String(editJobId))!;
-        return <ModalWrap title={lang === 'ar' ? 'تعديل الوظيفة' : 'Edit Vacancy'} onClose={() => setEditJobId(null)}>
+        return <ModalWrap title={u.editJobTitle} onClose={() => setEditJobId(null)}>
           <EditJobForm job={j} lang={lang} onSave={saveJob} onCancel={() => setEditJobId(null)} />
         </ModalWrap>;
       })()}
 
       {addDepartmentOpen && (
-        <ModalWrap title={lang === 'ar' ? 'إضافة قسم جديد' : 'Add New Department'} onClose={() => setAddDepartmentOpen(false)}>
+        <ModalWrap title={u.newDept} onClose={() => setAddDepartmentOpen(false)}>
           <div className="form-grid">
             <div className="form-col">
-              <label className="dash-label">Department Name (EN)</label>
+              <label className="dash-label">{u.nameEn}</label>
               <input className="dash-input" value={newDepartment.nameEn} onChange={e => setNewDepartment({ ...newDepartment, nameEn: e.target.value })} />
             </div>
             <div className="form-col">
-              <label className="dash-label">اسم القسم (عربي)</label>
+              <label className="dash-label">{u.nameAr}</label>
               <input className="dash-input" dir="rtl" value={newDepartment.nameAr} onChange={e => setNewDepartment({ ...newDepartment, nameAr: e.target.value })} />
             </div>
             <div className="form-full dash-form-actions">
@@ -2297,14 +2320,14 @@ const Dashboard: React.FC = () => {
       )}
 
       {addGovernorateOpen && (
-        <ModalWrap title={lang === 'ar' ? 'إضافة محافظة جديدة' : 'Add New Governorate'} onClose={() => setAddGovernorateOpen(false)}>
+        <ModalWrap title={u.newGov} onClose={() => setAddGovernorateOpen(false)}>
           <div className="form-grid">
             <div className="form-col">
-              <label className="dash-label">{lang === 'ar' ? 'اسم المحافظة (EN)' : 'Governorate Name (EN)'}</label>
+              <label className="dash-label">{u.nameEn}</label>
               <input className="dash-input" value={newGovernorate.name} onChange={e => setNewGovernorate({ ...newGovernorate, name: e.target.value })} placeholder="e.g., Cairo" />
             </div>
             <div className="form-col">
-              <label className="dash-label">{lang === 'ar' ? 'اسم المحافظة (عربي)' : 'Governorate Name (AR)'}</label>
+              <label className="dash-label">{u.nameAr}</label>
               <input className="dash-input" dir="rtl" value={newGovernorate.nameAr} onChange={e => setNewGovernorate({ ...newGovernorate, nameAr: e.target.value })} placeholder="مثال: القاهرة" />
             </div>
             <div className="form-full dash-form-actions">
@@ -2317,12 +2340,12 @@ const Dashboard: React.FC = () => {
 
       {/* complaint detail modal */}
       {complaintModalOpen && selectedComplaint && (
-        <ModalWrap title={lang === 'ar' ? 'تفاصيل الشكوى' : 'Complaint Details'} onClose={() => setComplaintModalOpen(false)}>
+        <ModalWrap title={u.requestDetails} onClose={() => setComplaintModalOpen(false)}>
           <div className="space-y-4 max-h-[60vh] overflow-y-auto">
             <p><strong>{u.senderName}:</strong> {selectedComplaint.fullName}</p>
             <p><strong>{u.phone}:</strong> {selectedComplaint.phone}</p>
             <p><strong>{u.school}:</strong> {selectedComplaint.school}</p>
-            <p><strong>{u.messageType}:</strong> {selectedComplaint.messageType}</p>
+            <p><strong>{u.messageType}:</strong> {getMessageTypeLabel(selectedComplaint.messageType)}</p>
             <p><strong>{u.message}:</strong></p>
             <p>{selectedComplaint.message}</p>
             <div>
@@ -2337,12 +2360,12 @@ const Dashboard: React.FC = () => {
               />
             </div>
             <div>
-              <label className="dash-label">{lang === 'ar' ? 'رد الإدارة' : 'Admin Response'}</label>
+              <label className="dash-label">{u.adminResponse}</label>
               <textarea
                 className="dash-input dash-ta"
                 value={selectedComplaint.response || ''}
                 onChange={e => setSelectedComplaint(c => c ? { ...c, response: e.target.value } : null)}
-                placeholder={lang === 'ar' ? 'اكتب الرد هنا...' : 'Write response here...'}
+                placeholder={u.writeResponse}
               />
             </div>
             <div className="dash-form-actions">
@@ -2355,12 +2378,12 @@ const Dashboard: React.FC = () => {
                     selectedComplaint.response || ''
                   );
                   if (res.status === 'success') {
-                    showToast(lang === 'ar' ? 'تم تحديث الشكوى بنجاح' : 'Complaint updated successfully');
+                    showToast(u.updatedSuccess);
                     fetchComplaints(); // Refetch paginated data
                     setComplaintModalOpen(false);
                   }
                 } catch (err) {
-                  showToast(lang === 'ar' ? 'فشل التحديث' : 'Update failed', 'error');
+                  showToast(u.updateFailed, 'error');
                 }
               }}>{u.save}</button>
               <button className="dash-btn dash-btn-ghost" onClick={() => setComplaintModalOpen(false)}>{u.close || u.cancel}</button>
@@ -2371,12 +2394,12 @@ const Dashboard: React.FC = () => {
 
       {/* contact message detail modal */}
       {contactModalOpen && selectedContact && (
-        <ModalWrap title={lang === 'ar' ? 'تفاصيل الرسالة' : 'Message Details'} onClose={() => setContactModalOpen(false)}>
+        <ModalWrap title={u.messageDetails} onClose={() => setContactModalOpen(false)}>
           <div className="space-y-4 max-h-[60vh] overflow-y-auto">
             <p><strong>{u.senderName}:</strong> {selectedContact.fullName}</p>
             <p><strong>{u.email}:</strong> {selectedContact.email}</p>
             <p><strong>{u.subject}:</strong> {selectedContact.subject}</p>
-            <p><strong>{u.date}:</strong> {selectedContact.createdAt ? new Date(selectedContact.createdAt).toLocaleString('en-GB') : selectedContact.date || '—'}</p>
+            <p><strong>{u.date}:</strong> {selectedContact.createdAt ? new Date(selectedContact.createdAt).toLocaleString(lang === 'ar' ? 'ar-EG' : 'en-GB') : selectedContact.date || '—'}</p>
             <p><strong>{u.message}:</strong></p>
             <p>{selectedContact.message}</p>
             <div className="flex gap-2 mt-4">
@@ -2389,7 +2412,7 @@ const Dashboard: React.FC = () => {
 
       {/* Confirmation Modal */}
       {confirmAction && (
-        <ModalWrap title={lang === 'ar' ? 'تأكيد الحذف' : 'Confirm Deletion'} onClose={() => setConfirmAction(null)}>
+        <ModalWrap title={u.confirmDeletion} onClose={() => setConfirmAction(null)}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <p style={{ fontSize: '15px', color: 'var(--text)', fontWeight: 500 }}>
               {confirmAction.message}
@@ -2399,7 +2422,7 @@ const Dashboard: React.FC = () => {
                 className="dash-btn dash-btn-ghost"
                 onClick={() => setConfirmAction(null)}
               >
-                {lang === 'ar' ? 'إلغاء' : 'Cancel'}
+                {u.cancel}
               </button>
               <button
                 className="dash-btn dash-btn-danger"
@@ -2408,7 +2431,7 @@ const Dashboard: React.FC = () => {
                   setConfirmAction(null);
                 }}
               >
-                {u.delete || (lang === 'ar' ? 'حذف' : 'Delete')}
+                {u.delete}
               </button>
             </div>
           </div>

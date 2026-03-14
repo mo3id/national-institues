@@ -14,6 +14,7 @@ const Footer: React.FC = () => {
   const { lang, isRTL, t: translationsRoot } = useLanguage();
   const { data: siteData } = useSiteData();
   const t = translationsRoot.footer;
+  const currentYear = new Date().getFullYear();
 
   const socialLinks = [
     { Icon: Facebook, href: siteData.contactData?.facebook || "#" },
@@ -113,7 +114,7 @@ const Footer: React.FC = () => {
         <ScrollReveal direction="up" delay={0.4}>
           <div className="pt-12 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-10">
             <div className="text-[16px] md:text-[20px] text-gray-600 text-center md:text-start">
-              {t.copyright}
+              {t.copyright.replace('2024', currentYear.toString())}
             </div>
             <div className="flex flex-wrap justify-center gap-12 text-[16px] md:text-[20px]">
               {[t.privacy, t.terms, t.cookies].map((link, i) => (
