@@ -88,6 +88,19 @@ export const getDashSchoolSchema = () => z.object({
     .refine(d => d.location || d.locationAr, { message: 'Location is required', path: ['location'] })
     .refine(d => d.about || d.aboutAr, { message: 'About section is required', path: ['about'] });
 
+export const getAdmissionSchema = (lang: string) => z.object({
+    studentName: z.string().min(3, { message: lang === 'ar' ? 'اسم الطالب مطلوب (3 أحرف على الأقل)' : 'Student name must be at least 3 characters' }),
+    studentDOB: z.string().min(1, { message: lang === 'ar' ? 'تاريخ الميلاد مطلوب' : 'Date of birth is required' }),
+    studentNationalId: z.string().min(5, { message: lang === 'ar' ? 'الرقم القومي مطلوب' : 'National ID is required' }),
+    gradeStage: z.string().min(1, { message: lang === 'ar' ? 'المرحلة الدراسية مطلوبة' : 'Grade stage is required' }),
+    gradeClass: z.string().min(1, { message: lang === 'ar' ? 'الصف الدراسي مطلوب' : 'Grade class is required' }),
+    parentName: z.string().min(3, { message: lang === 'ar' ? 'اسم ولي الأمر مطلوب' : 'Parent name must be at least 3 characters' }),
+    parentPhone: z.string().regex(phoneRegex, { message: lang === 'ar' ? 'رقم الهاتف غير صالح' : 'Invalid phone number' }),
+    parentEmail: z.string().email({ message: lang === 'ar' ? 'البريد الإلكتروني غير صالح' : 'Invalid email address' }),
+    preferences: z.array(z.any()).min(1, { message: lang === 'ar' ? 'يجب اختيار مدرسة واحدة على الأقل' : 'Please select at least one school' }),
+    notes: z.string().optional(),
+});
+
 export const getDashJobSchema = () => z.object({
     title: z.string().optional().nullish(),
     titleAr: z.string().optional().nullish(),

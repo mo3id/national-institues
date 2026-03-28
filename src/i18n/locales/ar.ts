@@ -7,6 +7,7 @@ export const ar = {
         about: "عن المعاهد",
         aiStudio: "استوديو الذكاء الاصطناعي",
         feedback: "الاقتراحات والشكاوى",
+        admissions: "التقديم",
         menu: "القائمة",
         mainMenu: "القائمة الرئيسية",
         contactUs: "اتصل بنا"

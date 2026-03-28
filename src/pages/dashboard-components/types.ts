@@ -1,4 +1,4 @@
-export type Section = 'overview' | 'news' | 'schools' | 'departments' | 'jobs' | 'recruitment' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'contact' | 'complaints' | 'contactMessages' | 'heroBackgrounds' | 'governorates' | 'settings';
+export type Section = 'overview' | 'news' | 'schools' | 'departments' | 'jobs' | 'recruitment' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'contact' | 'complaints' | 'contactMessages' | 'heroBackgrounds' | 'governorates' | 'admissions' | 'settings';
 export type Theme = 'light' | 'dark';
 export type Lang = 'en' | 'ar';
 
@@ -80,6 +80,25 @@ export interface DashJobApplication {
     appliedAt: string;
     status: 'Pending' | 'Interview' | 'Rejected' | 'Hired' | 'On Hold';
     notes?: string;
+}
+
+export interface DashAdmission {
+    id: string;
+    studentName: string;
+    studentDOB: string;
+    studentNationalId: string;
+    gradeStage: string;
+    gradeClass: string;
+    parentName: string;
+    parentPhone: string;
+    parentEmail: string;
+    preferences: { schoolId: string; schoolName: string; schoolNameAr: string }[];
+    documents?: { name: string; fileName: string; path: string }[];
+    notes?: string;
+    status: 'Pending' | 'Under Review' | 'Accepted' | 'Waitlist' | 'Rejected';
+    acceptedSchool?: string;
+    adminNotes?: string;
+    createdAt: string;
 }
 
 export interface HeroSlide {
@@ -343,6 +362,43 @@ export const UI: Record<Lang, Record<string, string>> = {
         footerTexts: 'Footer Texts',
         allTypes: 'All Types',
         requestId: 'Request ID',
+        admissions: 'School Admissions',
+        admissionsManage: 'View and manage school admission applications',
+        admissionSettings: 'Admission Settings',
+        admissionSettingsManage: 'Configure the admission form and required documents',
+        studentName: 'Student Name',
+        studentDOB: 'Date of Birth',
+        studentNationalId: 'National ID',
+        gradeStage: 'Grade Stage',
+        gradeClass: 'Grade Class',
+        parentName: 'Parent Name',
+        parentPhone: 'Parent Phone',
+        parentEmail: 'Parent Email',
+        preferences: 'School Preferences',
+        documents: 'Documents',
+        adminNotes: 'Admin Notes',
+        acceptedSchool: 'Accepted at School',
+        underReview: 'Under Review',
+        accepted: 'Accepted',
+        waitlist: 'Waitlist',
+        isOpen: 'Registration Open',
+        requiredDocuments: 'Required Documents',
+        gradeStages: 'Grade Stages',
+        gradeClasses: 'Grade Classes',
+        addDocument: 'Add Document',
+        addStage: 'Add Stage',
+        addClass: 'Add Class',
+        maxPreferences: 'Max Preferences (0 = unlimited)',
+        formTitleEn: 'Form Title (EN)',
+        formTitleAr: 'Form Title (AR)',
+        formDescEn: 'Form Description (EN)',
+        formDescAr: 'Form Description (AR)',
+        admissionSaved: 'Admission settings saved',
+        admissionUpdated: 'Admission updated successfully',
+        admissionDeleted: 'Admission deleted',
+        viewDocuments: 'View Documents',
+        noDocuments: 'No documents uploaded',
+        admissionId: 'Admission ID',
     },
     ar: {
         overview: 'نظرة عامة', news: 'الأخبار', schools: 'المدارس', jobs: 'الوظائف الشاغرة',
@@ -556,6 +612,43 @@ export const UI: Record<Lang, Record<string, string>> = {
         footerTexts: 'نصوص الفوتر',
         allTypes: 'جميع الأنواع',
         requestId: 'رقم الطلب',
+        admissions: 'طلبات الالتحاق',
+        admissionsManage: 'عرض وإدارة طلبات الالتحاق بالمدارس',
+        admissionSettings: 'إعدادات التقديم',
+        admissionSettingsManage: 'تكوين نموذج التقديم والمستندات المطلوبة',
+        studentName: 'اسم الطالب',
+        studentDOB: 'تاريخ الميلاد',
+        studentNationalId: 'الرقم القومي',
+        gradeStage: 'المرحلة الدراسية',
+        gradeClass: 'الصف الدراسي',
+        parentName: 'اسم ولي الأمر',
+        parentPhone: 'هاتف ولي الأمر',
+        parentEmail: 'بريد ولي الأمر',
+        preferences: 'الرغبات (المدارس)',
+        documents: 'المستندات',
+        adminNotes: 'ملاحظات الإدارة',
+        acceptedSchool: 'مقبول في مدرسة',
+        underReview: 'قيد المراجعة',
+        accepted: 'مقبول',
+        waitlist: 'قائمة الانتظار',
+        isOpen: 'التسجيل مفتوح',
+        requiredDocuments: 'المستندات المطلوبة',
+        gradeStages: 'المراحل الدراسية',
+        gradeClasses: 'الصفوف الدراسية',
+        addDocument: 'إضافة مستند',
+        addStage: 'إضافة مرحلة',
+        addClass: 'إضافة صف',
+        maxPreferences: 'أقصى رغبات (0 = غير محدود)',
+        formTitleEn: 'عنوان النموذج (EN)',
+        formTitleAr: 'عنوان النموذج (AR)',
+        formDescEn: 'وصف النموذج (EN)',
+        formDescAr: 'وصف النموذج (AR)',
+        admissionSaved: 'تم حفظ إعدادات التقديم',
+        admissionUpdated: 'تم تحديث الطلب بنجاح',
+        admissionDeleted: 'تم حذف الطلب',
+        viewDocuments: 'عرض المستندات',
+        noDocuments: 'لم يتم رفع مستندات',
+        admissionId: 'رقم الطلب',
         heroBackgrounds: 'خلفيات الهيرو',
         heroBackgroundsManage: 'تخصيص خلفيات قسم الهيرو لكل صفحة',
         pageHeroSettings: 'إعدادات هيرو الصفحات',

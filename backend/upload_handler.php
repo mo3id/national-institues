@@ -2,9 +2,9 @@
 // upload_handler.php - Handles image uploads and returns file paths instead of base64
 
 function saveBase64Image($base64Data, $prefix = 'img') {
-    // Remove data:image/xxx;base64, prefix if exists
-    if (preg_match('/^data:image\/(\w+);base64,/', $base64Data, $matches)) {
-        $imageType = $matches[1];
+    // Remove data:mimetype;base64, prefix — supports images AND PDFs
+    if (preg_match('/^data:(image\/(\w+)|application\/pdf);base64,/', $base64Data, $matches)) {
+        $imageType = !empty($matches[2]) ? $matches[2] : 'pdf';
         $base64Data = substr($base64Data, strpos($base64Data, ',') + 1);
     } else {
         $imageType = 'png';

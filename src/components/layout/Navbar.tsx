@@ -33,6 +33,7 @@ const Navbar: React.FC = () => {
     { to: '/schools', label: t.schools, icon: 'school' },
     { to: '/news', label: t.news || (lang === 'ar' ? 'الأخبار' : 'News'), icon: 'article' },
     { to: '/careers', label: t.careers, icon: 'work' },
+    { to: '/admissions', label: t.admissions || (lang === 'ar' ? 'التقديم' : 'Admissions'), icon: 'school' },
     { to: '/complaints', label: t.feedback || (lang === 'ar' ? 'الشكاوى' : 'Complaints'), icon: 'forum' },
     { to: '/contact', label: lang === 'ar' ? 'اتصل بنا' : 'Contact Us', icon: 'call' }
   ];

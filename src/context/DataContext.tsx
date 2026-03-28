@@ -92,6 +92,8 @@ function buildMergedData(apiData: SiteData): SiteData {
     merged.partners = pick('partners', true);
     merged.galleryImages = pick('galleryImages', true);
     merged.jobApplications = pick('jobApplications', true);
+    merged.admissions = pick('admissions', true);
+    merged.admissionSettings = pick('admissionSettings', false);
     merged.complaints = pick('complaints', true);
     merged.contactMessages = pick('contactMessages', true);
     merged.aboutData = pick('aboutData', false);

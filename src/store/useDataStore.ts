@@ -9,6 +9,18 @@ export interface SiteData {
     jobDepartments: { id: string; nameEn: string; nameAr: string }[];
     governorates: { id: string; name: string; nameAr: string }[];
     jobApplications: JobApplication[];
+    admissions: any[];
+    admissionSettings: {
+        isOpen: boolean;
+        requiredDocuments: string[];
+        gradeStages: string[];
+        gradeClasses: string[];
+        maxPreferences: number;
+        formTitle: string;
+        formTitleAr: string;
+        formDesc: string;
+        formDescAr: string;
+    };
     heroSlides: any[];
     aboutData: any;
     complaints: any[];
@@ -88,6 +100,18 @@ export const DEFAULT_SITE_DATA: SiteData = {
     jobDepartments: [],
     governorates: [],
     jobApplications: [],
+    admissions: [],
+    admissionSettings: {
+        isOpen: true,
+        requiredDocuments: ['شهادة الميلاد', 'صورة شخصية', 'شهادة آخر سنة دراسية'],
+        gradeStages: ['ابتدائي', 'إعدادي', 'ثانوي'],
+        gradeClasses: ['أول', 'ثاني', 'ثالث', 'رابع', 'خامس', 'سادس'],
+        maxPreferences: 0,
+        formTitle: 'School Admission Application',
+        formTitleAr: 'طلب التقديم للمدارس',
+        formDesc: 'Fill in your details to apply for admission',
+        formDescAr: 'أدخل بياناتك للتقديم على الالتحاق بالمدارس'
+    },
     complaints: [],
     contactMessages: [],
     heroSlides: [],

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  getPaginatedEntries, updateComplaint, updateJobApplication, getJobApplicationDetails, getDashboardStats, deleteEntry,
+  getPaginatedEntries, updateComplaint, updateJobApplication, updateAdmission, getJobApplicationDetails, getDashboardStats, deleteEntry,
   saveNews as apiSaveNews, deleteNews as apiDeleteNews,
   saveSchool as apiSaveSchool, deleteSchool as apiDeleteSchool,
   saveJob as apiSaveJob, deleteJob as apiDeleteJob,
@@ -45,7 +45,7 @@ import ChevronsLeft from 'lucide-react/dist/esm/icons/chevrons-left';
 import ChevronsRight from 'lucide-react/dist/esm/icons/chevrons-right';
 import { NEWS, SCHOOLS } from '@/constants';
 import {
-  Section, Theme, Lang, DashNewsItem, DashSchool, DashJob, DashJobApplication, HeroSlide, AboutData, AdminProfile,
+  Section, Theme, Lang, DashNewsItem, DashSchool, DashJob, DashJobApplication, DashAdmission, HeroSlide, AboutData, AdminProfile,
   UI, HERO_IMAGES
 } from './dashboard-components/types';
 import { ModalWrap, EditNewsForm, EditHeroForm, EditSchoolForm, EditJobForm } from './dashboard-components/Modals';
@@ -479,6 +479,145 @@ const Pagination: React.FC<{
   );
 };
 
+// ─── Admission Detail Modal ────────────────────────────────────────────────────
+const AdmissionModal: React.FC<{
+  admission: any;
+  lang: string;
+  isRTL: boolean;
+  u: Record<string, string>;
+  schools: any[];
+  onClose: () => void;
+  onUpdate: (id: string, status: string, acceptedSchool: string, adminNotes: string) => Promise<void>;
+}> = ({ admission, lang, isRTL, u, schools, onClose, onUpdate }) => {
+  const [status, setStatus] = useState(admission.status || 'Pending');
+  const [acceptedSchool, setAcceptedSchool] = useState(admission.acceptedSchool || '');
+  const [adminNotes, setAdminNotes] = useState(admission.adminNotes || '');
+  const [saving, setSaving] = useState(false);
+
+  const statusColors: Record<string, { bg: string; color: string }> = {
+    'Pending':      { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b' },
+    'Under Review': { bg: 'rgba(99,102,241,0.12)',  color: '#6366f1' },
+    'Accepted':     { bg: 'rgba(16,185,129,0.12)',  color: '#10b981' },
+    'Waitlist':     { bg: 'rgba(251,146,60,0.12)',  color: '#fb923c' },
+    'Rejected':     { bg: 'rgba(239,68,68,0.12)',   color: '#ef4444' },
+  };
+  const sc = statusColors[status] || statusColors['Pending'];
+
+  const handleSave = async () => {
+    setSaving(true);
+    await onUpdate(admission.id, status, acceptedSchool, adminNotes);
+    setSaving(false);
+  };
+
+  return (
+    <ModalWrap title={u.requestDetails} onClose={onClose}>
+      <div style={{ width: '100%', maxWidth: 680 }} dir={isRTL ? 'rtl' : 'ltr'}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+          <div>
+            <p style={{ fontSize: 12, color: 'var(--text2)', fontFamily: 'monospace', fontWeight: 700, marginBottom: 4 }}>{admission.id}</p>
+            <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.requestDetails}</h3>
+          </div>
+          <span style={{ padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 700, background: sc.bg, color: sc.color }}>{status}</span>
+        </div>
+
+        {/* Student & Parent Details */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+          {[
+            { label: u.studentName,       value: admission.studentName },
+            { label: u.studentDOB,        value: admission.studentDOB },
+            { label: u.studentNationalId, value: admission.studentNationalId },
+            { label: u.gradeStage,        value: `${admission.gradeStage} — ${admission.gradeClass}` },
+            { label: u.parentName,        value: admission.parentName },
+            { label: u.parentPhone,       value: admission.parentPhone },
+            { label: u.parentEmail,       value: admission.parentEmail },
+            { label: u.date,              value: admission.createdAt ? new Date(admission.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { year: 'numeric', month: 'long', day: 'numeric' }) : '—' },
+          ].map(row => (
+            <div key={row.label} style={{ background: 'var(--surface2)', borderRadius: 12, padding: '10px 14px' }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>{row.label}</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{row.value || '—'}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Preferences */}
+        {(admission.preferences || []).length > 0 && (
+          <div style={{ background: 'var(--surface2)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>{u.preferences}</p>
+            <ol style={{ margin: 0, paddingInlineStart: 20, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {(admission.preferences || []).map((p: any, i: number) => (
+                <li key={i} style={{ fontSize: 13, fontWeight: i === 0 ? 700 : 500, color: i === 0 ? 'var(--text)' : 'var(--text2)' }}>
+                  {lang === 'ar' ? (p.schoolNameAr || p.schoolName) : p.schoolName}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+
+        {/* Notes from applicant */}
+        {admission.notes && (
+          <div style={{ background: 'var(--surface2)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{u.notes}</p>
+            <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.6 }}>{admission.notes}</p>
+          </div>
+        )}
+
+        {/* Update Status */}
+        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{u.changeStatus}</p>
+          <CustomSelect
+            value={status}
+            onChange={val => { setStatus(val); if (val !== 'Accepted') setAcceptedSchool(''); }}
+            options={[
+              { value: 'Pending',      label: u.pending },
+              { value: 'Under Review', label: u.underReview },
+              { value: 'Accepted',     label: u.accepted },
+              { value: 'Waitlist',     label: u.waitlist },
+              { value: 'Rejected',     label: u.rejected },
+            ]}
+          />
+
+          {status === 'Accepted' && (
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', marginBottom: 6 }}>{u.acceptedSchool}</p>
+              <CustomSelect
+                value={acceptedSchool}
+                onChange={setAcceptedSchool}
+                options={[
+                  { value: '', label: lang === 'ar' ? 'اختر مدرسة...' : 'Select school...' },
+                  ...(admission.preferences || []).map((p: any) => ({
+                    value: lang === 'ar' ? (p.schoolNameAr || p.schoolName) : p.schoolName,
+                    label: lang === 'ar' ? (p.schoolNameAr || p.schoolName) : p.schoolName,
+                  }))
+                ]}
+              />
+            </div>
+          )}
+
+          <div>
+            <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', marginBottom: 6 }}>{u.adminNotes}</p>
+            <textarea
+              className="dash-input"
+              style={{ width: '100%', minHeight: 80, resize: 'vertical', fontSize: 13 }}
+              value={adminNotes}
+              onChange={e => setAdminNotes(e.target.value)}
+              placeholder={u.writeResponse}
+            />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, paddingTop: 4 }}>
+            <button className="dash-btn dash-btn-ghost" onClick={onClose}>{u.cancel}</button>
+            <button className="dash-btn dash-btn-primary" onClick={handleSave} disabled={saving}>
+              {saving ? <div style={{ width: 14, height: 14, border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin" /> : <Save style={{ width: 14, height: 14 }} />}
+              {u.save}
+            </button>
+          </div>
+        </div>
+      </div>
+    </ModalWrap>
+  );
+};
+
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
 const Dashboard: React.FC = () => {
   const { logout } = useAuth();
@@ -497,6 +636,14 @@ const Dashboard: React.FC = () => {
   const [hero, setHero] = useState<HeroSlide[]>([]);
   const [complaints, setComplaints] = useState<any[]>([]);
   const [contactMessages, setContactMessages] = useState<any[]>([]);
+  const [admissionsList, setAdmissionsList] = useState<DashAdmission[]>([]);
+  const [admissionsPage, setAdmissionsPage] = useState(1);
+  const [admissionsTotalPages, setAdmissionsTotalPages] = useState(1);
+  const [selectedAdmission, setSelectedAdmission] = useState<DashAdmission | null>(null);
+  const [admissionModalOpen, setAdmissionModalOpen] = useState(false);
+  const [admissionsSearch, setAdmissionsSearch] = useState('');
+  const [admissionsFilterStatus, setAdmissionsFilterStatus] = useState('All');
+  const [admissionSettings, setAdmissionSettings] = useState(siteData.admissionSettings);
   const [about, setAbout] = useState<AboutData>({
     ...(siteData.aboutData || {}),
     points: siteData.aboutData?.points || [],
@@ -629,12 +776,13 @@ const Dashboard: React.FC = () => {
   // ── Polling for new arrivals (Auto-refresh every 30s for active section) ───
   useEffect(() => {
     let interval: any;
-    if (['complaints', 'contactMessages', 'recruitment', 'news'].includes(section)) {
+    if (['complaints', 'contactMessages', 'recruitment', 'news', 'admissions'].includes(section)) {
       interval = setInterval(() => {
         if (section === 'complaints') fetchComplaints();
         if (section === 'contactMessages') fetchMessages();
         if (section === 'recruitment') fetchApplicants();
         if (section === 'news') fetchNews();
+        if (section === 'admissions') fetchAdmissions();
       }, 30000); // 30 seconds polling
     }
     return () => { if (interval) clearInterval(interval); };
@@ -671,6 +819,10 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     if (section === 'governorates') fetchGovernorates();
   }, [section]);
+
+  useEffect(() => {
+    if (section === 'admissions') fetchAdmissions();
+  }, [section, admissionsPage, admissionsSearch, admissionsFilterStatus]);
 
   // Initial fetch for overview stats
   useEffect(() => {
@@ -1050,6 +1202,18 @@ const Dashboard: React.FC = () => {
     setGovernorates(siteData.governorates || []);
   };
 
+  const fetchAdmissions = async () => {
+    setIsTableLoading(true);
+    try {
+      const res = await getPaginatedEntries({ type: 'admissions', page: admissionsPage, limit: 12, search: admissionsSearch, filterType: admissionsFilterStatus });
+      if (res.status === 'success') {
+        setAdmissionsList(res.data.items);
+        setAdmissionsTotalPages(res.data.totalPages);
+      }
+    } catch (err) { console.error(err); }
+    finally { setIsTableLoading(false); }
+  };
+
   const deleteComplaint = (item: any) => {
     const id = item.id;
     const typeLabel = getMessageTypeLabel(item.messageType);
@@ -1117,6 +1281,7 @@ const Dashboard: React.FC = () => {
     { id: 'recruitment', label: u.recruitmentPortal, icon: Briefcase },
     { id: 'departments', label: u.jobDepartments, icon: LayoutDashboard },
     { id: 'jobs', label: u.jobs, icon: Briefcase },
+    { id: 'admissions', label: u.admissions, icon: GraduationCap },
     { id: 'complaints', label: u.complaints, icon: MessageSquare },
     { id: 'contact', label: u.contactSettings || 'Contact Info', icon: Phone },
     { id: 'contactMessages', label: u.contactMessages, icon: Mail },
@@ -2205,6 +2370,207 @@ const Dashboard: React.FC = () => {
                 </table>
               </div>
               <Pagination current={messagePage} total={messageTotalPages} onChange={setMessagePage} lang={lang} />
+            </div>
+          )}
+
+          {/* ── Admissions ── */}
+          {section === 'admissions' && (
+            <div className="section-enter">
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
+                <div>
+                  <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <GraduationCap style={{ width: 24, height: 24, color: 'var(--accent)' }} />
+                    {u.admissions}
+                  </h2>
+                  <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 4 }}>{u.admissionsManage}</p>
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface2)', borderRadius: 16, border: '1px solid var(--border)', padding: '4px 8px', gap: 8 }}>
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                      <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 10, right: isRTL ? 10 : 'auto', width: 14, height: 14, color: 'var(--text2)' }} />
+                      <input
+                        style={{ background: 'transparent', border: 'none', outline: 'none', padding: '6px 10px', paddingLeft: isRTL ? 10 : 28, paddingRight: isRTL ? 28 : 10, fontSize: 13, color: 'var(--text)', width: 180 }}
+                        placeholder={u.search}
+                        value={admissionsSearch}
+                        onChange={e => { setAdmissionsSearch(e.target.value); setAdmissionsPage(1); }}
+                      />
+                    </div>
+                    <div style={{ width: 1, height: 20, background: 'var(--border)' }}></div>
+                    <CustomSelect
+                      className="!w-40"
+                      value={admissionsFilterStatus}
+                      onChange={val => { setAdmissionsFilterStatus(val); setAdmissionsPage(1); }}
+                      options={[
+                        { value: 'All', label: u.all },
+                        { value: 'Pending', label: u.pending },
+                        { value: 'Under Review', label: u.underReview },
+                        { value: 'Accepted', label: u.accepted },
+                        { value: 'Waitlist', label: u.waitlist },
+                        { value: 'Rejected', label: u.rejected },
+                      ]}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Admission Settings Card */}
+              <div className="dash-card" style={{ padding: 20, marginBottom: 24 }}>
+                <p className="dash-label" style={{ marginBottom: 16 }}>{u.admissionSettings}</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 16 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={admissionSettings?.isOpen ?? true} onChange={e => setAdmissionSettings((p: any) => ({ ...p, isOpen: e.target.checked }))} style={{ width: 16, height: 16 }} />
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{u.isOpen}</span>
+                  </label>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 12, marginBottom: 16 }}>
+                  {/* Required Documents */}
+                  <div>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>{u.requiredDocuments}</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {(admissionSettings?.requiredDocuments || []).map((doc: string, i: number) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <input value={doc} onChange={e => setAdmissionSettings((p: any) => { const docs = [...(p.requiredDocuments || [])]; docs[i] = e.target.value; return { ...p, requiredDocuments: docs }; })} className="dash-input" style={{ flex: 1, fontSize: 12 }} />
+                          <button className="dash-icon-btn" onClick={() => setAdmissionSettings((p: any) => { const docs = [...(p.requiredDocuments || [])]; docs.splice(i, 1); return { ...p, requiredDocuments: docs }; })}><X style={{ width: 13, height: 13, color: '#ef4444' }} /></button>
+                        </div>
+                      ))}
+                      <button className="dash-btn dash-btn-ghost" style={{ fontSize: 12, justifyContent: 'flex-start' }} onClick={() => setAdmissionSettings((p: any) => ({ ...p, requiredDocuments: [...(p.requiredDocuments || []), ''] }))}><Plus style={{ width: 13, height: 13 }} />{u.addDocument}</button>
+                    </div>
+                  </div>
+                  {/* Grade Stages */}
+                  <div>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>{u.gradeStages}</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {(admissionSettings?.gradeStages || []).map((stage: string, i: number) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <input value={stage} onChange={e => setAdmissionSettings((p: any) => { const arr = [...(p.gradeStages || [])]; arr[i] = e.target.value; return { ...p, gradeStages: arr }; })} className="dash-input" style={{ flex: 1, fontSize: 12 }} />
+                          <button className="dash-icon-btn" onClick={() => setAdmissionSettings((p: any) => { const arr = [...(p.gradeStages || [])]; arr.splice(i, 1); return { ...p, gradeStages: arr }; })}><X style={{ width: 13, height: 13, color: '#ef4444' }} /></button>
+                        </div>
+                      ))}
+                      <button className="dash-btn dash-btn-ghost" style={{ fontSize: 12, justifyContent: 'flex-start' }} onClick={() => setAdmissionSettings((p: any) => ({ ...p, gradeStages: [...(p.gradeStages || []), ''] }))}><Plus style={{ width: 13, height: 13 }} />{u.addStage}</button>
+                    </div>
+                  </div>
+                  {/* Grade Classes */}
+                  <div>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>{u.gradeClasses}</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {(admissionSettings?.gradeClasses || []).map((cls: string, i: number) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <input value={cls} onChange={e => setAdmissionSettings((p: any) => { const arr = [...(p.gradeClasses || [])]; arr[i] = e.target.value; return { ...p, gradeClasses: arr }; })} className="dash-input" style={{ flex: 1, fontSize: 12 }} />
+                          <button className="dash-icon-btn" onClick={() => setAdmissionSettings((p: any) => { const arr = [...(p.gradeClasses || [])]; arr.splice(i, 1); return { ...p, gradeClasses: arr }; })}><X style={{ width: 13, height: 13, color: '#ef4444' }} /></button>
+                        </div>
+                      ))}
+                      <button className="dash-btn dash-btn-ghost" style={{ fontSize: 12, justifyContent: 'flex-start' }} onClick={() => setAdmissionSettings((p: any) => ({ ...p, gradeClasses: [...(p.gradeClasses || []), ''] }))}><Plus style={{ width: 13, height: 13 }} />{u.addClass}</button>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button className="dash-btn dash-btn-primary" onClick={() => { updateData('admissionSettings', admissionSettings); showToast(u.admissionSaved); }}><Save style={{ width: 14, height: 14 }} />{u.save}</button>
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
+                {isTableLoading && (
+                  <div className="table-loader">
+                    <div style={{ width: 32, height: 32, border: '4px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin"></div>
+                  </div>
+                )}
+                <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
+                  <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
+                    <tr>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.admissionId}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.studentName}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.parentPhone}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.gradeStage}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.preferences}</th>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.status}</th>
+                      <th style={{ padding: '14px 12px', width: 48 }} />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {admissionsList.length > 0 ? admissionsList.map((adm, i) => {
+                      const statusColors: Record<string, { bg: string; color: string }> = {
+                        'Pending':      { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b' },
+                        'Under Review': { bg: 'rgba(99,102,241,0.12)',  color: 'var(--accent)' },
+                        'Accepted':     { bg: 'rgba(16,185,129,0.12)',  color: '#10b981' },
+                        'Waitlist':     { bg: 'rgba(251,146,60,0.12)',  color: '#fb923c' },
+                        'Rejected':     { bg: 'rgba(239,68,68,0.12)',   color: '#ef4444' },
+                      };
+                      const sc = statusColors[adm.status] || statusColors['Pending'];
+                      return (
+                        <tr key={adm.id} style={{ borderBottom: i === admissionsList.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease', cursor: 'pointer' }}
+                          onClick={() => { setSelectedAdmission(adm); setAdmissionModalOpen(true); }}
+                          onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'}
+                          onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                          <td style={{ padding: '16px 24px', color: 'var(--accent)', fontWeight: 800, fontSize: 12, fontFamily: 'monospace' }}>{adm.id}</td>
+                          <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>
+                            <p>{adm.studentName}</p>
+                            <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2 }}>{adm.createdAt ? new Date(adm.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB') : ''}</p>
+                          </td>
+                          <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }} dir="ltr">{adm.parentPhone}</td>
+                          <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{adm.gradeStage} — {adm.gradeClass}</td>
+                          <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 12, maxWidth: 200 }}>
+                            <ol style={{ margin: 0, paddingInlineStart: 16 }}>
+                              {(adm.preferences || []).slice(0, 3).map((p: any, pi: number) => (
+                                <li key={pi} style={{ fontWeight: pi === 0 ? 700 : 400, color: pi === 0 ? 'var(--text)' : 'var(--text2)' }}>
+                                  {lang === 'ar' ? (p.schoolNameAr || p.schoolName) : p.schoolName}
+                                </li>
+                              ))}
+                              {(adm.preferences || []).length > 3 && <li style={{ color: 'var(--text2)', fontStyle: 'italic' }}>+{(adm.preferences || []).length - 3} more</li>}
+                            </ol>
+                          </td>
+                          <td style={{ padding: '16px 24px' }}>
+                            <span style={{ padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: sc.bg, color: sc.color }}>{adm.status}</span>
+                          </td>
+                          <td style={{ padding: '16px 12px' }} onClick={e => e.stopPropagation()}>
+                            <button className="dash-icon-btn" title={u.delete} onClick={() => {
+                              setConfirmAction({
+                                message: u.deleteConfirm.replace('{type}', adm.studentName || adm.id),
+                                onConfirm: async () => {
+                                  await deleteEntry('admissions', adm.id);
+                                  showToast(u.admissionDeleted, 'error');
+                                  fetchAdmissions();
+                                }
+                              });
+                            }}><Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} /></button>
+                          </td>
+                        </tr>
+                      );
+                    }) : (
+                      <tr>
+                        <td colSpan={7} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}>
+                          <GraduationCap style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} />
+                          <p style={{ fontWeight: 600 }}>{u.noResults}</p>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <Pagination current={admissionsPage} total={admissionsTotalPages} onChange={setAdmissionsPage} lang={lang} />
+
+              {/* Admission Detail Modal */}
+              {admissionModalOpen && selectedAdmission && (
+                <AdmissionModal
+                  admission={selectedAdmission}
+                  lang={lang}
+                  isRTL={isRTL}
+                  u={u}
+                  schools={schools}
+                  onClose={() => { setAdmissionModalOpen(false); setSelectedAdmission(null); }}
+                  onUpdate={async (id, status, acceptedSchool, adminNotes) => {
+                    try {
+                      await updateAdmission(id, status, acceptedSchool, adminNotes);
+                      showToast(u.admissionUpdated);
+                      fetchAdmissions();
+                      setAdmissionModalOpen(false);
+                    } catch (err) {
+                      showToast(u.updateFailed, 'error');
+                    }
+                  }}
+                />
+              )}
             </div>
           )}
 

@@ -325,6 +325,17 @@ try {
                 'galleryImages' => $settings['galleryImages'] ?? [],
                 'contactData' => $settings['contactData'] ?? new stdClass(),
                 'formSettings' => $settings['formSettings'] ?? new stdClass(),
+                'admissionSettings' => $settings['admissionSettings'] ?? [
+                    'isOpen' => true,
+                    'requiredDocuments' => ['شهادة الميلاد', 'صورة شخصية', 'شهادة آخر سنة دراسية'],
+                    'gradeStages' => ['ابتدائي', 'إعدادي', 'ثانوي'],
+                    'gradeClasses' => ['أول', 'ثاني', 'ثالث', 'رابع', 'خامس', 'سادس'],
+                    'maxPreferences' => 0,
+                    'formTitle' => 'School Admission Application',
+                    'formTitleAr' => 'طلب التقديم للمدارس',
+                    'formDesc' => 'Fill in your details to apply for admission',
+                    'formDescAr' => 'أدخل بياناتك للتقديم على الالتحاق بالمدارس'
+                ],
             ];
 
             $jsonOut = json_encode(["status" => "success", "data" => $response]);
@@ -656,7 +667,7 @@ try {
                 $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'jobDepartments'");
                 $row = $stmt->fetch();
                 $data = $row ? json_decode($row['setting_value'], true) : [];
-            } elseif (in_array($type, ['complaints', 'contactMessages', 'jobApplications'])) {
+            } elseif (in_array($type, ['complaints', 'contactMessages', 'jobApplications', 'admissions'])) {
                 $stmt = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = ?");
                 $stmt->execute([$type]);
                 $row = $stmt->fetch();
@@ -712,6 +723,8 @@ try {
                                     return false;
                                 }
                             }
+                        } elseif ($type === 'admissions') {
+                            if (($item['status'] ?? '') !== $filterType) return false;
                         }
                     }
 
@@ -726,7 +739,11 @@ try {
                             $item['subject'] ?? '',
                             $item['message'] ?? '',
                             $item['job'] ?? '',
-                            $item['jobTitle'] ?? ''
+                            $item['jobTitle'] ?? '',
+                            $item['studentName'] ?? '',
+                            $item['parentName'] ?? '',
+                            $item['parentPhone'] ?? '',
+                            $item['parentEmail'] ?? ''
                         ]));
                         return strpos($searchable, $term) !== false;
                     }
@@ -743,6 +760,11 @@ try {
             if ($type === 'jobApplications') {
                 foreach ($items as &$item) {
                     unset($item['cvData']);
+                }
+            }
+            if ($type === 'admissions') {
+                foreach ($items as &$item) {
+                    unset($item['documents']); // Heavy field — only load on detail view
                 }
             }
 
@@ -807,6 +829,177 @@ try {
                 echo json_encode(["status" => "success", "message" => "Updated successfully."]);
             } else {
                 throw new Exception("Complaint not found");
+            }
+            break;
+
+        case 'add_admission':
+            // ── Accept multipart/form-data: text fields in $_POST, files in $_FILES
+            $input = [];
+            $textFields = ['studentName', 'studentDOB', 'studentNationalId', 'gradeStage', 'gradeClass', 'parentName', 'parentPhone', 'parentEmail', 'notes'];
+            foreach ($textFields as $f) {
+                $input[$f] = sanitizeInput($_POST[$f] ?? '');
+            }
+
+            // Preferences: sent as JSON string in a POST field
+            $input['preferences'] = [];
+            if (!empty($_POST['preferences'])) {
+                $prefs = json_decode($_POST['preferences'], true);
+                if (is_array($prefs)) {
+                    $input['preferences'] = array_map(function($p) {
+                        return is_array($p)
+                            ? ['schoolId' => htmlspecialchars($p['schoolId'] ?? '', ENT_QUOTES), 'schoolName' => htmlspecialchars($p['schoolName'] ?? '', ENT_QUOTES), 'schoolNameAr' => htmlspecialchars($p['schoolNameAr'] ?? '', ENT_QUOTES)]
+                            : [];
+                    }, $prefs);
+                }
+            }
+
+            // Document names: sent as JSON string in a POST field
+            $docNames = [];
+            if (!empty($_POST['documentNames'])) {
+                $docNames = json_decode($_POST['documentNames'], true) ?: [];
+            }
+
+            // Documents: actual files via $_FILES['documents']
+            $savedDocs = [];
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+            $maxFileSize = 5 * 1024 * 1024; // 5 MB
+            $uploadDir = __DIR__ . '/uploads/';
+            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+
+            if (!empty($_FILES['documents'])) {
+                $files = $_FILES['documents'];
+                $count = is_array($files['name']) ? count($files['name']) : 0;
+                for ($i = 0; $i < $count; $i++) {
+                    $docLabel = $docNames[$i] ?? ('Document ' . ($i + 1));
+                    $origName = $files['name'][$i] ?? '';
+                    $tmpPath  = $files['tmp_name'][$i] ?? '';
+                    $fileSize = $files['size'][$i] ?? 0;
+                    $fileMime = $files['type'][$i] ?? '';
+                    $error    = $files['error'][$i] ?? UPLOAD_ERR_NO_FILE;
+
+                    if ($error !== UPLOAD_ERR_OK || empty($tmpPath)) {
+                        $savedDocs[] = ['name' => $docLabel, 'fileName' => $origName, 'path' => ''];
+                        continue;
+                    }
+                    if (!in_array($fileMime, $allowedMimes)) {
+                        $savedDocs[] = ['name' => $docLabel, 'fileName' => $origName, 'path' => ''];
+                        continue;
+                    }
+                    if ($fileSize > $maxFileSize) {
+                        $savedDocs[] = ['name' => $docLabel, 'fileName' => $origName, 'path' => ''];
+                        continue;
+                    }
+
+                    $ext = pathinfo($origName, PATHINFO_EXTENSION) ?: 'bin';
+                    $safeName = 'doc_' . uniqid() . '_' . time() . '.' . $ext;
+                    $destPath = $uploadDir . $safeName;
+                    if (move_uploaded_file($tmpPath, $destPath)) {
+                        $savedDocs[] = ['name' => $docLabel, 'fileName' => $origName, 'path' => '/uploads/' . $safeName];
+                    } else {
+                        $savedDocs[] = ['name' => $docLabel, 'fileName' => $origName, 'path' => ''];
+                    }
+                }
+            }
+            $input['documents'] = $savedDocs;
+
+            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'admissions'");
+            $row = $stmt->fetch();
+            $admissions = $row ? json_decode($row['setting_value'], true) : [];
+
+            // Rate limit: reject if same parentPhone submitted within last 60 seconds
+            $parentPhone = $input['parentPhone'] ?? '';
+            $now = time();
+            foreach ($admissions as $existing) {
+                if (($existing['parentPhone'] ?? '') === $parentPhone && !empty($existing['createdAt'])) {
+                    $diff = $now - strtotime($existing['createdAt']);
+                    if ($diff >= 0 && $diff < 60) {
+                        throw new Exception('Please wait before submitting another application.');
+                    }
+                }
+            }
+
+            // Generate unique ID with collision check
+            $maxAttempts = 20;
+            do {
+                $candidateId = 'ADM-' . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
+                $idExists = false;
+                foreach ($admissions as $a) { if (($a['id'] ?? '') === $candidateId) { $idExists = true; break; } }
+                $maxAttempts--;
+            } while ($idExists && $maxAttempts > 0);
+            if ($idExists) $candidateId = 'ADM-' . uniqid();
+            $input['id']          = $candidateId;
+            $input['status']      = 'Pending';
+            $input['acceptedSchool'] = '';
+            $input['adminNotes']  = '';
+            $input['createdAt']   = date('c');
+            $admissions[]         = $input;
+            $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('admissions', ?)");
+            $stmt->execute([json_encode($admissions, JSON_UNESCAPED_UNICODE)]);
+            bustCache();
+            echo json_encode(["status" => "success", "message" => "Admission submitted successfully.", "data" => ['id' => $input['id'], 'createdAt' => $input['createdAt']]]);
+            break;
+
+        case 'get_admission_status':
+            $id = $_GET['admissionId'] ?? '';
+            if (!$id) throw new Exception("Admission ID is required");
+
+            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'admissions'");
+            $row = $stmt->fetch();
+            $admissions = $row ? json_decode($row['setting_value'], true) : [];
+
+            $found = null;
+            foreach ($admissions as $a) {
+                if (($a['id'] ?? '') === $id) {
+                    $found = $a;
+                    break;
+                }
+            }
+
+            if (!$found) {
+                echo json_encode(["status" => "error", "message" => "Admission not found."]);
+            } else {
+                // Mask student name: show first 3 chars only
+                $maskedName = mb_strlen($found['studentName'] ?? '') > 3
+                    ? mb_substr($found['studentName'], 0, 3) . '***'
+                    : ($found['studentName'] ?? '') . '***';
+                echo json_encode(["status" => "success", "data" => [
+                    'id'            => $found['id'],
+                    'status'        => $found['status'],
+                    'acceptedSchool'=> $found['acceptedSchool'] ?? '',
+                    'createdAt'     => $found['createdAt'],
+                    'studentName'   => $maskedName,
+                    'gradeStage'    => $found['gradeStage'] ?? '',
+                ]]);
+            }
+            break;
+
+        case 'update_admission':
+            $input = json_decode(file_get_contents('php://input'), true);
+            $id     = $input['id'] ?? '';
+            $status = $input['status'] ?? '';
+            $acceptedSchool = $input['acceptedSchool'] ?? '';
+            $adminNotes = $input['adminNotes'] ?? '';
+            if (!$id) throw new Exception("ID required");
+            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'admissions'");
+            $row = $stmt->fetch();
+            $admissions = $row ? json_decode($row['setting_value'], true) : [];
+            $found = false;
+            foreach ($admissions as &$a) {
+                if (($a['id'] ?? '') === $id) {
+                    $a['status']        = $status;
+                    $a['acceptedSchool']= $acceptedSchool;
+                    $a['adminNotes']    = $adminNotes;
+                    $found = true;
+                    break;
+                }
+            }
+            if ($found) {
+                $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('admissions', ?)");
+                $stmt->execute([json_encode($admissions, JSON_UNESCAPED_UNICODE)]);
+                bustCache();
+                echo json_encode(["status" => "success", "message" => "Updated successfully."]);
+            } else {
+                throw new Exception("Admission not found");
             }
             break;
 
@@ -990,7 +1183,7 @@ try {
             if (!is_array($input)) throw new Exception('Invalid JSON payload');
 
             // Whitelist allowed types — never expose arbitrary settings keys to the client
-            $allowedTypes = ['complaints', 'contactMessages', 'jobApplications'];
+            $allowedTypes = ['complaints', 'contactMessages', 'jobApplications', 'admissions'];
             $type = $input['type'] ?? '';
             $id   = $input['id']   ?? '';
 

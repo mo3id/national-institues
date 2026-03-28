@@ -7,6 +7,7 @@ export const en = {
         about: "About Us",
         aiStudio: "AI Studio",
         feedback: "Feedback",
+        admissions: "Admissions",
         menu: "Menu",
         mainMenu: "Main Menu",
         contactUs: "Contact Us"

@@ -150,7 +150,45 @@ export const getJobApplicationDetails = async (id: string): Promise<ApiResponse>
     return data;
 };
 
-export const deleteEntry = async (type: 'complaints' | 'contactMessages' | 'jobApplications', id: string): Promise<ApiResponse> => {
+export const submitAdmission = async (admissionData: Record<string, any>): Promise<ApiResponse> => {
+    const fd = new FormData();
+    // Text fields
+    const textFields = ['studentName', 'studentDOB', 'studentNationalId', 'gradeStage', 'gradeClass', 'parentName', 'parentPhone', 'parentEmail', 'notes'];
+    for (const key of textFields) {
+        fd.append(key, admissionData[key] ?? '');
+    }
+    // Preferences as JSON string
+    fd.append('preferences', JSON.stringify(admissionData.preferences || []));
+    // Document names as JSON string, files as actual File objects
+    const docs: { name: string; file?: File }[] = admissionData.documents || [];
+    const docNames: string[] = [];
+    for (const doc of docs) {
+        docNames.push(doc.name || '');
+        if (doc.file) {
+            fd.append('documents[]', doc.file, doc.file.name);
+        }
+    }
+    fd.append('documentNames', JSON.stringify(docNames));
+
+    const { data } = await apiClient.post<ApiResponse>('?action=add_admission', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 60000,
+    });
+    if (data.status !== 'success') throw new Error(data.message || 'Failed to submit admission');
+    return data;
+};
+
+export const getAdmissionStatus = async (admissionId: string): Promise<ApiResponse> => {
+    const { data } = await apiClient.get<ApiResponse>(`?action=get_admission_status&admissionId=${admissionId}`);
+    return data;
+};
+
+export const updateAdmission = async (id: string, status: string, acceptedSchool: string, adminNotes: string): Promise<ApiResponse> => {
+    const { data } = await apiClient.post<ApiResponse>('?action=update_admission', { id, status, acceptedSchool, adminNotes });
+    return data;
+};
+
+export const deleteEntry = async (type: 'complaints' | 'contactMessages' | 'jobApplications' | 'admissions', id: string): Promise<ApiResponse> => {
     const { data } = await apiClient.post<ApiResponse>('?action=delete_entry', { type, id });
     if (data.status !== 'success') throw new Error(data.message || 'Failed to delete entry');
     return data;
