@@ -191,7 +191,7 @@ const Home: React.FC = () => {
             <ScrollReveal delay={0.3}>
               <div className="w-full flex justify-center mt-8 md:mt-12 overflow-visible md:overflow-visible">
                 <img
-                  src={(h.mapImage && h.mapImage.replace('.png', '.webp')) || '/layer-1-small.webp'}
+                  src={h.mapImage || '/layer-1-small.webp'}
                   alt="Global Network"
                   loading="lazy"
                   width="1152"
@@ -329,7 +329,6 @@ const Home: React.FC = () => {
                   />
                   <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 rounded-full blur-[120px]" />
                   <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/20 rounded-full blur-[120px]" />
-                  <div className="absolute inset-0 opacity-[0.02] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
                 </div>
               </div>
             </ScrollReveal>

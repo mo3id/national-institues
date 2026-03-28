@@ -2,6 +2,12 @@
 // api.php
 
 // ═══════════════════════════════════════════════════════════════════════════
+// PHP LIMITS — Allow enough memory/time for large responses
+// ═══════════════════════════════════════════════════════════════════════════
+ini_set('memory_limit', '256M');
+ini_set('max_execution_time', 120);
+
+// ═══════════════════════════════════════════════════════════════════════════
 // GZIP COMPRESSION — Reduce response size by ~70%
 // ═══════════════════════════════════════════════════════════════════════════
 if (!ob_start('ob_gzhandler')) {
@@ -222,11 +228,39 @@ try {
             $stmt->bindValue(':offset', $schoolsOffset, PDO::PARAM_INT);
             $stmt->execute();
             $schools = $stmt->fetchAll();
+            $needsMigration = false;
             foreach ($schools as &$school) {
                 // Decode gallery JSON
                 if (!empty($school['gallery'])) {
                     $school['gallery'] = json_decode($school['gallery'], true);
                 }
+                // Safety net: convert any remaining base64 images on-the-fly
+                if (!empty($school['logo']) && strpos($school['logo'], 'data:image') === 0) {
+                    $school['logo'] = processImageField($school['logo'], 'school_logo_' . ($school['id'] ?? ''));
+                    $pdo->prepare("UPDATE schools SET logo = ? WHERE id = ?")->execute([$school['logo'], $school['id']]);
+                    $needsMigration = true;
+                }
+                if (!empty($school['mainImage']) && strpos($school['mainImage'], 'data:image') === 0) {
+                    $school['mainImage'] = processImageField($school['mainImage'], 'school_main_' . ($school['id'] ?? ''));
+                    $pdo->prepare("UPDATE schools SET mainImage = ? WHERE id = ?")->execute([$school['mainImage'], $school['id']]);
+                    $needsMigration = true;
+                }
+                if (is_array($school['gallery'] ?? null)) {
+                    $galleryChanged = false;
+                    foreach ($school['gallery'] as &$gImg) {
+                        if (is_string($gImg) && strpos($gImg, 'data:image') === 0) {
+                            $gImg = processImageField($gImg, 'school_gallery_' . ($school['id'] ?? ''));
+                            $galleryChanged = true;
+                        }
+                    }
+                    if ($galleryChanged) {
+                        $pdo->prepare("UPDATE schools SET gallery = ? WHERE id = ?")->execute([json_encode($school['gallery']), $school['id']]);
+                        $needsMigration = true;
+                    }
+                }
+            }
+            if ($needsMigration) {
+                error_log('[NIS] Auto-migrated base64 images to files during get_site_data');
             }
 
             // Fetch news with pagination
@@ -238,11 +272,22 @@ try {
             foreach ($news as &$item) {
                 $item['published'] = (bool)$item['published'];
                 $item['featured'] = (bool)($item['featured'] ?? false);
+                // Safety net: convert any remaining base64 images on-the-fly
+                if (!empty($item['image']) && strpos($item['image'], 'data:image') === 0) {
+                    $item['image'] = processImageField($item['image'], 'news_' . ($item['id'] ?? ''));
+                    $pdo->prepare("UPDATE news SET image = ? WHERE id = ?")->execute([$item['image'], $item['id']]);
+                }
             }
 
             // Fetch jobs
             $stmt = $pdo->query("SELECT * FROM jobs");
             $jobs = $stmt->fetchAll();
+            foreach ($jobs as &$job) {
+                if (!empty($job['image']) && strpos($job['image'], 'data:image') === 0) {
+                    $job['image'] = processImageField($job['image'], 'job_' . ($job['id'] ?? ''));
+                    $pdo->prepare("UPDATE jobs SET image = ? WHERE id = ?")->execute([$job['image'], $job['id']]);
+                }
+            }
 
             // Fetch governorates
             $stmt = $pdo->query("SELECT * FROM governorates ORDER BY name");
@@ -397,6 +442,9 @@ try {
                     $pdo->exec("DELETE FROM jobs");
                     $stmt = $pdo->prepare("INSERT INTO jobs (id, title, titleAr, department, departmentAr, location, locationAr, type, typeAr, description, descriptionAr, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     foreach ($newData as $j) {
+                        // Convert base64 image to file path
+                        $jobImg = processImageField($j['image'] ?? '', 'job');
+                        
                         $stmt->execute([
                             $j['id'] ?? uniqid(),
                             $j['title'] ?? '',
@@ -409,10 +457,19 @@ try {
                             $j['typeAr'] ?? '',
                             $j['description'] ?? '',
                             $j['descriptionAr'] ?? '',
-                            $j['image'] ?? ''
+                            $jobImg
                         ]);
                     }
                 } else {
+                    // Process any base64 images in settings data before storing
+                    $settingsWithImages = ['heroSlides', 'aboutData', 'partners', 'galleryImages', 'homeData', 'pagesHeroSettings'];
+                    if (in_array($category, $settingsWithImages) && is_array($newData)) {
+                        array_walk_recursive($newData, function(&$val) use ($category) {
+                            if (is_string($val) && (strpos($val, 'data:image') === 0) && strlen($val) > 500) {
+                                $val = processImageField($val, $category);
+                            }
+                        });
+                    }
                     $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES (?, ?)");
                     $stmt->execute([$category, json_encode($newData, JSON_UNESCAPED_UNICODE)]);
                 }
@@ -782,6 +839,9 @@ try {
         case 'save_news':
             $n = json_decode(file_get_contents('php://input'), true);
             if (!$n) throw new Exception("Data required");
+            // Convert base64 image to file path
+            $newsImage = processImageField($n['image'] ?? '', 'news');
+
             $stmt = $pdo->prepare("REPLACE INTO news (id, title, titleAr, date, summary, summaryAr, content, contentAr, highlightTitle, highlightTitleAr, highlightContent, highlightContentAr, image, published, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $n['id'] ?? uniqid(),
@@ -796,7 +856,7 @@ try {
                 $n['highlightTitleAr'] ?? '',
                 $n['highlightContent'] ?? '',
                 $n['highlightContentAr'] ?? '',
-                $n['image'] ?? '',
+                $newsImage,
                 !empty($n['published']) ? 1 : 0,
                 !empty($n['featured']) ? 1 : 0
             ]);
@@ -823,6 +883,16 @@ try {
             if (!in_array('addressAr', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN addressAr text");
             if (!in_array('applicationLink', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN applicationLink text");
 
+            // Convert base64 images to file paths
+            $logo = processImageField($s['logo'] ?? '', 'school_logo');
+            $mainImage = processImageField($s['mainImage'] ?? '', 'school_main');
+            $gallery = $s['gallery'] ?? [];
+            if (is_array($gallery)) {
+                foreach ($gallery as &$gImg) {
+                    $gImg = processImageField($gImg, 'school_gallery');
+                }
+            }
+
             $stmt = $pdo->prepare("REPLACE INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, teachersCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $s['id'] ?? uniqid(),
@@ -834,10 +904,10 @@ try {
                 $s['governorateAr'] ?? ($s['governorate'] ?? ''),
                 $s['principal'] ?? '',
                 $s['principalAr'] ?? ($s['principal'] ?? ''),
-                $s['logo'] ?? '',
+                $logo,
                 is_array($s['type'] ?? '') ? json_encode($s['type']) : ($s['type'] ?? ''),
-                $s['mainImage'] ?? '',
-                json_encode($s['gallery'] ?? []),
+                $mainImage,
+                json_encode($gallery),
                 $s['about'] ?? '',
                 $s['aboutAr'] ?? '',
                 $s['phone'] ?? '',
@@ -866,6 +936,9 @@ try {
                 $pdo->exec("ALTER TABLE jobs ADD COLUMN image TEXT NULL");
             }
 
+            // Convert base64 image to file path
+            $jobImage = processImageField($j['image'] ?? '', 'job');
+
             $stmt = $pdo->prepare("REPLACE INTO jobs (id, title, titleAr, department, departmentAr, location, locationAr, type, typeAr, description, descriptionAr, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $j['id'] ?? uniqid(),
@@ -879,7 +952,7 @@ try {
                 $j['typeAr'] ?? '',
                 $j['description'] ?? '',
                 $j['descriptionAr'] ?? '',
-                $j['image'] ?? ''
+                $jobImage
             ]);
             bustCache();
             echo json_encode(["status" => "success", "message" => "Job saved successfully."]);

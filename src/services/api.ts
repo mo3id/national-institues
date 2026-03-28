@@ -48,16 +48,29 @@ import { DEFAULT_SITE_DATA } from '@/store/useDataStore';
 
 export const fetchSiteData = async (): Promise<SiteData> => {
     try {
+        console.log('[API Debug]: Fetching site data from server...');
+        const startTime = Date.now();
         const response = await apiClient.get<ApiResponse<SiteData>>(`?action=get_site_data&t=${Date.now()}`);
+        const loadTime = Date.now() - startTime;
+        console.log(`[API Debug]: Response received in ${loadTime}ms`);
         const { data } = response;
 
         if (data.status !== 'success' || !data.data) {
+            console.error('[API Error]: Server returned non-success status:', data);
             throw new Error(data.message || 'Failed to fetch site data from server.');
         }
 
+        console.log('[API Success]: Site data loaded successfully');
         return data.data;
     } catch (error: any) {
-        console.warn('[API Warning]: Failed to fetch site data, falling back to mock data:', error);
+        console.error('[API Error]: Failed to fetch site data, falling back to mock data');
+        console.error('[API Error Details]:', {
+            message: error.message,
+            code: error.code,
+            response: error.response?.data,
+            status: error.response?.status,
+            url: error.config?.url
+        });
 
         // Return mock data so the app can still run when the PHP server is down or timing out
         return {
