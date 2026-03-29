@@ -14,7 +14,7 @@ export interface SiteData {
         isOpen: boolean;
         requiredDocuments: string[];
         gradeStages: string[];
-        gradeClasses: string[];
+        gradeClassesByStage: Record<string, string[]>;
         maxPreferences: number;
         formTitle: string;
         formTitleAr: string;
@@ -105,7 +105,11 @@ export const DEFAULT_SITE_DATA: SiteData = {
         isOpen: true,
         requiredDocuments: ['شهادة الميلاد', 'صورة شخصية', 'شهادة آخر سنة دراسية'],
         gradeStages: ['ابتدائي', 'إعدادي', 'ثانوي'],
-        gradeClasses: ['أول', 'ثاني', 'ثالث', 'رابع', 'خامس', 'سادس'],
+        gradeClassesByStage: {
+            'ابتدائي': ['أول', 'ثاني', 'ثالث', 'رابع', 'خامس', 'سادس'],
+            'إعدادي': ['أول', 'ثاني', 'ثالث'],
+            'ثانوي': ['أول', 'ثاني', 'ثالث']
+        },
         maxPreferences: 0,
         formTitle: 'School Admission Application',
         formTitleAr: 'طلب التقديم للمدارس',

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  getPaginatedEntries, updateComplaint, updateJobApplication, updateAdmission, getJobApplicationDetails, getDashboardStats, deleteEntry,
+  getPaginatedEntries, updateComplaint, updateJobApplication, updateAdmission, getAdmissionDetail, getJobApplicationDetails, getDashboardStats, deleteEntry,
   saveNews as apiSaveNews, deleteNews as apiDeleteNews,
   saveSchool as apiSaveSchool, deleteSchool as apiDeleteSchool,
   saveJob as apiSaveJob, deleteJob as apiDeleteJob,
@@ -493,6 +493,20 @@ const AdmissionModal: React.FC<{
   const [acceptedSchool, setAcceptedSchool] = useState(admission.acceptedSchool || '');
   const [adminNotes, setAdminNotes] = useState(admission.adminNotes || '');
   const [saving, setSaving] = useState(false);
+  const [documents, setDocuments] = useState<{ name: string; fileName: string; path: string }[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await getAdmissionDetail(admission.id);
+        if (!cancelled && res.data?.documents) setDocuments(res.data.documents);
+      } catch {}
+      if (!cancelled) setLoadingDocs(false);
+    })();
+    return () => { cancelled = true; };
+  }, [admission.id]);
 
   const statusColors: Record<string, { bg: string; color: string }> = {
     'Pending':      { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b' },
@@ -553,6 +567,37 @@ const AdmissionModal: React.FC<{
             </ol>
           </div>
         )}
+
+        {/* Documents */}
+        <div style={{ background: 'var(--surface2)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
+          <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>{u.documents}</p>
+          {loadingDocs ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 0' }}>
+              <div style={{ width: 16, height: 16, border: '2px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin" />
+              <span style={{ fontSize: 12, color: 'var(--text2)' }}>{lang === 'ar' ? 'جاري التحميل...' : 'Loading...'}</span>
+            </div>
+          ) : documents.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {documents.map((doc, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface)', borderRadius: 8, padding: '8px 12px', border: '1px solid var(--border)' }}>
+                  <div>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>{doc.name}</p>
+                    <p style={{ fontSize: 11, color: 'var(--text2)' }}>{doc.fileName}</p>
+                  </div>
+                  {doc.path ? (
+                    <a href={doc.path} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent)', textDecoration: 'none', padding: '4px 10px', borderRadius: 6, background: 'rgba(99,102,241,0.08)' }}>
+                      {lang === 'ar' ? 'عرض' : 'View'}
+                    </a>
+                  ) : (
+                    <span style={{ fontSize: 11, color: 'var(--text2)', fontStyle: 'italic' }}>{lang === 'ar' ? 'غير متوفر' : 'N/A'}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ fontSize: 12, color: 'var(--text2)', fontStyle: 'italic' }}>{u.noDocuments}</p>
+          )}
+        </div>
 
         {/* Notes from applicant */}
         {admission.notes && (
@@ -2431,10 +2476,13 @@ const Dashboard: React.FC = () => {
                       {(admissionSettings?.requiredDocuments || []).map((doc: string, i: number) => (
                         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <input value={doc} onChange={e => setAdmissionSettings((p: any) => { const docs = [...(p.requiredDocuments || [])]; docs[i] = e.target.value; return { ...p, requiredDocuments: docs }; })} className="dash-input" style={{ flex: 1, fontSize: 12 }} />
+                          <button className="dash-icon-btn" disabled={!doc.trim()} onClick={() => setAdmissionSettings((p: any) => ({ ...p, requiredDocuments: [...(p.requiredDocuments || []), ''] }))} title={u.addDocument}><Plus style={{ width: 13, height: 13 }} /></button>
                           <button className="dash-icon-btn" onClick={() => setAdmissionSettings((p: any) => { const docs = [...(p.requiredDocuments || [])]; docs.splice(i, 1); return { ...p, requiredDocuments: docs }; })}><X style={{ width: 13, height: 13, color: '#ef4444' }} /></button>
                         </div>
                       ))}
-                      <button className="dash-btn dash-btn-ghost" style={{ fontSize: 12, justifyContent: 'flex-start' }} onClick={() => setAdmissionSettings((p: any) => ({ ...p, requiredDocuments: [...(p.requiredDocuments || []), ''] }))}><Plus style={{ width: 13, height: 13 }} />{u.addDocument}</button>
+                      {(admissionSettings?.requiredDocuments || []).length === 0 && (
+                        <button className="dash-btn dash-btn-ghost" style={{ fontSize: 12, justifyContent: 'flex-start' }} onClick={() => setAdmissionSettings((p: any) => ({ ...p, requiredDocuments: [''] }))}><Plus style={{ width: 13, height: 13 }} />{u.addDocument}</button>
+                      )}
                     </div>
                   </div>
                   {/* Grade Stages */}
@@ -2443,28 +2491,39 @@ const Dashboard: React.FC = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                       {(admissionSettings?.gradeStages || []).map((stage: string, i: number) => (
                         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <input value={stage} onChange={e => setAdmissionSettings((p: any) => { const arr = [...(p.gradeStages || [])]; arr[i] = e.target.value; return { ...p, gradeStages: arr }; })} className="dash-input" style={{ flex: 1, fontSize: 12 }} />
-                          <button className="dash-icon-btn" onClick={() => setAdmissionSettings((p: any) => { const arr = [...(p.gradeStages || [])]; arr.splice(i, 1); return { ...p, gradeStages: arr }; })}><X style={{ width: 13, height: 13, color: '#ef4444' }} /></button>
+                          <input value={stage} onChange={e => setAdmissionSettings((p: any) => { const arr = [...(p.gradeStages || [])]; const oldName = arr[i]; const newName = e.target.value; arr[i] = newName; const map = { ...(p.gradeClassesByStage || {}) }; if (oldName !== newName && map[oldName] !== undefined) { map[newName] = map[oldName]; delete map[oldName]; } return { ...p, gradeStages: arr, gradeClassesByStage: map }; })} className="dash-input" style={{ flex: 1, fontSize: 12 }} />
+                          <button className="dash-icon-btn" disabled={!stage.trim()} onClick={() => setAdmissionSettings((p: any) => ({ ...p, gradeStages: [...(p.gradeStages || []), ''], gradeClassesByStage: { ...(p.gradeClassesByStage || {}), '': [] } }))} title={u.addStage}><Plus style={{ width: 13, height: 13 }} /></button>
+                          <button className="dash-icon-btn" onClick={() => setAdmissionSettings((p: any) => { const arr = [...(p.gradeStages || [])]; const oldStage = arr[i]; arr.splice(i, 1); const newMap = { ...(p.gradeClassesByStage || {}) }; delete newMap[oldStage]; return { ...p, gradeStages: arr, gradeClassesByStage: newMap }; })}><X style={{ width: 13, height: 13, color: '#ef4444' }} /></button>
                         </div>
                       ))}
-                      <button className="dash-btn dash-btn-ghost" style={{ fontSize: 12, justifyContent: 'flex-start' }} onClick={() => setAdmissionSettings((p: any) => ({ ...p, gradeStages: [...(p.gradeStages || []), ''] }))}><Plus style={{ width: 13, height: 13 }} />{u.addStage}</button>
-                    </div>
-                  </div>
-                  {/* Grade Classes */}
-                  <div>
-                    <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>{u.gradeClasses}</p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {(admissionSettings?.gradeClasses || []).map((cls: string, i: number) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <input value={cls} onChange={e => setAdmissionSettings((p: any) => { const arr = [...(p.gradeClasses || [])]; arr[i] = e.target.value; return { ...p, gradeClasses: arr }; })} className="dash-input" style={{ flex: 1, fontSize: 12 }} />
-                          <button className="dash-icon-btn" onClick={() => setAdmissionSettings((p: any) => { const arr = [...(p.gradeClasses || [])]; arr.splice(i, 1); return { ...p, gradeClasses: arr }; })}><X style={{ width: 13, height: 13, color: '#ef4444' }} /></button>
-                        </div>
-                      ))}
-                      <button className="dash-btn dash-btn-ghost" style={{ fontSize: 12, justifyContent: 'flex-start' }} onClick={() => setAdmissionSettings((p: any) => ({ ...p, gradeClasses: [...(p.gradeClasses || []), ''] }))}><Plus style={{ width: 13, height: 13 }} />{u.addClass}</button>
+                      {(admissionSettings?.gradeStages || []).length === 0 && (
+                        <button className="dash-btn dash-btn-ghost" style={{ fontSize: 12, justifyContent: 'flex-start' }} onClick={() => setAdmissionSettings((p: any) => ({ ...p, gradeStages: [''], gradeClassesByStage: { '': [] } }))}><Plus style={{ width: 13, height: 13 }} />{u.addStage}</button>
+                      )}
                     </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 8 }}>
+                {/* Grade Classes by Stage */}
+                <div style={{ marginBottom: 16 }}>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>{u.gradeClasses}</p>
+                  {(admissionSettings?.gradeStages || []).map((stage: string) => (
+                    <div key={stage} style={{ background: 'var(--surface2)', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>{stage || (lang === 'ar' ? 'مرحلة جديدة' : 'New Stage')}</p>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {((admissionSettings?.gradeClassesByStage || {})[stage] || []).map((cls: string, i: number) => (
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <input value={cls} onChange={e => setAdmissionSettings((p: any) => { const map = { ...(p.gradeClassesByStage || {}) }; const arr = [...(map[stage] || [])]; arr[i] = e.target.value; map[stage] = arr; return { ...p, gradeClassesByStage: map }; })} className="dash-input" style={{ flex: 1, fontSize: 11 }} />
+                            <button className="dash-icon-btn" disabled={!cls.trim()} onClick={() => setAdmissionSettings((p: any) => { const map = { ...(p.gradeClassesByStage || {}) }; map[stage] = [...(map[stage] || []), '']; return { ...p, gradeClassesByStage: map }; })} title={u.addClass}><Plus style={{ width: 12, height: 12 }} /></button>
+                            <button className="dash-icon-btn" onClick={() => setAdmissionSettings((p: any) => { const map = { ...(p.gradeClassesByStage || {}) }; const arr = [...(map[stage] || [])]; arr.splice(i, 1); map[stage] = arr; return { ...p, gradeClassesByStage: map }; })}><X style={{ width: 12, height: 12, color: '#ef4444' }} /></button>
+                          </div>
+                        ))}
+                        {((admissionSettings?.gradeClassesByStage || {})[stage] || []).length === 0 && (
+                          <button className="dash-btn dash-btn-ghost" style={{ fontSize: 11, justifyContent: 'flex-start' }} onClick={() => setAdmissionSettings((p: any) => { const map = { ...(p.gradeClassesByStage || {}) }; map[stage] = ['']; return { ...p, gradeClassesByStage: map }; })}><Plus style={{ width: 12, height: 12 }} />{u.addClass}</button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
                   <button className="dash-btn dash-btn-primary" onClick={() => { updateData('admissionSettings', admissionSettings); showToast(u.admissionSaved); }}><Save style={{ width: 14, height: 14 }} />{u.save}</button>
                 </div>
               </div>

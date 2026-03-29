@@ -325,17 +325,32 @@ try {
                 'galleryImages' => $settings['galleryImages'] ?? [],
                 'contactData' => $settings['contactData'] ?? new stdClass(),
                 'formSettings' => $settings['formSettings'] ?? new stdClass(),
-                'admissionSettings' => $settings['admissionSettings'] ?? [
-                    'isOpen' => true,
-                    'requiredDocuments' => ['شهادة الميلاد', 'صورة شخصية', 'شهادة آخر سنة دراسية'],
-                    'gradeStages' => ['ابتدائي', 'إعدادي', 'ثانوي'],
-                    'gradeClasses' => ['أول', 'ثاني', 'ثالث', 'رابع', 'خامس', 'سادس'],
-                    'maxPreferences' => 0,
-                    'formTitle' => 'School Admission Application',
-                    'formTitleAr' => 'طلب التقديم للمدارس',
-                    'formDesc' => 'Fill in your details to apply for admission',
-                    'formDescAr' => 'أدخل بياناتك للتقديم على الالتحاق بالمدارس'
-                ],
+                'admissionSettings' => (function() use ($settings) {
+                    $admSettings = $settings['admissionSettings'] ?? [
+                        'isOpen' => true,
+                        'requiredDocuments' => ['شهادة الميلاد', 'صورة شخصية', 'شهادة آخر سنة دراسية'],
+                        'gradeStages' => ['ابتدائي', 'إعدادي', 'ثانوي'],
+                        'gradeClassesByStage' => [
+                            'ابتدائي' => ['أول', 'ثاني', 'ثالث', 'رابع', 'خامس', 'سادس'],
+                            'إعدادي' => ['أول', 'ثاني', 'ثالث'],
+                            'ثانوي' => ['أول', 'ثاني', 'ثالث']
+                        ],
+                        'maxPreferences' => 0,
+                        'formTitle' => 'School Admission Application',
+                        'formTitleAr' => 'طلب التقديم للمدارس',
+                        'formDesc' => 'Fill in your details to apply for admission',
+                        'formDescAr' => 'أدخل بياناتك للتقديم على الالتحاق بالمدارس'
+                    ];
+                    // Auto-migrate old gradeClasses to gradeClassesByStage
+                    if (isset($admSettings['gradeClasses']) && !isset($admSettings['gradeClassesByStage'])) {
+                        $admSettings['gradeClassesByStage'] = [];
+                        foreach ($admSettings['gradeStages'] ?? [] as $stage) {
+                            $admSettings['gradeClassesByStage'][$stage] = $admSettings['gradeClasses'];
+                        }
+                        unset($admSettings['gradeClasses']);
+                    }
+                    return $admSettings;
+                })(),
             ];
 
             $jsonOut = json_encode(["status" => "success", "data" => $response]);
@@ -861,7 +876,7 @@ try {
 
             // Documents: actual files via $_FILES['documents']
             $savedDocs = [];
-            $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+            $allowedMimes = ['image/jpeg', 'application/pdf'];
             $maxFileSize = 5 * 1024 * 1024; // 5 MB
             $uploadDir = __DIR__ . '/uploads/';
             if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
@@ -971,6 +986,20 @@ try {
                     'gradeStage'    => $found['gradeStage'] ?? '',
                 ]]);
             }
+            break;
+
+        case 'get_admission_detail':
+            $id = $_GET['id'] ?? '';
+            if (!$id) throw new Exception("Admission ID is required");
+            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'admissions'");
+            $row = $stmt->fetch();
+            $admissions = $row ? json_decode($row['setting_value'], true) : [];
+            $found = null;
+            foreach ($admissions as $a) {
+                if (($a['id'] ?? '') === $id) { $found = $a; break; }
+            }
+            if (!$found) throw new Exception("Admission not found");
+            echo json_encode(["status" => "success", "data" => $found]);
             break;
 
         case 'update_admission':

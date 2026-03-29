@@ -94,9 +94,9 @@ const Admissions: React.FC = () => {
   const [docError, setDocError] = useState<string | null>(null);
 
   const handleDocUpload = useCallback(async (docIndex: number, file: File) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    const allowedTypes = ['image/jpeg', 'application/pdf'];
     if (!allowedTypes.includes(file.type)) {
-      setDocError(lang === 'ar' ? 'نوع الملف غير مدعوم (صور أو PDF فقط)' : 'Unsupported file type (images or PDF only)');
+      setDocError(lang === 'ar' ? 'نوع الملف غير مدعوم — يُسمح فقط بملفات JPEG أو PDF' : 'Unsupported file type — only JPEG images or PDF files are allowed');
       return;
     }
     if (file.size > MAX_FILE_SIZE) {
@@ -134,6 +134,11 @@ const Admissions: React.FC = () => {
       const res = await submitAdmission({ ...payload, documents: documents.filter(d => d.file) });
       setAdmissionId(res.data?.id || null);
       setSubmitted(true);
+      setFormData({ studentName: '', studentDOB: '', studentNationalId: '', gradeStage: '', gradeClass: '', parentName: '', parentPhone: '', parentEmail: '', notes: '' });
+      setPreferences([]);
+      setDocuments((admSettings?.requiredDocuments || []).map((name: string) => ({ name, fileName: '' })));
+      setErrors({});
+      setDocError(null);
     } catch (err: any) {
       setSubmitError(lang === 'ar' ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى.' : err.message || 'Failed to submit application.');
     } finally {
@@ -147,7 +152,12 @@ const Admissions: React.FC = () => {
   const labelClass = `block font-bold text-slate-700 ${isRTL ? 'text-sm' : 'text-xs uppercase tracking-wider'} mb-2`;
 
   const gradeStages = admSettings?.gradeStages || ['ابتدائي', 'إعدادي', 'ثانوي'];
-  const gradeClasses = admSettings?.gradeClasses || ['أول', 'ثاني', 'ثالث', 'رابع', 'خامس', 'سادس'];
+  const gradeClassesByStage = admSettings?.gradeClassesByStage || {
+    'ابتدائي': ['أول', 'ثاني', 'ثالث', 'رابع', 'خامس', 'سادس'],
+    'إعدادي': ['أول', 'ثاني', 'ثالث'],
+    'ثانوي': ['أول', 'ثاني', 'ثالث']
+  };
+  const gradeClasses = formData.gradeStage ? (gradeClassesByStage[formData.gradeStage] || []) : [];
   const isOpen = admSettings?.isOpen !== false;
 
   const availableSchools = schools.filter(s => !preferences.some(p => p.schoolId === (s as any).id));
@@ -392,6 +402,9 @@ const Admissions: React.FC = () => {
                           <h4 className="text-lg font-bold text-[#1e3a8a] border-b border-blue-100 pb-2">
                             {lang === 'ar' ? 'المستندات المطلوبة' : 'Required Documents'}
                           </h4>
+                          <p className="text-xs text-slate-500 font-semibold">
+                            {lang === 'ar' ? 'الصيغ المقبولة: JPEG أو PDF فقط — الحد الأقصى 5 ميجابايت لكل ملف' : 'Accepted formats: JPEG or PDF only — max 5 MB per file'}
+                          </p>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {documents.map((doc, idx) => (
                               <div key={idx} className="space-y-1">
@@ -399,7 +412,7 @@ const Admissions: React.FC = () => {
                                 <label className={`flex items-center gap-3 cursor-pointer border-2 ${doc.fileName ? 'border-green-200 bg-green-50' : 'border-dashed border-slate-200 bg-slate-50'} rounded-xl px-4 py-3 hover:border-[#1e3a8a] transition-all`}>
                                   <input
                                     type="file"
-                                    accept="image/*,application/pdf"
+                                    accept="image/jpeg,.jpg,.jpeg,application/pdf,.pdf"
                                     className="hidden"
                                     onChange={e => { if (e.target.files?.[0]) handleDocUpload(idx, e.target.files[0]); }}
                                   />

@@ -178,6 +178,12 @@ export const submitAdmission = async (admissionData: Record<string, any>): Promi
     return data;
 };
 
+export const getAdmissionDetail = async (id: string): Promise<ApiResponse> => {
+    const { data } = await apiClient.get<ApiResponse>(`?action=get_admission_detail&id=${id}`);
+    if (data.status !== 'success') throw new Error(data.message || 'Failed to fetch admission detail');
+    return data;
+};
+
 export const getAdmissionStatus = async (admissionId: string): Promise<ApiResponse> => {
     const { data } = await apiClient.get<ApiResponse>(`?action=get_admission_status&admissionId=${admissionId}`);
     return data;
