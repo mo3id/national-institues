@@ -3,7 +3,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
 import { DashNewsItem, DashSchool, DashJob, DashAlumni, HeroSlide } from './types';
 import { CustomSelect, CustomMultiSelect, ImageUpload, CustomDatePicker } from '@/components/common/FormControls';
-import { getDashNewsSchema, getDashSchoolSchema, getDashJobSchema } from '@/utils/validations';
+import { getDashNewsSchema, getDashSchoolSchema, getDashJobSchema, getDashAlumniSchema } from '@/utils/validations';
 import Save from 'lucide-react/dist/esm/icons/save';
 import X from 'lucide-react/dist/esm/icons/x';
 import Plus from 'lucide-react/dist/esm/icons/plus';
@@ -565,36 +565,66 @@ export const EditJobForm: React.FC<EditJobProps> = ({ job, lang, onSave, onCance
 // ── Edit Alumni ───────────────────────────────────────────────────────────────
 export const EditAlumniForm: React.FC<{ alumni: DashAlumni; lang: Lang; onSave: (a: DashAlumni) => void; onCancel: () => void }> = ({ alumni, lang, onSave, onCancel }) => {
     const u = UI[lang];
+    const { data: siteData } = useSiteData();
     const [d, setD] = useState<Partial<DashAlumni>>({ ...alumni });
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const currentYear = new Date().getFullYear();
+
+    const schoolOptions = (siteData.schools || []).map((s: any) => ({
+        value: s.name || '',
+        label: lang === 'ar' ? (s.nameAr || s.name) : s.name,
+        nameAr: s.nameAr || s.name
+    }));
+
+    const requiredMark = <span style={{ color: '#ef4444', marginLeft: 2 }}>*</span>;
 
     return (
         <form className="form-grid" noValidate onSubmit={e => {
             e.preventDefault();
+            const res = getDashAlumniSchema().safeParse(d);
+            if (!res.success) {
+                const errs: Record<string, string> = {};
+                res.error.issues.forEach(i => errs[i.path[0] as string] = i.message);
+                setErrors(errs);
+                return;
+            }
+            setErrors({});
             onSave(d as DashAlumni);
         }}>
             <div className="form-col">
-                <label className="dash-label">{u.nameEn || 'Name'} (EN)</label>
-                <input className="dash-input" value={d.name || ''} onChange={e => setD(p => ({ ...p, name: e.target.value }))} />
+                <label className="dash-label">{u.nameEn || 'Name'} {requiredMark}</label>
+                <input className={`dash-input ${errors.name ? 'border-red-500' : ''}`} value={d.name || ''} onChange={e => { setD(p => ({ ...p, name: e.target.value })); if (errors.name) setErrors(p => ({ ...p, name: '' })) }} />
+                {errors.name && <span className="text-red-500 text-xs mt-1 block">{errors.name}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.nameAr || 'الاسم'} (AR)</label>
                 <input className="dash-input" dir="rtl" value={d.nameAr || ''} onChange={e => setD(p => ({ ...p, nameAr: e.target.value }))} />
             </div>
             <div className="form-full">
-                <ImageUpload label={u.alumniImage || 'Alumni Photo'} value={d.image || ''} onChange={val => setD(p => ({ ...p, image: val }))} />
+                <ImageUpload label={`${u.alumniImage || 'Alumni Photo'} *`} value={d.image || ''} onChange={val => { setD(p => ({ ...p, image: val })); if (errors.image) setErrors(p => ({ ...p, image: '' })) }} />
+                {errors.image && <span className="text-red-500 text-xs mt-1 block">{errors.image}</span>}
             </div>
             <div className="form-col">
-                <label className="dash-label">{u.schoolName || 'School'} (EN)</label>
-                <input className="dash-input" value={d.school || ''} onChange={e => setD(p => ({ ...p, school: e.target.value }))} />
+                <label className="dash-label">{u.schoolName || 'School'} {requiredMark}</label>
+                <div className={errors.school ? 'border border-red-500 rounded' : ''}>
+                    <CustomSelect
+                        value={d.school || ''}
+                        placeholder={lang === 'ar' ? 'اختر المدرسة...' : 'Select school...'}
+                        onChange={val => {
+                            const sch = schoolOptions.find(s => s.value === val);
+                            setD(p => ({ ...p, school: val, schoolAr: sch?.nameAr || val }));
+                            if (errors.school) setErrors(p => ({ ...p, school: '' }));
+                        }}
+                        options={schoolOptions}
+                    />
+                </div>
+                {errors.school && <span className="text-red-500 text-xs mt-1 block">{errors.school}</span>}
             </div>
             <div className="form-col">
-                <label className="dash-label">{u.schoolName || 'المدرسة'} (AR)</label>
-                <input className="dash-input" dir="rtl" value={d.schoolAr || ''} onChange={e => setD(p => ({ ...p, schoolAr: e.target.value }))} />
-            </div>
-            <div className="form-col">
-                <label className="dash-label">{u.graduationYear}</label>
-                <input className="dash-input" value={d.graduationYear || ''} onChange={e => setD(p => ({ ...p, graduationYear: e.target.value }))} placeholder="2024" />
+                <label className="dash-label">{u.graduationYear} {requiredMark}</label>
+                <input type="number" className={`dash-input ${errors.graduationYear ? 'border-red-500' : ''}`} value={d.graduationYear || ''} onChange={e => { setD(p => ({ ...p, graduationYear: e.target.value })); if (errors.graduationYear) setErrors(p => ({ ...p, graduationYear: '' })) }} placeholder="2024" min="1950" max={currentYear} />
+                {errors.graduationYear && <span className="text-red-500 text-xs mt-1 block">{errors.graduationYear}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.degree} (EN)</label>
@@ -630,11 +660,13 @@ export const EditAlumniForm: React.FC<{ alumni: DashAlumni; lang: Lang; onSave: 
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.linkedin}</label>
-                <input className="dash-input" value={d.linkedin || ''} onChange={e => setD(p => ({ ...p, linkedin: e.target.value }))} placeholder="https://linkedin.com/in/..." />
+                <input className={`dash-input ${errors.linkedin ? 'border-red-500' : ''}`} value={d.linkedin || ''} onChange={e => { setD(p => ({ ...p, linkedin: e.target.value })); if (errors.linkedin) setErrors(p => ({ ...p, linkedin: '' })) }} placeholder="https://linkedin.com/in/..." />
+                {errors.linkedin && <span className="text-red-500 text-xs mt-1 block">{errors.linkedin}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.twitter}</label>
-                <input className="dash-input" value={d.twitter || ''} onChange={e => setD(p => ({ ...p, twitter: e.target.value }))} placeholder="https://twitter.com/..." />
+                <input className={`dash-input ${errors.twitter ? 'border-red-500' : ''}`} value={d.twitter || ''} onChange={e => { setD(p => ({ ...p, twitter: e.target.value })); if (errors.twitter) setErrors(p => ({ ...p, twitter: '' })) }} placeholder="https://x.com/..." />
+                {errors.twitter && <span className="text-red-500 text-xs mt-1 block">{errors.twitter}</span>}
             </div>
             <div className="form-col">
                 <label className="dash-label">{u.featured || 'Featured'}</label>

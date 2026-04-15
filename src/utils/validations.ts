@@ -115,23 +115,30 @@ export const getDashJobSchema = () => z.object({
 }).refine(d => d.title || d.titleAr, { message: 'Title is required', path: ['title'] })
     .refine(d => d.description || d.descriptionAr, { message: 'Description is required', path: ['description'] });
 
-export const getDashAlumniSchema = () => z.object({
-    name: z.string().optional().nullish(),
-    nameAr: z.string().optional().nullish(),
-    image: z.string().optional().nullish(),
-    school: z.string().optional().nullish(),
-    schoolAr: z.string().optional().nullish(),
-    graduationYear: z.string().optional().nullish(),
-    degree: z.string().optional().nullish(),
-    degreeAr: z.string().optional().nullish(),
-    jobTitle: z.string().optional().nullish(),
-    jobTitleAr: z.string().optional().nullish(),
-    company: z.string().optional().nullish(),
-    companyAr: z.string().optional().nullish(),
-    testimonial: z.string().optional().nullish(),
-    testimonialAr: z.string().optional().nullish(),
-    linkedin: z.string().optional().nullish(),
-    twitter: z.string().optional().nullish(),
-    featured: z.any().optional(),
-}).refine(d => d.name || d.nameAr, { message: 'Name is required in at least one language', path: ['name'] })
-    .refine(d => d.school || d.schoolAr, { message: 'School is required in at least one language', path: ['school'] });
+export const getDashAlumniSchema = () => {
+    const currentYear = new Date().getFullYear();
+    return z.object({
+        name: z.string().min(1, { message: 'Name is required' }),
+        nameAr: z.string().optional().nullish(),
+        image: z.string().min(1, { message: 'Alumni photo is required' }),
+        school: z.string().min(1, { message: 'School is required' }),
+        schoolAr: z.string().optional().nullish(),
+        graduationYear: z.string()
+            .min(1, { message: 'Graduation year is required' })
+            .refine(val => /^\d{4}$/.test(val), { message: 'Must be a valid 4-digit year' })
+            .refine(val => { const y = parseInt(val); return y >= 1950 && y <= currentYear; }, { message: `Year must be between 1950 and ${currentYear}` }),
+        degree: z.string().optional().nullish(),
+        degreeAr: z.string().optional().nullish(),
+        jobTitle: z.string().optional().nullish(),
+        jobTitleAr: z.string().optional().nullish(),
+        company: z.string().optional().nullish(),
+        companyAr: z.string().optional().nullish(),
+        testimonial: z.string().optional().nullish(),
+        testimonialAr: z.string().optional().nullish(),
+        linkedin: z.string().optional().nullish()
+            .refine(val => !val || /^https?:\/\/(www\.)?linkedin\.com\/.*/i.test(val), { message: 'Must be a valid LinkedIn URL (e.g. https://linkedin.com/in/...)' }),
+        twitter: z.string().optional().nullish()
+            .refine(val => !val || /^https?:\/\/(www\.)?(twitter\.com|x\.com)\/.*/i.test(val), { message: 'Must be a valid Twitter/X URL (e.g. https://x.com/...)' }),
+        featured: z.any().optional(),
+    });
+};
