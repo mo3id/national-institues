@@ -115,18 +115,19 @@ export const getDashJobSchema = () => z.object({
 }).refine(d => d.title || d.titleAr, { message: 'Title is required', path: ['title'] })
     .refine(d => d.description || d.descriptionAr, { message: 'Description is required', path: ['description'] });
 
-export const getDashAlumniSchema = () => {
+export const getDashAlumniSchema = (lang?: string) => {
     const currentYear = new Date().getFullYear();
+    const isAr = lang === 'ar';
     return z.object({
-        name: z.string().min(1, { message: 'Name is required' }),
+        name: z.string().optional().nullish(),
         nameAr: z.string().optional().nullish(),
-        image: z.string().min(1, { message: 'Alumni photo is required' }),
-        school: z.string().min(1, { message: 'School is required' }),
+        image: z.string().min(1, { message: isAr ? 'صورة الخريج مطلوبة' : 'Alumni photo is required' }),
+        school: z.string().min(1, { message: isAr ? 'اختر المدرسة' : 'School is required' }),
         schoolAr: z.string().optional().nullish(),
         graduationYear: z.string()
-            .min(1, { message: 'Graduation year is required' })
-            .refine(val => /^\d{4}$/.test(val), { message: 'Must be a valid 4-digit year' })
-            .refine(val => { const y = parseInt(val); return y >= 1950 && y <= currentYear; }, { message: `Year must be between 1950 and ${currentYear}` }),
+            .min(1, { message: isAr ? 'سنة التخرج مطلوبة' : 'Graduation year is required' })
+            .refine(val => /^\d{4}$/.test(val), { message: isAr ? 'يجب أن تكون السنة من 4 أرقام' : 'Must be a valid 4-digit year' })
+            .refine(val => { const y = parseInt(val); return y >= 1950 && y <= currentYear; }, { message: isAr ? `يجب أن تكون السنة بين 1950 و${currentYear}` : `Year must be between 1950 and ${currentYear}` }),
         degree: z.string().optional().nullish(),
         degreeAr: z.string().optional().nullish(),
         jobTitle: z.string().optional().nullish(),
@@ -136,9 +137,12 @@ export const getDashAlumniSchema = () => {
         testimonial: z.string().optional().nullish(),
         testimonialAr: z.string().optional().nullish(),
         linkedin: z.string().optional().nullish()
-            .refine(val => !val || /^https?:\/\/(www\.)?linkedin\.com\/.*/i.test(val), { message: 'Must be a valid LinkedIn URL (e.g. https://linkedin.com/in/...)' }),
+            .refine(val => !val || /^https?:\/\/(www\.)?linkedin\.com\/.*/i.test(val), { message: isAr ? 'يجب أن يكون رابط LinkedIn صحيحاً (مثال: https://linkedin.com/in/...)' : 'Must be a valid LinkedIn URL (e.g. https://linkedin.com/in/...)' }),
         twitter: z.string().optional().nullish()
-            .refine(val => !val || /^https?:\/\/(www\.)?(twitter\.com|x\.com)\/.*/i.test(val), { message: 'Must be a valid Twitter/X URL (e.g. https://x.com/...)' }),
+            .refine(val => !val || /^https?:\/\/(www\.)?(twitter\.com|x\.com)\/.*/i.test(val), { message: isAr ? 'يجب أن يكون رابط Twitter/X صحيحاً (مثال: https://x.com/...)' : 'Must be a valid Twitter/X URL (e.g. https://x.com/...)' }),
         featured: z.any().optional(),
+    }).refine(d => d.name?.trim() || d.nameAr?.trim(), {
+        message: isAr ? 'الاسم مطلوب (أدخل الاسم بأي لغة)' : 'Name is required (enter in at least one language)',
+        path: ['name']
     });
 };

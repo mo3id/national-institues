@@ -265,15 +265,18 @@ const AlumniProfile: React.FC = () => {
                 </ScrollReveal>
               )}
 
-              {/* Back Button */}
-              <Link
-                to="/alumni"
-                className="flex items-center justify-center gap-2 w-full py-3 bg-[#0f1115] text-white rounded-[16px] font-semibold text-[15px] hover:bg-black transition-colors"
-              >
-                <ArrowLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-                {at.backToAlumni}
-              </Link>
             </div>
+          </div>
+
+          {/* Back Button - Full Width Below Content */}
+          <div className="mt-8">
+            <Link
+              to="/alumni"
+              className="flex items-center justify-center gap-2 w-full max-w-xs mx-auto py-3.5 bg-[#0f1115] text-white rounded-[16px] font-semibold text-[15px] hover:bg-black transition-all hover:shadow-lg hover:-translate-y-0.5 duration-200"
+            >
+              <ArrowLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+              {at.backToAlumni}
+            </Link>
           </div>
         </div>
       </div>

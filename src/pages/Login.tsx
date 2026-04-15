@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -22,10 +22,41 @@ const LoginPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+    const [failedAttempts, setFailedAttempts] = useState(0);
+    const [lockedUntil, setLockedUntil] = useState<number | null>(null);
     const { login } = useAuth();
     const navigate = useNavigate();
+    const LOCKOUT_AFTER = 5;
+    const LOCKOUT_DURATION_MS = 30_000;
+
+    useEffect(() => {
+        if (!lockedUntil) return;
+        
+        const updateRemaining = () => {
+            const remaining = Math.ceil((lockedUntil - Date.now()) / 1000);
+            if (remaining <= 0) {
+                setLockedUntil(null);
+                setError('');
+                setFailedAttempts(0); // Reset attempts after lockout expires
+            } else {
+                setError(isRTL ? `تم تجاوز عدد المحاولات المسموح بها. يرجى الانتظار ${remaining} ثانية.` : `Too many failed attempts. Please wait ${remaining} seconds.`);
+            }
+        };
+
+        updateRemaining();
+        const interval = setInterval(updateRemaining, 1000);
+        return () => clearInterval(interval);
+    }, [lockedUntil, isRTL]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Check lockout
+        if (lockedUntil && Date.now() < lockedUntil) {
+            const remaining = Math.ceil((lockedUntil - Date.now()) / 1000);
+            setError(isRTL ? `تم تجاوز عدد المحاولات. يرجى الانتظار ${remaining} ثانية.` : `Too many attempts. Please wait ${remaining} seconds.`);
+            return;
+        }
 
         const result = getLoginSchema(isRTL).safeParse({ email, password });
         if (!result.success) {
@@ -46,10 +77,19 @@ const LoginPage: React.FC = () => {
         // Mock authentication
         setTimeout(() => {
             if (email === 'admin@nis.edu.eg' && password === 'admin123') {
+                setFailedAttempts(0);
+                setLockedUntil(null);
                 login();
                 navigate('/dashboard');
             } else {
-                setError(t.error);
+                const newCount = failedAttempts + 1;
+                setFailedAttempts(newCount);
+                if (newCount >= LOCKOUT_AFTER) {
+                    setLockedUntil(Date.now() + LOCKOUT_DURATION_MS);
+                    setError(isRTL ? `تم تجاوز عدد المحاولات المسموح بها. يرجى الانتظار 30 ثانية.` : `Too many failed attempts. Please wait 30 seconds.`);
+                } else {
+                    setError(t.error);
+                }
             }
             setLoading(false);
         }, 1500);
@@ -136,7 +176,7 @@ const LoginPage: React.FC = () => {
                                     <button
                                         type="submit"
                                         className="w-full h-14 bg-[#1e3a8a] hover:bg-blue-800 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-blue-900/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed group"
-                                        disabled={loading}
+                                        disabled={loading || !!lockedUntil}
                                     >
                                         {loading ? (
                                             <>

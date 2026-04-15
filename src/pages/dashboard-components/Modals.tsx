@@ -582,7 +582,7 @@ export const EditAlumniForm: React.FC<{ alumni: DashAlumni; lang: Lang; onSave: 
     return (
         <form className="form-grid" noValidate onSubmit={e => {
             e.preventDefault();
-            const res = getDashAlumniSchema().safeParse(d);
+            const res = getDashAlumniSchema(lang).safeParse(d);
             if (!res.success) {
                 const errs: Record<string, string> = {};
                 res.error.issues.forEach(i => errs[i.path[0] as string] = i.message);
@@ -590,15 +590,29 @@ export const EditAlumniForm: React.FC<{ alumni: DashAlumni; lang: Lang; onSave: 
                 return;
             }
             setErrors({});
-            onSave(d as DashAlumni);
+            // Auto-fill: if only one language entered, mirror it to the other
+            const payloadToSave = {
+                ...d,
+                name: d.name?.trim() ? d.name : d.nameAr,
+                nameAr: d.nameAr?.trim() ? d.nameAr : d.name,
+                degree: d.degree?.trim() ? d.degree : d.degreeAr,
+                degreeAr: d.degreeAr?.trim() ? d.degreeAr : d.degree,
+                jobTitle: d.jobTitle?.trim() ? d.jobTitle : d.jobTitleAr,
+                jobTitleAr: d.jobTitleAr?.trim() ? d.jobTitleAr : d.jobTitle,
+                company: d.company?.trim() ? d.company : d.companyAr,
+                companyAr: d.companyAr?.trim() ? d.companyAr : d.company,
+                testimonial: d.testimonial?.trim() ? d.testimonial : d.testimonialAr,
+                testimonialAr: d.testimonialAr?.trim() ? d.testimonialAr : d.testimonial,
+            };
+            onSave(payloadToSave as DashAlumni);
         }}>
             <div className="form-col">
-                <label className="dash-label">{u.nameEn || 'Name'} {requiredMark}</label>
+                <label className="dash-label">{lang === 'ar' ? 'الاسم (EN)' : 'Name (EN)'} {requiredMark}</label>
                 <input className={`dash-input ${errors.name ? 'border-red-500' : ''}`} value={d.name || ''} onChange={e => { setD(p => ({ ...p, name: e.target.value })); if (errors.name) setErrors(p => ({ ...p, name: '' })) }} />
                 {errors.name && <span className="text-red-500 text-xs mt-1 block">{errors.name}</span>}
             </div>
             <div className="form-col">
-                <label className="dash-label">{u.nameAr || 'الاسم'} (AR)</label>
+                <label className="dash-label">{lang === 'ar' ? 'الاسم (AR)' : 'Name (AR)'}</label>
                 <input className="dash-input" dir="rtl" value={d.nameAr || ''} onChange={e => setD(p => ({ ...p, nameAr: e.target.value }))} />
             </div>
             <div className="form-full">

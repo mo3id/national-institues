@@ -249,7 +249,7 @@ export const en = {
         password: "Secure Password",
         button: "Sign In to Dashboard",
         authenticating: "Authenticating...",
-        error: "Invalid email or password. Use admin@nis.edu.eg / admin123",
+        error: "Incorrect email or password. Please try again.",
         adminPortal: "Admin Portal"
     },
     common: {
