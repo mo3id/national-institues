@@ -723,6 +723,7 @@ const Dashboard: React.FC = () => {
   const [editNewsId, setEditNewsId] = useState<string | null>(null);
   const [addNewsOpen, setAddNewsOpen] = useState(false);
   const [editHeroId, setEditHeroId] = useState<number | null>(null);
+  const [addHeroOpen, setAddHeroOpen] = useState(false);
   const [editSchoolId, setEditSchoolId] = useState<string | null>(null);
   const [editJobId, setEditJobId] = useState<string | null>(null);
   const [addJobOpen, setAddJobOpen] = useState(false);
@@ -1074,7 +1075,28 @@ const Dashboard: React.FC = () => {
     setHero(updated);
     updateData('heroSlides', updated);
     setEditHeroId(null);
-    showToast(u.slideSaved);
+    showToast(u.slideSaved || 'Hero slide saved');
+  };
+
+  const addHeroSlide = (s: HeroSlide) => {
+    const newSlide = { ...s, id: Date.now() }; // ensure unique ID
+    const updated = [...hero, newSlide];
+    setHero(updated);
+    updateData('heroSlides', updated);
+    setAddHeroOpen(false);
+    showToast(u.slideSaved || 'Hero slide added');
+  };
+
+  const deleteHeroSlide = (id: number) => {
+    setConfirmAction({
+      message: u.deleteConfirm?.replace('{type}', lang === 'ar' ? 'هذه الشريحة' : 'this slide') || 'Are you sure you want to delete this slide?',
+      onConfirm: async () => {
+        const updated = hero.filter(h => h.id !== id);
+        setHero(updated);
+        updateData('heroSlides', updated);
+        showToast(u.deletedSuccess || 'Slide deleted', 'error');
+      }
+    });
   };
 
   const normalizeSchoolType = (type: DashSchool['type']): string[] => {
@@ -2026,6 +2048,7 @@ const Dashboard: React.FC = () => {
             <div className="section-enter">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                 <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.hero}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.heroManage}</p></div>
+                <button className="dash-btn dash-btn-primary" onClick={() => setAddHeroOpen(true)}><Plus className="w-4 h-4" />{lang === 'ar' ? 'إضافة شريحة' : 'Add Slide'}</button>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {hero.map((s, i) => (
@@ -2035,12 +2058,15 @@ const Dashboard: React.FC = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: 14, flexShrink: 0 }}>{i + 1}</div>
                         <div>
-                          <p style={{ fontWeight: 700, color: 'var(--text)', fontSize: 14 }}>{s.title}</p>
+                          <p style={{ fontWeight: 700, color: 'var(--text)', fontSize: 14 }}>{s.title || (lang === 'ar' ? '(بدون نص)' : '(No text)')}</p>
                           <p style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>{s.subtitle}</p>
                           <p style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4, maxWidth: 400 }}>{s.description}</p>
                         </div>
                       </div>
-                      <button className="dash-btn dash-btn-ghost" onClick={() => setEditHeroId(s.id)}><Pencil style={{ width: 14, height: 14 }} />{u.edit}</button>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="dash-btn dash-btn-ghost" onClick={() => setEditHeroId(s.id)}><Pencil style={{ width: 14, height: 14 }} />{u.edit}</button>
+                        <button className="dash-btn dash-btn-danger" onClick={() => deleteHeroSlide(s.id)}><Trash2 style={{ width: 14, height: 14 }} /></button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -2801,10 +2827,22 @@ const Dashboard: React.FC = () => {
 
       {editHeroId !== null && hero.find(h => String(h.id) === String(editHeroId)) && (() => {
         const s = hero.find(h => String(h.id) === String(editHeroId))!;
-        return <ModalWrap title={`${u.edit || 'Edit'} — ${(u.hero || 'Hero')} ${s.id}`} onClose={() => setEditHeroId(null)}>
+        return <ModalWrap title={`${u.edit || 'Edit'} — ${(u.hero || 'Hero')}`} onClose={() => setEditHeroId(null)}>
           <EditHeroForm slide={s} lang={lang} onSave={saveHero} onCancel={() => setEditHeroId(null)} />
         </ModalWrap>;
       })()}
+
+      {addHeroOpen && (
+        <ModalWrap title={lang === 'ar' ? 'إضافة شريحة' : 'Add Slide'} onClose={() => setAddHeroOpen(false)}>
+          <EditHeroForm 
+            slide={{ id: 0, title: '', subtitle: '', description: '', image: '' }} 
+            lang={lang} 
+            onSave={addHeroSlide} 
+            onCancel={() => setAddHeroOpen(false)} 
+          />
+        </ModalWrap>
+      )}
+
 
       {editSchoolId && schools.find(sc => String(sc.id) === String(editSchoolId)) && (() => {
         const s = schools.find(sc => String(sc.id) === String(editSchoolId))!;

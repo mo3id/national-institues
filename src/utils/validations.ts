@@ -60,7 +60,7 @@ export const getDashHeroSchema = () => z.object({
     description: z.string().optional().nullish(),
     descriptionAr: z.string().optional().nullish(),
     image: z.string().min(1, { message: 'Image is required' })
-}).refine(d => d.title || d.titleAr, { message: 'Title is required', path: ['title'] });
+});
 
 export const getDashSchoolSchema = () => z.object({
     name: z.string().optional().nullish(),
