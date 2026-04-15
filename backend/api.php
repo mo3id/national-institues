@@ -289,6 +289,17 @@ try {
                 }
             }
 
+            // Fetch alumni
+            $stmt = $pdo->query("SELECT * FROM alumni ORDER BY graduationYear DESC");
+            $alumni = $stmt->fetchAll();
+            foreach ($alumni as &$a) {
+                $a['featured'] = (bool)($a['featured'] ?? false);
+                if (!empty($a['image']) && strpos($a['image'], 'data:image') === 0) {
+                    $a['image'] = processImageField($a['image'], 'alumni_' . ($a['id'] ?? ''));
+                    $pdo->prepare("UPDATE alumni SET image = ? WHERE id = ?")->execute([$a['image'], $a['id']]);
+                }
+            }
+
             // Fetch governorates
             $stmt = $pdo->query("SELECT * FROM governorates ORDER BY name");
             $governorates = $stmt->fetchAll();
@@ -307,6 +318,7 @@ try {
                 'schools' => $schools,
                 'news' => $news,
                 'jobs' => $jobs,
+                'alumni' => $alumni,
                 'jobDepartments' => $settings['jobDepartments'] ?? [],
                 'governorates' => $governorates,
                 'heroSlides' => $settings['heroSlides'] ?? [],
@@ -678,6 +690,21 @@ try {
                 $stmt = $pdo->prepare($q);
                 $stmt->execute($params);
                 $data = $stmt->fetchAll();
+            } elseif ($type === 'alumni') {
+                $q = "SELECT * FROM alumni WHERE 1=1";
+                $params = [];
+                if ($search) {
+                    $q .= " AND (name LIKE ? OR nameAr LIKE ? OR school LIKE ? OR company LIKE ?)";
+                    $term = "%$search%";
+                    $params = [$term, $term, $term, $term];
+                }
+                $q .= " ORDER BY graduationYear DESC";
+                $stmt = $pdo->prepare($q);
+                $stmt->execute($params);
+                $data = $stmt->fetchAll();
+                foreach ($data as &$a) {
+                    $a['featured'] = (bool)($a['featured'] ?? false);
+                }
             } elseif ($type === 'jobDepartments') {
                 $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'jobDepartments'");
                 $row = $stmt->fetch();
@@ -1261,6 +1288,49 @@ try {
             
             bustCache();
             echo json_encode(["status" => "success", "message" => "Governorate deleted successfully."]);
+            break;
+
+        case 'save_alumni':
+            $a = json_decode(file_get_contents('php://input'), true);
+            if (!$a) throw new Exception("Data required");
+
+            // Convert base64 image to file path
+            $image = processImageField($a['image'] ?? '', 'alumni');
+
+            $stmt = $pdo->prepare("REPLACE INTO alumni (id, name, nameAr, image, school, schoolAr, graduationYear, degree, degreeAr, jobTitle, jobTitleAr, company, companyAr, testimonial, testimonialAr, linkedin, twitter, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([
+                $a['id'] ?? uniqid(),
+                $a['name'] ?? '',
+                $a['nameAr'] ?? ($a['name'] ?? ''),
+                $image,
+                $a['school'] ?? '',
+                $a['schoolAr'] ?? ($a['school'] ?? ''),
+                $a['graduationYear'] ?? '',
+                $a['degree'] ?? '',
+                $a['degreeAr'] ?? ($a['degree'] ?? ''),
+                $a['jobTitle'] ?? '',
+                $a['jobTitleAr'] ?? ($a['jobTitle'] ?? ''),
+                $a['company'] ?? '',
+                $a['companyAr'] ?? ($a['company'] ?? ''),
+                $a['testimonial'] ?? '',
+                $a['testimonialAr'] ?? '',
+                $a['linkedin'] ?? '',
+                $a['twitter'] ?? '',
+                isset($a['featured']) ? (int)$a['featured'] : 0
+            ]);
+            bustCache();
+            echo json_encode(["status" => "success", "message" => "Alumni saved successfully."]);
+            break;
+
+        case 'delete_alumni':
+            $id = $_GET['id'] ?? '';
+            if (!$id) throw new Exception("ID required");
+
+            $stmt = $pdo->prepare("DELETE FROM alumni WHERE id = ?");
+            $stmt->execute([$id]);
+
+            bustCache();
+            echo json_encode(["status" => "success", "message" => "Alumni deleted successfully."]);
             break;
 
         default:

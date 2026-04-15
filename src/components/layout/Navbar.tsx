@@ -34,6 +34,7 @@ const Navbar: React.FC = () => {
     { to: '/news', label: t.news || (lang === 'ar' ? 'الأخبار' : 'News'), icon: 'article' },
     { to: '/careers', label: t.careers, icon: 'work' },
     { to: '/admissions', label: t.admissions || (lang === 'ar' ? 'التقديم' : 'Admissions'), icon: 'school' },
+    { to: '/alumni', label: t.alumni || (lang === 'ar' ? 'الخريجون' : 'Alumni'), icon: 'school' },
     { to: '/complaints', label: t.feedback || (lang === 'ar' ? 'الشكاوى' : 'Complaints'), icon: 'forum' },
     { to: '/contact', label: lang === 'ar' ? 'اتصل بنا' : 'Contact Us', icon: 'call' }
   ];

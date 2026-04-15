@@ -1,4 +1,4 @@
-export type Section = 'overview' | 'news' | 'schools' | 'departments' | 'jobs' | 'recruitment' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'contact' | 'complaints' | 'contactMessages' | 'heroBackgrounds' | 'governorates' | 'admissions' | 'settings';
+export type Section = 'overview' | 'news' | 'schools' | 'departments' | 'jobs' | 'recruitment' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'contact' | 'complaints' | 'contactMessages' | 'heroBackgrounds' | 'governorates' | 'admissions' | 'alumni' | 'settings';
 export type Theme = 'light' | 'dark';
 export type Lang = 'en' | 'ar';
 
@@ -99,6 +99,27 @@ export interface DashAdmission {
     acceptedSchool?: string;
     adminNotes?: string;
     createdAt: string;
+}
+
+export interface DashAlumni {
+    id: string;
+    name: string;
+    nameAr: string;
+    image: string;
+    school: string;
+    schoolAr: string;
+    graduationYear: string;
+    degree: string;
+    degreeAr: string;
+    jobTitle: string;
+    jobTitleAr: string;
+    company: string;
+    companyAr: string;
+    testimonial?: string;
+    testimonialAr?: string;
+    linkedin?: string;
+    twitter?: string;
+    featured?: boolean;
 }
 
 export interface HeroSlide {
@@ -399,6 +420,21 @@ export const UI: Record<Lang, Record<string, string>> = {
         viewDocuments: 'View Documents',
         noDocuments: 'No documents uploaded',
         admissionId: 'Admission ID',
+        alumni: 'Alumni',
+        alumniManage: 'Browse and edit alumni profiles',
+        addAlumni: 'Add Alumni',
+        editAlumni: 'Edit Alumni',
+        alumniSaved: 'Alumni saved successfully',
+        alumniDeleted: 'Alumni deleted',
+        alumniAdded: 'New alumni added!',
+        graduationYear: 'Graduation Year',
+        degree: 'Degree',
+        jobTitle: 'Job Title',
+        company: 'Company',
+        testimonial: 'Testimonial',
+        linkedin: 'LinkedIn URL',
+        twitter: 'Twitter/X URL',
+        alumniImage: 'Alumni Photo',
     },
     ar: {
         overview: 'نظرة عامة', news: 'الأخبار', schools: 'المدارس', jobs: 'الوظائف الشاغرة',
@@ -657,6 +693,21 @@ export const UI: Record<Lang, Record<string, string>> = {
         backgroundImage: 'صورة الخلفية',
         colorMode: 'لون ثابت',
         imageMode: 'صورة',
+        alumni: 'الخريجون',
+        alumniManage: 'استعراض وتعديل بيانات الخريجين',
+        addAlumni: 'إضافة خريج',
+        editAlumni: 'تعديل بيانات خريج',
+        alumniSaved: 'تم حفظ بيانات الخريج بنجاح',
+        alumniDeleted: 'تم حذف الخريج',
+        alumniAdded: 'تمت إضافة خريج جديد!',
+        graduationYear: 'سنة التخرج',
+        degree: 'المؤهل',
+        jobTitle: 'المسمى الوظيفي',
+        company: 'الشركة',
+        testimonial: 'شهادة / كلمة',
+        linkedin: 'رابط لينكدإن',
+        twitter: 'رابط تويتر/X',
+        alumniImage: 'صورة الخريج',
     }
 };
 

@@ -258,3 +258,15 @@ export const deleteJob = async (id: string): Promise<ApiResponse> => {
     notifyUpdate();
     return data;
 };
+
+export const saveAlumni = async (alumni: any): Promise<ApiResponse> => {
+    const { data } = await apiClient.post<ApiResponse>('?action=save_alumni', alumni);
+    notifyUpdate();
+    return data;
+};
+
+export const deleteAlumni = async (id: string): Promise<ApiResponse> => {
+    const { data } = await apiClient.get<ApiResponse>(`?action=delete_alumni&id=${id}`);
+    notifyUpdate();
+    return data;
+};

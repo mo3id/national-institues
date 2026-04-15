@@ -4,7 +4,8 @@ import {
   saveNews as apiSaveNews, deleteNews as apiDeleteNews,
   saveSchool as apiSaveSchool, deleteSchool as apiDeleteSchool,
   saveJob as apiSaveJob, deleteJob as apiDeleteJob,
-  saveGovernorate, deleteGovernorate as apiDeleteGovernorate
+  saveGovernorate, deleteGovernorate as apiDeleteGovernorate,
+  saveAlumni as apiSaveAlumni, deleteAlumni as apiDeleteAlumni
 } from '@/services/api';
 import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
 import Newspaper from 'lucide-react/dist/esm/icons/newspaper';
@@ -45,10 +46,10 @@ import ChevronsLeft from 'lucide-react/dist/esm/icons/chevrons-left';
 import ChevronsRight from 'lucide-react/dist/esm/icons/chevrons-right';
 import { NEWS, SCHOOLS } from '@/constants';
 import {
-  Section, Theme, Lang, DashNewsItem, DashSchool, DashJob, DashJobApplication, DashAdmission, HeroSlide, AboutData, AdminProfile,
+  Section, Theme, Lang, DashNewsItem, DashSchool, DashJob, DashJobApplication, DashAdmission, DashAlumni, HeroSlide, AboutData, AdminProfile,
   UI, HERO_IMAGES
 } from './dashboard-components/types';
-import { ModalWrap, EditNewsForm, EditHeroForm, EditSchoolForm, EditJobForm } from './dashboard-components/Modals';
+import { ModalWrap, EditNewsForm, EditHeroForm, EditSchoolForm, EditJobForm, EditAlumniForm } from './dashboard-components/Modals';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import NISLogo from '@/components/common/NISLogo';
@@ -675,6 +676,7 @@ const Dashboard: React.FC = () => {
   const [newsList, setNewsList] = useState<DashNewsItem[]>([]);
   const [schools, setSchools] = useState<DashSchool[]>([]);
   const [jobs, setJobs] = useState<DashJob[]>([]);
+  const [alumniList, setAlumniList] = useState<DashAlumni[]>([]);
   const [departments, setDepartments] = useState<{ id: string, nameEn: string, nameAr: string }[]>([]);
   const [governorates, setGovernorates] = useState<{ id: string, name: string, nameAr: string }[]>([]);
   const [applications, setApplications] = useState<DashJobApplication[]>([]);
@@ -724,6 +726,9 @@ const Dashboard: React.FC = () => {
   const [editSchoolId, setEditSchoolId] = useState<string | null>(null);
   const [editJobId, setEditJobId] = useState<string | null>(null);
   const [addJobOpen, setAddJobOpen] = useState(false);
+  const [addAlumniOpen, setAddAlumniOpen] = useState(false);
+  const [editAlumniId, setEditAlumniId] = useState<string | null>(null);
+  const [newAlumni, setNewAlumni] = useState<Partial<DashAlumni>>({ name: '', nameAr: '', image: '', school: '', schoolAr: '', graduationYear: '', degree: '', degreeAr: '', jobTitle: '', jobTitleAr: '', company: '', companyAr: '', testimonial: '', testimonialAr: '', linkedin: '', twitter: '', featured: false });
   const [addDepartmentOpen, setAddDepartmentOpen] = useState(false);
   const [newDepartment, setNewDepartment] = useState({ nameEn: '', nameAr: '' });
   const [addGovernorateOpen, setAddGovernorateOpen] = useState(false);
@@ -764,6 +769,7 @@ const Dashboard: React.FC = () => {
   const [newsSearch, setNewsSearch] = useState('');
   const [schoolSearch, setSchoolSearch] = useState('');
   const [jobSearch, setJobSearch] = useState('');
+  const [alumniSearch, setAlumniSearch] = useState('');
   const [complaintsSearch, setComplaintsSearch] = useState('');
   const [complaintsFilterType, setComplaintsFilterType] = useState('All');
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
@@ -789,6 +795,7 @@ const Dashboard: React.FC = () => {
   const debouncedSchoolSearch = useDebounce(schoolSearch, 500);
   const debouncedNewsSearch = useDebounce(newsSearch, 500);
   const debouncedJobSearch = useDebounce(jobSearch, 500);
+  const debouncedAlumniSearch = useDebounce(alumniSearch, 500);
 
   const u = UI[lang];
   const isRTL = lang === 'ar';
@@ -852,6 +859,10 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     if (section === 'schools') fetchSchools();
   }, [section, debouncedSchoolSearch]);
+
+  useEffect(() => {
+    if (section === 'alumni') fetchAlumni();
+  }, [section, debouncedAlumniSearch]);
 
   useEffect(() => {
     if (section === 'jobs') fetchJobs();
@@ -954,6 +965,17 @@ const Dashboard: React.FC = () => {
       const res = await getPaginatedEntries({ type: 'jobs', page: 1, limit: 100, search: debouncedJobSearch });
       if (res.status === 'success') {
         setJobs(res.data.items);
+      }
+    } catch (err) { console.error(err); }
+    finally { setIsTableLoading(false); }
+  };
+
+  const fetchAlumni = async () => {
+    setIsTableLoading(true);
+    try {
+      const res = await getPaginatedEntries({ type: 'alumni', page: 1, limit: 100, search: debouncedAlumniSearch });
+      if (res.status === 'success') {
+        setAlumniList(res.data.items);
       }
     } catch (err) { console.error(err); }
     finally { setIsTableLoading(false); }
@@ -1154,6 +1176,45 @@ const Dashboard: React.FC = () => {
     });
   };
 
+  const saveAlumni = async (a: DashAlumni) => {
+    setAlumniList(prev => prev.map(al => al.id === a.id ? a : al));
+    setEditAlumniId(null);
+
+    await apiSaveAlumni(a);
+    showToast(u.alumniSaved);
+    fetchAlumni();
+  };
+
+  const addAlumni = async (a: DashAlumni) => {
+    const newEntry: DashAlumni = {
+      ...a,
+      id: String(Date.now()),
+    };
+
+    setAlumniList(prev => [newEntry, ...prev]);
+    setNewAlumni({ name: '', nameAr: '', image: '', school: '', schoolAr: '', graduationYear: '', degree: '', degreeAr: '', jobTitle: '', jobTitleAr: '', company: '', companyAr: '', testimonial: '', testimonialAr: '', linkedin: '', twitter: '', featured: false });
+    setAddAlumniOpen(false);
+    showToast(u.alumniAdded);
+
+    await apiSaveAlumni(newEntry);
+    fetchAlumni();
+  };
+
+  const deleteAlumni = (id: string) => {
+    const item = alumniList.find(a => a.id === id);
+    const name = lang === 'ar' ? (item?.nameAr || item?.name) : (item?.name || item?.nameAr);
+    setConfirmAction({
+      message: u.deleteConfirm.replace('{type}', name || (lang === 'ar' ? 'هذا الخريج' : 'this alumni')),
+      onConfirm: async () => {
+        setAlumniList(prev => prev.filter(a => a.id !== id));
+
+        await apiDeleteAlumni(id);
+        showToast(u.alumniDeleted, 'error');
+        fetchAlumni();
+      }
+    });
+  };
+
   const addJob = async (j: DashJob) => {
     const newEntry: DashJob = {
       ...j,
@@ -1307,6 +1368,7 @@ const Dashboard: React.FC = () => {
   const filteredNews = newsList;
   const filteredSchools = schools;
   const filteredJobs = jobs;
+  const filteredAlumni = alumniList;
 
   // These are now filtered on the backend
   const filteredApplications = applications;
@@ -1327,6 +1389,7 @@ const Dashboard: React.FC = () => {
     { id: 'departments', label: u.jobDepartments, icon: LayoutDashboard },
     { id: 'jobs', label: u.jobs, icon: Briefcase },
     { id: 'admissions', label: u.admissions, icon: GraduationCap },
+    { id: 'alumni', label: u.alumni, icon: GraduationCap },
     { id: 'complaints', label: u.complaints, icon: MessageSquare },
     { id: 'contact', label: u.contactSettings || 'Contact Info', icon: Phone },
     { id: 'contactMessages', label: u.contactMessages, icon: Mail },
@@ -1579,6 +1642,50 @@ const Dashboard: React.FC = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Alumni ── */}
+          {section === 'alumni' && (
+            <div className="section-enter">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.alumni}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.alumniManage}</p></div>
+                <button className="dash-btn dash-btn-primary" onClick={() => setAddAlumniOpen(true)}><Plus style={{ width: 15, height: 15 }} />{u.addAlumni}</button>
+              </div>
+              <div style={{ position: 'relative', marginBottom: 18, maxWidth: 320 }}>
+                <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 14, right: isRTL ? 14 : 'auto', top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: 'var(--text2)' }} />
+                <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={alumniSearch} onChange={e => setAlumniSearch(e.target.value)} />
+              </div>
+              <div style={{ position: 'relative' }}>
+                {isTableLoading && (
+                  <div className="table-loader" style={{ borderRadius: 24 }}>
+                    <div style={{ width: 32, height: 32, border: '4px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin"></div>
+                  </div>
+                )}
+                <div className="school-grid">
+                  {filteredAlumni.map(a => (
+                    <div key={a.id} className="school-card">
+                      <img src={a.image || undefined} style={{ width: 52, height: 52, borderRadius: 12, objectFit: 'cover', background: 'var(--surface2)', flexShrink: 0 }} alt={a.name} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{a.name}</p>
+                        <p style={{ fontSize: 11, color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}><GraduationCap style={{ width: 11, height: 11 }} />{a.school} • {a.graduationYear}</p>
+                        {a.jobTitle && <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2 }}>{a.jobTitle}{a.company ? ` @ ${a.company}` : ''}</p>}
+                        {a.featured && <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(245,158,11,0.1)', color: '#d97706', marginTop: 4 }}>★ {u.featured}</span>}
+                      </div>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        <button className="dash-icon-btn" onClick={() => setEditAlumniId(a.id)} title={u.edit}><Pencil style={{ width: 15, height: 15, color: 'var(--accent)' }} /></button>
+                        <button className="dash-icon-btn" onClick={() => deleteAlumni(a.id)} title={u.delete}><Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} /></button>
+                      </div>
+                    </div>
+                  ))}
+                  {filteredAlumni.length === 0 && (
+                    <div style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)', gridColumn: '1 / -1' }}>
+                      <GraduationCap style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} />
+                      <p style={{ fontWeight: 600 }}>{u.noResults}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -2715,6 +2822,19 @@ const Dashboard: React.FC = () => {
       {addSchoolOpen && (
         <ModalWrap title={u.addSchoolTitle} onClose={() => setAddSchoolOpen(false)}>
           <EditSchoolForm school={newSchool as DashSchool} lang={lang} onSave={addSchool} onCancel={() => setAddSchoolOpen(false)} />
+        </ModalWrap>
+      )}
+
+      {editAlumniId && alumniList.find(a => String(a.id) === String(editAlumniId)) && (() => {
+        const a = alumniList.find(a => String(a.id) === String(editAlumniId))!;
+        return <ModalWrap title={u.editAlumni} onClose={() => setEditAlumniId(null)}>
+          <EditAlumniForm alumni={a} lang={lang} onSave={saveAlumni} onCancel={() => setEditAlumniId(null)} />
+        </ModalWrap>;
+      })()}
+
+      {addAlumniOpen && (
+        <ModalWrap title={u.addAlumni} onClose={() => setAddAlumniOpen(false)}>
+          <EditAlumniForm alumni={newAlumni as DashAlumni} lang={lang} onSave={addAlumni} onCancel={() => setAddAlumniOpen(false)} />
         </ModalWrap>
       )}
 

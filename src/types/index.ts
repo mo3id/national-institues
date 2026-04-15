@@ -75,6 +75,27 @@ export interface JobApplication {
   notes?: string;
 }
 
+export interface Alumni {
+  id: string;
+  name: string;
+  nameAr: string;
+  image: string;
+  school: string;
+  schoolAr: string;
+  graduationYear: string;
+  degree: string;
+  degreeAr: string;
+  jobTitle: string;
+  jobTitleAr: string;
+  company: string;
+  companyAr: string;
+  testimonial?: string;
+  testimonialAr?: string;
+  linkedin?: string;
+  twitter?: string;
+  featured?: boolean;
+}
+
 export enum ThinkingLevel {
   LOW = 'LOW',
   MEDIUM = 'MEDIUM',

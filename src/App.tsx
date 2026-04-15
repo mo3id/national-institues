@@ -25,6 +25,8 @@ const NewsDetail = lazy(() => import('./pages/NewsDetail'));
 const Complaints = lazy(() => import('./pages/Complaints'));
 const ComplaintInquiry = lazy(() => import('./pages/ComplaintInquiry'));
 const Admissions = lazy(() => import('./pages/Admissions'));
+const Alumni = lazy(() => import('./pages/Alumni'));
+const AlumniProfile = lazy(() => import('./pages/AlumniProfile'));
 const AdmissionInquiry = lazy(() => import('./pages/AdmissionInquiry'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Login = lazy(() => import('./pages/Login'));
@@ -55,7 +57,8 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isNoPadding = noPadPaths.includes(location.pathname) ||
     location.pathname.startsWith('/schools') ||
     location.pathname.startsWith('/careers') ||
-    location.pathname.startsWith('/news');
+    location.pathname.startsWith('/news') ||
+    location.pathname.startsWith('/alumni');
 
   return (
     <div className="flex flex-col min-h-screen bg-[#fafcff]">
@@ -103,6 +106,8 @@ const App: React.FC = () => {
                           <Route path="/news/:id" element={<NewsDetail />} />
                           <Route path="/schools" element={<Schools />} />
                           <Route path="/schools/:id" element={<SchoolProfile />} />
+                          <Route path="/alumni" element={<Alumni />} />
+                          <Route path="/alumni/:id" element={<AlumniProfile />} />
                           <Route path="/ai-studio" element={<AIStudio />} />
                           <Route path="/careers" element={<Jobs />} />
                           <Route path="/complaints" element={<Complaints />} />

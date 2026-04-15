@@ -114,3 +114,24 @@ export const getDashJobSchema = () => z.object({
     image: z.string().min(1, { message: 'Image is required' }).optional()
 }).refine(d => d.title || d.titleAr, { message: 'Title is required', path: ['title'] })
     .refine(d => d.description || d.descriptionAr, { message: 'Description is required', path: ['description'] });
+
+export const getDashAlumniSchema = () => z.object({
+    name: z.string().optional().nullish(),
+    nameAr: z.string().optional().nullish(),
+    image: z.string().optional().nullish(),
+    school: z.string().optional().nullish(),
+    schoolAr: z.string().optional().nullish(),
+    graduationYear: z.string().optional().nullish(),
+    degree: z.string().optional().nullish(),
+    degreeAr: z.string().optional().nullish(),
+    jobTitle: z.string().optional().nullish(),
+    jobTitleAr: z.string().optional().nullish(),
+    company: z.string().optional().nullish(),
+    companyAr: z.string().optional().nullish(),
+    testimonial: z.string().optional().nullish(),
+    testimonialAr: z.string().optional().nullish(),
+    linkedin: z.string().optional().nullish(),
+    twitter: z.string().optional().nullish(),
+    featured: z.any().optional(),
+}).refine(d => d.name || d.nameAr, { message: 'Name is required in at least one language', path: ['name'] })
+    .refine(d => d.school || d.schoolAr, { message: 'School is required in at least one language', path: ['school'] });

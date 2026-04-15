@@ -86,6 +86,7 @@ function buildMergedData(apiData: SiteData): SiteData {
     merged.schools = pick('schools', true);
     merged.news = pick('news', true);
     merged.jobs = pick('jobs', true);
+    merged.alumni = pick('alumni', true);
     merged.jobDepartments = pick('jobDepartments', true);
     merged.governorates = pick('governorates', true);
     merged.heroSlides = pick('heroSlides', true);

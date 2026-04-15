@@ -8,6 +8,7 @@ export const en = {
         aiStudio: "AI Studio",
         feedback: "Feedback",
         admissions: "Admissions",
+        alumni: "Alumni",
         menu: "Menu",
         mainMenu: "Main Menu",
         contactUs: "Contact Us"
@@ -267,5 +268,20 @@ export const en = {
         prev: "Previous",
         next: "Next",
         selectDate: "Select Date"
+    },
+    alumni: {
+        title: "Our Alumni",
+        subtitle: "Meet the graduates who are making a difference worldwide.",
+        searchPlaceholder: "Search alumni by name, school, or company...",
+        filterSchool: "All Schools",
+        filterYear: "All Years",
+        noResults: "No alumni found matching your criteria.",
+        clearFilters: "Clear Filters",
+        viewProfile: "View Profile",
+        graduationYear: "Graduation Year",
+        degree: "Degree",
+        currentPosition: "Current Position",
+        testimonial: "Testimonial",
+        backToAlumni: "Back to Alumni"
     }
 };

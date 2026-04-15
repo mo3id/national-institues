@@ -14,12 +14,22 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
         },
+        '/uploads': {
+          target: 'https://gani.edu.eg',
+          changeOrigin: true,
+          secure: false,
+        },
       },
     },
     preview: {
       port: 4173,
       proxy: {
         '/api.php': {
+          target: 'https://gani.edu.eg',
+          changeOrigin: true,
+          secure: false,
+        },
+        '/uploads': {
           target: 'https://gani.edu.eg',
           changeOrigin: true,
           secure: false,

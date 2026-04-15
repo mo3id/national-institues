@@ -62,6 +62,27 @@ CREATE TABLE IF NOT EXISTS jobs (
     image TEXT
 );
 
+CREATE TABLE IF NOT EXISTS alumni (
+    id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    nameAr VARCHAR(255) NOT NULL,
+    image TEXT,
+    school VARCHAR(255),
+    schoolAr VARCHAR(255),
+    graduationYear VARCHAR(20),
+    degree VARCHAR(255),
+    degreeAr VARCHAR(255),
+    jobTitle VARCHAR(255),
+    jobTitleAr VARCHAR(255),
+    company VARCHAR(255),
+    companyAr VARCHAR(255),
+    testimonial TEXT,
+    testimonialAr TEXT,
+    linkedin TEXT,
+    twitter TEXT,
+    featured TINYINT(1) DEFAULT 0
+);
+
 CREATE TABLE IF NOT EXISTS settings (
     setting_key VARCHAR(100) PRIMARY KEY,
     setting_value JSON

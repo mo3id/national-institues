@@ -8,6 +8,7 @@ export const ar = {
         aiStudio: "استوديو الذكاء الاصطناعي",
         feedback: "الاقتراحات والشكاوى",
         admissions: "التقديم",
+        alumni: "الخريجون",
         menu: "القائمة",
         mainMenu: "القائمة الرئيسية",
         contactUs: "اتصل بنا"
@@ -267,5 +268,20 @@ export const ar = {
         prev: "السابق",
         next: "التالي",
         selectDate: "اختر التاريخ"
+    },
+    alumni: {
+        title: "خريجونا",
+        subtitle: "تعرف على خريجينا الذين يصنعون الفرق حول العالم.",
+        searchPlaceholder: "ابحث في الخريجين بالاسم أو المدرسة أو الشركة...",
+        filterSchool: "جميع المدارس",
+        filterYear: "جميع السنوات",
+        noResults: "لم يتم العثور على خريجين مطابقين لمعايير البحث.",
+        clearFilters: "مسح الفلاتر",
+        viewProfile: "عرض الملف",
+        graduationYear: "سنة التخرج",
+        degree: "المؤهل",
+        currentPosition: "الوظيفة الحالية",
+        testimonial: "شهادة / كلمة",
+        backToAlumni: "العودة للخريجين"
     }
 };

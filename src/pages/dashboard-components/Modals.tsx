@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteData } from '@/context/DataContext';
-import { DashNewsItem, DashSchool, DashJob, HeroSlide } from './types';
+import { DashNewsItem, DashSchool, DashJob, DashAlumni, HeroSlide } from './types';
 import { CustomSelect, CustomMultiSelect, ImageUpload, CustomDatePicker } from '@/components/common/FormControls';
 import { getDashNewsSchema, getDashSchoolSchema, getDashJobSchema } from '@/utils/validations';
 import Save from 'lucide-react/dist/esm/icons/save';
@@ -553,6 +553,95 @@ export const EditJobForm: React.FC<EditJobProps> = ({ job, lang, onSave, onCance
             <div className="form-full">
                 <ImageUpload label={u.jobImage || 'Job Image'} value={d.image || ''} onChange={val => setD(p => ({ ...p, image: val }))} />
                 {errors.image && <span className="text-red-500 text-xs mt-1 block">{errors.image}</span>}
+            </div>
+            <div className="form-full dash-form-actions">
+                <button type="submit" className="dash-btn dash-btn-primary"><Save className="w-4 h-4" />{u.save}</button>
+                <button type="button" className="dash-btn dash-btn-ghost" onClick={onCancel}>{u.cancel}</button>
+            </div>
+        </form>
+    );
+};
+
+// ── Edit Alumni ───────────────────────────────────────────────────────────────
+export const EditAlumniForm: React.FC<{ alumni: DashAlumni; lang: Lang; onSave: (a: DashAlumni) => void; onCancel: () => void }> = ({ alumni, lang, onSave, onCancel }) => {
+    const u = UI[lang];
+    const [d, setD] = useState<Partial<DashAlumni>>({ ...alumni });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    return (
+        <form className="form-grid" noValidate onSubmit={e => {
+            e.preventDefault();
+            onSave(d as DashAlumni);
+        }}>
+            <div className="form-col">
+                <label className="dash-label">{u.nameEn || 'Name'} (EN)</label>
+                <input className="dash-input" value={d.name || ''} onChange={e => setD(p => ({ ...p, name: e.target.value }))} />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.nameAr || 'الاسم'} (AR)</label>
+                <input className="dash-input" dir="rtl" value={d.nameAr || ''} onChange={e => setD(p => ({ ...p, nameAr: e.target.value }))} />
+            </div>
+            <div className="form-full">
+                <ImageUpload label={u.alumniImage || 'Alumni Photo'} value={d.image || ''} onChange={val => setD(p => ({ ...p, image: val }))} />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.schoolName || 'School'} (EN)</label>
+                <input className="dash-input" value={d.school || ''} onChange={e => setD(p => ({ ...p, school: e.target.value }))} />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.schoolName || 'المدرسة'} (AR)</label>
+                <input className="dash-input" dir="rtl" value={d.schoolAr || ''} onChange={e => setD(p => ({ ...p, schoolAr: e.target.value }))} />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.graduationYear}</label>
+                <input className="dash-input" value={d.graduationYear || ''} onChange={e => setD(p => ({ ...p, graduationYear: e.target.value }))} placeholder="2024" />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.degree} (EN)</label>
+                <input className="dash-input" value={d.degree || ''} onChange={e => setD(p => ({ ...p, degree: e.target.value }))} />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.degree} (AR)</label>
+                <input className="dash-input" dir="rtl" value={d.degreeAr || ''} onChange={e => setD(p => ({ ...p, degreeAr: e.target.value }))} />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.jobTitle} (EN)</label>
+                <input className="dash-input" value={d.jobTitle || ''} onChange={e => setD(p => ({ ...p, jobTitle: e.target.value }))} />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.jobTitle} (AR)</label>
+                <input className="dash-input" dir="rtl" value={d.jobTitleAr || ''} onChange={e => setD(p => ({ ...p, jobTitleAr: e.target.value }))} />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.company} (EN)</label>
+                <input className="dash-input" value={d.company || ''} onChange={e => setD(p => ({ ...p, company: e.target.value }))} />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.company} (AR)</label>
+                <input className="dash-input" dir="rtl" value={d.companyAr || ''} onChange={e => setD(p => ({ ...p, companyAr: e.target.value }))} />
+            </div>
+            <div className="form-full">
+                <label className="dash-label">{u.testimonial} (EN)</label>
+                <textarea className="dash-input dash-ta" value={d.testimonial || ''} onChange={e => setD(p => ({ ...p, testimonial: e.target.value }))} />
+            </div>
+            <div className="form-full">
+                <label className="dash-label">{u.testimonial} (AR)</label>
+                <textarea className="dash-input dash-ta" dir="rtl" value={d.testimonialAr || ''} onChange={e => setD(p => ({ ...p, testimonialAr: e.target.value }))} />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.linkedin}</label>
+                <input className="dash-input" value={d.linkedin || ''} onChange={e => setD(p => ({ ...p, linkedin: e.target.value }))} placeholder="https://linkedin.com/in/..." />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.twitter}</label>
+                <input className="dash-input" value={d.twitter || ''} onChange={e => setD(p => ({ ...p, twitter: e.target.value }))} placeholder="https://twitter.com/..." />
+            </div>
+            <div className="form-col">
+                <label className="dash-label">{u.featured || 'Featured'}</label>
+                <div className="flex items-center gap-2 mt-1">
+                    <input type="checkbox" checked={!!d.featured} onChange={e => setD(p => ({ ...p, featured: e.target.checked }))} className="w-4 h-4 rounded border-gray-300" />
+                    <span className="text-sm text-gray-500">{lang === 'ar' ? 'خريج مميز' : 'Featured alumni'}</span>
+                </div>
             </div>
             <div className="form-full dash-form-actions">
                 <button type="submit" className="dash-btn dash-btn-primary"><Save className="w-4 h-4" />{u.save}</button>
