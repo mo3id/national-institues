@@ -6,10 +6,11 @@
   # This ensures they don't get caught by the SPA catch-all
   RewriteRule ^api\.php$ - [L]
 
-  # SPA Routing: If requested file/dir doesn't exist, serve index.html
+  # SPA Routing: Route non-existent files through seo_router.php to inject dynamic SEO tags
+  RewriteRule ^seo_router\.php$ - [L]
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME} !-e
-  RewriteRule . /index.html [L]
+  RewriteRule . /seo_router.php [L]
 </IfModule>
