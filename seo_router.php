@@ -15,7 +15,15 @@ $image = "/layer-1-small.webp"; // Default fallback image from the site
 
 // Database connection
 try {
-    require_once __DIR__ . '/backend/db_config.php';
+    $dbConfigBackend = __DIR__ . '/backend/db_config.php';
+    $dbConfigRoot = __DIR__ . '/db_config.php';
+    
+    if (file_exists($dbConfigBackend)) {
+        require_once $dbConfigBackend;
+    } elseif (file_exists($dbConfigRoot)) {
+        require_once $dbConfigRoot;
+    }
+
     if (isset($pdo) && count($pathParts) >= 2) {
         $type = $pathParts[0];
         $id = $pathParts[1];
