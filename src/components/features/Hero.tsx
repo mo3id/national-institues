@@ -29,7 +29,7 @@ const Hero: React.FC = () => {
   const currentSlide = slides[currentIndex];
 
   return (
-    <main className="m-[10px] rounded-[20px] relative lg:h-[calc(100dvh-20px)] lg:min-h-0 flex flex-col lg:flex-row lg:items-center overflow-hidden bg-white lg:bg-transparent pb-4 lg:pb-0">
+    <main className="m-[10px] rounded-[20px] relative h-[75dvh] lg:h-[calc(100dvh-20px)] lg:min-h-0 flex flex-col lg:flex-row lg:items-center overflow-hidden bg-white lg:bg-transparent pb-4 lg:pb-0">
 
       {/* Background Images */}
       {slides.map((slide, index) => {
@@ -37,7 +37,7 @@ const Hero: React.FC = () => {
         return (
         <div
           key={index}
-          className={`absolute inset-x-2 top-2 h-[48dvh] lg:inset-0 lg:top-0 lg:h-full transition-opacity duration-1000 ease-in-out z-0 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute inset-x-2 top-2 h-[58dvh] lg:inset-0 lg:top-0 lg:h-full transition-opacity duration-1000 ease-in-out z-0 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
         >
           {/* Inner div to apply flip without animating it */}
           <div
@@ -89,57 +89,57 @@ const Hero: React.FC = () => {
                 )}
               </div>
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 lg:gap-6 justify-start mt-6 lg:mt-0 relative z-30 pointer-events-auto">
-                <Link to="/contact" className="bg-[#991b1b] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#7f1616] lg:hover:bg-white lg:hover:text-[#991b1b] transition-all duration-300 flex items-center justify-center gap-3 group shadow-xl" aria-label={t.joinNow}>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 lg:gap-6 justify-start mt-6 lg:mt-0 relative z-30 pointer-events-auto">
+                <Link to="/contact" className="bg-[#991b1b] text-white px-6 py-3 lg:px-10 lg:py-5 rounded-full font-bold text-base lg:text-xl hover:bg-[#7f1616] lg:hover:bg-white lg:hover:text-[#991b1b] transition-all duration-300 flex items-center justify-center gap-3 group shadow-xl" aria-label={t.joinNow}>
                   {t.joinNow}
                   <span className={`material-symbols-outlined transition-transform ${isRTL ? 'rotate-180 sm:group-hover:-translate-x-1' : 'sm:group-hover:translate-x-1'}`}>arrow_forward</span>
                 </Link>
-                <Link to="/about" className="flex items-center justify-center gap-4 group px-6 py-4 rounded-full bg-slate-50 border border-slate-200 lg:border-none lg:bg-transparent lg:p-0 shadow-xl lg:shadow-none">
+                <Link to="/about" className="flex items-center justify-center gap-4 group px-5 py-3 lg:px-0 lg:py-0 rounded-full bg-slate-50 border border-slate-200 lg:border-none lg:bg-transparent lg:p-0 shadow-lg lg:shadow-none">
                   <div className="hidden lg:flex bg-white/10 backdrop-blur-md p-3 rounded-full text-white border border-white/20 group-hover:bg-white group-hover:text-[#1e3a8a] transition-all duration-300 items-center justify-center shadow-lg">
                     <span className="material-symbols-outlined text-[20px]">
                       {isRTL ? 'arrow_back' : 'arrow_outward'}
                     </span>
                   </div>
-                  <span className="font-bold text-lg text-slate-900 lg:text-white group-hover:text-[#991b1b] transition-colors drop-shadow-md">{t.explorePrograms}</span>
+                  <span className="font-bold text-base lg:text-xl text-slate-900 lg:text-white group-hover:text-[#991b1b] transition-colors drop-shadow-md">{t.explorePrograms}</span>
                 </Link>
               </div>
             </>
           )}
 
-          {/* Mobile Slider Controls - Horizontal under the content */}
-          <div className="lg:hidden w-full pt-8 pb-4 flex items-center justify-between relative z-20 pointer-events-auto" dir="ltr">
-            <div className="flex gap-2">
-              {slides.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentIndex(idx)}
-                  className={`h-1.5 transition-all duration-500 rounded-full ${currentIndex === idx ? 'w-6 bg-[#991b1b]' : 'w-2 bg-slate-200'}`}
-                  aria-label={`Go to slide ${idx + 1}`}
-                />
-              ))}
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setCurrentIndex((prev) => (prev + 1) % slides.length)}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-[#991b1b] text-white active:scale-95 transition-all shadow-[0_5px_15px_rgba(153,27,27,0.2)]"
-                aria-label="Next slide"
-              >
-                <span className="material-symbols-outlined text-xl">
-                  chevron_right
-                </span>
-              </button>
-              <button
-                onClick={() => setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length)}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 active:scale-95 transition-all"
-                aria-label="Previous slide"
-              >
-                <span className="material-symbols-outlined text-xl">
-                  chevron_left
-                </span>
-              </button>
-            </div>
-          </div>
+        </div>
+      </div>
 
+      {/* Mobile Slider Controls - Horizontal under the content (always at bottom of flex-col) */}
+      <div className="lg:hidden w-full px-6 pt-4 pb-6 flex items-center justify-between relative z-20 pointer-events-auto bg-white" dir="ltr">
+        <div className="flex gap-2">
+          {slides.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentIndex(idx)}
+              className={`h-1.5 transition-all duration-500 rounded-full ${currentIndex === idx ? 'w-6 bg-[#991b1b]' : 'w-2 bg-slate-200'}`}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setCurrentIndex((prev) => (prev + 1) % slides.length)}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-[#991b1b] text-white active:scale-95 transition-all shadow-[0_5px_15px_rgba(153,27,27,0.2)]"
+            aria-label="Next slide"
+          >
+            <span className="material-symbols-outlined text-xl">
+              chevron_right
+            </span>
+          </button>
+          <button
+            onClick={() => setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length)}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 active:scale-95 transition-all"
+            aria-label="Previous slide"
+          >
+            <span className="material-symbols-outlined text-xl">
+              chevron_left
+            </span>
+          </button>
         </div>
       </div>
 
