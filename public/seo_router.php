@@ -21,29 +21,53 @@ try {
         if ($siteData && isset($siteData['data'])) {
             $data = $siteData['data'];
 
-            // Helper function to extract and save base64 images
+            // Handle dynamic image serving without relying on folder write permissions
+            if (count($pathParts) >= 2 && $pathParts[0] === 'dyn_images') {
+                $filename = $pathParts[1];
+                if (preg_match('/^([a-zA-Z0-9]+)_([a-zA-Z0-9]+)\./', $filename, $matches)) {
+                    $reqType = $matches[1];
+                    $reqId = $matches[2];
+                    if (isset($data[$reqType])) {
+                        foreach ($data[$reqType] as $item) {
+                            if (strval($item['id']) === $reqId) {
+                                // Determine the right image field based on entity type
+                                $rawImg = '';
+                                if ($reqType === 'schools') {
+                                    $rawImg = !empty($item['mainImage']) ? $item['mainImage'] : (!empty($item['logo']) ? $item['logo'] : '');
+                                } else {
+                                    $rawImg = $item['image'] ?? '';
+                                }
+
+                                if (strpos($rawImg, 'data:image') === 0 && preg_match('/^data:image\/(\w+);base64,/', $rawImg, $imgMatches)) {
+                                    $ext = $imgMatches[1] === 'jpeg' ? 'jpg' : $imgMatches[1];
+                                    $base64Data = substr($rawImg, strpos($rawImg, ',') + 1);
+                                    $decodedData = base64_decode($base64Data);
+                                    if ($decodedData !== false) {
+                                        header('Content-Type: image/' . $imgMatches[1]);
+                                        header('Cache-Control: public, max-age=86400'); // Cache for 1 day
+                                        echo $decodedData;
+                                        exit;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                // If failed, return 404
+                header("HTTP/1.0 404 Not Found");
+                exit;
+            }
+
+            // Helper function to return the dynamic URL instead of writing the file
             $extractImage = function($rawImage, $entityType, $entityId) {
                 if (empty($rawImage)) return null;
                 if (strpos($rawImage, 'data:image') === 0) {
-                    $ogImageDir = __DIR__ . '/og_images';
-                    if (!is_dir($ogImageDir)) {
-                        @mkdir($ogImageDir, 0755, true);
-                    }
                     if (preg_match('/^data:image\/(\w+);base64,/', $rawImage, $matches)) {
                         $ext = $matches[1];
                         if ($ext === 'jpeg') $ext = 'jpg';
                         $cleanType = preg_replace('/[^a-zA-Z0-9_-]/', '', $entityType);
                         $cleanId = preg_replace('/[^a-zA-Z0-9_-]/', '', $entityId);
-                        $filename = "{$cleanType}_{$cleanId}.{$ext}";
-                        $filepath = $ogImageDir . '/' . $filename;
-                        if (!file_exists($filepath)) {
-                            $base64Data = substr($rawImage, strpos($rawImage, ',') + 1);
-                            $decodedData = base64_decode($base64Data);
-                            if ($decodedData !== false) {
-                                @file_put_contents($filepath, $decodedData);
-                            }
-                        }
-                        return '/og_images/' . $filename;
+                        return "/dyn_images/{$cleanType}_{$cleanId}.{$ext}";
                     }
                     return null;
                 }
