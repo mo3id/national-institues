@@ -185,30 +185,62 @@ export const EditHeroForm: React.FC<EditHeroProps> = ({ slide, lang, onSave, onC
     return (
         <form className="form-grid" noValidate onSubmit={e => {
             e.preventDefault();
-            const res = getDashHeroSchema().safeParse(d);
+            
+            // Apply language fallback mapping (if one language is provided and the other is empty)
+            const finalData = { ...d };
+            if (finalData.title?.trim() && !finalData.titleAr?.trim()) finalData.titleAr = finalData.title;
+            if (finalData.titleAr?.trim() && !finalData.title?.trim()) finalData.title = finalData.titleAr;
+            
+            if (finalData.subtitle?.trim() && !finalData.subtitleAr?.trim()) finalData.subtitleAr = finalData.subtitle;
+            if (finalData.subtitleAr?.trim() && !finalData.subtitle?.trim()) finalData.subtitle = finalData.subtitleAr;
+            
+            if (finalData.description?.trim() && !finalData.descriptionAr?.trim()) finalData.descriptionAr = finalData.description;
+            if (finalData.descriptionAr?.trim() && !finalData.description?.trim()) finalData.description = finalData.descriptionAr;
+
+            const res = getDashHeroSchema().safeParse(finalData);
             if (!res.success) {
                 const errs: Record<string, string> = {};
                 res.error.issues.forEach(i => errs[i.path[0] as string] = i.message);
                 setErrors(errs);
                 return;
             }
-            onSave(d);
+            onSave(finalData);
         }}>
-            <div className="form-full">
-                <label className="dash-label">{u.slideTitle}</label>
-                <input className={`dash-input ${errors.title ? 'border-red-500' : ''}`} value={d.title} onChange={e => { setD(p => ({ ...p, title: e.target.value })); if (errors.title) setErrors(p => ({ ...p, title: '' })) }} />
-                {errors.title && <span className="text-red-500 text-xs mt-1 block">{errors.title}</span>}
+            <div className="form-full flex gap-4">
+                <div className="flex-1">
+                    <label className="dash-label">{u.slideTitle} (EN)</label>
+                    <input className={`dash-input ${errors.title ? 'border-red-500' : ''}`} value={d.title || ''} onChange={e => { setD(p => ({ ...p, title: e.target.value })); if (errors.title) setErrors(p => ({ ...p, title: '' })) }} />
+                    {errors.title && <span className="text-red-500 text-xs mt-1 block">{errors.title}</span>}
+                </div>
+                <div className="flex-1">
+                    <label className="dash-label">{u.slideTitle} (AR)</label>
+                    <input className={`dash-input ${errors.titleAr ? 'border-red-500' : ''}`} value={d.titleAr || ''} onChange={e => { setD(p => ({ ...p, titleAr: e.target.value })); if (errors.titleAr) setErrors(p => ({ ...p, titleAr: '' })) }} dir="rtl" />
+                </div>
             </div>
-            <div className="form-full">
-                <label className="dash-label">{u.slideSubtitle}</label>
-                <input className={`dash-input ${errors.subtitle ? 'border-red-500' : ''}`} value={d.subtitle} onChange={e => { setD(p => ({ ...p, subtitle: e.target.value })); if (errors.subtitle) setErrors(p => ({ ...p, subtitle: '' })) }} />
-                {errors.subtitle && <span className="text-red-500 text-xs mt-1 block">{errors.subtitle}</span>}
+            
+            <div className="form-full flex gap-4">
+                <div className="flex-1">
+                    <label className="dash-label">{u.slideSubtitle} (EN)</label>
+                    <input className={`dash-input ${errors.subtitle ? 'border-red-500' : ''}`} value={d.subtitle || ''} onChange={e => { setD(p => ({ ...p, subtitle: e.target.value })); if (errors.subtitle) setErrors(p => ({ ...p, subtitle: '' })) }} />
+                </div>
+                <div className="flex-1">
+                    <label className="dash-label">{u.slideSubtitle} (AR)</label>
+                    <input className={`dash-input ${errors.subtitleAr ? 'border-red-500' : ''}`} value={d.subtitleAr || ''} onChange={e => { setD(p => ({ ...p, subtitleAr: e.target.value })); if (errors.subtitleAr) setErrors(p => ({ ...p, subtitleAr: '' })) }} dir="rtl" />
+                </div>
             </div>
-            <div className="form-full">
-                <label className="dash-label">{u.slideDesc}</label>
-                <textarea className={`dash-input dash-ta ${errors.description ? 'border-red-500' : ''}`} value={d.description} onChange={e => { setD(p => ({ ...p, description: e.target.value })); if (errors.description) setErrors(p => ({ ...p, description: '' })) }} />
-                {errors.description && <span className="text-red-500 text-xs mt-1 block">{errors.description}</span>}
+            
+            <div className="form-full flex gap-4">
+                <div className="flex-1">
+                    <label className="dash-label">{u.slideDesc} (EN)</label>
+                    <textarea className={`dash-input dash-ta ${errors.description ? 'border-red-500' : ''}`} value={d.description || ''} onChange={e => { setD(p => ({ ...p, description: e.target.value })); if (errors.description) setErrors(p => ({ ...p, description: '' })) }} />
+                    {errors.description && <span className="text-red-500 text-xs mt-1 block">{errors.description}</span>}
+                </div>
+                <div className="flex-1">
+                    <label className="dash-label">{u.slideDesc} (AR)</label>
+                    <textarea className={`dash-input dash-ta ${errors.descriptionAr ? 'border-red-500' : ''}`} value={d.descriptionAr || ''} onChange={e => { setD(p => ({ ...p, descriptionAr: e.target.value })); if (errors.descriptionAr) setErrors(p => ({ ...p, descriptionAr: '' })) }} dir="rtl" />
+                </div>
             </div>
+
             <div className="form-full">
                 <div className={errors.image ? 'border border-red-500 p-2 rounded' : ''}>
                     <ImageUpload label={u.slideImage} value={d.image} onChange={val => { setD(p => ({ ...p, image: val })); if (errors.image) setErrors(p => ({ ...p, image: '' })) }} />

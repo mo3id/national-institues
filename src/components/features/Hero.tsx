@@ -32,7 +32,9 @@ const Hero: React.FC = () => {
     <main className="m-[10px] rounded-[20px] relative lg:h-[calc(100dvh-20px)] lg:min-h-0 flex flex-col lg:flex-row lg:items-center overflow-hidden bg-white lg:bg-transparent pb-4 lg:pb-0">
 
       {/* Background Images */}
-      {slides.map((slide, index) => (
+      {slides.map((slide, index) => {
+        const slideHasText = !!slide.title?.trim() || !!slide.description?.trim();
+        return (
         <div
           key={index}
           className={`absolute inset-x-2 top-2 h-[48dvh] lg:inset-0 lg:top-0 lg:h-full transition-opacity duration-1000 ease-in-out z-0 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
@@ -47,53 +49,65 @@ const Hero: React.FC = () => {
               WebkitBackfaceVisibility: 'hidden'
             }}
           />
-          {/* Gradient overlay: Darker on text side (Desktop only) */}
-          <div
-            className={`hidden lg:block absolute inset-0 z-10 ${isRTL
-              ? 'bg-gradient-to-l from-black/60 via-black/10 to-transparent'
-              : 'bg-gradient-to-r from-black/60 via-black/10 to-transparent'
-              }`}
-          />
-          {/* Mobile Image Gradient (top) to make Navbar visible */}
-          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 to-transparent lg:hidden z-10 pointer-events-none rounded-t-[24px]" />
-          {/* Mobile Image Gradient (bottom) for over-image text */}
-          <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/90 via-black/40 to-transparent lg:hidden z-10 pointer-events-none rounded-b-[24px]" />
+          {slideHasText && (
+            <>
+              {/* Gradient overlay: Darker on text side (Desktop only) */}
+              <div
+                className={`hidden lg:block absolute inset-0 z-10 ${isRTL
+                  ? 'bg-gradient-to-l from-black/60 via-black/10 to-transparent'
+                  : 'bg-gradient-to-r from-black/60 via-black/10 to-transparent'
+                  }`}
+              />
+              {/* Mobile Image Gradient (top) to make Navbar visible */}
+              <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 to-transparent lg:hidden z-10 pointer-events-none rounded-t-[24px]" />
+              {/* Mobile Image Gradient (bottom) for over-image text */}
+              <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/90 via-black/40 to-transparent lg:hidden z-10 pointer-events-none rounded-b-[24px]" />
+            </>
+          )}
         </div>
-      ))}
+      )})}
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 md:px-12 pt-32 pb-8 lg:py-20 relative z-20 flex-1 flex flex-col justify-start lg:justify-center" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="container mx-auto px-6 md:px-12 pt-32 pb-8 lg:py-20 relative z-20 flex-1 flex flex-col justify-start lg:justify-center pointer-events-none" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className={`w-full max-w-3xl flex flex-col lg:block animate-fade-up ${isRTL ? 'lg:ml-auto' : 'lg:mr-auto'}`}>
 
           {/* Text Container: overlays the image on mobile */}
-          <div className="lg:h-auto flex flex-col justify-start pb-8 lg:pb-0">
-            <h1 key={`title-${currentIndex}`} className="text-3xl sm:text-4xl lg:text-7xl font-extrabold text-white leading-[1.3] mb-3 lg:mb-8 animate-fade-in text-start drop-shadow-lg">
-              {currentSlide.title}
-            </h1>
+          {(!!currentSlide.title?.trim() || !!currentSlide.description?.trim()) && (
+            <>
+              <div className="lg:h-auto flex flex-col justify-start pb-8 lg:pb-0 pointer-events-auto cursor-default">
+                {currentSlide.title?.trim() && (
+                  <h1 key={`title-${currentIndex}`} className="text-3xl sm:text-4xl lg:text-7xl font-extrabold text-white leading-[1.3] mb-3 lg:mb-8 animate-fade-in text-start drop-shadow-lg">
+                    {currentSlide.title}
+                  </h1>
+                )}
 
-            {/* removed font-['Cairo'] and increased size by ~4px: text-[20px] and lg:text-[24px] */}
-            <p key={`desc-${currentIndex}`} className="text-[20px] lg:text-[24px] text-white/95 max-w-2xl mb-2 lg:mb-12 leading-relaxed font-medium animate-fade-in text-start drop-shadow-md" style={{ animationDelay: '0.1s' }}>
-              {currentSlide.description}
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 lg:gap-6 justify-start mt-6 lg:mt-0 relative z-30">
-            <Link to="/contact" className="bg-[#991b1b] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#7f1616] lg:hover:bg-white lg:hover:text-[#991b1b] transition-all duration-300 flex items-center justify-center gap-3 group shadow-xl" aria-label={t.joinNow}>
-              {t.joinNow}
-              <span className={`material-symbols-outlined transition-transform ${isRTL ? 'rotate-180 sm:group-hover:-translate-x-1' : 'sm:group-hover:translate-x-1'}`}>arrow_forward</span>
-            </Link>
-            <Link to="/about" className="flex items-center justify-center gap-4 group px-6 py-4 rounded-full bg-slate-50 border border-slate-200 lg:border-none lg:bg-transparent lg:p-0 shadow-xl lg:shadow-none">
-              <div className="hidden lg:flex bg-white/10 backdrop-blur-md p-3 rounded-full text-white border border-white/20 group-hover:bg-white group-hover:text-[#1e3a8a] transition-all duration-300 items-center justify-center shadow-lg">
-                <span className="material-symbols-outlined text-[20px]">
-                  {isRTL ? 'arrow_back' : 'arrow_outward'}
-                </span>
+                {/* removed font-['Cairo'] and increased size by ~4px: text-[20px] and lg:text-[24px] */}
+                {currentSlide.description?.trim() && (
+                  <p key={`desc-${currentIndex}`} className="text-[20px] lg:text-[24px] text-white/95 max-w-2xl mb-2 lg:mb-12 leading-relaxed font-medium animate-fade-in text-start drop-shadow-md" style={{ animationDelay: '0.1s' }}>
+                    {currentSlide.description}
+                  </p>
+                )}
               </div>
-              <span className="font-bold text-lg text-slate-900 lg:text-white group-hover:text-[#991b1b] transition-colors drop-shadow-md">{t.explorePrograms}</span>
-            </Link>
-          </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 lg:gap-6 justify-start mt-6 lg:mt-0 relative z-30 pointer-events-auto">
+                <Link to="/contact" className="bg-[#991b1b] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#7f1616] lg:hover:bg-white lg:hover:text-[#991b1b] transition-all duration-300 flex items-center justify-center gap-3 group shadow-xl" aria-label={t.joinNow}>
+                  {t.joinNow}
+                  <span className={`material-symbols-outlined transition-transform ${isRTL ? 'rotate-180 sm:group-hover:-translate-x-1' : 'sm:group-hover:translate-x-1'}`}>arrow_forward</span>
+                </Link>
+                <Link to="/about" className="flex items-center justify-center gap-4 group px-6 py-4 rounded-full bg-slate-50 border border-slate-200 lg:border-none lg:bg-transparent lg:p-0 shadow-xl lg:shadow-none">
+                  <div className="hidden lg:flex bg-white/10 backdrop-blur-md p-3 rounded-full text-white border border-white/20 group-hover:bg-white group-hover:text-[#1e3a8a] transition-all duration-300 items-center justify-center shadow-lg">
+                    <span className="material-symbols-outlined text-[20px]">
+                      {isRTL ? 'arrow_back' : 'arrow_outward'}
+                    </span>
+                  </div>
+                  <span className="font-bold text-lg text-slate-900 lg:text-white group-hover:text-[#991b1b] transition-colors drop-shadow-md">{t.explorePrograms}</span>
+                </Link>
+              </div>
+            </>
+          )}
 
           {/* Mobile Slider Controls - Horizontal under the content */}
-          <div className="lg:hidden w-full pt-8 pb-4 flex items-center justify-between relative z-20" dir="ltr">
+          <div className="lg:hidden w-full pt-8 pb-4 flex items-center justify-between relative z-20 pointer-events-auto" dir="ltr">
             <div className="flex gap-2">
               {slides.map((_, idx) => (
                 <button

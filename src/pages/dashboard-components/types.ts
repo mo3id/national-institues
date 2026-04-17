@@ -125,8 +125,11 @@ export interface DashAlumni {
 export interface HeroSlide {
     id: number;
     title: string;
+    titleAr?: string;
     subtitle: string;
+    subtitleAr?: string;
     description: string;
+    descriptionAr?: string;
     image: string;
 }
 
