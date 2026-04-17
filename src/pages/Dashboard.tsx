@@ -1570,7 +1570,7 @@ const Dashboard: React.FC = () => {
                   <div key={n.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 20px', borderBottom: '1px solid var(--border)' }}>
                     <img src={n.image || undefined} style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} alt="" />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{n.title}</p>
+                      <p style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{lang === 'ar' ? (n.titleAr || n.title) : n.title}</p>
                       <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2 }}>{n.date}</p>
                     </div>
                     <span className={`dash-badge ${n.published ? 'badge-green' : 'badge-gray'}`}>{n.published ? u.published : u.draft}</span>
@@ -1608,10 +1608,10 @@ const Dashboard: React.FC = () => {
                     <img src={n.image || undefined} style={{ width: 52, height: 52, borderRadius: 10, objectFit: 'cover' }} alt="" />
                     <div style={{ minWidth: 0, position: 'relative' }}>
                       <p style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        {n.title}
+                        {lang === 'ar' ? (n.titleAr || n.title) : n.title}
                         {n.featured && <span style={{ fontSize: '10px', background: '#eab308', color: 'white', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', fontWeight: 'bold' }}>⭐ {u.featured}</span>}
                       </p>
-                      <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{n.titleAr}</p>
+                      <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{lang === 'ar' ? (n.summaryAr || n.summary) : n.summary}</p>
                     </div>
                     <p style={{ fontSize: 13, color: 'var(--text2)' }}>{n.date}</p>
                     <button className={`dash-badge ${n.published ? 'badge-green' : 'badge-gray'}`} style={{ cursor: 'pointer', border: 'none' }} onClick={() => togglePublish(n.id)}>{n.published ? u.published : u.draft}</button>
@@ -1650,12 +1650,23 @@ const Dashboard: React.FC = () => {
                     <div key={s.id} className="school-card">
                       <img src={s.logo || undefined} style={{ width: 52, height: 52, borderRadius: 12, objectFit: 'cover', background: 'var(--surface2)', flexShrink: 0 }} alt={s.name} />
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{s.name}</p>
-                        <p style={{ fontSize: 11, color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}><MapPin style={{ width: 11, height: 11 }} />{s.location}, {s.governorate}</p>
+                        <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{lang === 'ar' ? (s.nameAr || s.name) : s.name}</p>
+                        <p style={{ fontSize: 11, color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}><MapPin style={{ width: 11, height: 11 }} />{lang === 'ar' ? (s.locationAr || s.location) : s.location}{s.governorate ? `, ${lang === 'ar' ? (s.governorateAr || s.governorate) : s.governorate}` : ''}</p>
                         <div style={{ marginTop: 6, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                          {(Array.isArray(s.type) ? s.type : []).map((t: string) => (
-                            <span key={t} style={{ display: 'inline-block', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(79,70,229,0.1)', color: 'var(--accent)' }}>{t}</span>
-                          ))}
+                          {(Array.isArray(s.type) ? s.type : []).map((t: string) => {
+                            const typeMap: Record<string, string> = {
+                              'Arabic': 'عربي/قومي',
+                              'Languages': 'لغات',
+                              'American': 'أمريكي',
+                              'British': 'بريطاني',
+                              'French': 'فرنسي'
+                            };
+                            return (
+                              <span key={t} style={{ display: 'inline-block', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(79,70,229,0.1)', color: 'var(--accent)' }}>
+                                {lang === 'ar' ? (typeMap[t] || t) : t}
+                              </span>
+                            );
+                          })}
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: 4 }}>
@@ -1691,9 +1702,9 @@ const Dashboard: React.FC = () => {
                     <div key={a.id} className="school-card">
                       <img src={a.image || undefined} style={{ width: 52, height: 52, borderRadius: 12, objectFit: 'cover', background: 'var(--surface2)', flexShrink: 0 }} alt={a.name} />
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{a.name}</p>
-                        <p style={{ fontSize: 11, color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}><GraduationCap style={{ width: 11, height: 11 }} />{a.school} • {a.graduationYear}</p>
-                        {a.jobTitle && <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2 }}>{a.jobTitle}{a.company ? ` @ ${a.company}` : ''}</p>}
+                        <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{lang === 'ar' ? (a.nameAr || a.name) : a.name}</p>
+                        <p style={{ fontSize: 11, color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}><GraduationCap style={{ width: 11, height: 11 }} />{lang === 'ar' ? (a.schoolAr || a.school) : a.school} • {a.graduationYear}</p>
+                        {(a.jobTitle || a.jobTitleAr) && <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2 }}>{lang === 'ar' ? (a.jobTitleAr || a.jobTitle) : a.jobTitle}{(a.company || a.companyAr) ? ` @ ${lang === 'ar' ? (a.companyAr || a.company) : a.company}` : ''}</p>}
                         {a.featured && <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(245,158,11,0.1)', color: '#d97706', marginTop: 4 }}>★ {u.featured}</span>}
                       </div>
                       <div style={{ display: 'flex', gap: 4 }}>
