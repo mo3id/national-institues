@@ -29,7 +29,7 @@ const Hero: React.FC = () => {
   const currentSlide = slides[currentIndex];
 
   return (
-    <main className="m-[10px] rounded-[20px] relative h-[75dvh] lg:h-[calc(100dvh-20px)] lg:min-h-0 flex flex-col lg:flex-row lg:items-center overflow-hidden bg-white lg:bg-transparent pb-4 lg:pb-0">
+    <main className="m-[10px] rounded-[20px] relative min-h-[85dvh] lg:h-[calc(100dvh-20px)] lg:min-h-0 flex flex-col lg:flex-row lg:items-center overflow-visible lg:overflow-hidden bg-white lg:bg-transparent pb-4 lg:pb-0">
 
       {/* Background Images */}
       {slides.map((slide, index) => {
@@ -37,7 +37,7 @@ const Hero: React.FC = () => {
         return (
         <div
           key={index}
-          className={`absolute inset-x-2 top-2 h-[58dvh] lg:inset-0 lg:top-0 lg:h-full transition-opacity duration-1000 ease-in-out z-0 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute inset-x-2 top-2 h-[65dvh] lg:inset-0 lg:top-0 lg:h-full transition-opacity duration-1000 ease-in-out z-0 ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
         >
           {/* Inner div to apply flip without animating it */}
           <div
@@ -68,7 +68,7 @@ const Hero: React.FC = () => {
       )})}
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 md:px-12 pt-32 pb-8 lg:py-20 relative z-20 flex-1 flex flex-col justify-start lg:justify-center pointer-events-none" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="container mx-auto px-6 md:px-12 pt-20 pb-8 lg:py-20 relative z-20 flex-1 flex flex-col justify-start lg:justify-center pointer-events-none" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className={`w-full max-w-3xl flex flex-col lg:block animate-fade-up ${isRTL ? 'lg:ml-auto' : 'lg:mr-auto'}`}>
 
           {/* Text Container: overlays the image on mobile */}
