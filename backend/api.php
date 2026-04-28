@@ -877,10 +877,12 @@ try {
         case 'add_admission':
             // ── Accept multipart/form-data: text fields in $_POST, files in $_FILES
             $input = [];
-            $textFields = ['studentName', 'studentDOB', 'studentNationalId', 'gradeStage', 'gradeClass', 'parentName', 'parentPhone', 'parentEmail', 'notes'];
+            $textFields = ['studentName', 'studentDOB', 'studentNationalId', 'gradeStage', 'gradeClass', 'parentName', 'parentPhone', 'parentEmail', 'notes', 'hasSibling'];
             foreach ($textFields as $f) {
                 $input[$f] = sanitizeInput($_POST[$f] ?? '');
             }
+            // Convert checkbox to boolean
+            $input['hasSibling'] = in_array($input['hasSibling'], ['1', 'true', 'on'], true) || (bool)$input['hasSibling'];
 
             // Preferences: sent as JSON string in a POST field
             $input['preferences'] = [];

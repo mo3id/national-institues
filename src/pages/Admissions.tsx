@@ -46,6 +46,7 @@ const Admissions: React.FC = () => {
     studentNationalId: '',
     gradeStage: '',
     gradeClass: '',
+    hasSibling: false,
     parentName: '',
     parentPhone: '',
     parentEmail: '',
@@ -134,7 +135,7 @@ const Admissions: React.FC = () => {
       const res = await submitAdmission({ ...payload, documents: documents.filter(d => d.file) });
       setAdmissionId(res.data?.id || null);
       setSubmitted(true);
-      setFormData({ studentName: '', studentDOB: '', studentNationalId: '', gradeStage: '', gradeClass: '', parentName: '', parentPhone: '', parentEmail: '', notes: '' });
+      setFormData({ studentName: '', studentDOB: '', studentNationalId: '', gradeStage: '', gradeClass: '', hasSibling: false, parentName: '', parentPhone: '', parentEmail: '', notes: '' });
       setPreferences([]);
       setDocuments((admSettings?.requiredDocuments || []).map((name: string) => ({ name, fileName: '' })));
       setErrors({});
@@ -162,9 +163,44 @@ const Admissions: React.FC = () => {
 
   const availableSchools = schools.filter(s => !preferences.some(p => p.schoolId === (s as any).id));
   const [schoolSearch, setSchoolSearch] = useState('');
+  const [govFilter, setGovFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+
+  const governorateOptions = (siteData.governorates || []).map((g: any) => ({
+    value: g.name,
+    label: lang === 'ar' ? (g.nameAr || g.name) : g.name
+  }));
+
+  const allTypes = Array.from(new Set(schools.flatMap((s: any) => {
+    const t = s.type;
+    if (Array.isArray(t)) return t.filter(Boolean);
+    if (typeof t === 'string' && t.trim()) {
+      try { const p = JSON.parse(t); return Array.isArray(p) ? p.filter(Boolean) : [t]; }
+      catch { return t.split(',').map((x: string) => x.trim()).filter(Boolean); }
+    }
+    return [];
+  })));
+
+  const typeOptions = allTypes.map((t: string) => ({
+    value: t,
+    label: lang === 'ar' ? ({ Arabic: 'عربي', Languages: 'لغات', American: 'أمريكي', British: 'بريطاني', French: 'فرنسي' }[t] || t) : t
+  }));
+
   const filteredSchools = availableSchools.filter(s => {
     const q = schoolSearch.toLowerCase();
-    return !q || s.name.toLowerCase().includes(q) || ((s as any).nameAr || '').includes(q);
+    const matchSearch = !q || s.name.toLowerCase().includes(q) || ((s as any).nameAr || '').includes(q);
+    const matchGov = !govFilter || (s as any).governorate === govFilter;
+    const schoolTypes = (() => {
+      const t = (s as any).type;
+      if (Array.isArray(t)) return t.filter(Boolean);
+      if (typeof t === 'string' && t.trim()) {
+        try { const p = JSON.parse(t); return Array.isArray(p) ? p.filter(Boolean) : [t]; }
+        catch { return t.split(',').map((x: string) => x.trim()).filter(Boolean); }
+      }
+      return [];
+    })();
+    const matchType = !typeFilter || schoolTypes.includes(typeFilter);
+    return matchSearch && matchGov && matchType;
   });
 
   return (
@@ -255,7 +291,7 @@ const Admissions: React.FC = () => {
                             <Search className="w-5 h-5" />
                             <span>{lang === 'ar' ? 'تتبع الطلب' : 'Track Application'}</span>
                           </Link>
-                          <button onClick={() => { setSubmitted(false); setAdmissionId(null); setFormData({ studentName: '', studentDOB: '', studentNationalId: '', gradeStage: '', gradeClass: '', parentName: '', parentPhone: '', parentEmail: '', notes: '' }); setPreferences([]); }} className="bg-slate-100 text-slate-700 px-8 py-3.5 rounded-xl font-bold hover:bg-slate-200 transition-all">
+                          <button onClick={() => { setSubmitted(false); setAdmissionId(null); setFormData({ studentName: '', studentDOB: '', studentNationalId: '', gradeStage: '', gradeClass: '', hasSibling: false, parentName: '', parentPhone: '', parentEmail: '', notes: '' }); setPreferences([]); }} className="bg-slate-100 text-slate-700 px-8 py-3.5 rounded-xl font-bold hover:bg-slate-200 transition-all">
                             {lang === 'ar' ? 'تقديم طلب آخر' : 'Submit Another'}
                           </button>
                         </div>
@@ -303,6 +339,19 @@ const Admissions: React.FC = () => {
                             <label className={labelClass}>{lang === 'ar' ? 'الصف الدراسي' : 'Grade Class'} <span className="text-red-500">*</span></label>
                             <CustomSelect value={formData.gradeClass} onChange={val => handleChange({ target: { name: 'gradeClass', value: val } } as any)} options={gradeClasses.map(c => ({ value: c, label: c }))} className={errors.gradeClass ? 'border-red-500' : ''} />
                             {errors.gradeClass && <p className="text-red-500 text-xs font-bold mt-1">{errors.gradeClass}</p>}
+                          </div>
+                          <div className="flex items-center gap-3 md:col-span-2 mt-2">
+                            <input
+                              type="checkbox"
+                              id="hasSibling"
+                              name="hasSibling"
+                              checked={formData.hasSibling}
+                              onChange={e => setFormData(prev => ({ ...prev, hasSibling: e.target.checked }))}
+                              className="w-5 h-5 rounded border-slate-300 text-[#1e3a8a] focus:ring-[#1e3a8a]"
+                            />
+                            <label htmlFor="hasSibling" className="text-sm font-semibold text-slate-700 cursor-pointer">
+                              {lang === 'ar' ? 'لديه أخ/أخت بالمدرسة' : 'Has a sibling at the school'}
+                            </label>
                           </div>
                         </div>
                       </div>
@@ -368,6 +417,26 @@ const Admissions: React.FC = () => {
                         {(admSettings?.maxPreferences === 0 || preferences.length < (admSettings?.maxPreferences || Infinity)) && (
                           <div className="border-2 border-dashed border-blue-100 rounded-2xl p-4 space-y-3">
                             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{lang === 'ar' ? 'أضف مدرسة' : 'Add a school'}</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label className="text-xs font-bold text-slate-500 mb-1 block">{lang === 'ar' ? 'المحافظة' : 'Governorate'}</label>
+                                <CustomSelect
+                                  value={govFilter}
+                                  placeholder={lang === 'ar' ? 'كل المحافظات' : 'All Governorates'}
+                                  onChange={val => setGovFilter(val)}
+                                  options={governorateOptions}
+                                />
+                              </div>
+                              <div>
+                                <label className="text-xs font-bold text-slate-500 mb-1 block">{lang === 'ar' ? 'نوع التعليم' : 'Education Type'}</label>
+                                <CustomSelect
+                                  value={typeFilter}
+                                  placeholder={lang === 'ar' ? 'كل الأنواع' : 'All Types'}
+                                  onChange={val => setTypeFilter(val)}
+                                  options={typeOptions}
+                                />
+                              </div>
+                            </div>
                             <input
                               type="text"
                               value={schoolSearch}
