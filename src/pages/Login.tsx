@@ -74,12 +74,12 @@ const LoginPage: React.FC = () => {
         setLoading(true);
         setError('');
 
-        // Mock authentication
-        setTimeout(() => {
-            if (email === 'admin@nis.edu.eg' && password === 'admin123') {
+        // Real backend authentication
+        try {
+            const success = await login(email, password);
+            if (success) {
                 setFailedAttempts(0);
                 setLockedUntil(null);
-                login();
                 navigate('/dashboard');
             } else {
                 const newCount = failedAttempts + 1;
@@ -91,8 +91,11 @@ const LoginPage: React.FC = () => {
                     setError(t.error);
                 }
             }
+        } catch (err: any) {
+            setError(err.message || t.error);
+        } finally {
             setLoading(false);
-        }, 1500);
+        }
     };
 
     return (

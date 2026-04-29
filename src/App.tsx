@@ -46,7 +46,13 @@ const PageLoader = () => (
 );
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  // Show loading while checking authentication
+  if (isLoading) {
+    return <PageLoader />;
+  }
+  
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return <>{children}</>;
 };

@@ -87,3 +87,17 @@ CREATE TABLE IF NOT EXISTS settings (
     setting_key VARCHAR(100) PRIMARY KEY,
     setting_value JSON
 );
+
+CREATE TABLE IF NOT EXISTS users (
+  id VARCHAR(50) PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  passwordHash VARCHAR(255) NOT NULL,
+  name VARCHAR(255),
+  role ENUM('super_admin', 'school_admin') DEFAULT 'super_admin',
+  schoolId VARCHAR(50) NULL,
+  isActive TINYINT(1) DEFAULT 1,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  lastLogin DATETIME,
+  INDEX idx_email (email),
+  INDEX idx_role (role)
+);

@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { SiteData } from '@/store/useDataStore';
+import { getAuthHeaders, clearAuth } from './authApi';
 
 // Ensure the API base URL falls back to relative /api.php if VITE_API_BASE_URL is not provided or undefined
 // This uses Vite's string replacement for env variables.
@@ -28,14 +29,37 @@ export const apiClient = axios.create({
     timeout: 120000,
 });
 
-// Axios interceptor to append /api.php correctly without redundant slashes
+// Axios interceptor to append /api.php and add Authorization header
 apiClient.interceptors.request.use(config => {
     // If the url is just query params (e.g. ?action=...), prepend /api.php
     if (config.url && config.url.startsWith('?')) {
         config.url = `/api.php${config.url}`;
     }
+    
+    // Add Authorization header if token exists
+    const authHeaders = getAuthHeaders();
+    if (authHeaders.Authorization) {
+        config.headers = config.headers || {};
+        config.headers.Authorization = authHeaders.Authorization;
+    }
+    
     return config;
 });
+
+// Response interceptor to handle 401 errors
+apiClient.interceptors.response.use(
+    response => response,
+    error => {
+        if (error.response?.status === 401) {
+            // Clear auth and redirect to login
+            clearAuth();
+            // Remove old mock auth flag if exists
+            localStorage.removeItem('is_admin_authenticated');
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
+);
 
 interface ApiResponse<T = any> {
     status: 'success' | 'error';

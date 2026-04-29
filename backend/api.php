@@ -123,6 +123,128 @@ function sanitizeArray(?array $data, array $textFields): array {
     return $data;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// JWT AUTHENTICATION HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Load JWT secret from environment or use default (CHANGE IN PRODUCTION!)
+function getJWTSecret(): string {
+    return $_ENV['JWT_SECRET'] ?? $_SERVER['JWT_SECRET'] ?? 'nis-default-secret-change-in-production-2024';
+}
+
+/**
+ * Generate JWT token
+ * @param string $userId User ID
+ * @param string $email User email
+ * @param string $role User role (super_admin, school_admin)
+ * @return string JWT token
+ */
+function generateJWT(string $userId, string $email, string $role): string {
+    $secret = getJWTSecret();
+    $issuedAt = time();
+    $expirationTime = $issuedAt + 86400; // 24 hours
+    
+    $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
+    $payload = json_encode([
+        'iat' => $issuedAt,
+        'exp' => $expirationTime,
+        'sub' => $userId,
+        'email' => $email,
+        'role' => $role
+    ]);
+    
+    $base64Header = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
+    $base64Payload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
+    
+    $signature = hash_hmac('sha256', $base64Header . "." . $base64Payload, $secret, true);
+    $base64Signature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
+    
+    return $base64Header . "." . $base64Payload . "." . $base64Signature;
+}
+
+/**
+ * Verify JWT token and return payload
+ * @param string $token JWT token
+ * @return array|false Payload if valid, false otherwise
+ */
+function verifyJWT(string $token): array|false {
+    $parts = explode('.', $token);
+    if (count($parts) !== 3) return false;
+    
+    $secret = getJWTSecret();
+    $signature = hash_hmac('sha256', $parts[0] . "." . $parts[1], $secret, true);
+    $base64Signature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
+    
+    if (!hash_equals($base64Signature, $parts[2])) return false;
+    
+    $payload = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $parts[1])), true);
+    if (!$payload) return false;
+    
+    // Check expiration
+    if (isset($payload['exp']) && $payload['exp'] < time()) return false;
+    
+    return $payload;
+}
+
+/**
+ * Get authorization token from request headers
+ * @return string|null Token or null if not found
+ */
+function getAuthToken(): ?string {
+    $headers = getallheaders();
+    $authHeader = $headers['Authorization'] ?? '';
+    
+    if (preg_match('/Bearer\s+(\S+)/', $authHeader, $matches)) {
+        return $matches[1];
+    }
+    
+    return null;
+}
+
+/**
+ * Require authentication for protected endpoints
+ * Returns user payload or exits with 401
+ * @return array User payload containing id, email, role
+ */
+function requireAuth(): array {
+    $token = getAuthToken();
+    
+    if (!$token) {
+        http_response_code(401);
+        echo json_encode(["status" => "error", "message" => "Authentication required. Please login."]);
+        exit;
+    }
+    
+    $payload = verifyJWT($token);
+    
+    if (!$payload) {
+        http_response_code(401);
+        echo json_encode(["status" => "error", "message" => "Invalid or expired token. Please login again."]);
+        exit;
+    }
+    
+    return $payload;
+}
+
+/**
+ * Hash password using bcrypt
+ * @param string $password Plain password
+ * @return string Hashed password
+ */
+function hashPassword(string $password): string {
+    return password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
+}
+
+/**
+ * Verify password against hash
+ * @param string $password Plain password
+ * @param string $hash Stored hash
+ * @return bool True if matches
+ */
+function verifyPassword(string $password, string $hash): bool {
+    return password_verify($password, $hash);
+}
+
 $action = $_GET['action'] ?? '';
 
 try {
@@ -208,6 +330,63 @@ try {
                     "schoolsCount" => (int)$schoolsCount,
                     "totalStudents" => (int)$totalStudents,
                     "totalTeachers" => (int)$totalTeachers
+                ]
+            ]);
+            break;
+
+        case 'login':
+            $input = json_decode(file_get_contents('php://input'), true);
+            $email = sanitizeInput($input['email'] ?? '');
+            $password = $input['password'] ?? '';
+            
+            if (!$email || !$password) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Email and password are required."]);
+                break;
+            }
+            
+            $stmt = $pdo->prepare("SELECT id, email, passwordHash, name, role, isActive FROM users WHERE email = ?");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch();
+            
+            if (!$user || !verifyPassword($password, $user['passwordHash'])) {
+                http_response_code(401);
+                echo json_encode(["status" => "error", "message" => "Invalid email or password."]);
+                break;
+            }
+            
+            if (!$user['isActive']) {
+                http_response_code(403);
+                echo json_encode(["status" => "error", "message" => "Account is disabled. Please contact administrator."]);
+                break;
+            }
+            
+            // Generate JWT token
+            $token = generateJWT($user['id'], $user['email'], $user['role']);
+            
+            // Update last login
+            $pdo->prepare("UPDATE users SET lastLogin = NOW() WHERE id = ?")->execute([$user['id']]);
+            
+            echo json_encode([
+                "status" => "success",
+                "token" => $token,
+                "user" => [
+                    "id" => $user['id'],
+                    "email" => $user['email'],
+                    "name" => $user['name'],
+                    "role" => $user['role']
+                ]
+            ]);
+            break;
+
+        case 'verify_token':
+            $payload = requireAuth();
+            echo json_encode([
+                "status" => "success",
+                "user" => [
+                    "id" => $payload['sub'],
+                    "email" => $payload['email'],
+                    "role" => $payload['role']
                 ]
             ]);
             break;
@@ -372,6 +551,7 @@ try {
             break;
 
         case 'update_category':
+            requireAuth(); // Protected: only admin can update categories
             $input = json_decode(file_get_contents('php://input'), true);
             $category = $input['category'] ?? '';
             $newData = $input['newData'] ?? [];
@@ -847,6 +1027,7 @@ try {
             break;
 
         case 'update_complaint':
+            requireAuth(); // Protected: only admin can update complaints
             $input = json_decode(file_get_contents('php://input'), true);
             $id = $input['id'] ?? '';
             $status = $input['status'] ?? '';
@@ -1032,6 +1213,7 @@ try {
             break;
 
         case 'update_admission':
+            requireAuth(); // Protected: only admin can update admissions
             $input = json_decode(file_get_contents('php://input'), true);
             $id     = $input['id'] ?? '';
             $status = $input['status'] ?? '';
@@ -1062,6 +1244,7 @@ try {
             break;
 
         case 'update_job_application':
+            requireAuth(); // Protected: only admin can update job applications
             $input = json_decode(file_get_contents('php://input'), true);
             $id = $input['id'] ?? '';
             $status = $input['status'] ?? '';
@@ -1088,6 +1271,7 @@ try {
             break;
 
         case 'save_news':
+            requireAuth(); // Protected: only admin can save news
             $n = json_decode(file_get_contents('php://input'), true);
             if (!$n) throw new Exception("Data required");
             // Convert base64 image to file path
@@ -1116,6 +1300,7 @@ try {
             break;
 
         case 'save_school':
+            requireAuth(); // Protected: only admin can save schools
             $s = json_decode(file_get_contents('php://input'), true);
             if (!$s) throw new Exception("Data required");
 
@@ -1177,6 +1362,7 @@ try {
             break;
 
         case 'save_job':
+            requireAuth(); // Protected: only admin can save jobs
             $j = json_decode(file_get_contents('php://input'), true);
             if (!$j) throw new Exception("Data required");
             
@@ -1210,6 +1396,7 @@ try {
             break;
 
         case 'delete_news':
+            requireAuth(); // Protected: only admin can delete news
             $id = $_GET['id'] ?? '';
             if (!$id) throw new Exception("ID required");
             $stmt = $pdo->prepare("DELETE FROM news WHERE id = ?");
@@ -1219,6 +1406,7 @@ try {
             break;
 
         case 'delete_school':
+            requireAuth(); // Protected: only admin can delete schools
             $id = $_GET['id'] ?? '';
             if (!$id) throw new Exception("ID required");
             $stmt = $pdo->prepare("DELETE FROM schools WHERE id = ?");
@@ -1228,6 +1416,7 @@ try {
             break;
 
         case 'delete_job':
+            requireAuth(); // Protected: only admin can delete jobs
             $id = $_GET['id'] ?? '';
             if (!$id) throw new Exception("ID required");
             $stmt = $pdo->prepare("DELETE FROM jobs WHERE id = ?");
@@ -1237,6 +1426,7 @@ try {
             break;
 
         case 'delete_entry':
+            requireAuth(); // Protected: only admin can delete entries
             $input = json_decode(file_get_contents('php://input'), true);
             if (!is_array($input)) throw new Exception('Invalid JSON payload');
 
@@ -1265,6 +1455,7 @@ try {
             break;
 
         case 'save_governorate':
+            requireAuth(); // Protected: only admin can save governorates
             $gov = json_decode(file_get_contents('php://input'), true);
             if (!$gov) throw new Exception("Data required");
             
@@ -1282,6 +1473,7 @@ try {
             break;
 
         case 'delete_governorate':
+            requireAuth(); // Protected: only admin can delete governorates
             $id = $_GET['id'] ?? '';
             if (!$id) throw new Exception("ID required");
             
@@ -1293,6 +1485,7 @@ try {
             break;
 
         case 'save_alumni':
+            requireAuth(); // Protected: only admin can save alumni
             $a = json_decode(file_get_contents('php://input'), true);
             if (!$a) throw new Exception("Data required");
 
@@ -1325,6 +1518,7 @@ try {
             break;
 
         case 'delete_alumni':
+            requireAuth(); // Protected: only admin can delete alumni
             $id = $_GET['id'] ?? '';
             if (!$id) throw new Exception("ID required");
 
