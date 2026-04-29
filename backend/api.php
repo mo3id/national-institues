@@ -188,14 +188,44 @@ function verifyJWT(string $token): array|false {
 
 /**
  * Get authorization token from request headers
+ * Supports multiple methods for different server configurations
  * @return string|null Token or null if not found
  */
 function getAuthToken(): ?string {
-    $headers = getallheaders();
-    $authHeader = $headers['Authorization'] ?? '';
+    $authHeader = '';
     
-    if (preg_match('/Bearer\s+(\S+)/', $authHeader, $matches)) {
+    // Method 1: getallheaders() - Standard method
+    if (function_exists('getallheaders')) {
+        $headers = getallheaders();
+        $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+    }
+    
+    // Method 2: $_SERVER['HTTP_AUTHORIZATION'] - For CGI/FastCGI
+    if (empty($authHeader)) {
+        $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    }
+    
+    // Method 3: $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] - For Apache mod_rewrite
+    if (empty($authHeader)) {
+        $authHeader = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+    }
+    
+    // Method 4: get_headers() function - Alternative method
+    if (empty($authHeader) && function_exists('get_headers')) {
+        $allHeaders = get_headers('php://input', true);
+        if (is_array($allHeaders)) {
+            $authHeader = $allHeaders['Authorization'] ?? '';
+        }
+    }
+    
+    // Extract Bearer token
+    if (!empty($authHeader) && preg_match('/Bearer\s+(\S+)/', $authHeader, $matches)) {
         return $matches[1];
+    }
+    
+    // Method 5: Query parameter fallback (last resort)
+    if (isset($_GET['token']) && !empty($_GET['token'])) {
+        return $_GET['token'];
     }
     
     return null;

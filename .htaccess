@@ -2,6 +2,13 @@
   RewriteEngine On
   RewriteBase /
   
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PRESERVE AUTHORIZATION HEADER (for JWT Bearer tokens)
+  # Apache strips Authorization headers by default - this preserves them
+  # ═══════════════════════════════════════════════════════════════════════════
+  RewriteCond %{HTTP:Authorization} ^(.*)
+  RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+  
   # Forward API requests directly to api.php
   # This ensures they don't get caught by the SPA catch-all
   RewriteRule ^api\.php$ - [L]
