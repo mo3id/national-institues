@@ -15,11 +15,13 @@ import Info from 'lucide-react/dist/esm/icons/info';
 import Settings from 'lucide-react/dist/esm/icons/settings';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Pencil from 'lucide-react/dist/esm/icons/pencil';
+import Edit3 from 'lucide-react/dist/esm/icons/edit-3';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import Eye from 'lucide-react/dist/esm/icons/eye';
 import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
 import Save from 'lucide-react/dist/esm/icons/save';
 import X from 'lucide-react/dist/esm/icons/x';
+import XCircle from 'lucide-react/dist/esm/icons/x-circle';
 import Users from 'lucide-react/dist/esm/icons/users';
 import HomeIcon from 'lucide-react/dist/esm/icons/home';
 import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
@@ -1411,6 +1413,7 @@ const Dashboard: React.FC = () => {
     { id: 'departments', label: u.jobDepartments, icon: LayoutDashboard },
     { id: 'jobs', label: u.jobs, icon: Briefcase },
     { id: 'admissions', label: u.admissions, icon: GraduationCap },
+    { id: 'modifications', label: u.modifications || 'Modification Requests', icon: Edit3 },
     { id: 'alumni', label: u.alumni, icon: GraduationCap },
     { id: 'complaints', label: u.complaints, icon: MessageSquare },
     { id: 'contact', label: u.contactSettings || 'Contact Info', icon: Phone },
@@ -2777,6 +2780,18 @@ const Dashboard: React.FC = () => {
             </div>
           )}
 
+          {/* ── Modifications ── */}
+          {section === 'modifications' && (
+            <div className="section-enter">
+              <ModificationsSection 
+                lang={lang} 
+                isRTL={isRTL} 
+                u={u} 
+                showToast={showToast}
+              />
+            </div>
+          )}
+
           {/* ── Settings ── */}
           {section === 'settings' && (
             <div className="section-enter">
@@ -3042,5 +3057,318 @@ const Dashboard: React.FC = () => {
     </div>
   );
 };
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Modifications Section Component
+// ═══════════════════════════════════════════════════════════════════════════
+interface ModificationsSectionProps {
+  lang: 'en' | 'ar';
+  isRTL: boolean;
+  u: Record<string, string>;
+  showToast: (msg: string, type?: 'success' | 'error') => void;
+}
+
+const ModificationsSection: React.FC<ModificationsSectionProps> = ({ lang, isRTL, u, showToast }) => {
+  const [requests, setRequests] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [adminResponse, setAdminResponse] = useState('');
+  const [filterStatus, setFilterStatus] = useState('pending');
+
+  useEffect(() => {
+    fetchRequests();
+  }, [filterStatus]);
+
+  const fetchRequests = async () => {
+    setIsLoading(true);
+    try {
+      // Get paginated entries for modification_requests
+      const res = await getPaginatedEntries({ 
+        type: 'modification_requests', 
+        page: 1, 
+        limit: 100,
+        search: filterStatus === 'all' ? '' : filterStatus
+      });
+      if (res.status === 'success') {
+        // Filter by status on client side since API doesn't support status filter
+        let items = res.data.items || [];
+        if (filterStatus !== 'all') {
+          items = items.filter((req: any) => req.status === filterStatus);
+        }
+        setRequests(items);
+      }
+    } catch (err) {
+      console.error('Failed to fetch modification requests:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleReview = async (action: 'approve' | 'reject') => {
+    if (!selectedRequest) return;
+    if (action === 'reject' && !adminResponse.trim()) {
+      showToast(lang === 'ar' ? 'يرجى إدخال سبب الرفض' : 'Please enter rejection reason', 'error');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api.php?action=review_modification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requestId: selectedRequest.id,
+          action,
+          adminResponse: adminResponse.trim(),
+        }),
+      });
+      const data = await res.json();
+      
+      if (data.status === 'success') {
+        showToast(action === 'approve' ? (u.approved || 'Approved') : (u.rejected || 'Rejected'));
+        setReviewModalOpen(false);
+        setSelectedRequest(null);
+        setAdminResponse('');
+        fetchRequests();
+      } else {
+        showToast(data.message || u.error, 'error');
+      }
+    } catch (err) {
+      showToast(u.error, 'error');
+    }
+  };
+
+  const statusColors: Record<string, { bg: string; color: string }> = {
+    'pending':  { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b' },
+    'approved': { bg: 'rgba(16,185,129,0.12)',  color: '#10b981' },
+    'rejected': { bg: 'rgba(239,68,68,0.12)',   color: '#ef4444' },
+    'completed':{ bg: 'rgba(59,130,246,0.12)',  color: '#3b82f6' },
+  };
+
+  return (
+    <>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
+        <div>
+          <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Edit3 style={{ width: 24, height: 24, color: 'var(--accent)' }} />
+            {u.modifications}
+          </h2>
+          <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 4 }}>{u.modificationsManage}</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface2)', borderRadius: 16, border: '1px solid var(--border)', padding: '4px 8px', gap: 8 }}>
+            <CustomSelect
+              className="!w-40"
+              value={filterStatus}
+              onChange={val => setFilterStatus(val)}
+              options={[
+                { value: 'all', label: u.all },
+                { value: 'pending', label: u.pending },
+                { value: 'approved', label: u.approved },
+                { value: 'rejected', label: u.rejected },
+                { value: 'completed', label: u.completed },
+              ]}
+            />
+          </div>
+          <button 
+            className="dash-btn dash-btn-primary"
+            onClick={fetchRequests}
+            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            <Search style={{ width: 14, height: 14 }} />
+            {u.refresh}
+          </button>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
+        {isLoading && (
+          <div className="table-loader">
+            <div style={{ width: 32, height: 32, border: '4px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin"></div>
+          </div>
+        )}
+        <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
+          <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
+            <tr>
+              <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.requestId}</th>
+              <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.studentName}</th>
+              <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.reason}</th>
+              <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.status}</th>
+              <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.date}</th>
+              <th style={{ padding: '14px 12px', width: 48 }} />
+            </tr>
+          </thead>
+          <tbody>
+            {requests.length > 0 ? requests.map((req, i) => (
+              <tr 
+                key={req.id} 
+                style={{ 
+                  cursor: 'pointer', 
+                  borderBottom: i === requests.length - 1 ? 'none' : '1px solid var(--border)', 
+                  transition: 'background 0.2s ease' 
+                }} 
+                onClick={() => { setSelectedRequest(req); setReviewModalOpen(true); }}
+                onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'}
+                onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+              >
+                <td style={{ padding: '16px 24px', color: 'var(--text)', fontFamily: 'monospace', fontWeight: 700, fontSize: 13 }}>{req.requestNumber}</td>
+                <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{req.studentName}</td>
+                <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, maxWidth: 200 }}>
+                  <p style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={req.requestReason}>{req.requestReason}</p>
+                </td>
+                <td style={{ padding: '16px 24px' }}>
+                  <span style={{
+                    padding: '4px 10px', borderRadius: 999, fontSize: 10, fontWeight: 800, textTransform: 'uppercase',
+                    background: statusColors[req.status]?.bg || statusColors['pending'].bg,
+                    color: statusColors[req.status]?.color || statusColors['pending'].color,
+                  }}>{req.status}</span>
+                </td>
+                <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 12, fontWeight: 600 }}>{req.createdAt ? new Date(req.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB') : '—'}</td>
+                <td style={{ padding: '16px 12px' }}>
+                  <ChevronRight style={{ width: 16, height: 16, color: 'var(--border)', transform: isRTL ? 'rotate(180deg)' : 'none' }} />
+                </td>
+              </tr>
+            )) : (
+              <tr>
+                <td colSpan={6} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}>
+                  <Edit3 style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} />
+                  <p style={{ fontWeight: 600 }}>{u.noResults}</p>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Review Modal */}
+      {reviewModalOpen && selectedRequest && (
+        <ModalWrap title={u.reviewRequest || 'Review Request'} onClose={() => { setReviewModalOpen(false); setAdminResponse(''); }}>
+          <div style={{ width: '100%', maxWidth: 600 }} dir={isRTL ? 'rtl' : 'ltr'}>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+              <div>
+                <p style={{ fontSize: 12, color: 'var(--text2)', fontFamily: 'monospace', fontWeight: 700, marginBottom: 4 }}>{selectedRequest.requestNumber}</p>
+                <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.requestDetails}</h3>
+              </div>
+              <span style={{ 
+                padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 700, 
+                background: statusColors[selectedRequest.status]?.bg || statusColors['pending'].bg, 
+                color: statusColors[selectedRequest.status]?.color || statusColors['pending'].color 
+              }}>{selectedRequest.status}</span>
+            </div>
+
+            {/* Details */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+              <div className="dash-card" style={{ padding: 12 }}>
+                <p className="dash-label">{u.studentName}</p>
+                <p style={{ fontWeight: 700 }}>{selectedRequest.studentName}</p>
+              </div>
+              <div className="dash-card" style={{ padding: 12 }}>
+                <p className="dash-label">{u.nationalId}</p>
+                <p style={{ fontFamily: 'monospace' }}>****{selectedRequest.nationalIdSuffix}</p>
+              </div>
+            </div>
+
+            {/* Reason */}
+            <div className="dash-card" style={{ padding: 16, marginBottom: 20 }}>
+              <p className="dash-label">{u.reason}</p>
+              <p style={{ fontWeight: 600 }}>{selectedRequest.requestReason}</p>
+            </div>
+
+            {/* Requested Preferences */}
+            <div className="dash-card" style={{ padding: 16, marginBottom: 20 }}>
+              <p className="dash-label">{u.requestedPreferences || 'Requested Preferences'}</p>
+              <ol style={{ paddingLeft: 20 }}>
+                {selectedRequest.requestedPreferences && JSON.parse(selectedRequest.requestedPreferences || '[]').map((pref: any, idx: number) => (
+                  <li key={idx} style={{ fontWeight: 600, marginBottom: 4 }}>
+                    {pref.schoolNameAr || pref.schoolName}
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            {/* Admin Response */}
+            {selectedRequest.status === 'pending' ? (
+              <div style={{ marginBottom: 20 }}>
+                <label className="dash-label">{u.adminResponse || 'Your Response'}</label>
+                <textarea 
+                  className="dash-input dash-ta" 
+                  value={adminResponse}
+                  onChange={e => setAdminResponse(e.target.value)}
+                  placeholder={lang === 'ar' ? 'اكتب ردك أو سبب الرفض...' : 'Write your response or rejection reason...'}
+                />
+              </div>
+            ) : selectedRequest.adminResponse ? (
+              <div className="dash-card" style={{ padding: 16, marginBottom: 20, background: selectedRequest.status === 'rejected' ? 'rgba(239,68,68,0.05)' : 'rgba(16,185,129,0.05)' }}>
+                <p className="dash-label">{u.adminResponse || 'Admin Response'}</p>
+                <p style={{ fontWeight: 600 }}>{selectedRequest.adminResponse}</p>
+              </div>
+            ) : null}
+
+            {/* Actions */}
+            <div className="dash-form-actions" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              {selectedRequest.status === 'pending' ? (
+                <>
+                  <button 
+                    className="dash-btn dash-btn-primary" 
+                    onClick={() => handleReview('approve')}
+                    style={{ background: '#10b981', borderColor: '#10b981' }}
+                  >
+                    <CheckCircle style={{ width: 14, height: 14 }} />
+                    {u.approve || 'Approve'}
+                  </button>
+                  <button 
+                    className="dash-btn dash-btn-danger" 
+                    onClick={() => handleReview('reject')}
+                  >
+                    <XCircle style={{ width: 14, height: 14 }} />
+                    {u.reject || 'Reject'}
+                  </button>
+                  <button 
+                    className="dash-btn dash-btn-ghost" 
+                    onClick={() => { setReviewModalOpen(false); setAdminResponse(''); }}
+                    style={{ marginInlineStart: 'auto' }}
+                  >
+                    {u.cancel}
+                  </button>
+                </>
+              ) : (
+                <button 
+                  className="dash-btn dash-btn-ghost" 
+                  onClick={() => { setReviewModalOpen(false); setAdminResponse(''); }}
+                  style={{ marginInlineStart: 'auto' }}
+                >
+                  {u.close || 'Close'}
+                </button>
+              )}
+            </div>
+          </div>
+        </ModalWrap>
+      )}
+    </>
+  );
+};
+
+// Add translations
+UI.en.approve = 'Approve';
+UI.en.reject = 'Reject';
+UI.en.approved = 'Approved';
+UI.en.rejected = 'Rejected';
+UI.en.reviewRequest = 'Review Request';
+UI.en.requestedPreferences = 'Requested Preferences';
+UI.en.adminResponse = 'Admin Response';
+UI.en.close = 'Close';
+UI.en.refresh = 'Refresh';
+UI.ar.approve = 'موافقة';
+UI.ar.reject = 'رفض';
+UI.ar.approved = 'تمت الموافقة';
+UI.ar.rejected = 'تم الرفض';
+UI.ar.reviewRequest = 'مراجعة الطلب';
+UI.ar.requestedPreferences = 'الرغبات المطلوبة';
+UI.ar.adminResponse = 'رد الإدارة';
+UI.ar.close = 'إغلاق';
+UI.ar.refresh = 'تحديث';
 
 export default Dashboard;

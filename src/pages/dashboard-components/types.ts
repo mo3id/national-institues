@@ -1,4 +1,4 @@
-export type Section = 'overview' | 'news' | 'schools' | 'departments' | 'jobs' | 'recruitment' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'contact' | 'complaints' | 'contactMessages' | 'heroBackgrounds' | 'governorates' | 'admissions' | 'alumni' | 'settings';
+export type Section = 'overview' | 'news' | 'schools' | 'departments' | 'jobs' | 'recruitment' | 'hero' | 'chairman' | 'institute' | 'home' | 'forms' | 'contact' | 'complaints' | 'contactMessages' | 'heroBackgrounds' | 'governorates' | 'admissions' | 'modifications' | 'alumni' | 'settings';
 export type Theme = 'light' | 'dark';
 export type Lang = 'en' | 'ar';
 
@@ -388,6 +388,8 @@ export const UI: Record<Lang, Record<string, string>> = {
         requestId: 'Request ID',
         admissions: 'School Admissions',
         admissionsManage: 'View and manage school admission applications',
+        modifications: 'Modification Requests',
+        modificationsManage: 'Review and approve student preference modification requests',
         admissionSettings: 'Admission Settings',
         admissionSettingsManage: 'Configure the admission form and required documents',
         studentName: 'Student Name',
@@ -653,6 +655,8 @@ export const UI: Record<Lang, Record<string, string>> = {
         requestId: 'رقم الطلب',
         admissions: 'طلبات الالتحاق',
         admissionsManage: 'عرض وإدارة طلبات الالتحاق بالمدارس',
+        modifications: 'طلبات تعديل الرغبات',
+        modificationsManage: 'مراجعة واعتماد طلبات تعديل رغبات المدارس',
         admissionSettings: 'إعدادات التقديم',
         admissionSettingsManage: 'تكوين نموذج التقديم والمستندات المطلوبة',
         studentName: 'اسم الطالب',

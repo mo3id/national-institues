@@ -294,3 +294,8 @@ export const deleteAlumni = async (id: string): Promise<ApiResponse> => {
     notifyUpdate();
     return data;
 };
+
+export const getSchools = async (): Promise<ApiResponse> => {
+    const { data } = await apiClient.get<ApiResponse>(`?action=get_schools`);
+    return data;
+};

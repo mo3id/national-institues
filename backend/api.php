@@ -231,6 +231,151 @@ function getAuthToken(): ?string {
     return null;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// NUMBER GENERATION FUNCTIONS (DYNAMIC YEAR)
+// All numbers use current year from date('Y') - auto-updates each year
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Generate new admission application number
+ * Format: APP-YYYY-XXX-NNNN (last 4 of national ID)
+ * Example: APP-2026-015-5847 (for year 2026)
+ * @param string $nationalId Student national ID (14 digits)
+ * @param PDO $pdo Database connection
+ * @return string Generated application number
+ */
+function generateAdmissionNumber(string $nationalId, PDO $pdo): string {
+    $year = date('Y'); // Dynamic year: 2026, 2027, etc.
+    $last4 = substr($nationalId, -4);
+    
+    // Get next sequence number for this year
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) as count 
+        FROM admissions 
+        WHERE application_number LIKE CONCAT('APP-', ?, '-%')
+    ");
+    $stmt->execute([$year]);
+    $row = $stmt->fetch();
+    $nextNumber = str_pad(($row['count'] ?? 0) + 1, 3, '0', STR_PAD_LEFT);
+    
+    return "APP-{$year}-{$nextNumber}-{$last4}";
+}
+
+/**
+ * Generate modification request number
+ * Format: MOD-YYYY-XXX-NNNN
+ * Example: MOD-2026-003-5847
+ */
+function generateModificationNumber(string $nationalId, PDO $pdo): string {
+    $year = date('Y');
+    $last4 = substr($nationalId, -4);
+    
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) as count 
+        FROM modification_requests 
+        WHERE request_number LIKE CONCAT('MOD-', ?, '-%')
+    ");
+    $stmt->execute([$year]);
+    $row = $stmt->fetch();
+    $nextNumber = str_pad(($row['count'] ?? 0) + 1, 3, '0', STR_PAD_LEFT);
+    
+    return "MOD-{$year}-{$nextNumber}-{$last4}";
+}
+
+/**
+ * Generate complaint number
+ * Format: COMP-YYYY-XXX
+ * Example: COMP-2026-042
+ */
+function generateComplaintNumber(PDO $pdo): string {
+    $year = date('Y');
+    
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) as count 
+        FROM complaints 
+        WHERE complaint_number LIKE CONCAT('COMP-', ?, '-%')
+    ");
+    $stmt->execute([$year]);
+    $row = $stmt->fetch();
+    $nextNumber = str_pad(($row['count'] ?? 0) + 1, 3, '0', STR_PAD_LEFT);
+    
+    return "COMP-{$year}-{$nextNumber}";
+}
+
+/**
+ * Generate message number
+ * Format: MSG-YYYY-XXX
+ * Example: MSG-2026-018
+ */
+function generateMessageNumber(PDO $pdo): string {
+    $year = date('Y');
+    
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) as count 
+        FROM contact_messages 
+        WHERE message_number LIKE CONCAT('MSG-', ?, '-%')
+    ");
+    $stmt->execute([$year]);
+    $row = $stmt->fetch();
+    $nextNumber = str_pad(($row['count'] ?? 0) + 1, 3, '0', STR_PAD_LEFT);
+    
+    return "MSG-{$year}-{$nextNumber}";
+}
+
+/**
+ * Generate job application number
+ * Format: JOB-YYYY-XXX
+ * Example: JOB-2026-007
+ */
+function generateJobApplicationNumber(PDO $pdo): string {
+    $year = date('Y');
+    
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) as count 
+        FROM job_applications 
+        WHERE application_number LIKE CONCAT('JOB-', ?, '-%')
+    ");
+    $stmt->execute([$year]);
+    $row = $stmt->fetch();
+    $nextNumber = str_pad(($row['count'] ?? 0) + 1, 3, '0', STR_PAD_LEFT);
+    
+    return "JOB-{$year}-{$nextNumber}";
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER FUNCTIONS FOR STATUS LABELS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Get Arabic label for admission status
+ */
+function getStatusLabel(string $status): string {
+    $labels = [
+        'pending' => 'معلق',
+        'under_review' => 'قيد المراجعة',
+        'accepted' => 'مقبول',
+        'rejected' => 'مرفوض',
+        'modification_requested' => 'بانتظار تعديل الرغبات',
+        'modification_approved' => 'تم الموافقة على التعديل'
+    ];
+    return $labels[$status] ?? $status;
+}
+
+/**
+ * Get Arabic label for modification request status
+ */
+function getModificationStatusLabel(string $status): string {
+    $labels = [
+        'pending' => 'معلق',
+        'approved' => 'تمت الموافقة',
+        'rejected' => 'مرفوض',
+        'completed' => 'مكتمل'
+    ];
+    return $labels[$status] ?? $status;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+
 /**
  * Require authentication for protected endpoints
  * Returns user payload or exits with 401
@@ -1086,41 +1231,93 @@ try {
             break;
 
         case 'add_admission':
+            // ═══════════════════════════════════════════════════════════════════════════
+            // NEW: Submit admission with duplicate check and database storage
+            // ═══════════════════════════════════════════════════════════════════════════
+            
             // ── Accept multipart/form-data: text fields in $_POST, files in $_FILES
             $input = [];
-            $textFields = ['studentName', 'studentDOB', 'studentNationalId', 'gradeStage', 'gradeClass', 'parentName', 'parentPhone', 'parentEmail', 'notes', 'hasSibling'];
+            $textFields = ['studentName', 'studentNameAr', 'studentDOB', 'studentNationalId', 'gradeStage', 'gradeClass', 'parentName', 'parentNameAr', 'parentPhone', 'parentEmail', 'parentNationalId', 'parentJob', 'address', 'siblingSchool'];
             foreach ($textFields as $f) {
                 $input[$f] = sanitizeInput($_POST[$f] ?? '');
             }
+            
             // Convert checkbox to boolean
-            $input['hasSibling'] = in_array($input['hasSibling'], ['1', 'true', 'on'], true) || (bool)$input['hasSibling'];
-
+            $input['hasSibling'] = in_array($_POST['hasSibling'] ?? '', ['1', 'true', 'on'], true);
+            
+            // Validate required fields
+            if (empty($input['studentName']) || empty($input['studentNationalId'])) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Student name and national ID are required."]);
+                break;
+            }
+            
+            // ═══════════════════════════════════════════════════════════════════════════
+            // STEP 1: Check if already applied (by national ID)
+            // ═══════════════════════════════════════════════════════════════════════════
+            $nationalId = $input['studentNationalId'];
+            
+            $checkStmt = $pdo->prepare("
+                SELECT id, application_number, student_name, status, created_at 
+                FROM admissions 
+                WHERE student_national_id = ?
+            ");
+            $checkStmt->execute([$nationalId]);
+            $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($existing) {
+                // Student already applied - return error with details
+                http_response_code(409); // Conflict
+                echo json_encode([
+                    "status" => "error",
+                    "error_code" => "ALREADY_APPLIED",
+                    "message" => "لقد قدمت طلباً مسبقاً بهذا الرقم القومي",
+                    "data" => [
+                        "applicationId" => $existing['id'],
+                        "applicationNumber" => $existing['application_number'] ?? $existing['id'],
+                        "studentName" => $existing['student_name'],
+                        "status" => $existing['status'],
+                        "submittedAt" => $existing['created_at'],
+                        "actions" => [
+                            "view_details" => "/admissions/track?id={$existing['id']}",
+                            "request_modification" => "/modifications/request?admissionId={$existing['id']}"
+                        ]
+                    ]
+                ]);
+                break;
+            }
+            
             // Preferences: sent as JSON string in a POST field
-            $input['preferences'] = [];
+            $preferences = [];
             if (!empty($_POST['preferences'])) {
                 $prefs = json_decode($_POST['preferences'], true);
                 if (is_array($prefs)) {
-                    $input['preferences'] = array_map(function($p) {
+                    $preferences = array_map(function($p) {
                         return is_array($p)
-                            ? ['schoolId' => htmlspecialchars($p['schoolId'] ?? '', ENT_QUOTES), 'schoolName' => htmlspecialchars($p['schoolName'] ?? '', ENT_QUOTES), 'schoolNameAr' => htmlspecialchars($p['schoolNameAr'] ?? '', ENT_QUOTES)]
-                            : [];
+                            ? [
+                                'schoolId' => htmlspecialchars($p['schoolId'] ?? '', ENT_QUOTES),
+                                'schoolName' => htmlspecialchars($p['schoolName'] ?? '', ENT_QUOTES),
+                                'schoolNameAr' => htmlspecialchars($p['schoolNameAr'] ?? '', ENT_QUOTES)
+                              ]
+                            : null;
                     }, $prefs);
+                    $preferences = array_filter($preferences); // Remove nulls
                 }
             }
-
+            
             // Document names: sent as JSON string in a POST field
             $docNames = [];
             if (!empty($_POST['documentNames'])) {
                 $docNames = json_decode($_POST['documentNames'], true) ?: [];
             }
-
+            
             // Documents: actual files via $_FILES['documents']
             $savedDocs = [];
-            $allowedMimes = ['image/jpeg', 'application/pdf'];
+            $allowedMimes = ['image/jpeg', 'image/png', 'application/pdf'];
             $maxFileSize = 5 * 1024 * 1024; // 5 MB
-            $uploadDir = __DIR__ . '/uploads/';
+            $uploadDir = __DIR__ . '/uploads/admissions/';
             if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-
+            
             if (!empty($_FILES['documents'])) {
                 $files = $_FILES['documents'];
                 $count = is_array($files['name']) ? count($files['name']) : 0;
@@ -1131,101 +1328,245 @@ try {
                     $fileSize = $files['size'][$i] ?? 0;
                     $fileMime = $files['type'][$i] ?? '';
                     $error    = $files['error'][$i] ?? UPLOAD_ERR_NO_FILE;
-
+                    
                     if ($error !== UPLOAD_ERR_OK || empty($tmpPath)) {
-                        $savedDocs[] = ['name' => $docLabel, 'fileName' => $origName, 'path' => ''];
-                        continue;
+                        continue; // Skip failed uploads
                     }
                     if (!in_array($fileMime, $allowedMimes)) {
-                        $savedDocs[] = ['name' => $docLabel, 'fileName' => $origName, 'path' => ''];
+                        $savedDocs[] = ['name' => $docLabel, 'fileName' => $origName, 'path' => '', 'error' => 'Invalid file type'];
                         continue;
                     }
                     if ($fileSize > $maxFileSize) {
-                        $savedDocs[] = ['name' => $docLabel, 'fileName' => $origName, 'path' => ''];
+                        $savedDocs[] = ['name' => $docLabel, 'fileName' => $origName, 'path' => '', 'error' => 'File too large'];
                         continue;
                     }
-
-                    $ext = pathinfo($origName, PATHINFO_EXTENSION) ?: 'bin';
+                    
+                    $ext = pathinfo($origName, PATHINFO_EXTENSION) ?: 'pdf';
                     $safeName = 'doc_' . uniqid() . '_' . time() . '.' . $ext;
                     $destPath = $uploadDir . $safeName;
                     if (move_uploaded_file($tmpPath, $destPath)) {
-                        $savedDocs[] = ['name' => $docLabel, 'fileName' => $origName, 'path' => '/uploads/' . $safeName];
-                    } else {
-                        $savedDocs[] = ['name' => $docLabel, 'fileName' => $origName, 'path' => ''];
+                        $savedDocs[] = ['name' => $docLabel, 'fileName' => $origName, 'path' => '/uploads/admissions/' . $safeName];
                     }
                 }
             }
-            $input['documents'] = $savedDocs;
-
-            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'admissions'");
-            $row = $stmt->fetch();
-            $admissions = $row ? json_decode($row['setting_value'], true) : [];
-
+            
             // Rate limit: reject if same parentPhone submitted within last 60 seconds
             $parentPhone = $input['parentPhone'] ?? '';
-            $now = time();
-            foreach ($admissions as $existing) {
-                if (($existing['parentPhone'] ?? '') === $parentPhone && !empty($existing['createdAt'])) {
-                    $diff = $now - strtotime($existing['createdAt']);
-                    if ($diff >= 0 && $diff < 60) {
-                        throw new Exception('Please wait before submitting another application.');
-                    }
-                }
-            }
-
-            // Generate unique ID with collision check
-            $maxAttempts = 20;
-            do {
-                $candidateId = 'ADM-' . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
-                $idExists = false;
-                foreach ($admissions as $a) { if (($a['id'] ?? '') === $candidateId) { $idExists = true; break; } }
-                $maxAttempts--;
-            } while ($idExists && $maxAttempts > 0);
-            if ($idExists) $candidateId = 'ADM-' . uniqid();
-            $input['id']          = $candidateId;
-            $input['status']      = 'Pending';
-            $input['acceptedSchool'] = '';
-            $input['adminNotes']  = '';
-            $input['createdAt']   = date('c');
-            $admissions[]         = $input;
-            $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('admissions', ?)");
-            $stmt->execute([json_encode($admissions, JSON_UNESCAPED_UNICODE)]);
-            bustCache();
-            echo json_encode(["status" => "success", "message" => "Admission submitted successfully.", "data" => ['id' => $input['id'], 'createdAt' => $input['createdAt']]]);
-            break;
-
-        case 'get_admission_status':
-            $id = $_GET['admissionId'] ?? '';
-            if (!$id) throw new Exception("Admission ID is required");
-
-            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'admissions'");
-            $row = $stmt->fetch();
-            $admissions = $row ? json_decode($row['setting_value'], true) : [];
-
-            $found = null;
-            foreach ($admissions as $a) {
-                if (($a['id'] ?? '') === $id) {
-                    $found = $a;
+            if (!empty($parentPhone)) {
+                $rateStmt = $pdo->prepare("
+                    SELECT id FROM admissions 
+                    WHERE parent_phone = ? AND created_at > DATE_SUB(NOW(), INTERVAL 60 SECOND)
+                    LIMIT 1
+                ");
+                $rateStmt->execute([$parentPhone]);
+                if ($rateStmt->fetch()) {
+                    http_response_code(429); // Too Many Requests
+                    echo json_encode([
+                        "status" => "error",
+                        "message" => "يرجى الانتظار 60 ثانية قبل إرسال طلب آخر"
+                    ]);
                     break;
                 }
             }
-
-            if (!$found) {
-                echo json_encode(["status" => "error", "message" => "Admission not found."]);
-            } else {
-                // Mask student name: show first 3 chars only
-                $maskedName = mb_strlen($found['studentName'] ?? '') > 3
-                    ? mb_substr($found['studentName'], 0, 3) . '***'
-                    : ($found['studentName'] ?? '') . '***';
-                echo json_encode(["status" => "success", "data" => [
-                    'id'            => $found['id'],
-                    'status'        => $found['status'],
-                    'acceptedSchool'=> $found['acceptedSchool'] ?? '',
-                    'createdAt'     => $found['createdAt'],
-                    'studentName'   => $maskedName,
-                    'gradeStage'    => $found['gradeStage'] ?? '',
-                ]]);
+            
+            // ═══════════════════════════════════════════════════════════════════════════
+            // STEP 2: Generate IDs and Number
+            // ═══════════════════════════════════════════════════════════════════════════
+            $id = uniqid('ADM_');
+            
+            // Generate application number with dynamic year (APP-YYYY-XXX-NNNN)
+            $applicationNumber = generateAdmissionNumber($nationalId, $pdo);
+            
+            // ═══════════════════════════════════════════════════════════════════════════
+            // STEP 3: Insert into admissions table
+            // ═══════════════════════════════════════════════════════════════════════════
+            $stmt = $pdo->prepare("
+                INSERT INTO admissions (
+                    id, application_number, student_name, student_name_ar, student_dob,
+                    student_national_id, grade_stage, grade_class, parent_name, parent_name_ar,
+                    parent_phone, parent_email, parent_national_id, parent_job, address,
+                    has_sibling, sibling_school, documents, status, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
+            ");
+            
+            $stmt->execute([
+                $id,
+                $applicationNumber,
+                $input['studentName'],
+                $input['studentNameAr'],
+                !empty($input['studentDOB']) ? $input['studentDOB'] : null,
+                $nationalId,
+                $input['gradeStage'],
+                $input['gradeClass'],
+                $input['parentName'],
+                $input['parentNameAr'],
+                $input['parentPhone'],
+                $input['parentEmail'],
+                $input['parentNationalId'],
+                $input['parentJob'],
+                $input['address'],
+                $input['hasSibling'] ? 1 : 0,
+                $input['siblingSchool'],
+                json_encode($savedDocs, JSON_UNESCAPED_UNICODE)
+            ]);
+            
+            // ═══════════════════════════════════════════════════════════════════════════
+            // STEP 4: Insert preferences into admission_preferences table
+            // ═══════════════════════════════════════════════════════════════════════════
+            if (!empty($preferences)) {
+                $prefStmt = $pdo->prepare("
+                    INSERT INTO admission_preferences (id, admission_id, school_id, preference_order)
+                    VALUES (?, ?, ?, ?)
+                ");
+                
+                foreach ($preferences as $index => $pref) {
+                    if (is_array($pref) && !empty($pref['schoolId'])) {
+                        $prefStmt->execute([
+                            uniqid('PREF_'),
+                            $id,
+                            $pref['schoolId'],
+                            $index + 1
+                        ]);
+                    }
+                }
             }
+            
+            // Clear cache
+            bustCache();
+            
+            echo json_encode([
+                "status" => "success",
+                "message" => "تم تقديم طلب الالتحاق بنجاح",
+                "data" => [
+                    "applicationId" => $id,
+                    "applicationNumber" => $applicationNumber,
+                    "trackUrl" => "/admissions/track?id={$id}"
+                ]
+            ]);
+            break;
+
+        case 'get_admission_status':
+            // ═══════════════════════════════════════════════════════════════════════════
+            // NEW: Get admission status from database with preferences and modifications
+            // Supports: admissionId, applicationNumber, or nationalId
+            // ═══════════════════════════════════════════════════════════════════════════
+            $admissionId = $_GET['admissionId'] ?? '';
+            $applicationNumber = $_GET['applicationNumber'] ?? '';
+            $nationalId = $_GET['nationalId'] ?? '';
+            
+            if (empty($admissionId) && empty($applicationNumber) && empty($nationalId)) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "يرجى إدخال رقم الطلب أو رقم القيد أو الرقم القومي"]);
+                break;
+            }
+            
+            // Build query based on provided identifier
+            $whereClause = '';
+            $params = [];
+            if (!empty($admissionId)) {
+                $whereClause = 'a.id = ?';
+                $params[] = $admissionId;
+            } elseif (!empty($applicationNumber)) {
+                $whereClause = 'a.application_number = ?';
+                $params[] = $applicationNumber;
+            } else {
+                $whereClause = 'a.student_national_id = ?';
+                $params[] = $nationalId;
+            }
+            
+            // Get admission with school info
+            $stmt = $pdo->prepare("
+                SELECT a.*, s.name as accepted_school_name, s.name_ar as accepted_school_name_ar
+                FROM admissions a
+                LEFT JOIN schools s ON a.accepted_school_id = s.id
+                WHERE {$whereClause}
+            ");
+            $stmt->execute($params);
+            $admission = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$admission) {
+                http_response_code(404);
+                echo json_encode(["status" => "error", "message" => "لم يتم العثور على طلب بهذا الرقم"]);
+                break;
+            }
+            
+            // Get preferences
+            $prefStmt = $pdo->prepare("
+                SELECT ap.*, s.name as school_name, s.name_ar as school_name_ar, s.stage
+                FROM admission_preferences ap
+                JOIN schools s ON ap.school_id = s.id
+                WHERE ap.admission_id = ?
+                ORDER BY ap.preference_order
+            ");
+            $prefStmt->execute([$admission['id']]);
+            $preferences = $prefStmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Get pending/completed modification requests
+            $modStmt = $pdo->prepare("
+                SELECT id, request_number, status, request_reason, admin_response, created_at, reviewed_at
+                FROM modification_requests
+                WHERE admission_id = ?
+                ORDER BY created_at DESC
+            ");
+            $modStmt->execute([$admission['id']]);
+            $modifications = $modStmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Mask student name for public display
+            $studentName = $admission['student_name'] ?? '';
+            $maskedName = mb_strlen($studentName) > 3
+                ? mb_substr($studentName, 0, 3) . '***'
+                : $studentName . '***';
+            
+            // Determine if modification is allowed
+            $canRequestModification = in_array($admission['status'], ['pending', 'under_review', 'accepted']);
+            $hasPendingModification = false;
+            foreach ($modifications as $mod) {
+                if ($mod['status'] === 'pending') {
+                    $hasPendingModification = true;
+                    break;
+                }
+            }
+            
+            echo json_encode([
+                "status" => "success",
+                "data" => [
+                    'applicationId' => $admission['id'],
+                    'applicationNumber' => $admission['application_number'] ?? $admission['id'],
+                    'studentName' => $maskedName,
+                    'gradeStage' => $admission['grade_stage'],
+                    'gradeClass' => $admission['grade_class'],
+                    'status' => $admission['status'],
+                    'statusLabel' => getStatusLabel($admission['status']),
+                    'acceptedSchool' => $admission['accepted_school_name_ar'] ?? $admission['accepted_school_name'] ?? null,
+                    'submittedAt' => $admission['created_at'],
+                    'updatedAt' => $admission['updated_at'],
+                    'preferences' => array_map(function($p) {
+                        return [
+                            'order' => intval($p['preference_order']),
+                            'schoolId' => $p['school_id'],
+                            'schoolName' => $p['school_name_ar'] ?? $p['school_name'],
+                            'stage' => $p['stage']
+                        ];
+                    }, $preferences),
+                    'modifications' => array_map(function($m) {
+                        return [
+                            'requestNumber' => $m['request_number'],
+                            'status' => $m['status'],
+                            'statusLabel' => getModificationStatusLabel($m['status']),
+                            'reason' => $m['request_reason'],
+                            'adminResponse' => $m['admin_response'],
+                            'requestedAt' => $m['created_at'],
+                            'reviewedAt' => $m['reviewed_at']
+                        ];
+                    }, $modifications),
+                    'actions' => [
+                        'canRequestModification' => $canRequestModification && !$hasPendingModification,
+                        'canEditPreferences' => $admission['status'] === 'modification_approved',
+                        'requestModificationUrl' => "/modifications/request?admissionId={$admission['id']}",
+                        'editPreferencesUrl' => "/admissions/edit?id={$admission['id']}"
+                    ]
+                ]
+            ]);
             break;
 
         case 'get_admission_detail':
@@ -1557,6 +1898,302 @@ try {
 
             bustCache();
             echo json_encode(["status" => "success", "message" => "Alumni deleted successfully."]);
+            break;
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // NEW ADMISSION & MODIFICATION APIs
+        // ═══════════════════════════════════════════════════════════════════════════
+
+        case 'update_admission':
+            // Admin only: Update admission status and accepted school
+            requireAuth();
+            
+            $input = json_decode(file_get_contents('php://input'), true);
+            $id = sanitizeInput($input['id'] ?? '');
+            $status = sanitizeInput($input['status'] ?? '');
+            $acceptedSchoolId = sanitizeInput($input['acceptedSchoolId'] ?? null);
+            $adminNotes = sanitizeInput($input['adminNotes'] ?? '');
+            
+            if (empty($id)) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Admission ID is required"]);
+                break;
+            }
+            
+            $validStatuses = ['pending', 'under_review', 'accepted', 'rejected', 'modification_approved'];
+            if (!empty($status) && !in_array($status, $validStatuses)) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Invalid status"]);
+                break;
+            }
+            
+            // Build update query dynamically
+            $updates = [];
+            $params = [];
+            
+            if (!empty($status)) {
+                $updates[] = "status = ?";
+                $params[] = $status;
+            }
+            if ($acceptedSchoolId !== null) {
+                $updates[] = "accepted_school_id = ?";
+                $params[] = $acceptedSchoolId ?: null;
+            }
+            if (!empty($adminNotes)) {
+                $updates[] = "admin_notes = ?";
+                $params[] = $adminNotes;
+            }
+            
+            if (empty($updates)) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "No fields to update"]);
+                break;
+            }
+            
+            $params[] = $id;
+            $sql = "UPDATE admissions SET " . implode(', ', $updates) . " WHERE id = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            
+            if ($stmt->rowCount() === 0) {
+                http_response_code(404);
+                echo json_encode(["status" => "error", "message" => "Admission not found"]);
+                break;
+            }
+            
+            bustCache();
+            echo json_encode([
+                "status" => "success",
+                "message" => "تم تحديث حالة الطلب بنجاح",
+                "data" => ["id" => $id, "status" => $status]
+            ]);
+            break;
+
+        case 'request_modification':
+            // Student: Request to modify preferences
+            $input = json_decode(file_get_contents('php://input'), true);
+            $admissionId = sanitizeInput($input['admissionId'] ?? '');
+            $requestedPreferences = $input['requestedPreferences'] ?? [];
+            $reason = sanitizeInput($input['reason'] ?? '');
+            
+            if (empty($admissionId) || empty($reason)) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Admission ID and reason are required"]);
+                break;
+            }
+            
+            if (empty($requestedPreferences) || !is_array($requestedPreferences)) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Preferences are required"]);
+                break;
+            }
+            
+            // Check admission exists and status allows modification request
+            $checkStmt = $pdo->prepare("
+                SELECT id, student_national_id, status FROM admissions WHERE id = ?
+            ");
+            $checkStmt->execute([$admissionId]);
+            $admission = $checkStmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$admission) {
+                http_response_code(404);
+                echo json_encode(["status" => "error", "message" => "Admission not found"]);
+                break;
+            }
+            
+            // Only allow modification requests for certain statuses
+            if (!in_array($admission['status'], ['pending', 'under_review', 'accepted'])) {
+                http_response_code(400);
+                echo json_encode([
+                    "status" => "error",
+                    "message" => "لا يمكن طلب تعديل في الحالة الحالية"
+                ]);
+                break;
+            }
+            
+            // Check for pending modification request
+            $pendingStmt = $pdo->prepare("
+                SELECT id FROM modification_requests 
+                WHERE admission_id = ? AND status = 'pending'
+            ");
+            $pendingStmt->execute([$admissionId]);
+            if ($pendingStmt->fetch()) {
+                http_response_code(409);
+                echo json_encode([
+                    "status" => "error",
+                    "message" => "يوجد طلب تعديل معلق بالفعل"
+                ]);
+                break;
+            }
+            
+            // Generate modification request number
+            $nationalId = $admission['student_national_id'];
+            $requestNumber = generateModificationNumber($nationalId, $pdo);
+            
+            // Create modification request
+            $id = uniqid('MODREQ_');
+            $stmt = $pdo->prepare("
+                INSERT INTO modification_requests (
+                    id, request_number, admission_id, national_id_suffix,
+                    requested_preferences, request_reason, status, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())
+            ");
+            
+            $stmt->execute([
+                $id,
+                $requestNumber,
+                $admissionId,
+                substr($nationalId, -4),
+                json_encode($requestedPreferences, JSON_UNESCAPED_UNICODE),
+                $reason
+            ]);
+            
+            // Update admission status
+            $pdo->prepare("UPDATE admissions SET status = 'modification_requested' WHERE id = ?")
+                ->execute([$admissionId]);
+            
+            bustCache();
+            echo json_encode([
+                "status" => "success",
+                "message" => "تم تقديم طلب التعديل بنجاح",
+                "data" => [
+                    "requestId" => $id,
+                    "requestNumber" => $requestNumber,
+                    "trackUrl" => "/modifications/track?requestNumber={$requestNumber}"
+                ]
+            ]);
+            break;
+
+        case 'get_modification_status':
+            // Track modification request status
+            $requestNumber = sanitizeInput($_GET['requestNumber'] ?? '');
+            $nationalIdSuffix = sanitizeInput($_GET['nationalIdSuffix'] ?? '');
+            
+            if (empty($requestNumber)) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Request number is required"]);
+                break;
+            }
+            
+            $sql = "
+                SELECT mr.*, a.student_name, a.student_national_id
+                FROM modification_requests mr
+                JOIN admissions a ON mr.admission_id = a.id
+                WHERE mr.request_number = ?
+            ";
+            $params = [$requestNumber];
+            
+            // Optional: verify last 4 digits of national ID for security
+            if (!empty($nationalIdSuffix)) {
+                $sql .= " AND mr.national_id_suffix = ?";
+                $params[] = $nationalIdSuffix;
+            }
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $request = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$request) {
+                http_response_code(404);
+                echo json_encode(["status" => "error", "message" => "Request not found"]);
+                break;
+            }
+            
+            // Mask student name
+            $studentName = $request['student_name'] ?? '';
+            $maskedName = mb_strlen($studentName) > 3
+                ? mb_substr($studentName, 0, 3) . '***'
+                : $studentName . '***';
+            
+            echo json_encode([
+                "status" => "success",
+                "data" => [
+                    "requestNumber" => $request['request_number'],
+                    "studentName" => $maskedName,
+                    "status" => $request['status'],
+                    "statusLabel" => getModificationStatusLabel($request['status']),
+                    "reason" => $request['request_reason'],
+                    "adminResponse" => $request['admin_response'],
+                    "requestedAt" => $request['created_at'],
+                    "reviewedAt" => $request['reviewed_at'],
+                    "completedAt" => $request['completed_at'],
+                    "requestedPreferences" => json_decode($request['requested_preferences'], true),
+                    "actions" => [
+                        "canResubmit" => $request['status'] === 'rejected',
+                        "canEdit" => $request['status'] === 'approved'
+                    ]
+                ]
+            ]);
+            break;
+
+        case 'review_modification':
+            // Admin only: Approve or reject modification request
+            requireAuth();
+            
+            $input = json_decode(file_get_contents('php://input'), true);
+            $requestId = sanitizeInput($input['requestId'] ?? '');
+            $action = sanitizeInput($input['action'] ?? ''); // 'approve' or 'reject'
+            $adminResponse = sanitizeInput($input['adminResponse'] ?? '');
+            
+            if (empty($requestId) || !in_array($action, ['approve', 'reject'])) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Request ID and valid action (approve/reject) are required"]);
+                break;
+            }
+            
+            if ($action === 'reject' && empty($adminResponse)) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Rejection reason is required"]);
+                break;
+            }
+            
+            // Get request details
+            $stmt = $pdo->prepare("
+                SELECT * FROM modification_requests WHERE id = ? AND status = 'pending'
+            ");
+            $stmt->execute([$requestId]);
+            $request = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$request) {
+                http_response_code(404);
+                echo json_encode(["status" => "error", "message" => "Request not found or already processed"]);
+                break;
+            }
+            
+            $user = requireAuth();
+            $newStatus = $action === 'approve' ? 'approved' : 'rejected';
+            $admissionStatus = $action === 'approve' ? 'modification_approved' : 'pending';
+            
+            // Update modification request
+            $updateStmt = $pdo->prepare("
+                UPDATE modification_requests 
+                SET status = ?, admin_response = ?, reviewed_by = ?, reviewed_at = NOW()
+                WHERE id = ?
+            ");
+            $updateStmt->execute([$newStatus, $adminResponse, $user['id'], $requestId]);
+            
+            // Update admission status
+            $admissionStmt = $pdo->prepare("
+                UPDATE admissions SET status = ? WHERE id = ?
+            ");
+            $admissionStmt->execute([$admissionStatus, $request['admission_id']]);
+            
+            bustCache();
+            
+            $message = $action === 'approve'
+                ? "تمت الموافقة على طلب التعديل"
+                : "تم رفض طلب التعديل";
+            
+            echo json_encode([
+                "status" => "success",
+                "message" => $message,
+                "data" => [
+                    "requestId" => $requestId,
+                    "newStatus" => $newStatus,
+                    "admissionStatus" => $admissionStatus,
+                    "adminResponse" => $adminResponse
+                ]
+            ]);
             break;
 
         default:
