@@ -88,10 +88,42 @@ export const getDashSchoolSchema = () => z.object({
     .refine(d => d.location || d.locationAr, { message: 'Location is required', path: ['location'] })
     .refine(d => d.about || d.aboutAr, { message: 'About section is required', path: ['about'] });
 
+// Egyptian National ID validation
+const egyptianIdRegex = /^\d{14}$/;
+const passportRegex = /^[A-Z0-9]{6,12}$/i;
+
+// Validate Egyptian National ID components
+const validateEgyptianId = (id: string): boolean => {
+  if (!egyptianIdRegex.test(id)) return false;
+  
+  const century = id[0];
+  const year = id.substring(1, 3);
+  const month = parseInt(id.substring(3, 5));
+  const day = parseInt(id.substring(5, 7));
+  const governorate = parseInt(id.substring(7, 9));
+  
+  // Century must be 2 or 3
+  if (century !== '2' && century !== '3') return false;
+  
+  // Month must be 01-12
+  if (month < 1 || month > 12) return false;
+  
+  // Day validation based on month
+  const fullYear = century === '2' ? 1900 + parseInt(year) : 2000 + parseInt(year);
+  const daysInMonth = new Date(fullYear, month, 0).getDate();
+  if (day < 1 || day > daysInMonth) return false;
+  
+  // Governorate must be 01-35 or 88 (abroad)
+  if ((governorate < 1 || governorate > 35) && governorate !== 88) return false;
+  
+  return true;
+};
+
 export const getAdmissionSchema = (lang: string) => z.object({
     studentName: z.string().min(3, { message: lang === 'ar' ? 'اسم الطالب مطلوب (3 أحرف على الأقل)' : 'Student name must be at least 3 characters' }),
     studentDOB: z.string().min(1, { message: lang === 'ar' ? 'تاريخ الميلاد مطلوب' : 'Date of birth is required' }),
-    studentNationalId: z.string().min(5, { message: lang === 'ar' ? 'الرقم القومي مطلوب' : 'National ID is required' }),
+    studentNationalId: z.string().optional(),
+    passportNumber: z.string().optional(),
     gradeStage: z.string().min(1, { message: lang === 'ar' ? 'المرحلة الدراسية مطلوبة' : 'Grade stage is required' }),
     gradeClass: z.string().min(1, { message: lang === 'ar' ? 'الصف الدراسي مطلوب' : 'Grade class is required' }),
     parentName: z.string().min(3, { message: lang === 'ar' ? 'اسم ولي الأمر مطلوب' : 'Parent name must be at least 3 characters' }),
@@ -99,6 +131,36 @@ export const getAdmissionSchema = (lang: string) => z.object({
     parentEmail: z.string().email({ message: lang === 'ar' ? 'البريد الإلكتروني غير صالح' : 'Invalid email address' }),
     preferences: z.array(z.any()).min(1, { message: lang === 'ar' ? 'يجب اختيار مدرسة واحدة على الأقل' : 'Please select at least one school' }),
     notes: z.string().optional(),
+    documents: z.array(z.any()).min(1, { message: lang === 'ar' ? 'يجب إرفاق جميع المستندات المطلوبة' : 'All required documents must be attached' }),
+}).refine((data) => {
+    // At least one ID must be provided
+    const hasNationalId = data.studentNationalId && data.studentNationalId.trim().length > 0;
+    const hasPassport = data.passportNumber && data.passportNumber.trim().length > 0;
+    return hasNationalId || hasPassport;
+}, {
+    message: lang === 'ar' ? 'يجب إدخال الرقم القومي أو رقم جواز السفر' : 'Please enter either national ID or passport number',
+    path: ['studentNationalId']
+}).refine((data) => {
+    // If national ID is provided, validate it
+    if (data.studentNationalId && data.studentNationalId.trim().length > 0) {
+        if (!egyptianIdRegex.test(data.studentNationalId)) {
+            return false;
+        }
+        return validateEgyptianId(data.studentNationalId);
+    }
+    return true;
+}, {
+    message: lang === 'ar' ? 'الرقم القومي غير صالح - يجب أن يكون 14 رقمًا صحيحًا' : 'Invalid national ID - must be 14 valid digits',
+    path: ['studentNationalId']
+}).refine((data) => {
+    // If passport is provided, validate it
+    if (data.passportNumber && data.passportNumber.trim().length > 0) {
+        return passportRegex.test(data.passportNumber.trim());
+    }
+    return true;
+}, {
+    message: lang === 'ar' ? 'رقم جواز السفر غير صالح' : 'Invalid passport number',
+    path: ['passportNumber']
 });
 
 export const getDashJobSchema = () => z.object({

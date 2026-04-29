@@ -21,6 +21,7 @@ import ScrollReveal from '@/components/common/ScrollReveal';
 import { CustomSelect } from '@/components/common/FormControls';
 import { getAdmissionSchema } from '@/utils/validations';
 import { submitAdmission } from '@/services/api';
+import { validateEgyptianNationalId, validatePassport, getValidationMessage } from '@/utils/validation';
 
 interface Preference {
   schoolId: string;
@@ -44,6 +45,7 @@ const Admissions: React.FC = () => {
     studentName: '',
     studentDOB: '',
     studentNationalId: '',
+    passportNumber: '',
     gradeStage: '',
     gradeClass: '',
     hasSibling: false,
@@ -119,7 +121,21 @@ const Admissions: React.FC = () => {
     e.preventDefault();
     if (isSubmitting) return;
 
-    const payload = { ...formData, preferences };
+    // Check if documents are uploaded (required)
+    const uploadedDocs = documents.filter(d => d.file);
+    if (uploadedDocs.length === 0) {
+      setDocError(lang === 'ar' ? 'يجب إرفاق جميع المستندات المطلوبة' : 'All required documents must be attached');
+      return;
+    }
+
+    // Validate documents completeness
+    const missingDocs = documents.filter(d => !d.file);
+    if (missingDocs.length > 0) {
+      setDocError(lang === 'ar' ? `الرجاء إرفاق: ${missingDocs.map(d => d.name).join(', ')}` : `Please upload: ${missingDocs.map(d => d.name).join(', ')}`);
+      return;
+    }
+
+    const payload = { ...formData, preferences, documents: uploadedDocs };
     const result = getAdmissionSchema(lang).safeParse(payload);
     if (!result.success) {
       const errs: Record<string, string> = {};
@@ -132,10 +148,10 @@ const Admissions: React.FC = () => {
     setSubmitError(null);
 
     try {
-      const res = await submitAdmission({ ...payload, documents: documents.filter(d => d.file) });
+      const res = await submitAdmission({ ...payload, documents: uploadedDocs });
       setAdmissionId(res.data?.id || null);
       setSubmitted(true);
-      setFormData({ studentName: '', studentDOB: '', studentNationalId: '', gradeStage: '', gradeClass: '', hasSibling: false, parentName: '', parentPhone: '', parentEmail: '', notes: '' });
+      setFormData({ studentName: '', studentDOB: '', studentNationalId: '', passportNumber: '', gradeStage: '', gradeClass: '', hasSibling: false, parentName: '', parentPhone: '', parentEmail: '', notes: '' });
       setPreferences([]);
       setDocuments((admSettings?.requiredDocuments || []).map((name: string) => ({ name, fileName: '' })));
       setErrors({});
@@ -291,7 +307,7 @@ const Admissions: React.FC = () => {
                             <Search className="w-5 h-5" />
                             <span>{lang === 'ar' ? 'تتبع الطلب' : 'Track Application'}</span>
                           </Link>
-                          <button onClick={() => { setSubmitted(false); setAdmissionId(null); setFormData({ studentName: '', studentDOB: '', studentNationalId: '', gradeStage: '', gradeClass: '', hasSibling: false, parentName: '', parentPhone: '', parentEmail: '', notes: '' }); setPreferences([]); }} className="bg-slate-100 text-slate-700 px-8 py-3.5 rounded-xl font-bold hover:bg-slate-200 transition-all">
+                          <button onClick={() => { setSubmitted(false); setAdmissionId(null); setFormData({ studentName: '', studentDOB: '', studentNationalId: '', passportNumber: '', gradeStage: '', gradeClass: '', hasSibling: false, parentName: '', parentPhone: '', parentEmail: '', notes: '' }); setPreferences([]); }} className="bg-slate-100 text-slate-700 px-8 py-3.5 rounded-xl font-bold hover:bg-slate-200 transition-all">
                             {lang === 'ar' ? 'تقديم طلب آخر' : 'Submit Another'}
                           </button>
                         </div>
@@ -326,9 +342,14 @@ const Admissions: React.FC = () => {
                             {errors.studentDOB && <p className="text-red-500 text-xs font-bold mt-1">{errors.studentDOB}</p>}
                           </div>
                           <div>
-                            <label className={labelClass}>{lang === 'ar' ? 'الرقم القومي' : 'National ID'} <span className="text-red-500">*</span></label>
-                            <input type="text" name="studentNationalId" value={formData.studentNationalId} onChange={handleChange} className={fieldClass('studentNationalId')} placeholder={lang === 'ar' ? 'رقم البطاقة القومية' : 'National ID number'} dir="ltr" />
+                            <label className={labelClass}>{lang === 'ar' ? 'الرقم القومي' : 'National ID'} <span className="text-slate-400 text-xs">({lang === 'ar' ? 'أو جواز السفر' : 'or Passport'})</span></label>
+                            <input type="text" name="studentNationalId" value={formData.studentNationalId} onChange={handleChange} className={fieldClass('studentNationalId')} placeholder={lang === 'ar' ? '14 رقمًا' : '14 digits'} dir="ltr" maxLength={14} />
                             {errors.studentNationalId && <p className="text-red-500 text-xs font-bold mt-1">{errors.studentNationalId}</p>}
+                          </div>
+                          <div>
+                            <label className={labelClass}>{lang === 'ar' ? 'رقم جواز السفر' : 'Passport Number'} <span className="text-slate-400 text-xs">({lang === 'ar' ? 'للأجانب' : 'for foreigners'})</span></label>
+                            <input type="text" name="passportNumber" value={formData.passportNumber} onChange={handleChange} className={fieldClass('passportNumber')} placeholder={lang === 'ar' ? 'رقم جواز السفر' : 'Passport number'} dir="ltr" />
+                            {errors.passportNumber && <p className="text-red-500 text-xs font-bold mt-1">{errors.passportNumber}</p>}
                           </div>
                           <div>
                             <label className={labelClass}>{lang === 'ar' ? 'المرحلة الدراسية' : 'Grade Stage'} <span className="text-red-500">*</span></label>

@@ -15,7 +15,8 @@ export interface AdmissionData {
   studentName: string;
   studentNameAr?: string;
   studentDOB?: string;
-  studentNationalId: string;
+  studentNationalId?: string;
+  passportNumber?: string;
   gradeStage: string;
   gradeClass?: string;
   parentName?: string;
@@ -28,7 +29,8 @@ export interface AdmissionData {
   hasSibling?: boolean;
   siblingSchool?: string;
   preferences: Preference[];
-  documents?: File[];
+  documents: File[]; // Required
+  idType?: 'national_id' | 'passport' | 'both';
 }
 
 export interface AdmissionResponse {

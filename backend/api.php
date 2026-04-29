@@ -1237,7 +1237,7 @@ try {
             
             // ── Accept multipart/form-data: text fields in $_POST, files in $_FILES
             $input = [];
-            $textFields = ['studentName', 'studentNameAr', 'studentDOB', 'studentNationalId', 'gradeStage', 'gradeClass', 'parentName', 'parentNameAr', 'parentPhone', 'parentEmail', 'parentNationalId', 'parentJob', 'address', 'siblingSchool'];
+            $textFields = ['studentName', 'studentNameAr', 'studentDOB', 'studentNationalId', 'passportNumber', 'gradeStage', 'gradeClass', 'parentName', 'parentNameAr', 'parentPhone', 'parentEmail', 'parentNationalId', 'parentJob', 'address', 'siblingSchool'];
             foreach ($textFields as $f) {
                 $input[$f] = sanitizeInput($_POST[$f] ?? '');
             }
@@ -1245,46 +1245,165 @@ try {
             // Convert checkbox to boolean
             $input['hasSibling'] = in_array($_POST['hasSibling'] ?? '', ['1', 'true', 'on'], true);
             
-            // Validate required fields
-            if (empty($input['studentName']) || empty($input['studentNationalId'])) {
+            // ═══════════════════════════════════════════════════════════════════════════
+            // STEP 0: Validate ID requirements (National ID or Passport)
+            // ═══════════════════════════════════════════════════════════════════════════
+            $nationalId = $input['studentNationalId'];
+            $passport = $input['passportNumber'];
+            $hasNationalId = !empty($nationalId);
+            $hasPassport = !empty($passport);
+            
+            // At least one ID is required
+            if (!$hasNationalId && !$hasPassport) {
                 http_response_code(400);
-                echo json_encode(["status" => "error", "message" => "Student name and national ID are required."]);
+                echo json_encode([
+                    "status" => "error",
+                    "error_code" => "ID_REQUIRED",
+                    "message" => "يجب إدخال الرقم القومي أو رقم جواز السفر / Please enter either national ID or passport number"
+                ]);
+                break;
+            }
+            
+            // Validate Egyptian National ID format if provided
+            if ($hasNationalId) {
+                if (!preg_match('/^\d{14}$/', $nationalId)) {
+                    http_response_code(400);
+                    echo json_encode([
+                        "status" => "error",
+                        "error_code" => "INVALID_NATIONAL_ID",
+                        "message" => "الرقم القومي يجب أن يكون 14 رقمًا / National ID must be 14 digits"
+                    ]);
+                    break;
+                }
+                
+                // Extract components
+                $century = $nationalId[0];
+                $year = substr($nationalId, 1, 2);
+                $month = substr($nationalId, 3, 2);
+                $day = substr($nationalId, 5, 2);
+                $governorate = substr($nationalId, 7, 2);
+                
+                // Validate century (2 or 3)
+                if ($century !== '2' && $century !== '3') {
+                    http_response_code(400);
+                    echo json_encode([
+                        "status" => "error",
+                        "error_code" => "INVALID_NATIONAL_ID_CENTURY",
+                        "message" => "الرقم القومي يجب أن يبدأ بـ 2 أو 3 / National ID must start with 2 or 3"
+                    ]);
+                    break;
+                }
+                
+                // Validate month
+                $monthNum = intval($month);
+                if ($monthNum < 1 || $monthNum > 12) {
+                    http_response_code(400);
+                    echo json_encode([
+                        "status" => "error",
+                        "error_code" => "INVALID_NATIONAL_ID_MONTH",
+                        "message" => "الرقم القومي غير صالح - الشهر غير صحيح / Invalid national ID - invalid month"
+                    ]);
+                    break;
+                }
+                
+                // Validate day
+                $dayNum = intval($day);
+                $fullYear = ($century === '2') ? '19' . $year : '20' . $year;
+                $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $monthNum, intval($fullYear));
+                if ($dayNum < 1 || $dayNum > $daysInMonth) {
+                    http_response_code(400);
+                    echo json_encode([
+                        "status" => "error",
+                        "error_code" => "INVALID_NATIONAL_ID_DAY",
+                        "message" => "الرقم القومي غير صالح - اليوم غير صحيح / Invalid national ID - invalid day"
+                    ]);
+                    break;
+                }
+                
+                // Validate governorate (01-35 or 88 for abroad)
+                $govNum = intval($governorate);
+                if (($govNum < 1 || $govNum > 35) && $govNum !== 88) {
+                    http_response_code(400);
+                    echo json_encode([
+                        "status" => "error",
+                        "error_code" => "INVALID_NATIONAL_ID_GOVERNORATE",
+                        "message" => "الرقم القومي غير صالح - محافظة غير معروفة / Invalid national ID - unknown governorate"
+                    ]);
+                    break;
+                }
+            }
+            
+            // Validate Passport format if provided
+            if ($hasPassport) {
+                // Common formats: AB123456, 123456789, A12345678
+                if (!preg_match('/^[A-Z0-9]{6,12}$/i', str_replace(' ', '', $passport))) {
+                    http_response_code(400);
+                    echo json_encode([
+                        "status" => "error",
+                        "error_code" => "INVALID_PASSPORT",
+                        "message" => "رقم جواز السفر غير صالح / Invalid passport number format"
+                    ]);
+                    break;
+                }
+            }
+            
+            // Validate required documents
+            if (empty($_FILES['documents']) || !is_array($_FILES['documents']['name']) || count($_FILES['documents']['name']) === 0) {
+                http_response_code(400);
+                echo json_encode([
+                    "status" => "error",
+                    "error_code" => "DOCUMENTS_REQUIRED",
+                    "message" => "يجب إرفاق جميع المستندات المطلوبة / All required documents must be attached"
+                ]);
                 break;
             }
             
             // ═══════════════════════════════════════════════════════════════════════════
-            // STEP 1: Check if already applied (by national ID)
+            // STEP 1: Check if already applied (by national ID or passport)
             // ═══════════════════════════════════════════════════════════════════════════
-            $nationalId = $input['studentNationalId'];
+            $checkConditions = [];
+            $checkParams = [];
             
-            $checkStmt = $pdo->prepare("
-                SELECT id, application_number, student_name, status, created_at 
-                FROM admissions 
-                WHERE student_national_id = ?
-            ");
-            $checkStmt->execute([$nationalId]);
-            $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
+            if ($hasNationalId) {
+                $checkConditions[] = "student_national_id = ?";
+                $checkParams[] = $nationalId;
+            }
+            if ($hasPassport) {
+                $checkConditions[] = "passport_number = ?";
+                $checkParams[] = $passport;
+            }
             
-            if ($existing) {
-                // Student already applied - return error with details
-                http_response_code(409); // Conflict
-                echo json_encode([
-                    "status" => "error",
-                    "error_code" => "ALREADY_APPLIED",
-                    "message" => "لقد قدمت طلباً مسبقاً بهذا الرقم القومي",
-                    "data" => [
-                        "applicationId" => $existing['id'],
-                        "applicationNumber" => $existing['application_number'] ?? $existing['id'],
-                        "studentName" => $existing['student_name'],
-                        "status" => $existing['status'],
-                        "submittedAt" => $existing['created_at'],
-                        "actions" => [
-                            "view_details" => "/admissions/track?id={$existing['id']}",
-                            "request_modification" => "/modifications/request?admissionId={$existing['id']}"
+            if (!empty($checkConditions)) {
+                $checkQuery = "
+                    SELECT id, application_number, student_name, status, created_at, student_national_id, passport_number 
+                    FROM admissions 
+                    WHERE " . implode(" OR ", $checkConditions);
+                $checkStmt = $pdo->prepare($checkQuery);
+                $checkStmt->execute($checkParams);
+                $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($existing) {
+                    // Student already applied - return error with details
+                    http_response_code(409); // Conflict
+                    $idType = !empty($existing['student_national_id']) ? 'الرقم القومي' : 'رقم جواز السفر';
+                    echo json_encode([
+                        "status" => "error",
+                        "error_code" => "ALREADY_APPLIED",
+                        "message" => "لقد قدمت طلباً مسبقاً بهذا $idType / You have already applied with this " . ($idType === 'الرقم القومي' ? 'national ID' : 'passport number'),
+                        "data" => [
+                            "applicationId" => $existing['id'],
+                            "applicationNumber" => $existing['application_number'] ?? $existing['id'],
+                            "studentName" => $existing['student_name'],
+                            "status" => $existing['status'],
+                            "submittedAt" => $existing['created_at'],
+                            "actions" => [
+                                "view_details" => "/admissions/track?id={$existing['id']}",
+                                "request_modification" => "/modifications/request?admissionId={$existing['id']}"
+                            ]
                         ]
-                    ]
-                ]);
-                break;
+                    ]);
+                    break;
+                }
             }
             
             // Preferences: sent as JSON string in a POST field
@@ -1375,7 +1494,18 @@ try {
             $id = uniqid('ADM_');
             
             // Generate application number with dynamic year (APP-YYYY-XXX-NNNN)
-            $applicationNumber = generateAdmissionNumber($nationalId, $pdo);
+            // Use national ID if available, otherwise use passport for the number
+            $idForNumber = $hasNationalId ? $nationalId : $passport;
+            $applicationNumber = generateAdmissionNumber($idForNumber, $pdo);
+            
+            // Determine id_type
+            if ($hasNationalId && $hasPassport) {
+                $idType = 'both';
+            } elseif ($hasNationalId) {
+                $idType = 'national_id';
+            } else {
+                $idType = 'passport';
+            }
             
             // ═══════════════════════════════════════════════════════════════════════════
             // STEP 3: Insert into admissions table
@@ -1383,10 +1513,10 @@ try {
             $stmt = $pdo->prepare("
                 INSERT INTO admissions (
                     id, application_number, student_name, student_name_ar, student_dob,
-                    student_national_id, grade_stage, grade_class, parent_name, parent_name_ar,
-                    parent_phone, parent_email, parent_national_id, parent_job, address,
-                    has_sibling, sibling_school, documents, status, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
+                    student_national_id, passport_number, id_type, grade_stage, grade_class,
+                    parent_name, parent_name_ar, parent_phone, parent_email, parent_national_id,
+                    parent_job, address, has_sibling, sibling_school, documents, status, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
             ");
             
             $stmt->execute([
@@ -1395,7 +1525,9 @@ try {
                 $input['studentName'],
                 $input['studentNameAr'],
                 !empty($input['studentDOB']) ? $input['studentDOB'] : null,
-                $nationalId,
+                $hasNationalId ? $nationalId : null,
+                $hasPassport ? $passport : null,
+                $idType,
                 $input['gradeStage'],
                 $input['gradeClass'],
                 $input['parentName'],

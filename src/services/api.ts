@@ -177,7 +177,7 @@ export const getJobApplicationDetails = async (id: string): Promise<ApiResponse>
 export const submitAdmission = async (admissionData: Record<string, any>): Promise<ApiResponse> => {
     const fd = new FormData();
     // Text fields
-    const textFields = ['studentName', 'studentDOB', 'studentNationalId', 'gradeStage', 'gradeClass', 'parentName', 'parentPhone', 'parentEmail', 'notes'];
+    const textFields = ['studentName', 'studentDOB', 'studentNationalId', 'passportNumber', 'gradeStage', 'gradeClass', 'parentName', 'parentPhone', 'parentEmail', 'notes'];
     for (const key of textFields) {
         fd.append(key, admissionData[key] ?? '');
     }
