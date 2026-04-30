@@ -6,7 +6,7 @@ import Eye from 'lucide-react/dist/esm/icons/eye';
 import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
 import Search from 'lucide-react/dist/esm/icons/search';
 import Newspaper from 'lucide-react/dist/esm/icons/newspaper';
-import Pagination from '../Pagination';
+import Pagination from '../Pagination.tsx';
 
 interface DashNewsItem {
   id: string;
