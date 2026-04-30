@@ -1178,6 +1178,20 @@ try {
             $offset = ($page - 1) * $limit;
             $items = array_values(array_slice($data, $offset, $limit));
             
+            // Calculate top schools by complaints (from ALL data, not just current page)
+            $topSchools = [];
+            if ($type === 'complaints') {
+                $schoolCounts = [];
+                foreach ($data as $item) {
+                    $school = $item['school'] ?? '';
+                    if ($school) {
+                        $schoolCounts[$school] = ($schoolCounts[$school] ?? 0) + 1;
+                    }
+                }
+                arsort($schoolCounts); // Sort by count descending
+                $topSchools = array_slice($schoolCounts, 0, 3, true);
+            }
+            
             // Optimization: Remove heavy fields from list view to keep payload small
             if ($type === 'jobApplications') {
                 foreach ($items as &$item) {
@@ -1190,7 +1204,7 @@ try {
                 }
             }
 
-            echo json_encode([
+            $response = [
                 "status" => "success",
                 "data" => [
                     "items" => $items,
@@ -1199,7 +1213,14 @@ try {
                     "limit" => $limit,
                     "totalPages" => $totalPages
                 ]
-            ]);
+            ];
+            
+            // Include top schools stats for complaints
+            if ($type === 'complaints' && !empty($topSchools)) {
+                $response['data']['topSchools'] = $topSchools;
+            }
+            
+            echo json_encode($response);
             break;
 
         case 'get_job_application':
