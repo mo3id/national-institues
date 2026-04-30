@@ -1095,20 +1095,46 @@ try {
                 });
             }
 
-            // Build school→governorate mapping for complaints filtering
-            $schoolGovMap = [];
+            // Calculate top schools by complaints from ALL data (before filtering)
+            $topSchools = [];
+            if ($type === 'complaints') {
+                $schoolCounts = [];
+                foreach ($data as $item) {
+                    $school = $item['school'] ?? '';
+                    if ($school) {
+                        $schoolCounts[$school] = ($schoolCounts[$school] ?? 0) + 1;
+                    }
+                }
+                arsort($schoolCounts);
+                $topSchools = array_slice($schoolCounts, 0, 3, true);
+            }
+
+            // Build school→governorate mapping for complaints filtering (supports both languages)
+            $schoolGovMapEn = []; // school name/nameAr => governorate (English)
+            $schoolGovMapAr = []; // school name/nameAr => governorateAr (Arabic)
+            $schoolNameMap = [];  // school nameAr => name (English), name => nameAr (Arabic)
             if ($type === 'complaints' && ($filterSchool || $filterGov)) {
                 $stmtSG = $pdo->query("SELECT name, nameAr, governorate, governorateAr FROM schools");
                 while ($sr = $stmtSG->fetch(PDO::FETCH_ASSOC)) {
-                    $schoolGovMap[$sr['name']] = $sr['governorate'] ?? '';
-                    $schoolGovMap[$sr['nameAr']] = $sr['governorateAr'] ?? '';
+                    $gov = $sr['governorate'] ?? '';
+                    $govAr = $sr['governorateAr'] ?? '';
+                    $sName = $sr['name'] ?? '';
+                    $sNameAr = $sr['nameAr'] ?? '';
+                    // Map both English and Arabic school names to both governorate versions
+                    $schoolGovMapEn[$sName] = $gov;
+                    $schoolGovMapEn[$sNameAr] = $gov;
+                    $schoolGovMapAr[$sName] = $govAr;
+                    $schoolGovMapAr[$sNameAr] = $govAr;
+                    // Map between English and Arabic school names
+                    $schoolNameMap[$sName] = $sNameAr;
+                    $schoolNameMap[$sNameAr] = $sName;
                 }
             }
 
             // Backend Filtering
             if ($search || $filterType !== 'All' || $filterSchool || $filterGov) {
                 $term = strtolower($search);
-                $data = array_filter($data, function($item) use ($term, $filterType, $type, $filterSchool, $filterGov, $schoolGovMap) {
+                $data = array_filter($data, function($item) use ($term, $filterType, $type, $filterSchool, $filterGov, $schoolGovMapEn, $schoolGovMapAr, $schoolNameMap) {
                     // Filter by Type-specific field
                     if ($filterType !== 'All') {
                         if ($type === 'complaints') {
@@ -1137,17 +1163,19 @@ try {
                         }
                     }
 
-                    // Filter by School (complaints)
+                    // Filter by School (complaints — match English or Arabic name)
                     if ($filterSchool && $type === 'complaints') {
                         $itemSchool = $item['school'] ?? '';
-                        if ($itemSchool !== $filterSchool) return false;
+                        $altSchoolName = $schoolNameMap[$filterSchool] ?? '';
+                        if ($itemSchool !== $filterSchool && $itemSchool !== $altSchoolName) return false;
                     }
 
-                    // Filter by Governorate (complaints — resolve via school)
+                    // Filter by Governorate (complaints — resolve via school, match English or Arabic)
                     if ($filterGov && $type === 'complaints') {
                         $itemSchool = $item['school'] ?? '';
-                        $schoolGov = $schoolGovMap[$itemSchool] ?? '';
-                        if ($schoolGov !== $filterGov) return false;
+                        $schoolGov = $schoolGovMapEn[$itemSchool] ?? '';
+                        $schoolGovAr = $schoolGovMapAr[$itemSchool] ?? '';
+                        if ($schoolGov !== $filterGov && $schoolGovAr !== $filterGov) return false;
                     }
 
                     // Filter by Search Term
@@ -1190,15 +1218,19 @@ try {
                 }
             }
 
+            $responseData = [
+                "items" => $items,
+                "total" => $total,
+                "page" => $page,
+                "limit" => $limit,
+                "totalPages" => $totalPages
+            ];
+            if ($type === 'complaints' && !empty($topSchools)) {
+                $responseData['topSchools'] = $topSchools;
+            }
             echo json_encode([
                 "status" => "success",
-                "data" => [
-                    "items" => $items,
-                    "total" => $total,
-                    "page" => $page,
-                    "limit" => $limit,
-                    "totalPages" => $totalPages
-                ]
+                "data" => $responseData
             ]);
             break;
 
