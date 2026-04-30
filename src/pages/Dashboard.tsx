@@ -800,7 +800,7 @@ const Dashboard: React.FC = () => {
   }, [section, newsPage, debouncedNewsSearch]);
 
   useEffect(() => {
-    if (section === 'schools') fetchSchools();
+    if (section === 'schools' || section === 'complaints') fetchSchools();
   }, [section, debouncedSchoolSearch]);
 
   useEffect(() => {
