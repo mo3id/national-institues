@@ -52,6 +52,17 @@ import {
   UI, HERO_IMAGES
 } from './dashboard-components/types';
 import { ModalWrap, EditNewsForm, EditHeroForm, EditSchoolForm, EditJobForm, EditAlumniForm } from './dashboard-components/Modals';
+import Pagination from './dashboard-components/Pagination';
+import DepartmentsSection from './dashboard-components/sections/DepartmentsSection';
+import GovernoratesSection from './dashboard-components/sections/GovernoratesSection';
+import HeroSectionComponent from './dashboard-components/sections/HeroSection';
+import FormsSection from './dashboard-components/sections/FormsSection';
+import NewsSection from './dashboard-components/sections/NewsSection';
+import AlumniSection from './dashboard-components/sections/AlumniSection';
+import SchoolsSection from './dashboard-components/sections/SchoolsSection';
+import JobsSection from './dashboard-components/sections/JobsSection';
+import ContactMessagesSection from './dashboard-components/sections/ContactMessagesSection';
+import OverviewSection from './dashboard-components/sections/OverviewSection';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import NISLogo from '@/components/common/NISLogo';
@@ -407,79 +418,6 @@ const buildWorkingHours = (form: any) => {
   const en = `${DAYS_EN[form.startDay]} - ${DAYS_EN[form.endDay]}: ${formatTimeString(form.startTime, false)} - ${formatTimeString(form.endTime, false)}`;
   const ar = `${DAYS_AR[form.startDay]} - ${DAYS_AR[form.endDay]}: ${formatTimeString(form.startTime, true)} - ${formatTimeString(form.endTime, true)}`;
   return { en, ar };
-};
-
-// ─── Shared Components ─────────────────────────────────────────────────────────────
-const Pagination: React.FC<{
-  current: number;
-  total: number;
-  onChange: (page: number) => void;
-  lang: string;
-}> = ({ current, total, onChange, lang }) => {
-  const isRTL = lang === 'ar';
-  const u = UI[lang as Lang];
-  if (total <= 1) return null;
-
-  const pages = [];
-  const start = Math.max(1, current - 2);
-  const end = Math.min(total, current + 2);
-
-  for (let i = start; i <= end; i++) pages.push(i);
-
-  return (
-    <div className="pagination-container">
-      <button
-        className="pagination-btn"
-        onClick={() => onChange(1)}
-        disabled={current === 1}
-        title={u.firstPage}
-      >
-        <ChevronsLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-      </button>
-      <button
-        className="pagination-btn"
-        onClick={() => onChange(current - 1)}
-        disabled={current === 1}
-      >
-        <ChevronLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-      </button>
-
-      <div className="pagination-info mobile-hide">
-        {u.page}
-        <span>{current} / {total}</span>
-      </div>
-
-      <div className="flex items-center gap-1.5">
-        {start > 1 && <span className="text-[var(--text2)] px-1">...</span>}
-        {pages.map(p => (
-          <button
-            key={p}
-            className={`pagination-btn ${current === p ? 'active' : ''}`}
-            onClick={() => onChange(p)}
-          >
-            {p}
-          </button>
-        ))}
-        {end < total && <span className="text-[var(--text2)] px-1">...</span>}
-      </div>
-
-      <button
-        className="pagination-btn"
-        onClick={() => onChange(current + 1)}
-        disabled={current === total}
-      >
-        <ChevronRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-      </button>
-      <button
-        className="pagination-btn"
-        onClick={() => onChange(total)}
-        disabled={current === total}
-        title={u.lastPage}
-      >
-        <ChevronsRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-      </button>
-    </div>
-  );
 };
 
 // ─── Admission Detail Modal ────────────────────────────────────────────────────
@@ -1537,318 +1475,111 @@ const Dashboard: React.FC = () => {
 
           {/* ── Overview ── */}
           {section === 'overview' && (
-            <div className="section-enter" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: 14 }}>
-                {[
-                  { icon: Newspaper, label: u.totalArticles, val: (dashStats.totalNews || 0).toString(), color: '#4f46e5', bg: 'rgba(79,70,229,0.1)' },
-                  { icon: CheckCircle, label: u.publishedCount, val: (dashStats.publishedNews || 0).toString(), color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-                  { icon: School, label: u.schoolsCount, val: (dashStats.schoolsCount || 0).toString(), color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
-                  { icon: Users, label: u.totalTeachers, val: (dashStats.totalTeachers || 0).toString(), color: '#0ea5e9', bg: 'rgba(14,165,233,0.1)' },
-                  { icon: Users, label: u.studentsCount, val: (dashStats.totalStudents || 0).toString(), color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
-                ].map(({ icon: Icon, label, val, color, bg }) => (
-                  <div key={label} className="stat-card">
-                    <div className="stat-icon" style={{ background: bg }}><Icon style={{ width: 22, height: 22, color }} /></div>
-                    <div>
-                      <p style={{ fontSize: 12, color: 'var(--text2)', fontWeight: 600 }}>{label}</p>
-                      <p style={{ fontSize: 26, fontWeight: 900, color: 'var(--text)', lineHeight: 1.1 }}>{val}</p>
-                      <p style={{ fontSize: 11, color: '#10b981', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}><TrendingUp style={{ width: 12, height: 12 }} />{u.thisYear}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {/* Quick Actions */}
-              <div className="dash-card" style={{ padding: 20 }}>
-                <p className="dash-label" style={{ marginBottom: 12 }}>{u.quickActions}</p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-                  <button className="dash-btn dash-btn-primary" onClick={() => { setSection('news'); setAddNewsOpen(true); }}><Plus style={{ width: 15, height: 15 }} />{u.addNewArticle}</button>
-                  <button className="dash-btn dash-btn-ghost" onClick={() => setSection('hero')}><Image style={{ width: 15, height: 15 }} />{u.editHero}</button>
-                  <button className="dash-btn dash-btn-ghost" onClick={() => setSection('chairman')}><Users style={{ width: 15, height: 15 }} />{u.chairman}</button>
-                  <button className="dash-btn dash-btn-ghost" onClick={() => setSection('institute')}><Info style={{ width: 15, height: 15 }} />{u.institute}</button>
-                </div>
-              </div>
-              {/* Recent */}
-              <div className="dash-card" style={{ overflow: 'hidden' }}>
-                <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <p style={{ fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>{u.recentArticles}</p>
-                  <button style={{ fontSize: 13, fontWeight: 600, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setSection('news')}>{u.viewAll}</button>
-                </div>
-                {newsList.slice(0, 5).map(n => (
-                  <div key={n.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 20px', borderBottom: '1px solid var(--border)' }}>
-                    <img src={n.image || undefined} style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} alt="" />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{lang === 'ar' ? (n.titleAr || n.title) : n.title}</p>
-                      <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2 }}>{n.date}</p>
-                    </div>
-                    <span className={`dash-badge ${n.published ? 'badge-green' : 'badge-gray'}`}>{n.published ? u.published : u.draft}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <OverviewSection
+              dashStats={dashStats}
+              newsList={newsList}
+              setSection={setSection}
+              setAddNewsOpen={setAddNewsOpen}
+              u={u}
+              lang={lang}
+            />
           )}
 
           {/* ── News ── */}
           {section === 'news' && (
-            <div className="section-enter">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <div>
-                  <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.news}</h2>
-                  <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{newsList.length} {u.newsManage} · {publishedCount} {u.publishedCount}</p>
-                </div>
-                <button className="dash-btn dash-btn-primary" onClick={() => setAddNewsOpen(true)}><Plus style={{ width: 15, height: 15 }} />{u.addArticle}</button>
-              </div>
-              <div style={{ position: 'relative', marginBottom: 16, maxWidth: 320 }}>
-                <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 14, right: isRTL ? 14 : 'auto', top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: 'var(--text2)' }} />
-                <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={newsSearch} onChange={e => setNewsSearch(e.target.value)} />
-              </div>
-              <div className="dash-card" style={{ overflow: 'hidden', position: 'relative' }}>
-                {isTableLoading && (
-                  <div className="table-loader">
-                    <div style={{ width: 32, height: 32, border: '4px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin"></div>
-                  </div>
-                )}
-                <div className="row-header">
-                  <div /><p className="dash-label" style={{ margin: 0 }}>{u.title}</p><p className="dash-label" style={{ margin: 0 }}>{u.date}</p><p className="dash-label" style={{ margin: 0 }}>{u.status}</p><p className="dash-label" style={{ margin: 0 }}>{u.actions}</p>
-                </div>
-                {newsList.map(n => (
-                  <div key={n.id} className="news-row">
-                    <img src={n.image || undefined} style={{ width: 52, height: 52, borderRadius: 10, objectFit: 'cover' }} alt="" />
-                    <div style={{ minWidth: 0, position: 'relative' }}>
-                      <p style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        {lang === 'ar' ? (n.titleAr || n.title) : n.title}
-                        {n.featured && <span style={{ fontSize: '10px', background: '#eab308', color: 'white', padding: '2px 6px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', fontWeight: 'bold' }}>⭐ {u.featured}</span>}
-                      </p>
-                      <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{lang === 'ar' ? (n.summaryAr || n.summary) : n.summary}</p>
-                    </div>
-                    <p style={{ fontSize: 13, color: 'var(--text2)' }}>{n.date}</p>
-                    <button className={`dash-badge ${n.published ? 'badge-green' : 'badge-gray'}`} style={{ cursor: 'pointer', border: 'none' }} onClick={() => togglePublish(n.id)}>{n.published ? u.published : u.draft}</button>
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      <button className="dash-icon-btn" title={u.edit} onClick={() => setEditNewsId(n.id)}><Pencil style={{ width: 15, height: 15, color: 'var(--accent)' }} /></button>
-                      <button className="dash-icon-btn" title={n.published ? 'Unpublish' : 'Publish'} onClick={() => togglePublish(n.id)}>{n.published ? <EyeOff style={{ width: 15, height: 15 }} /> : <Eye style={{ width: 15, height: 15 }} />}</button>
-                      <button className="dash-icon-btn" title={u.delete} onClick={() => deleteNews(n.id)}><Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} /></button>
-                    </div>
-                  </div>
-                ))}
-                {newsList.length === 0 && <div style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><Newspaper style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></div>}
-              </div>
-              <Pagination current={newsPage} total={newsTotalPages} onChange={setNewsPage} lang={lang} />
-            </div>
+            <NewsSection
+              newsList={newsList}
+              newsSearch={newsSearch}
+              setNewsSearch={setNewsSearch}
+              addNewsOpen={addNewsOpen}
+              setAddNewsOpen={setAddNewsOpen}
+              editNewsId={editNewsId}
+              setEditNewsId={setEditNewsId}
+              togglePublish={togglePublish}
+              deleteNews={deleteNews}
+              newsPage={newsPage}
+              newsTotalPages={newsTotalPages}
+              setNewsPage={setNewsPage}
+              publishedCount={publishedCount}
+              u={u}
+              isRTL={isRTL}
+              lang={lang}
+              isTableLoading={isTableLoading}
+            />
           )}
 
           {/* ── Schools ── */}
           {section === 'schools' && (
-            <div className="section-enter">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.schools}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.schoolsManage}</p></div>
-                <button className="dash-btn dash-btn-primary" onClick={() => setAddSchoolOpen(true)}><Plus style={{ width: 15, height: 15 }} />{u.addSchool}</button>
-              </div>
-              <div style={{ position: 'relative', marginBottom: 18, maxWidth: 320 }}>
-                <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 14, right: isRTL ? 14 : 'auto', top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: 'var(--text2)' }} />
-                <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={schoolSearch} onChange={e => setSchoolSearch(e.target.value)} />
-              </div>
-              <div style={{ position: 'relative' }}>
-                {isTableLoading && (
-                  <div className="table-loader" style={{ borderRadius: 24 }}>
-                    <div style={{ width: 32, height: 32, border: '4px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin"></div>
-                  </div>
-                )}
-                <div className="school-grid">
-                  {filteredSchools.map(s => (
-                    <div key={s.id} className="school-card">
-                      <img src={s.logo || undefined} style={{ width: 52, height: 52, borderRadius: 12, objectFit: 'cover', background: 'var(--surface2)', flexShrink: 0 }} alt={s.name} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{lang === 'ar' ? (s.nameAr || s.name) : s.name}</p>
-                        <p style={{ fontSize: 11, color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}><MapPin style={{ width: 11, height: 11 }} />{lang === 'ar' ? (s.locationAr || s.location) : s.location}{s.governorate ? `, ${lang === 'ar' ? (s.governorateAr || s.governorate) : s.governorate}` : ''}</p>
-                        <div style={{ marginTop: 6, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                          {(Array.isArray(s.type) ? s.type : []).map((t: string) => {
-                            const typeMap: Record<string, string> = {
-                              'Arabic': 'عربي/قومي',
-                              'Languages': 'لغات',
-                              'American': 'أمريكي',
-                              'British': 'بريطاني',
-                              'French': 'فرنسي'
-                            };
-                            return (
-                              <span key={t} style={{ display: 'inline-block', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(79,70,229,0.1)', color: 'var(--accent)' }}>
-                                {lang === 'ar' ? (typeMap[t] || t) : t}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        <button className="dash-icon-btn" onClick={() => setEditSchoolId(s.id)} title={u.edit}><Pencil style={{ width: 15, height: 15, color: 'var(--accent)' }} /></button>
-                        <button className="dash-icon-btn" onClick={() => deleteSchool(s.id)} title={u.delete}><Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} /></button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <SchoolsSection
+              schools={schools}
+              schoolSearch={schoolSearch}
+              setSchoolSearch={setSchoolSearch}
+              setAddSchoolOpen={setAddSchoolOpen}
+              setEditSchoolId={setEditSchoolId}
+              deleteSchool={deleteSchool}
+              u={u}
+              isRTL={isRTL}
+              lang={lang}
+              isTableLoading={isTableLoading}
+            />
           )}
 
           {/* ── Alumni ── */}
           {section === 'alumni' && (
-            <div className="section-enter">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.alumni}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.alumniManage}</p></div>
-                <button className="dash-btn dash-btn-primary" onClick={() => setAddAlumniOpen(true)}><Plus style={{ width: 15, height: 15 }} />{u.addAlumni}</button>
-              </div>
-              <div style={{ position: 'relative', marginBottom: 18, maxWidth: 320 }}>
-                <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 14, right: isRTL ? 14 : 'auto', top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: 'var(--text2)' }} />
-                <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={alumniSearch} onChange={e => setAlumniSearch(e.target.value)} />
-              </div>
-              <div style={{ position: 'relative' }}>
-                {isTableLoading && (
-                  <div className="table-loader" style={{ borderRadius: 24 }}>
-                    <div style={{ width: 32, height: 32, border: '4px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin"></div>
-                  </div>
-                )}
-                <div className="school-grid">
-                  {filteredAlumni.map(a => (
-                    <div key={a.id} className="school-card">
-                      <img src={a.image || undefined} style={{ width: 52, height: 52, borderRadius: 12, objectFit: 'cover', background: 'var(--surface2)', flexShrink: 0 }} alt={a.name} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{lang === 'ar' ? (a.nameAr || a.name) : a.name}</p>
-                        <p style={{ fontSize: 11, color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}><GraduationCap style={{ width: 11, height: 11 }} />{lang === 'ar' ? (a.schoolAr || a.school) : a.school} • {a.graduationYear}</p>
-                        {(a.jobTitle || a.jobTitleAr) && <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2 }}>{lang === 'ar' ? (a.jobTitleAr || a.jobTitle) : a.jobTitle}{(a.company || a.companyAr) ? ` @ ${lang === 'ar' ? (a.companyAr || a.company) : a.company}` : ''}</p>}
-                        {a.featured && <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'rgba(245,158,11,0.1)', color: '#d97706', marginTop: 4 }}>★ {u.featured}</span>}
-                      </div>
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        <button className="dash-icon-btn" onClick={() => setEditAlumniId(a.id)} title={u.edit}><Pencil style={{ width: 15, height: 15, color: 'var(--accent)' }} /></button>
-                        <button className="dash-icon-btn" onClick={() => deleteAlumni(a.id)} title={u.delete}><Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} /></button>
-                      </div>
-                    </div>
-                  ))}
-                  {filteredAlumni.length === 0 && (
-                    <div style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)', gridColumn: '1 / -1' }}>
-                      <GraduationCap style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} />
-                      <p style={{ fontWeight: 600 }}>{u.noResults}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <AlumniSection
+              alumniList={alumniList}
+              alumniSearch={alumniSearch}
+              setAlumniSearch={setAlumniSearch}
+              setAddAlumniOpen={setAddAlumniOpen}
+              setEditAlumniId={setEditAlumniId}
+              deleteAlumni={deleteAlumni}
+              u={u}
+              isRTL={isRTL}
+              lang={lang}
+              isTableLoading={isTableLoading}
+            />
           )}
 
           {/* ── Departments ── */}
           {section === 'departments' && (
-            <div className="section-enter">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.jobDepartmentsTitle}</h2></div>
-                <button className="dash-btn dash-btn-primary" onClick={() => setAddDepartmentOpen(true)}><Plus style={{ width: 15, height: 15 }} />{u.newDept}</button>
-              </div>
-              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
-                <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
-                  <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
-                    <tr>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.nameEn}</th>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.nameAr}</th>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.actions}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {departments.map((dep, i) => (
-                      <tr key={dep.id} style={{ borderBottom: i === departments.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{dep.nameEn}</td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontSize: 13 }}>{dep.nameAr}</td>
-                        <td style={{ padding: '16px 24px' }}>
-                          <button className="dash-icon-btn" onClick={() => deleteDepartment(dep.id)} title={u.delete}><Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} /></button>
-                        </td>
-                      </tr>
-                    ))}
-                    {departments.length === 0 && <tr><td colSpan={3} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><LayoutDashboard style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></td></tr>}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <DepartmentsSection
+              departments={departments}
+              addDepartmentOpen={addDepartmentOpen}
+              setAddDepartmentOpen={setAddDepartmentOpen}
+              newDepartment={newDepartment}
+              setNewDepartment={setNewDepartment}
+              addDepartment={addDepartment}
+              deleteDepartment={deleteDepartment}
+              u={u}
+              isRTL={isRTL}
+            />
           )}
 
           {/* ── Governorates ── */}
           {section === 'governorates' && (
-            <div className="section-enter">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.governoratesTitle}</h2></div>
-                <button className="dash-btn dash-btn-primary" onClick={() => setAddGovernorateOpen(true)}><Plus style={{ width: 15, height: 15 }} />{u.newGov}</button>
-              </div>
-              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
-                <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
-                  <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
-                    <tr>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.nameEn}</th>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.nameAr}</th>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.actions}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {governorates.map((gov, i) => (
-                      <tr key={gov.id} style={{ borderBottom: i === governorates.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{gov.name}</td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontSize: 13 }}>{gov.nameAr}</td>
-                        <td style={{ padding: '16px 24px' }}>
-                          <button className="dash-icon-btn" onClick={() => handleDeleteGovernorate(gov.id)} title={u.delete}><Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} /></button>
-                        </td>
-                      </tr>
-                    ))}
-                    {governorates.length === 0 && <tr><td colSpan={3} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><MapPin style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></td></tr>}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <GovernoratesSection
+              governorates={governorates}
+              setAddGovernorateOpen={setAddGovernorateOpen}
+              handleDeleteGovernorate={handleDeleteGovernorate}
+              u={u}
+              isRTL={isRTL}
+            />
           )}
 
           {/* ── Jobs ── */}
           {section === 'jobs' && (
-            <div className="section-enter">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.jobs}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.jobsManage}</p></div>
-                <button className="dash-btn dash-btn-primary" onClick={() => setAddJobOpen(true)}><Plus style={{ width: 15, height: 15 }} />{u.addJob}</button>
-              </div>
-              <div style={{ position: 'relative', marginBottom: 18, maxWidth: 320 }}>
-                <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 14, right: isRTL ? 14 : 'auto', top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: 'var(--text2)' }} />
-                <input className="dash-input" style={{ paddingLeft: isRTL ? 14 : 40, paddingRight: isRTL ? 40 : 14 }} placeholder={u.search} value={jobSearch} onChange={e => setJobSearch(e.target.value)} />
-              </div>
-              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
-                {isTableLoading && (
-                  <div className="table-loader">
-                    <div style={{ width: 32, height: 32, border: '4px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin"></div>
-                  </div>
-                )}
-                <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
-                  <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
-                    <tr>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.title}</th>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.department}</th>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.location}</th>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.actions}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredJobs.map((job, i) => (
-                      <tr key={job.id} style={{ borderBottom: i === filteredJobs.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                        <td style={{ padding: '16px 24px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <div style={{ width: 42, height: 42, borderRadius: 10, overflow: 'hidden', background: 'var(--surface2)', flexShrink: 0, border: '1px solid var(--border)' }}>
-                              <img src={job.image || "/layer-1-small.webp"} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            </div>
-                            <div>
-                              <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)' }}>{lang === 'ar' ? job.titleAr : job.title}</p>
-                              <p style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 500 }}>{lang === 'ar' ? job.typeAr : job.type}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{lang === 'ar' ? job.departmentAr : job.department}</td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{lang === 'ar' ? job.locationAr : job.location}</td>
-                        <td style={{ padding: '16px 24px', display: 'flex', gap: 4 }}>
-                          <button className="dash-icon-btn" onClick={() => setEditJobId(job.id)} title={u.edit}><Pencil style={{ width: 15, height: 15, color: 'var(--accent)' }} /></button>
-                          <button className="dash-icon-btn" onClick={() => deleteJob(job.id)} title={u.delete}><Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} /></button>
-                        </td>
-                      </tr>
-                    ))}
-                    {filteredJobs.length === 0 && <tr><td colSpan={4} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}><Briefcase style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} /><p style={{ fontWeight: 600 }}>{u.noResults}</p></td></tr>}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <JobsSection
+              jobs={jobs}
+              jobSearch={jobSearch}
+              setJobSearch={setJobSearch}
+              setAddJobOpen={setAddJobOpen}
+              setEditJobId={setEditJobId}
+              deleteJob={deleteJob}
+              u={u}
+              isRTL={isRTL}
+              lang={lang}
+              isTableLoading={isTableLoading}
+            />
           )}
 
           {/* ── Recruitment Portal ── */}
@@ -2062,33 +1793,14 @@ const Dashboard: React.FC = () => {
           )}
 
           {section === 'hero' && (
-            <div className="section-enter">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.hero}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.heroManage}</p></div>
-                <button className="dash-btn dash-btn-primary" onClick={() => setAddHeroOpen(true)}><Plus className="w-4 h-4" />{lang === 'ar' ? 'إضافة شريحة' : 'Add Slide'}</button>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {hero.map((s, i) => (
-                  <div key={s.id} className="hero-card">
-                    {s.image && <div style={{ position: 'relative', height: 160, overflow: 'hidden' }}><img src={s.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /><div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)' }} /><span style={{ position: 'absolute', bottom: 12, left: 16, right: 16, color: 'white', fontWeight: 800, fontSize: 18 }}>{s.title}</span></div>}
-                    <div style={{ padding: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: 14, flexShrink: 0 }}>{i + 1}</div>
-                        <div>
-                          <p style={{ fontWeight: 700, color: 'var(--text)', fontSize: 14 }}>{s.title || (lang === 'ar' ? '(بدون نص)' : '(No text)')}</p>
-                          <p style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>{s.subtitle}</p>
-                          <p style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4, maxWidth: 400 }}>{s.description}</p>
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="dash-btn dash-btn-ghost" onClick={() => setEditHeroId(s.id)}><Pencil style={{ width: 14, height: 14 }} />{u.edit}</button>
-                        <button className="dash-btn dash-btn-danger" onClick={() => deleteHeroSlide(s.id)}><Trash2 style={{ width: 14, height: 14 }} /></button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <HeroSectionComponent
+              hero={hero}
+              setAddHeroOpen={setAddHeroOpen}
+              setEditHeroId={setEditHeroId}
+              deleteHeroSlide={deleteHeroSlide}
+              u={u}
+              lang={lang}
+            />
           )}
 
           {/* ── Chairman Word ── */}
@@ -2312,32 +2024,12 @@ const Dashboard: React.FC = () => {
 
           {/* ── Forms Settings ── */}
           {section === 'forms' && (
-            <div className="section-enter">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.forms}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.formsManage}</p></div>
-                <button className="dash-btn dash-btn-primary" onClick={saveFormSettings}><Save style={{ width: 14, height: 14 }} />{u.save}</button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="dash-card" style={{ padding: 24 }}>
-                  <h3 className="font-bold mb-4 text-[var(--text)]">{u.contactForm}</h3>
-                  <div className="space-y-4">
-                    <div><label className="dash-label">Title (EN)</label><input className="dash-input" value={formSettings?.contactFormTitle || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormTitle: e.target.value }))} /></div>
-                    <div><label className="dash-label">{u.titleArLabel}</label><input className="dash-input" dir="rtl" value={formSettings?.contactFormTitleAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormTitleAr: e.target.value }))} /></div>
-                    <div><label className="dash-label">{u.descriptionEnLabel}</label><textarea className="dash-input" value={formSettings?.contactFormDesc || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormDesc: e.target.value }))} /></div>
-                    <div><label className="dash-label">{u.descArLabel}</label><textarea className="dash-input" dir="rtl" value={formSettings?.contactFormDescAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, contactFormDescAr: e.target.value }))} /></div>
-                  </div>
-                </div>
-                <div className="dash-card" style={{ padding: 24 }}>
-                  <h3 className="font-bold mb-4 text-[var(--text)]">{u.careersForm}</h3>
-                  <div className="space-y-4">
-                    <div><label className="dash-label">Title (EN)</label><input className="dash-input" value={formSettings?.jobFormTitle || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormTitle: e.target.value }))} /></div>
-                    <div><label className="dash-label">{u.titleArLabel}</label><input className="dash-input" dir="rtl" value={formSettings?.jobFormTitleAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormTitleAr: e.target.value }))} /></div>
-                    <div><label className="dash-label">{u.descriptionEnLabel}</label><textarea className="dash-input" value={formSettings?.jobFormDesc || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormDesc: e.target.value }))} /></div>
-                    <div><label className="dash-label">{u.descArLabel}</label><textarea className="dash-input" dir="rtl" value={formSettings?.jobFormDescAr || ''} onChange={e => setFormSettings((p: any) => ({ ...p, jobFormDescAr: e.target.value }))} /></div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <FormsSection
+              formSettings={formSettings}
+              setFormSettings={setFormSettings}
+              saveFormSettings={saveFormSettings}
+              u={u}
+            />
           )}
 
           {/* ── Contact Settings ── */}
@@ -2575,58 +2267,21 @@ const Dashboard: React.FC = () => {
           )}
 
           {/* ── Contact Messages ── */}
+          {/* ── Contact Messages ── */}
           {section === 'contactMessages' && (
-            <div className="section-enter">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <div><h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.contactMessages}</h2><p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{u.contactMessagesManage}</p></div>
-              </div>
-
-              <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
-                {isTableLoading && (
-                  <div className="table-loader">
-                    <div style={{ width: 32, height: 32, border: '4px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin"></div>
-                  </div>
-                )}
-                <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
-                  <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
-                    <tr>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.senderName}</th>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.email}</th>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.subject}</th>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.message}</th>
-                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.date}</th>
-                      <th style={{ padding: '14px 12px', width: 48 }} />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {contactMessages.length > 0 ? contactMessages.map((c, i) => (
-                      <tr key={i} style={{ cursor: 'pointer', borderBottom: i === contactMessages.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onClick={() => { setSelectedContact(c); setContactModalOpen(true); }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                        <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{c.fullName}</td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{c.email}</td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13 }}>{c.subject}</td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, maxWidth: 300 }}>
-                          <p style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={c.message}>{c.message}</p>
-                        </td>
-                        <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 12, fontWeight: 600 }}>{c.createdAt ? new Date(c.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB') : c.date || '—'}</td>
-                        <td style={{ padding: '16px 12px' }} onClick={e => e.stopPropagation()}>
-                          <button className="dash-icon-btn" title={u.delete} onClick={() => deleteContactMessage(c.id)}>
-                            <Trash2 style={{ width: 15, height: 15, color: '#ef4444' }} />
-                          </button>
-                        </td>
-                      </tr>
-                    )) : (
-                      <tr>
-                        <td colSpan={6} style={{ padding: '48px', textAlign: 'center', color: 'var(--text2)' }}>
-                          <Mail style={{ width: 36, height: 36, margin: '0 auto 12px', opacity: 0.3 }} />
-                          <p style={{ fontWeight: 600 }}>{u.noResults}</p>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              <Pagination current={messagePage} total={messageTotalPages} onChange={setMessagePage} lang={lang} />
-            </div>
+            <ContactMessagesSection
+              contactMessages={contactMessages}
+              messagePage={messagePage}
+              messageTotalPages={messageTotalPages}
+              setMessagePage={setMessagePage}
+              setSelectedContact={setSelectedContact}
+              setContactModalOpen={setContactModalOpen}
+              deleteContactMessage={deleteContactMessage}
+              u={u}
+              isRTL={isRTL}
+              lang={lang}
+              isTableLoading={isTableLoading}
+            />
           )}
 
           {/* ── Admission Settings ── */}
