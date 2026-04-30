@@ -1095,26 +1095,6 @@ try {
                 });
             }
 
-            // Calculate top schools by complaints (from ALL data, before any filtering)
-            $topSchools = [];
-            if ($type === 'complaints') {
-                $schoolCounts = [];
-                $totalItems = count($data);
-                $itemsWithSchool = 0;
-                foreach ($data as $item) {
-                    $school = $item['school'] ?? '';
-                    if ($school) {
-                        $itemsWithSchool++;
-                        $schoolCounts[$school] = ($schoolCounts[$school] ?? 0) + 1;
-                    }
-                }
-                error_log("DEBUG: Total complaints: $totalItems, With school: $itemsWithSchool");
-                error_log("DEBUG: School counts: " . json_encode($schoolCounts));
-                arsort($schoolCounts); // Sort by count descending
-                $topSchools = array_slice($schoolCounts, 0, 3, true);
-                error_log("DEBUG: Top schools: " . json_encode($topSchools));
-            }
-
             // Build school→governorate mapping for complaints filtering
             $schoolGovMap = [];
             if ($type === 'complaints' && ($filterSchool || $filterGov)) {
@@ -1210,7 +1190,7 @@ try {
                 }
             }
 
-            $response = [
+            echo json_encode([
                 "status" => "success",
                 "data" => [
                     "items" => $items,
@@ -1219,14 +1199,7 @@ try {
                     "limit" => $limit,
                     "totalPages" => $totalPages
                 ]
-            ];
-            
-            // Include top schools stats for complaints
-            if ($type === 'complaints' && !empty($topSchools)) {
-                $response['data']['topSchools'] = $topSchools;
-            }
-            
-            echo json_encode($response);
+            ]);
             break;
 
         case 'get_job_application':

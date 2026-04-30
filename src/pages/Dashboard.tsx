@@ -622,7 +622,6 @@ const Dashboard: React.FC = () => {
   const [applications, setApplications] = useState<DashJobApplication[]>([]);
   const [hero, setHero] = useState<HeroSlide[]>([]);
   const [complaints, setComplaints] = useState<any[]>([]);
-  const [topSchools, setTopSchools] = useState<Record<string, number>>({});
   const [contactMessages, setContactMessages] = useState<any[]>([]);
   const [admissionsList, setAdmissionsList] = useState<DashAdmission[]>([]);
   const [admissionsPage, setAdmissionsPage] = useState(1);
@@ -842,12 +841,9 @@ const Dashboard: React.FC = () => {
     setIsTableLoading(true);
     try {
       const res = await getPaginatedEntries({ type: 'complaints', page: complaintPage, limit: 12, search: debouncedComplaintSearch, filterType: complaintsFilterType, filterSchool: complaintsFilterSchool, filterGov: complaintsFilterGov });
-      console.log('API Response:', res);
       if (res.status === 'success') {
         setComplaints(res.data.items);
         setComplaintTotalPages(res.data.totalPages);
-        console.log('topSchools from API:', res.data.topSchools);
-        setTopSchools(res.data.topSchools || {});
       }
     } catch (err) { console.error(err); }
     finally { setIsTableLoading(false); }
@@ -2183,29 +2179,33 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Top 3 Schools by Complaints - from backend (all data) */}
-              {/* DEBUG: topSchools = {JSON.stringify(topSchools)} */}
-              {Object.keys(topSchools).length > 0 ? (
-                <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em', alignSelf: 'center', marginRight: 8 }}>{u.topComplaintSchools}:</p>
-                  {Object.entries(topSchools).map(([school, count], idx) => {
-                    const schoolData = schools.find((s: any) => s.name === school || s.nameAr === school);
-                    const displayName = lang === 'ar' ? (schoolData?.nameAr || school) : school;
-                    const medals = ['#f59e0b', '#94a3b8', '#cd7f32'];
-                    return (
-                      <div key={school} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--surface2)', borderRadius: 12, padding: '8px 14px', border: '1px solid var(--border)', cursor: 'pointer' }} onClick={() => { setComplaintsFilterSchool(school); setComplaintPage(1); }}>
-                        <span style={{ fontSize: 16, fontWeight: 800, color: medals[idx] || 'var(--text2)' }}>#{idx + 1}</span>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{displayName}</span>
-                        <span style={{ fontSize: 11, fontWeight: 700, background: 'rgba(239,68,68,0.12)', color: '#ef4444', borderRadius: 999, padding: '2px 8px' }}>{count} {u.complaintsCount}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div style={{ padding: '8px 12px', background: '#fef3c7', borderRadius: 8, marginBottom: 12, fontSize: 12, color: '#92400e' }}>
-                  DEBUG: No top schools (topSchools is empty: {JSON.stringify(topSchools)})
-                </div>
-              )}
+              {/* Top 3 Schools by Complaints */}
+              {(() => {
+                const schoolCounts: Record<string, number> = {};
+                complaints.forEach((c: any) => {
+                  const school = c.school || '';
+                  if (school) schoolCounts[school] = (schoolCounts[school] || 0) + 1;
+                });
+                const top3 = Object.entries(schoolCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+                if (top3.length === 0) return null;
+                return (
+                  <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em', alignSelf: 'center', marginRight: 8 }}>{u.topComplaintSchools}:</p>
+                    {top3.map(([school, count], idx) => {
+                      const schoolData = schools.find((s: any) => s.name === school || s.nameAr === school);
+                      const displayName = lang === 'ar' ? (schoolData?.nameAr || school) : school;
+                      const medals = ['#f59e0b', '#94a3b8', '#cd7f32'];
+                      return (
+                        <div key={school} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--surface2)', borderRadius: 12, padding: '8px 14px', border: '1px solid var(--border)', cursor: 'pointer' }} onClick={() => { setComplaintsFilterSchool(school); setComplaintPage(1); }}>
+                          <span style={{ fontSize: 16, fontWeight: 800, color: medals[idx] || 'var(--text2)' }}>#{idx + 1}</span>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{displayName}</span>
+                          <span style={{ fontSize: 11, fontWeight: 700, background: 'rgba(239,68,68,0.12)', color: '#ef4444', borderRadius: 999, padding: '2px 8px' }}>{count} {u.complaintsCount}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
 
               <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
                 <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
