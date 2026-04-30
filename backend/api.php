@@ -1095,6 +1095,20 @@ try {
                 });
             }
 
+            // Calculate top schools by complaints (from ALL data, before any filtering)
+            $topSchools = [];
+            if ($type === 'complaints') {
+                $schoolCounts = [];
+                foreach ($data as $item) {
+                    $school = $item['school'] ?? '';
+                    if ($school) {
+                        $schoolCounts[$school] = ($schoolCounts[$school] ?? 0) + 1;
+                    }
+                }
+                arsort($schoolCounts); // Sort by count descending
+                $topSchools = array_slice($schoolCounts, 0, 3, true);
+            }
+
             // Build school→governorate mapping for complaints filtering
             $schoolGovMap = [];
             if ($type === 'complaints' && ($filterSchool || $filterGov)) {
@@ -1177,20 +1191,6 @@ try {
             $totalPages = ceil($total / $limit);
             $offset = ($page - 1) * $limit;
             $items = array_values(array_slice($data, $offset, $limit));
-            
-            // Calculate top schools by complaints (from ALL data, not just current page)
-            $topSchools = [];
-            if ($type === 'complaints') {
-                $schoolCounts = [];
-                foreach ($data as $item) {
-                    $school = $item['school'] ?? '';
-                    if ($school) {
-                        $schoolCounts[$school] = ($schoolCounts[$school] ?? 0) + 1;
-                    }
-                }
-                arsort($schoolCounts); // Sort by count descending
-                $topSchools = array_slice($schoolCounts, 0, 3, true);
-            }
             
             // Optimization: Remove heavy fields from list view to keep payload small
             if ($type === 'jobApplications') {
