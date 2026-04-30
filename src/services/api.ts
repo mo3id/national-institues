@@ -153,9 +153,9 @@ export const submitJobApplication = async (applicationData: Record<string, any>)
     return data;
 };
 
-export const getPaginatedEntries = async (params: { type: string, page: number, limit: number, search?: string, filterType?: string }): Promise<ApiResponse> => {
-    const { type, page, limit, search = '', filterType = 'All' } = params;
-    const { data } = await apiClient.get<ApiResponse>(`?action=get_entries&type=${type}&page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&filterType=${encodeURIComponent(filterType)}`);
+export const getPaginatedEntries = async (params: { type: string, page: number, limit: number, search?: string, filterType?: string, filterSchool?: string, filterGov?: string }): Promise<ApiResponse> => {
+    const { type, page, limit, search = '', filterType = 'All', filterSchool = '', filterGov = '' } = params;
+    const { data } = await apiClient.get<ApiResponse>(`?action=get_entries&type=${type}&page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&filterType=${encodeURIComponent(filterType)}&filterSchool=${encodeURIComponent(filterSchool)}&filterGov=${encodeURIComponent(filterGov)}`);
     return data;
 };
 

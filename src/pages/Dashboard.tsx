@@ -775,6 +775,8 @@ const Dashboard: React.FC = () => {
   const [alumniSearch, setAlumniSearch] = useState('');
   const [complaintsSearch, setComplaintsSearch] = useState('');
   const [complaintsFilterType, setComplaintsFilterType] = useState('All');
+  const [complaintsFilterSchool, setComplaintsFilterSchool] = useState('');
+  const [complaintsFilterGov, setComplaintsFilterGov] = useState('');
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   const [newArt, setNewArt] = useState<Partial<DashNewsItem>>({ title: '', titleAr: '', summary: '', summaryAr: '', date: '', image: '', published: true });
   const [newJob, setNewJob] = useState<Partial<DashJob>>({ title: '', titleAr: '', department: '', departmentAr: '', location: '', locationAr: '', type: '', typeAr: '', description: '', descriptionAr: '', image: '' });
@@ -831,21 +833,21 @@ const Dashboard: React.FC = () => {
   // ── Polling for new arrivals (Auto-refresh every 30s for active section) ───
   useEffect(() => {
     let interval: any;
-    if (['complaints', 'contactMessages', 'recruitment', 'news', 'admissions'].includes(section)) {
+    if (['complaints', 'contactMessages', 'recruitment', 'news', 'admissionApplications'].includes(section)) {
       interval = setInterval(() => {
         if (section === 'complaints') fetchComplaints();
         if (section === 'contactMessages') fetchMessages();
         if (section === 'recruitment') fetchApplicants();
         if (section === 'news') fetchNews();
-        if (section === 'admissions') fetchAdmissions();
+        if (section === 'admissionApplications') fetchAdmissions();
       }, 30000); // 30 seconds polling
     }
     return () => { if (interval) clearInterval(interval); };
-  }, [section, complaintPage, messagePage, applicantPage, newsPage, debouncedComplaintSearch, debouncedNewsSearch, complaintsFilterType, selectedRecruitmentJobId]);
+  }, [section, complaintPage, messagePage, applicantPage, newsPage, debouncedComplaintSearch, debouncedNewsSearch, complaintsFilterType, complaintsFilterSchool, complaintsFilterGov, selectedRecruitmentJobId]);
 
   useEffect(() => {
     if (section === 'complaints') fetchComplaints();
-  }, [section, complaintPage, debouncedComplaintSearch, complaintsFilterType]);
+  }, [section, complaintPage, debouncedComplaintSearch, complaintsFilterType, complaintsFilterSchool, complaintsFilterGov]);
 
   useEffect(() => {
     if (section === 'contactMessages') fetchMessages();
@@ -880,7 +882,7 @@ const Dashboard: React.FC = () => {
   }, [section]);
 
   useEffect(() => {
-    if (section === 'admissions') fetchAdmissions();
+    if (section === 'admissionApplications') fetchAdmissions();
   }, [section, admissionsPage, admissionsSearch, admissionsFilterStatus]);
 
   // Initial fetch for overview stats
@@ -900,7 +902,7 @@ const Dashboard: React.FC = () => {
   const fetchComplaints = async () => {
     setIsTableLoading(true);
     try {
-      const res = await getPaginatedEntries({ type: 'complaints', page: complaintPage, limit: 12, search: debouncedComplaintSearch, filterType: complaintsFilterType });
+      const res = await getPaginatedEntries({ type: 'complaints', page: complaintPage, limit: 12, search: debouncedComplaintSearch, filterType: complaintsFilterType, filterSchool: complaintsFilterSchool, filterGov: complaintsFilterGov });
       if (res.status === 'success') {
         setComplaints(res.data.items);
         setComplaintTotalPages(res.data.totalPages);
@@ -1412,7 +1414,8 @@ const Dashboard: React.FC = () => {
     { id: 'recruitment', label: u.recruitmentPortal, icon: Briefcase },
     { id: 'departments', label: u.jobDepartments, icon: LayoutDashboard },
     { id: 'jobs', label: u.jobs, icon: Briefcase },
-    { id: 'admissions', label: u.admissions, icon: GraduationCap },
+    { id: 'admissionSettings', label: u.admissionSettings, icon: Settings },
+    { id: 'admissionApplications', label: u.admissionApplications, icon: GraduationCap },
     { id: 'modifications', label: u.modifications || 'Modification Requests', icon: Edit3 },
     { id: 'alumni', label: u.alumni, icon: GraduationCap },
     { id: 'complaints', label: u.complaints, icon: MessageSquare },
@@ -2425,8 +2428,9 @@ const Dashboard: React.FC = () => {
                   </h2>
                   <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 4 }}>{u.complaintsManage}</p>
                 </div>
-                <div style={{ display: 'flex', gap: 0, alignItems: 'stretch', flexWrap: 'nowrap', flex: 1, justifyContent: 'flex-end', minWidth: 280 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface2)', borderRadius: 16, border: '1px solid var(--border)', boxShadow: '0 2px 4px rgba(0,0,0,0.02)', padding: '4px 8px', width: '100%', maxWidth: 450 }}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                  {/* Search + Type filter */}
+                  <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface2)', borderRadius: 16, border: '1px solid var(--border)', boxShadow: '0 2px 4px rgba(0,0,0,0.02)', padding: '4px 8px', maxWidth: 450 }}>
                     <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center' }}>
                       <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 12, right: isRTL ? 12 : 'auto', top: '50%', transform: 'translateY(-50%)', width: 16, height: 16, color: 'var(--text2)' }} />
                       <input
@@ -2447,12 +2451,72 @@ const Dashboard: React.FC = () => {
                       ]}
                     />
                   </div>
+                  {/* Governorate filter */}
+                  <CustomSelect
+                    className="!w-36"
+                    value={complaintsFilterGov}
+                    onChange={val => { setComplaintsFilterGov(val); setComplaintsFilterSchool(''); setComplaintPage(1); }}
+                    options={[
+                      { value: '', label: u.allGovs },
+                      ...Array.from(new Set(schools.map((s: any) => lang === 'ar' ? (s.governorateAr || s.governorate) : s.governorate).filter(Boolean))).sort().map((g: string) => ({ value: g, label: g }))
+                    ]}
+                  />
+                  {/* School filter (filtered by governorate) */}
+                  <CustomSelect
+                    className="!w-44"
+                    value={complaintsFilterSchool}
+                    onChange={val => {
+                      setComplaintsFilterSchool(val);
+                      // Auto-set governorate when school is selected
+                      if (val) {
+                        const school = schools.find((s: any) => s.name === val || s.nameAr === val);
+                        if (school) {
+                          const gov = lang === 'ar' ? (school.governorateAr || school.governorate) : school.governorate;
+                          if (gov && gov !== complaintsFilterGov) setComplaintsFilterGov(gov);
+                        }
+                      }
+                      setComplaintPage(1);
+                    }}
+                    options={[
+                      { value: '', label: u.allSchools },
+                      ...schools
+                        .filter((s: any) => !complaintsFilterGov || (lang === 'ar' ? (s.governorateAr || s.governorate) : s.governorate) === complaintsFilterGov)
+                        .map((s: any) => ({ value: s.name, label: lang === 'ar' ? (s.nameAr || s.name) : s.name }))
+                    ]}
+                  />
                 </div>
               </div>
 
+              {/* Top 3 Schools by Complaints */}
+              {(() => {
+                const schoolCounts: Record<string, number> = {};
+                complaints.forEach((c: any) => {
+                  const school = c.school || '';
+                  if (school) schoolCounts[school] = (schoolCounts[school] || 0) + 1;
+                });
+                const top3 = Object.entries(schoolCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+                if (top3.length === 0) return null;
+                return (
+                  <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em', alignSelf: 'center', marginRight: 8 }}>{u.topComplaintSchools}:</p>
+                    {top3.map(([school, count], idx) => {
+                      const schoolData = schools.find((s: any) => s.name === school || s.nameAr === school);
+                      const displayName = lang === 'ar' ? (schoolData?.nameAr || school) : school;
+                      const medals = ['#f59e0b', '#94a3b8', '#cd7f32'];
+                      return (
+                        <div key={school} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--surface2)', borderRadius: 12, padding: '8px 14px', border: '1px solid var(--border)', cursor: 'pointer' }} onClick={() => { setComplaintsFilterSchool(school); setComplaintPage(1); }}>
+                          <span style={{ fontSize: 16, fontWeight: 800, color: medals[idx] || 'var(--text2)' }}>#{idx + 1}</span>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{displayName}</span>
+                          <span style={{ fontSize: 11, fontWeight: 700, background: 'rgba(239,68,68,0.12)', color: '#ef4444', borderRadius: 999, padding: '2px 8px' }}>{count} {u.complaintsCount}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+
               <div className="dash-card" style={{ overflow: 'hidden', overflowX: 'auto', position: 'relative' }}>
                 <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
-                  {/* ... same thead ... */}
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.requestId}</th>
@@ -2565,50 +2629,19 @@ const Dashboard: React.FC = () => {
             </div>
           )}
 
-          {/* ── Admissions ── */}
-          {section === 'admissions' && (
+          {/* ── Admission Settings ── */}
+          {section === 'admissionSettings' && (
             <div className="section-enter">
-              {/* Header */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
-                <div>
-                  <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <GraduationCap style={{ width: 24, height: 24, color: 'var(--accent)' }} />
-                    {u.admissions}
-                  </h2>
-                  <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 4 }}>{u.admissionsManage}</p>
-                </div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface2)', borderRadius: 16, border: '1px solid var(--border)', padding: '4px 8px', gap: 8 }}>
-                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                      <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 10, right: isRTL ? 10 : 'auto', width: 14, height: 14, color: 'var(--text2)' }} />
-                      <input
-                        style={{ background: 'transparent', border: 'none', outline: 'none', padding: '6px 10px', paddingLeft: isRTL ? 10 : 28, paddingRight: isRTL ? 28 : 10, fontSize: 13, color: 'var(--text)', width: 180 }}
-                        placeholder={u.search}
-                        value={admissionsSearch}
-                        onChange={e => { setAdmissionsSearch(e.target.value); setAdmissionsPage(1); }}
-                      />
-                    </div>
-                    <div style={{ width: 1, height: 20, background: 'var(--border)' }}></div>
-                    <CustomSelect
-                      className="!w-40"
-                      value={admissionsFilterStatus}
-                      onChange={val => { setAdmissionsFilterStatus(val); setAdmissionsPage(1); }}
-                      options={[
-                        { value: 'All', label: u.all },
-                        { value: 'Pending', label: u.pending },
-                        { value: 'Under Review', label: u.underReview },
-                        { value: 'Accepted', label: u.accepted },
-                        { value: 'Waitlist', label: u.waitlist },
-                        { value: 'Rejected', label: u.rejected },
-                      ]}
-                    />
-                  </div>
-                </div>
+              <div style={{ marginBottom: 24 }}>
+                <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Settings style={{ width: 24, height: 24, color: 'var(--accent)' }} />
+                  {u.admissionSettings}
+                </h2>
+                <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 4 }}>{u.admissionSettingsManage}</p>
               </div>
 
               {/* Admission Settings Card */}
-              <div className="dash-card" style={{ padding: 20, marginBottom: 24 }}>
-                <p className="dash-label" style={{ marginBottom: 16 }}>{u.admissionSettings}</p>
+              <div className="dash-card" style={{ padding: 20 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 16 }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                     <input type="checkbox" checked={admissionSettings?.isOpen ?? true} onChange={e => setAdmissionSettings((p: any) => ({ ...p, isOpen: e.target.checked }))} style={{ width: 16, height: 16 }} />
@@ -2672,6 +2705,49 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
                   <button className="dash-btn dash-btn-primary" onClick={() => { updateData('admissionSettings', admissionSettings); showToast(u.admissionSaved); }}><Save style={{ width: 14, height: 14 }} />{u.save}</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Admission Applications ── */}
+          {section === 'admissionApplications' && (
+            <div className="section-enter">
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
+                <div>
+                  <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <GraduationCap style={{ width: 24, height: 24, color: 'var(--accent)' }} />
+                    {u.admissionApplications}
+                  </h2>
+                  <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 4 }}>{u.admissionApplicationsManage}</p>
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface2)', borderRadius: 16, border: '1px solid var(--border)', padding: '4px 8px', gap: 8 }}>
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                      <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 10, right: isRTL ? 10 : 'auto', width: 14, height: 14, color: 'var(--text2)' }} />
+                      <input
+                        style={{ background: 'transparent', border: 'none', outline: 'none', padding: '6px 10px', paddingLeft: isRTL ? 10 : 28, paddingRight: isRTL ? 28 : 10, fontSize: 13, color: 'var(--text)', width: 180 }}
+                        placeholder={u.search}
+                        value={admissionsSearch}
+                        onChange={e => { setAdmissionsSearch(e.target.value); setAdmissionsPage(1); }}
+                      />
+                    </div>
+                    <div style={{ width: 1, height: 20, background: 'var(--border)' }}></div>
+                    <CustomSelect
+                      className="!w-40"
+                      value={admissionsFilterStatus}
+                      onChange={val => { setAdmissionsFilterStatus(val); setAdmissionsPage(1); }}
+                      options={[
+                        { value: 'All', label: u.all },
+                        { value: 'Pending', label: u.pending },
+                        { value: 'Under Review', label: u.underReview },
+                        { value: 'Accepted', label: u.accepted },
+                        { value: 'Waitlist', label: u.waitlist },
+                        { value: 'Rejected', label: u.rejected },
+                      ]}
+                    />
+                  </div>
                 </div>
               </div>
 

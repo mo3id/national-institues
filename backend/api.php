@@ -1000,6 +1000,8 @@ try {
             $limit = max(1, (int)($_GET['limit'] ?? 12));
             $search = $_GET['search'] ?? '';
             $filterType = $_GET['filterType'] ?? 'All';
+            $filterSchool = $_GET['filterSchool'] ?? '';
+            $filterGov = $_GET['filterGov'] ?? '';
 
             $data = [];
             if ($type === 'schools') {
@@ -1093,10 +1095,20 @@ try {
                 });
             }
 
+            // Build school→governorate mapping for complaints filtering
+            $schoolGovMap = [];
+            if ($type === 'complaints' && ($filterSchool || $filterGov)) {
+                $stmtSG = $pdo->query("SELECT name, nameAr, governorate, governorateAr FROM schools");
+                while ($sr = $stmtSG->fetch(PDO::FETCH_ASSOC)) {
+                    $schoolGovMap[$sr['name']] = $sr['governorate'] ?? '';
+                    $schoolGovMap[$sr['nameAr']] = $sr['governorateAr'] ?? '';
+                }
+            }
+
             // Backend Filtering
-            if ($search || $filterType !== 'All') {
+            if ($search || $filterType !== 'All' || $filterSchool || $filterGov) {
                 $term = strtolower($search);
-                $data = array_filter($data, function($item) use ($term, $filterType, $type) {
+                $data = array_filter($data, function($item) use ($term, $filterType, $type, $filterSchool, $filterGov, $schoolGovMap) {
                     // Filter by Type-specific field
                     if ($filterType !== 'All') {
                         if ($type === 'complaints') {
@@ -1123,6 +1135,19 @@ try {
                         } elseif ($type === 'admissions') {
                             if (($item['status'] ?? '') !== $filterType) return false;
                         }
+                    }
+
+                    // Filter by School (complaints)
+                    if ($filterSchool && $type === 'complaints') {
+                        $itemSchool = $item['school'] ?? '';
+                        if ($itemSchool !== $filterSchool) return false;
+                    }
+
+                    // Filter by Governorate (complaints — resolve via school)
+                    if ($filterGov && $type === 'complaints') {
+                        $itemSchool = $item['school'] ?? '';
+                        $schoolGov = $schoolGovMap[$itemSchool] ?? '';
+                        if ($schoolGov !== $filterGov) return false;
                     }
 
                     // Filter by Search Term
