@@ -842,9 +842,11 @@ const Dashboard: React.FC = () => {
     setIsTableLoading(true);
     try {
       const res = await getPaginatedEntries({ type: 'complaints', page: complaintPage, limit: 12, search: debouncedComplaintSearch, filterType: complaintsFilterType, filterSchool: complaintsFilterSchool, filterGov: complaintsFilterGov });
+      console.log('API Response:', res);
       if (res.status === 'success') {
         setComplaints(res.data.items);
         setComplaintTotalPages(res.data.totalPages);
+        console.log('topSchools from API:', res.data.topSchools);
         setTopSchools(res.data.topSchools || {});
       }
     } catch (err) { console.error(err); }
@@ -2182,7 +2184,8 @@ const Dashboard: React.FC = () => {
               </div>
 
               {/* Top 3 Schools by Complaints - from backend (all data) */}
-              {Object.keys(topSchools).length > 0 && (
+              {/* DEBUG: topSchools = {JSON.stringify(topSchools)} */}
+              {Object.keys(topSchools).length > 0 ? (
                 <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
                   <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em', alignSelf: 'center', marginRight: 8 }}>{u.topComplaintSchools}:</p>
                   {Object.entries(topSchools).map(([school, count], idx) => {
@@ -2197,6 +2200,10 @@ const Dashboard: React.FC = () => {
                       </div>
                     );
                   })}
+                </div>
+              ) : (
+                <div style={{ padding: '8px 12px', background: '#fef3c7', borderRadius: 8, marginBottom: 12, fontSize: 12, color: '#92400e' }}>
+                  DEBUG: No top schools (topSchools is empty: {JSON.stringify(topSchools)})
                 </div>
               )}
 
