@@ -1366,7 +1366,7 @@ try {
                 // Validate day
                 $dayNum = intval($day);
                 $fullYear = ($century === '2') ? '19' . $year : '20' . $year;
-                $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $monthNum, intval($fullYear));
+                $daysInMonth = (int)date('t', strtotime("{$fullYear}-{$monthNum}-01"));
                 if ($dayNum < 1 || $dayNum > $daysInMonth) {
                     http_response_code(400);
                     echo json_encode([
