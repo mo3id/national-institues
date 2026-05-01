@@ -27,6 +27,10 @@
   RewriteEngine On
   RewriteBase /
 
+  # ── Pass Authorization header to PHP (cPanel fix) ────────────────────────
+  RewriteCond %{HTTP:Authorization} ^(.*)
+  RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+
   # ── React Router — SPA fallback ──────────────────────────────────────────
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
