@@ -45,8 +45,7 @@ CREATE TABLE IF NOT EXISTS admissions (
   INDEX idx_application_number (application_number),
   INDEX idx_status (status),
   INDEX idx_email (parent_email),
-  INDEX idx_created (created_at),
-  FOREIGN KEY (accepted_school_id) REFERENCES schools(id)
+  INDEX idx_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 3. admission_preferences table
@@ -57,8 +56,6 @@ CREATE TABLE IF NOT EXISTS admission_preferences (
   preference_order INT NOT NULL CHECK (preference_order BETWEEN 1 AND 10),
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (admission_id) REFERENCES admissions(id) ON DELETE CASCADE,
-  FOREIGN KEY (school_id) REFERENCES schools(id),
   INDEX idx_admission (admission_id),
   INDEX idx_school (school_id),
   UNIQUE KEY unique_preference (admission_id, preference_order)
@@ -79,7 +76,6 @@ CREATE TABLE IF NOT EXISTS modification_requests (
   completed_at DATETIME,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (admission_id) REFERENCES admissions(id),
   INDEX idx_request_number (request_number),
   INDEX idx_admission (admission_id),
   INDEX idx_status (status),
@@ -145,7 +141,6 @@ CREATE TABLE IF NOT EXISTS job_applications (
   interview_date DATETIME,
   applied_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (job_id) REFERENCES jobs(id),
   INDEX idx_email (email),
   INDEX idx_job (job_id),
   INDEX idx_status (status),
