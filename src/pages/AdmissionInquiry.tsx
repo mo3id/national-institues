@@ -21,6 +21,7 @@ const STATUS_CONFIG: Record<string, { color: string; bg: string; icon: React.Ele
   'pending':              { color: 'text-amber-700',  bg: 'bg-amber-50  border-amber-200',  icon: Clock,        labelAr: 'معلق',                      labelEn: 'Pending' },
   'under_review':         { color: 'text-blue-700',   bg: 'bg-blue-50   border-blue-200',   icon: AlertCircle,  labelAr: 'قيد المراجعة',             labelEn: 'Under Review' },
   'accepted':             { color: 'text-green-700',  bg: 'bg-green-50  border-green-200',  icon: CheckCircle,  labelAr: 'مقبول',                     labelEn: 'Accepted' },
+  'waitlist':             { color: 'text-purple-700', bg: 'bg-purple-50 border-purple-200', icon: Clock,        labelAr: 'قائمة الانتظار',           labelEn: 'Waitlist' },
   'rejected':             { color: 'text-red-700',    bg: 'bg-red-50    border-red-200',    icon: XCircle,      labelAr: 'مرفوض',                     labelEn: 'Rejected' },
   'modification_requested': { color: 'text-orange-700', bg: 'bg-orange-50 border-orange-200', icon: History,    labelAr: 'بانتظار تعديل الرغبات',     labelEn: 'Modification Requested' },
   'modification_approved': { color: 'text-purple-700', bg: 'bg-purple-50 border-purple-200', icon: Edit3,       labelAr: 'تمت الموافقة على التعديل', labelEn: 'Modification Approved' },

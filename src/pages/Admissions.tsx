@@ -63,6 +63,7 @@ const Admissions: React.FC = () => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [admissionId, setAdmissionId] = useState<string | null>(null);
+  const [applicationNumber, setApplicationNumber] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: string } }) => {
@@ -111,8 +112,8 @@ const Admissions: React.FC = () => {
   }, [lang]);
 
   const copyToClipboard = () => {
-    if (!admissionId) return;
-    navigator.clipboard.writeText(admissionId);
+    if (!applicationNumber) return;
+    navigator.clipboard.writeText(applicationNumber);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -149,7 +150,8 @@ const Admissions: React.FC = () => {
 
     try {
       const res = await submitAdmission({ ...payload, documents: uploadedDocs });
-      setAdmissionId(res.data?.id || null);
+      setAdmissionId(res.data?.applicationId || null);
+      setApplicationNumber(res.data?.applicationNumber || null);
       setSubmitted(true);
       setFormData({ studentName: '', studentDOB: '', studentNationalId: '', passportNumber: '', gradeStage: '', gradeClass: '', hasSibling: false, parentName: '', parentPhone: '', parentEmail: '', notes: '' });
       setPreferences([]);
@@ -291,11 +293,11 @@ const Admissions: React.FC = () => {
                         <p className="text-slate-500 font-medium text-lg max-w-md mx-auto">
                           {lang === 'ar' ? 'احتفظ برقم الطلب لمتابعة حالة تقديمك.' : 'Keep your application ID to track your status.'}
                         </p>
-                        {admissionId && (
+                        {applicationNumber && (
                           <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 inline-block mx-auto min-w-[280px]">
                             <div className="flex flex-col items-center gap-4">
-                              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{lang === 'ar' ? 'رقم الطلب' : 'Application ID'}</p>
-                              <span className="text-4xl font-black text-[#1e3a8a] tracking-widest font-mono">{admissionId}</span>
+                              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{lang === 'ar' ? 'رقم الطلب' : 'Application Number'}</p>
+                              <span className="text-4xl font-black text-[#1e3a8a] tracking-widest font-mono">{applicationNumber}</span>
                               <button onClick={copyToClipboard} className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-bold text-slate-600 hover:text-[#1e3a8a] hover:border-[#1e3a8a] transition-all shadow-sm">
                                 {copied ? <><Check className="w-4 h-4 text-green-500" /><span>{lang === 'ar' ? 'تم النسخ!' : 'Copied!'}</span></> : <><Clipboard className="w-4 h-4" /><span>{lang === 'ar' ? 'نسخ الرقم' : 'Copy ID'}</span></>}
                               </button>
@@ -307,7 +309,7 @@ const Admissions: React.FC = () => {
                             <Search className="w-5 h-5" />
                             <span>{lang === 'ar' ? 'تتبع الطلب' : 'Track Application'}</span>
                           </Link>
-                          <button onClick={() => { setSubmitted(false); setAdmissionId(null); setFormData({ studentName: '', studentDOB: '', studentNationalId: '', passportNumber: '', gradeStage: '', gradeClass: '', hasSibling: false, parentName: '', parentPhone: '', parentEmail: '', notes: '' }); setPreferences([]); }} className="bg-slate-100 text-slate-700 px-8 py-3.5 rounded-xl font-bold hover:bg-slate-200 transition-all">
+                          <button onClick={() => { setSubmitted(false); setAdmissionId(null); setApplicationNumber(null); setFormData({ studentName: '', studentDOB: '', studentNationalId: '', passportNumber: '', gradeStage: '', gradeClass: '', hasSibling: false, parentName: '', parentPhone: '', parentEmail: '', notes: '' }); setPreferences([]); }} className="bg-slate-100 text-slate-700 px-8 py-3.5 rounded-xl font-bold hover:bg-slate-200 transition-all">
                             {lang === 'ar' ? 'تقديم طلب آخر' : 'Submit Another'}
                           </button>
                         </div>

@@ -176,11 +176,17 @@ export const getJobApplicationDetails = async (id: string): Promise<ApiResponse>
 
 export const submitAdmission = async (admissionData: Record<string, any>): Promise<ApiResponse> => {
     const fd = new FormData();
-    // Text fields
-    const textFields = ['studentName', 'studentDOB', 'studentNationalId', 'passportNumber', 'gradeStage', 'gradeClass', 'parentName', 'parentPhone', 'parentEmail', 'notes'];
+    // Text fields - must match backend expected fields
+    const textFields = [
+        'studentName', 'studentNameAr', 'studentDOB', 'studentNationalId', 'passportNumber',
+        'gradeStage', 'gradeClass', 'parentName', 'parentNameAr', 'parentPhone',
+        'parentEmail', 'parentNationalId', 'parentJob', 'address', 'siblingSchool'
+    ];
     for (const key of textFields) {
         fd.append(key, admissionData[key] ?? '');
     }
+    // Boolean fields
+    fd.append('hasSibling', admissionData.hasSibling ? '1' : '0');
     // Preferences as JSON string
     fd.append('preferences', JSON.stringify(admissionData.preferences || []));
     // Document names as JSON string, files as actual File objects
