@@ -1292,6 +1292,56 @@ try {
             // NEW: Submit admission with duplicate check and database storage
             // ═══════════════════════════════════════════════════════════════════════════
             
+            // ── Auto-create tables if they don't exist ──────────────────────────────
+            $pdo->exec("
+                CREATE TABLE IF NOT EXISTS admissions (
+                    id VARCHAR(50) PRIMARY KEY,
+                    application_number VARCHAR(25) UNIQUE,
+                    student_name VARCHAR(255) NOT NULL,
+                    student_name_ar VARCHAR(255),
+                    student_dob DATE,
+                    student_national_id VARCHAR(20),
+                    student_birth_certificate VARCHAR(100),
+                    grade_stage VARCHAR(50),
+                    grade_class VARCHAR(50),
+                    parent_name VARCHAR(255),
+                    parent_name_ar VARCHAR(255),
+                    parent_phone VARCHAR(50),
+                    parent_email VARCHAR(255),
+                    parent_national_id VARCHAR(20),
+                    parent_job VARCHAR(255),
+                    address TEXT,
+                    has_sibling BOOLEAN DEFAULT FALSE,
+                    sibling_school VARCHAR(255),
+                    passport_number VARCHAR(50),
+                    id_type ENUM('national_id', 'passport', 'both') DEFAULT 'national_id',
+                    documents JSON,
+                    status ENUM('pending','under_review','accepted','waitlist','rejected','modification_requested') DEFAULT 'pending',
+                    accepted_school_id VARCHAR(50),
+                    admin_notes TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
+                    INDEX idx_national_id (student_national_id),
+                    INDEX idx_passport (passport_number),
+                    INDEX idx_application_number (application_number),
+                    INDEX idx_status (status),
+                    INDEX idx_email (parent_email),
+                    INDEX idx_created (created_at)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
+            $pdo->exec("
+                CREATE TABLE IF NOT EXISTS admission_preferences (
+                    id VARCHAR(50) PRIMARY KEY,
+                    admission_id VARCHAR(50) NOT NULL,
+                    school_id VARCHAR(50) NOT NULL,
+                    preference_order INT NOT NULL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
+                    INDEX idx_admission (admission_id),
+                    INDEX idx_school (school_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
+            
             // ── Accept multipart/form-data: text fields in $_POST, files in $_FILES
             $input = [];
             $textFields = ['studentName', 'studentNameAr', 'studentDOB', 'studentNationalId', 'passportNumber', 'gradeStage', 'gradeClass', 'parentName', 'parentNameAr', 'parentPhone', 'parentEmail', 'parentNationalId', 'parentJob', 'address', 'siblingSchool'];
@@ -1665,7 +1715,7 @@ try {
             
             // Get admission with school info
             $stmt = $pdo->prepare("
-                SELECT a.*, s.name as accepted_school_name, s.name_ar as accepted_school_name_ar
+                SELECT a.*, s.name as accepted_school_name, s.nameAr as accepted_school_name_ar
                 FROM admissions a
                 LEFT JOIN schools s ON a.accepted_school_id = s.id
                 WHERE {$whereClause}
@@ -1681,7 +1731,7 @@ try {
             
             // Get preferences
             $prefStmt = $pdo->prepare("
-                SELECT ap.*, s.name as school_name, s.name_ar as school_name_ar, s.stage
+                SELECT ap.*, s.name as school_name, s.nameAr as school_name_ar
                 FROM admission_preferences ap
                 JOIN schools s ON ap.school_id = s.id
                 WHERE ap.admission_id = ?

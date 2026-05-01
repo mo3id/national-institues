@@ -150,8 +150,9 @@ const Admissions: React.FC = () => {
 
     try {
       const res = await submitAdmission({ ...payload, documents: uploadedDocs });
+      console.log('[Admissions] Submit response:', res);
       setAdmissionId(res.data?.applicationId || null);
-      setApplicationNumber(res.data?.applicationNumber || null);
+      setApplicationNumber(res.data?.applicationNumber || res.data?.applicationId || null);
       setSubmitted(true);
       setFormData({ studentName: '', studentDOB: '', studentNationalId: '', passportNumber: '', gradeStage: '', gradeClass: '', hasSibling: false, parentName: '', parentPhone: '', parentEmail: '', notes: '' });
       setPreferences([]);
@@ -159,7 +160,22 @@ const Admissions: React.FC = () => {
       setErrors({});
       setDocError(null);
     } catch (err: any) {
-      setSubmitError(lang === 'ar' ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى.' : err.message || 'Failed to submit application.');
+      console.error('[Admissions] Submit error:', err?.response?.data || err);
+      const backendData = err?.response?.data;
+      // Handle duplicate application (ALREADY_APPLIED) — show existing application number
+      if (backendData?.error_code === 'ALREADY_APPLIED' && backendData?.data?.applicationNumber) {
+        setAdmissionId(backendData.data.applicationId || null);
+        setApplicationNumber(backendData.data.applicationNumber);
+        setSubmitted(true);
+        return;
+      }
+      // Show descriptive error from backend if available
+      const backendMsg = backendData?.message;
+      if (backendMsg) {
+        setSubmitError(backendMsg);
+      } else {
+        setSubmitError(lang === 'ar' ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى.' : err.message || 'Failed to submit application.');
+      }
     } finally {
       setIsSubmitting(false);
     }

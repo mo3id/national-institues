@@ -161,32 +161,10 @@ CREATE TABLE IF NOT EXISTS job_departments (
   INDEX idx_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert default governorates (optional)
+-- Insert default governorates
 INSERT IGNORE INTO governorates (id, name, nameAr) VALUES 
 ('1', 'Cairo', 'القاهرة'), 
+('1773323691575', 'Minya', 'المنيا'),
+('1773323708257', 'Portsaid', 'بورسعيد'),
 ('2', 'Alexandria', 'الإسكندرية'), 
-('3', 'Giza', 'الجيزة'),
-('4', 'Qalyubia', 'القليوبية'),
-('5', 'Port Said', 'بورسعيد'),
-('6', 'Suez', 'السويس'),
-('7', 'Luxor', 'الأقصر'),
-('8', 'Aswan', 'أسوان'),
-('9', 'Dakahlia', 'الدقهلية'),
-('10', 'Gharbia', 'الغربية'),
-('11', 'Kafr El Sheikh', 'كفر الشيخ'),
-('12', 'Monufia', 'المنوفية'),
-('13', 'Sharqia', 'الشرقية'),
-('14', 'Damietta', 'دمياط'),
-('15', 'Ismailia', 'الإسماعيلية'),
-('16', 'Faiyum', 'الفيوم'),
-('17', 'Beni Suef', 'بني سويف'),
-('18', 'Minya', 'المنيا'),
-('19', 'Asyut', 'أسيوط'),
-('20', 'Sohag', 'سوهاج'),
-('21', 'Qena', 'قنا'),
-('22', 'Red Sea', 'البحر الأحمر'),
-('23', 'Beheira', 'البحيرة'),
-('24', 'New Valley', 'الوادي الجديد'),
-('25', 'Matruh', 'مرسى مطروح'),
-('26', 'North Sinai', 'شمال سيناء'),
-('27', 'South Sinai', 'جنوب سيناء');
+('3', 'Giza', 'الجيزة');

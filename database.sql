@@ -102,10 +102,10 @@ CREATE TABLE IF NOT EXISTS `governorates` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `governorates` (`id`, `name`, `nameAr`) VALUES ('1', 'Cairo', 'القاهرة');
+INSERT INTO `governorates` (`id`, `name`, `nameAr`) VALUES ('1773323691575', 'Minya', 'المنيا');
+INSERT INTO `governorates` (`id`, `name`, `nameAr`) VALUES ('1773323708257', 'Portsaid', 'بورسعيد');
 INSERT INTO `governorates` (`id`, `name`, `nameAr`) VALUES ('2', 'Alexandria', 'الإسكندرية');
 INSERT INTO `governorates` (`id`, `name`, `nameAr`) VALUES ('3', 'Giza', 'الجيزة');
-INSERT INTO `governorates` (`id`, `name`, `nameAr`) VALUES ('4', 'Dakahlia', 'الدقهلية');
-INSERT INTO `governorates` (`id`, `name`, `nameAr`) VALUES ('5', 'Gharbia', 'الغربية');
 
 CREATE TABLE IF NOT EXISTS `settings` (
   `setting_key` varchar(100) NOT NULL PRIMARY KEY,
@@ -123,3 +123,53 @@ INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES ('partners', '[{"
 INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES ('galleryImages', '["https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=600&q=80","https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=600&q=80","https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=600&q=80","https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80"]');
 INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES ('formSettings', '{"contactFormTitle":"Get in Touch","contactFormTitleAr":"تواصل معنا","contactFormDesc":"We are here to answer your questions and help you in any way we can.","contactFormDescAr":"نحن هنا للإجابة على أسئلتك ومساعدتك بأي طريقة ممكنة.","jobFormTitle":"Join Our Team","jobFormTitleAr":"انضم إلى فريقنا","jobFormDesc":"Fill out the form below to apply for your dream job at NIS.","jobFormDescAr":"املأ النموذج أدناه للتقدم لوظيفة أحلامك في المعاهد القومية."}');
 INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES ('contactData', '{"address":"123 Education St, Cairo, Egypt","addressAr":"١٢٣ شارع التعليم، القاهرة، مصر","phone":"+20 123 456 7890","email":"info@nis.edu.eg","workingHours":"Sunday - Thursday: 8:00 AM - 3:00 PM","workingHoursAr":"الأحد - الخميس: ٨:٠٠ صباحاً - ٣:٠٠ مساءً","facebook":"https://facebook.com","twitter":"https://twitter.com","instagram":"https://instagram.com","linkedin":"https://linkedin.com","footerDesc":"The largest educational organization in Egypt, overseeing excellence in national and international schooling for over 60 years.","footerDescAr":"أكبر مؤسسة تعليمية في مصر، تشرف على التميز في التعليم القومي والدولي لأكثر من 60 عاماً."}');
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- ADMISSIONS & PREFERENCES TABLES
+-- ═══════════════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS `admissions` (
+  `id` varchar(50) NOT NULL PRIMARY KEY,
+  `application_number` varchar(25) UNIQUE,
+  `student_name` varchar(255) NOT NULL,
+  `student_name_ar` varchar(255),
+  `student_dob` date DEFAULT NULL,
+  `student_national_id` varchar(20) DEFAULT NULL,
+  `student_birth_certificate` varchar(100) DEFAULT NULL,
+  `grade_stage` varchar(50),
+  `grade_class` varchar(50),
+  `parent_name` varchar(255),
+  `parent_name_ar` varchar(255),
+  `parent_phone` varchar(50),
+  `parent_email` varchar(255),
+  `parent_national_id` varchar(20),
+  `parent_job` varchar(255),
+  `address` text,
+  `has_sibling` tinyint(1) DEFAULT 0,
+  `sibling_school` varchar(255),
+  `passport_number` varchar(50) DEFAULT NULL,
+  `id_type` enum('national_id','passport','both') DEFAULT 'national_id',
+  `documents` json DEFAULT NULL,
+  `status` enum('pending','under_review','accepted','waitlist','rejected','modification_requested') DEFAULT 'pending',
+  `accepted_school_id` varchar(50) DEFAULT NULL,
+  `admin_notes` text,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_national_id` (`student_national_id`),
+  INDEX `idx_passport` (`passport_number`),
+  INDEX `idx_application_number` (`application_number`),
+  INDEX `idx_adm_status` (`status`),
+  INDEX `idx_adm_email` (`parent_email`),
+  INDEX `idx_adm_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `admission_preferences` (
+  `id` varchar(50) NOT NULL PRIMARY KEY,
+  `admission_id` varchar(50) NOT NULL,
+  `school_id` varchar(50) NOT NULL,
+  `preference_order` int NOT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_pref_admission` (`admission_id`),
+  INDEX `idx_pref_school` (`school_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

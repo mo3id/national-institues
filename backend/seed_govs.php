@@ -3,10 +3,10 @@ require "db_config.php";
 try {
     $sql = "INSERT INTO governorates (id, name, nameAr) VALUES 
     (\"1\", \"Cairo\", \"القاهرة\"), 
+    (\"1773323691575\", \"Minya\", \"المنيا\"), 
+    (\"1773323708257\", \"Portsaid\", \"بورسعيد\"), 
     (\"2\", \"Alexandria\", \"الإسكندرية\"), 
-    (\"3\", \"Giza\", \"الجيزة\"), 
-    (\"4\", \"Dakahlia\", \"الدقهلية\"), 
-    (\"5\", \"Gharbia\", \"الغربية\")
+    (\"3\", \"Giza\", \"الجيزة\")
     ON DUPLICATE KEY UPDATE name=VALUES(name), nameAr=VALUES(nameAr);";
     $pdo->exec($sql);
     echo "Data inserted successfully!";
