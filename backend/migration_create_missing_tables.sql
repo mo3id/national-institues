@@ -80,7 +80,6 @@ CREATE TABLE IF NOT EXISTS modification_requests (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (admission_id) REFERENCES admissions(id),
-  FOREIGN KEY (reviewed_by) REFERENCES users(id),
   INDEX idx_request_number (request_number),
   INDEX idx_admission (admission_id),
   INDEX idx_status (status),
