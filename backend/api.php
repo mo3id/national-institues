@@ -586,6 +586,18 @@ try {
             ]);
             break;
 
+        case 'get_schools':
+            $stmt = $pdo->query("SELECT id, name, nameAr, location, locationAr, governorate, governorateAr, type FROM schools ORDER BY name");
+            $schools = $stmt->fetchAll();
+            foreach ($schools as &$school) {
+                if (!empty($school['type']) && is_string($school['type'])) {
+                    $decoded = json_decode($school['type'], true);
+                    $school['type'] = is_array($decoded) ? $decoded : $school['type'];
+                }
+            }
+            echo json_encode(["status" => "success", "data" => $schools]);
+            break;
+
         case 'get_site_data':
             // Serve from file cache if fresh (TTL: 60s) — avoids 4 SQL queries per request
             if (serveFromCache()) break;
@@ -604,6 +616,11 @@ try {
             $schools = $stmt->fetchAll();
             $needsMigration = false;
             foreach ($schools as &$school) {
+                // Decode type JSON
+                if (!empty($school['type']) && is_string($school['type'])) {
+                    $decoded = json_decode($school['type'], true);
+                    $school['type'] = is_array($decoded) ? $decoded : $school['type'];
+                }
                 // Decode gallery JSON
                 if (!empty($school['gallery'])) {
                     $school['gallery'] = json_decode($school['gallery'], true);
@@ -1098,6 +1115,10 @@ try {
                 
                 // Decode JSON fields
                 foreach ($data as &$school) {
+                    if (!empty($school['type']) && is_string($school['type'])) {
+                        $decoded = json_decode($school['type'], true);
+                        $school['type'] = is_array($decoded) ? $decoded : $school['type'];
+                    }
                     if (!empty($school['gallery'])) {
                         $school['gallery'] = json_decode($school['gallery'], true);
                     } else {
@@ -1195,6 +1216,17 @@ try {
                     } else {
                         $adm['documents'] = [];
                     }
+                    // Fetch preferences
+                    $prefStmt = $pdo->prepare("SELECT ap.school_id as schoolId, ap.preference_order, s.name as schoolName, s.nameAr as schoolNameAr, s.type as stage FROM admission_preferences ap LEFT JOIN schools s ON ap.school_id = s.id WHERE ap.admission_id = ? ORDER BY ap.preference_order ASC");
+                    $prefStmt->execute([$adm['id']]);
+                    $prefs = $prefStmt->fetchAll(PDO::FETCH_ASSOC);
+                    foreach ($prefs as &$p) {
+                        if (!empty($p['stage']) && is_string($p['stage'])) {
+                            $dec = json_decode($p['stage'], true);
+                            $p['stage'] = is_array($dec) ? $dec : $p['stage'];
+                        }
+                    }
+                    $adm['preferences'] = $prefs;
                 }
                 unset($adm);
             }
@@ -1881,6 +1913,20 @@ try {
             } else {
                 $admission['documents'] = [];
             }
+
+            // Fetch preferences with school names
+            $prefStmt = $pdo->prepare("SELECT ap.*, s.name as schoolName, s.nameAr as schoolNameAr, s.type as stage FROM admission_preferences ap LEFT JOIN schools s ON ap.school_id = s.id WHERE ap.admission_id = ? ORDER BY ap.preference_order ASC");
+            $prefStmt->execute([$id]);
+            $preferences = $prefStmt->fetchAll();
+            foreach ($preferences as &$pref) {
+                $pref['schoolId'] = $pref['school_id'];
+                if (!empty($pref['stage']) && is_string($pref['stage'])) {
+                    $decoded = json_decode($pref['stage'], true);
+                    $pref['stage'] = is_array($decoded) ? $decoded : $pref['stage'];
+                }
+            }
+            $admission['preferences'] = $preferences;
+
             echo json_encode(["status" => "success", "data" => $admission]);
             break;
 
@@ -1890,7 +1936,7 @@ try {
             
             $input = json_decode(file_get_contents('php://input'), true);
             $id = sanitizeInput($input['id'] ?? '');
-            $status = sanitizeInput($input['status'] ?? '');
+            $status = $input['status'] ?? '';
             $acceptedSchoolId = sanitizeInput($input['acceptedSchoolId'] ?? $input['acceptedSchool'] ?? null);
             $adminNotes = sanitizeInput($input['adminNotes'] ?? '');
             
@@ -1899,11 +1945,25 @@ try {
                 echo json_encode(["status" => "error", "message" => "Admission ID is required"]);
                 break;
             }
+
+            // Normalize status: accept both "Under Review" and "under_review"
+            $statusMap = [
+                'pending' => 'pending',
+                'under review' => 'under_review',
+                'under_review' => 'under_review',
+                'accepted' => 'accepted',
+                'waitlist' => 'waitlist',
+                'rejected' => 'rejected',
+                'modification_approved' => 'modification_approved',
+                'modification approved' => 'modification_approved',
+            ];
+            $statusKey = strtolower(trim($status));
+            $status = $statusMap[$statusKey] ?? $statusKey;
             
-            $validStatuses = ['pending', 'under_review', 'accepted', 'rejected', 'modification_approved'];
+            $validStatuses = ['pending', 'under_review', 'accepted', 'rejected', 'modification_approved', 'waitlist'];
             if (!empty($status) && !in_array($status, $validStatuses)) {
                 http_response_code(400);
-                echo json_encode(["status" => "error", "message" => "Invalid status"]);
+                echo json_encode(["status" => "error", "message" => "Invalid status: $status"]);
                 break;
             }
             
@@ -1915,6 +1975,13 @@ try {
                 $params[] = $status;
             }
             if ($acceptedSchoolId !== null) {
+                // If it's a school name instead of ID, resolve it
+                if (!empty($acceptedSchoolId) && !preg_match('/^\d+$/', $acceptedSchoolId)) {
+                    $schoolLookup = $pdo->prepare("SELECT id FROM schools WHERE name = ? OR nameAr = ? OR id = ? LIMIT 1");
+                    $schoolLookup->execute([$acceptedSchoolId, $acceptedSchoolId, $acceptedSchoolId]);
+                    $schoolRow = $schoolLookup->fetch();
+                    $acceptedSchoolId = $schoolRow ? $schoolRow['id'] : null;
+                }
                 $updates[] = "accepted_school_id = ?";
                 $params[] = $acceptedSchoolId ?: null;
             }
@@ -2464,6 +2531,6 @@ try {
 } catch (Exception $e) {
     http_response_code(500);
     error_log('[NIS API Error] Action: ' . ($action ?? 'unknown') . ' | ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine());
-    echo json_encode(["status" => "error", "message" => $e->getMessage(), "file" => basename($e->getFile()), "line" => $e->getLine()]);
+    echo json_encode(["status" => "error", "message" => "An internal server error occurred. Please try again."]);
 }
 ?>

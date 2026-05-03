@@ -422,6 +422,16 @@ const buildWorkingHours = (form: any) => {
 };
 
 // ─── Admission Detail Modal ────────────────────────────────────────────────────
+const toDisplayStatus = (s: string): string => {
+  const map: Record<string, string> = {
+    'pending': 'Pending', 'under_review': 'Under Review', 'accepted': 'Accepted',
+    'waitlist': 'Waitlist', 'rejected': 'Rejected', 'modification_approved': 'Modification Approved',
+    'Under Review': 'Under Review', 'Pending': 'Pending', 'Accepted': 'Accepted',
+    'Waitlist': 'Waitlist', 'Rejected': 'Rejected',
+  };
+  return map[s] || s || 'Pending';
+};
+
 const AdmissionModal: React.FC<{
   admission: any;
   lang: string;
@@ -431,8 +441,8 @@ const AdmissionModal: React.FC<{
   onClose: () => void;
   onUpdate: (id: string, status: string, acceptedSchool: string, adminNotes: string) => Promise<void>;
 }> = ({ admission, lang, isRTL, u, schools, onClose, onUpdate }) => {
-  const [status, setStatus] = useState(admission.status || 'Pending');
-  const [acceptedSchool, setAcceptedSchool] = useState(admission.acceptedSchool || '');
+  const [status, setStatus] = useState(toDisplayStatus(admission.status));
+  const [acceptedSchool, setAcceptedSchool] = useState(admission.acceptedSchoolId || admission.acceptedSchool || '');
   const [adminNotes, setAdminNotes] = useState(admission.adminNotes || '');
   const [saving, setSaving] = useState(false);
   const [documents, setDocuments] = useState<{ name: string; fileName: string; path: string }[]>([]);
@@ -593,7 +603,7 @@ const AdmissionModal: React.FC<{
                 options={[
                   { value: '', label: lang === 'ar' ? 'اختر مدرسة...' : 'Select school...' },
                   ...(admission.preferences || []).map((p: any) => ({
-                    value: lang === 'ar' ? (p.schoolNameAr || p.schoolName) : p.schoolName,
+                    value: p.schoolId || p.school_id || '',
                     label: lang === 'ar' ? (p.schoolNameAr || p.schoolName) : p.schoolName,
                   }))
                 ]}
@@ -2455,7 +2465,7 @@ const Dashboard: React.FC = () => {
                         'Waitlist':     { bg: 'rgba(251,146,60,0.12)',  color: '#fb923c' },
                         'Rejected':     { bg: 'rgba(239,68,68,0.12)',   color: '#ef4444' },
                       };
-                      const sc = statusColors[adm.status] || statusColors['Pending'];
+                      const sc = statusColors[toDisplayStatus(adm.status)] || statusColors['Pending'];
                       return (
                         <tr key={adm.id} style={{ borderBottom: i === admissionsList.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease', cursor: 'pointer' }}
                           onClick={() => { setSelectedAdmission(adm); setAdmissionModalOpen(true); }}
@@ -2480,7 +2490,7 @@ const Dashboard: React.FC = () => {
                             </ol>
                           </td>
                           <td style={{ padding: '16px 24px' }}>
-                            <span style={{ padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: sc.bg, color: sc.color }}>{adm.status}</span>
+                            <span style={{ padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: sc.bg, color: sc.color }}>{toDisplayStatus(adm.status)}</span>
                           </td>
                           <td style={{ padding: '16px 12px' }} onClick={e => e.stopPropagation()}>
                             <button className="dash-icon-btn" title={u.delete} onClick={() => {

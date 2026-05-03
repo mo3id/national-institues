@@ -159,7 +159,15 @@ const Admissions: React.FC = () => {
       setErrors({});
       setDocError(null);
     } catch (err: any) {
-      setSubmitError(lang === 'ar' ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى.' : err.message || 'Failed to submit application.');
+      const resp = err?.response?.data;
+      if (resp?.error_code === 'ALREADY_APPLIED' && resp?.data) {
+        setSubmitError(resp.message || (lang === 'ar' ? 'لقد قدمت طلباً مسبقاً بهذا الرقم القومي' : 'You have already applied with this ID'));
+        if (resp.data.applicationId) setAdmissionId(resp.data.applicationId);
+        if (resp.data.applicationNumber) setApplicationNumber(resp.data.applicationNumber);
+        setSubmitted(true);
+      } else {
+        setSubmitError(resp?.message || (lang === 'ar' ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى.' : err.message || 'Failed to submit application.'));
+      }
     } finally {
       setIsSubmitting(false);
     }
