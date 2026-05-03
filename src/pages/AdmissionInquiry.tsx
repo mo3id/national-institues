@@ -30,7 +30,7 @@ const STATUS_CONFIG: Record<string, { color: string; bg: string; icon: React.Ele
 const AdmissionInquiry: React.FC = () => {
   const { lang, isRTL } = useLanguage();
   const navigate = useNavigate();
-  const [searchType, setSearchType] = useState<'id' | 'applicationNumber' | 'nationalId'>('applicationNumber');
+  const [searchType, setSearchType] = useState<'applicationNumber' | 'nationalId'>('applicationNumber');
   const [searchValue, setSearchValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,9 +46,7 @@ const AdmissionInquiry: React.FC = () => {
     setAdmission(null);
     
     try {
-      const identifier = searchType === 'id' 
-        ? { admissionId: value }
-        : searchType === 'applicationNumber'
+      const identifier = searchType === 'applicationNumber'
         ? { applicationNumber: value }
         : { nationalId: value };
         
@@ -116,10 +114,9 @@ const AdmissionInquiry: React.FC = () => {
                     <label className={`block font-bold text-slate-700 mb-2 ${isRTL ? 'text-sm' : 'text-xs uppercase tracking-widest'}`}>
                       {lang === 'ar' ? 'طريقة البحث' : 'Search Method'}
                     </label>
-                    <div className="grid grid-cols-3 gap-2 mb-3">
+                    <div className="grid grid-cols-2 gap-2 mb-3">
                       {[
                         { key: 'applicationNumber', labelAr: 'رقم الطلب', labelEn: 'App Number' },
-                        { key: 'id', labelAr: 'رقم القيد', labelEn: 'ID' },
                         { key: 'nationalId', labelAr: 'الرقم القومي', labelEn: 'National ID' },
                       ].map((type) => (
                         <button
@@ -139,8 +136,6 @@ const AdmissionInquiry: React.FC = () => {
                     <label className={`block font-bold text-slate-700 mb-2 ${isRTL ? 'text-sm' : 'text-xs uppercase tracking-widest'}`}>
                       {searchType === 'applicationNumber' 
                         ? (lang === 'ar' ? 'رقم الطلب' : 'Application Number')
-                        : searchType === 'id'
-                        ? (lang === 'ar' ? 'رقم القيد' : 'Admission ID')
                         : (lang === 'ar' ? 'الرقم القومي' : 'National ID')}
                     </label>
                     <input
@@ -148,7 +143,7 @@ const AdmissionInquiry: React.FC = () => {
                       value={searchValue}
                       onChange={e => { setSearchValue(e.target.value); setError(null); }}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent transition-all text-lg font-mono tracking-widest text-center"
-                      placeholder={searchType === 'applicationNumber' ? 'APP-2026-XXX-NNNN' : searchType === 'id' ? 'ADM_XXXXX' : 'XXXXXXXXXXXXXX'}
+                      placeholder={searchType === 'applicationNumber' ? 'APP-2026-XXX-NNNN' : 'XXXXXXXXXXXXXX'}
                       dir="ltr"
                       autoComplete="off"
                       spellCheck={false}
@@ -210,7 +205,6 @@ const AdmissionInquiry: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {[
                         { label: lang === 'ar' ? 'رقم الطلب' : 'Application Number', value: admission.applicationNumber, mono: true },
-                        { label: lang === 'ar' ? 'رقم القيد' : 'Admission ID', value: admission.applicationId, mono: true },
                         { label: lang === 'ar' ? 'اسم الطالب' : 'Student Name', value: admission.studentName },
                         { label: lang === 'ar' ? 'المرحلة الدراسية' : 'Grade Stage', value: `${admission.gradeStage}${admission.gradeClass ? ' - ' + admission.gradeClass : ''}` },
                         { label: lang === 'ar' ? 'تاريخ التقديم' : 'Submission Date', value: admission.submittedAt ? new Date(admission.submittedAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { year: 'numeric', month: 'long', day: 'numeric' }) : '—' },
@@ -227,12 +221,24 @@ const AdmissionInquiry: React.FC = () => {
                       <div className="bg-slate-50 rounded-xl p-4">
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">{lang === 'ar' ? 'الرغبات المقدمة' : 'Submitted Preferences'}</p>
                         <ol className={`space-y-2 ${isRTL ? 'pr-4' : 'pl-4'} list-decimal`}>
-                          {admission.preferences.map((pref, i: number) => (
-                            <li key={i} className="font-semibold text-slate-700 text-sm">
-                              {pref.schoolName}
-                              <span className="text-slate-400 font-normal ml-2">({pref.stage})</span>
-                            </li>
-                          ))}
+                          {admission.preferences.map((pref, i: number) => {
+                            const stages = (() => {
+                              try {
+                                const parsed = JSON.parse(pref.stage);
+                                return Array.isArray(parsed) ? parsed : [pref.stage];
+                              } catch { return pref.stage ? [pref.stage] : []; }
+                            })();
+                            return (
+                              <li key={i} className="font-semibold text-slate-700 text-sm">
+                                {pref.schoolName}
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {stages.map((s, j) => (
+                                    <span key={j} className="inline-block bg-blue-50 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full border border-blue-200">{s}</span>
+                                  ))}
+                                </div>
+                              </li>
+                            );
+                          })}
                         </ol>
                       </div>
                     )}

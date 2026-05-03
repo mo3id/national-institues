@@ -84,6 +84,7 @@ export interface DashJobApplication {
 
 export interface DashAdmission {
     id: string;
+    applicationNumber?: string;
     studentName: string;
     studentDOB: string;
     studentNationalId: string;

@@ -2,6 +2,10 @@
 
 // ── Load environment variables from .env file ─────────────────────────────
 $envFile = __DIR__ . '/.env';
+if (!file_exists($envFile)) {
+    // Fallback: check document root (when backend/ .env doesn't exist but root one does)
+    $envFile = $_SERVER['DOCUMENT_ROOT'] . '/.env';
+}
 
 if (file_exists($envFile)) {
     $env = parse_ini_file($envFile);

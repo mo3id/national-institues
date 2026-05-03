@@ -46,6 +46,7 @@ import Phone from 'lucide-react/dist/esm/icons/phone';
 import ChevronLeft from 'lucide-react/dist/esm/icons/chevron-left';
 import ChevronsLeft from 'lucide-react/dist/esm/icons/chevrons-left';
 import ChevronsRight from 'lucide-react/dist/esm/icons/chevrons-right';
+import Copy from 'lucide-react/dist/esm/icons/copy';
 import { NEWS, SCHOOLS } from '@/constants';
 import {
   Section, Theme, Lang, DashNewsItem, DashSchool, DashJob, DashJobApplication, DashAdmission, DashAlumni, HeroSlide, AboutData, AdminProfile,
@@ -467,10 +468,30 @@ const AdmissionModal: React.FC<{
   return (
     <ModalWrap title={u.requestDetails} onClose={onClose}>
       <div style={{ width: '100%', maxWidth: 680 }} dir={isRTL ? 'rtl' : 'ltr'}>
+        {/* Identifiers — Copy Buttons */}
+        <div style={{ background: 'var(--surface2)', borderRadius: 14, padding: '14px 18px', marginBottom: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 700, minWidth: 80 }}>{lang === 'ar' ? 'رقم الطلب' : 'App No.'}</span>
+              <code style={{ flex: 1, fontSize: 13, fontWeight: 700, color: 'var(--accent)', background: 'var(--surface)', padding: '4px 10px', borderRadius: 6 }}>{admission.applicationNumber || admission.id}</code>
+              <button onClick={() => { navigator.clipboard.writeText(admission.applicationNumber || admission.id); }} title="Copy" style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer' }}><Copy style={{ width: 14, height: 14, color: 'var(--text2)' }} /></button>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 700, minWidth: 80 }}>{lang === 'ar' ? 'المعرف' : 'ID'}</span>
+              <code style={{ flex: 1, fontSize: 12, fontWeight: 700, color: 'var(--text2)', background: 'var(--surface)', padding: '4px 10px', borderRadius: 6, fontFamily: 'monospace' }}>{admission.id}</code>
+              <button onClick={() => { navigator.clipboard.writeText(admission.id); }} title="Copy" style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer' }}><Copy style={{ width: 14, height: 14, color: 'var(--text2)' }} /></button>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 700, minWidth: 80 }}>{lang === 'ar' ? 'الرقم القومي' : 'Nat. ID'}</span>
+              <code style={{ flex: 1, fontSize: 13, fontWeight: 700, color: 'var(--text)', background: 'var(--surface)', padding: '4px 10px', borderRadius: 6 }}>{admission.studentNationalId}</code>
+              <button onClick={() => { navigator.clipboard.writeText(admission.studentNationalId); }} title="Copy" style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer' }}><Copy style={{ width: 14, height: 14, color: 'var(--text2)' }} /></button>
+            </div>
+          </div>
+        </div>
+
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
           <div>
-            <p style={{ fontSize: 12, color: 'var(--text2)', fontFamily: 'monospace', fontWeight: 700, marginBottom: 4 }}>{admission.id}</p>
             <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{u.requestDetails}</h3>
           </div>
           <span style={{ padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 700, background: sc.bg, color: sc.color }}>{status}</span>
@@ -1080,13 +1101,19 @@ const Dashboard: React.FC = () => {
 
   const saveSchool = async (s: DashSchool) => {
     const normalized = normalizeSchoolPayload(s);
-    // Optimistic Update
+    const previousSchools = [...schools];
     setSchools(prev => prev.map(sc => sc.id === normalized.id ? normalized : sc));
     setEditSchoolId(null);
 
-    await apiSaveSchool(normalized);
-    showToast(u.schoolSaved);
-    fetchSchools();
+    try {
+      await apiSaveSchool(normalized);
+      showToast(u.schoolSaved);
+      fetchSchools();
+    } catch (err: any) {
+      setSchools(previousSchools);
+      setEditSchoolId(normalized.id);
+      showToast(err.message || u.saveFailed, 'error');
+    }
   };
   const addSchool = async (s: DashSchool) => {
     const newEntry = normalizeSchoolPayload({ ...s, id: String(Date.now()) });
@@ -2409,6 +2436,7 @@ const Dashboard: React.FC = () => {
                 <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
                   <thead style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)' }}>
                     <tr>
+                      <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{lang === 'ar' ? 'رقم الطلب' : 'App No.'}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.admissionId}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.studentName}</th>
                       <th style={{ padding: '14px 24px', textAlign: isRTL ? 'right' : 'left', fontSize: 12, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{u.parentPhone}</th>
@@ -2433,7 +2461,8 @@ const Dashboard: React.FC = () => {
                           onClick={() => { setSelectedAdmission(adm); setAdmissionModalOpen(true); }}
                           onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'}
                           onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                          <td style={{ padding: '16px 24px', color: 'var(--accent)', fontWeight: 800, fontSize: 12, fontFamily: 'monospace' }}>{adm.id}</td>
+                          <td style={{ padding: '16px 24px', color: 'var(--accent)', fontWeight: 800, fontSize: 12, fontFamily: 'monospace' }}>{adm.applicationNumber || adm.id}</td>
+                          <td style={{ padding: '16px 24px', color: 'var(--text2)', fontWeight: 600, fontSize: 11, fontFamily: 'monospace' }}>{adm.id}</td>
                           <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>
                             <p>{adm.studentName}</p>
                             <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 2 }}>{adm.createdAt ? new Date(adm.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB') : ''}</p>

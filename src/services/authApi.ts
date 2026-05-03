@@ -50,7 +50,7 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
  * Verify if current token is valid
  */
 export async function verifyToken(token: string): Promise<VerifyTokenResponse> {
-  const response = await fetch(`${API_URL}?action=verify_token`, {
+  const response = await fetch(`${API_URL}?action=verify_token&token=${encodeURIComponent(token)}`, {
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',
