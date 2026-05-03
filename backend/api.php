@@ -616,7 +616,7 @@ try {
                 }
                 if (!empty($school['mainImage']) && strpos($school['mainImage'], 'data:image') === 0) {
                     $school['mainImage'] = processImageField($school['mainImage'], 'school_main_' . ($school['id'] ?? ''));
-                    $pdo->prepare("UPDATE schools SET mainImage = ? WHERE id = ?")->execute([$school['mainImage'], $school['id']]);
+                    $pdo->prepare("UPDATE schools SET mainimage = ? WHERE id = ?")->execute([$school['mainImage'], $school['id']]);
                     $needsMigration = true;
                 }
                 if (is_array($school['gallery'] ?? null)) {
@@ -774,7 +774,7 @@ try {
                     if (!in_array('applicationLink', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN applicationLink text");
 
                     $pdo->exec("DELETE FROM schools");
-                    $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, teachersCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainimage, gallery, about, aboutAr, phone, email, website, rating, studentCount, teachersCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     foreach ($newData as $s) {
                         // Convert base64 images to file paths
                         $logo = processImageField($s['logo'] ?? '', 'school_logo');
@@ -2025,9 +2025,10 @@ try {
                 }
             }
 
-            $stmt = $pdo->prepare("REPLACE INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, teachersCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $schoolId = $s['id'] ?? uniqid();
+            $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainimage, gallery, about, aboutAr, phone, email, website, rating, studentCount, teachersCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), nameAr=VALUES(nameAr), location=VALUES(location), locationAr=VALUES(locationAr), governorate=VALUES(governorate), governorateAr=VALUES(governorateAr), principal=VALUES(principal), principalAr=VALUES(principalAr), logo=VALUES(logo), type=VALUES(type), mainimage=VALUES(mainimage), gallery=VALUES(gallery), about=VALUES(about), aboutAr=VALUES(aboutAr), phone=VALUES(phone), email=VALUES(email), website=VALUES(website), rating=VALUES(rating), studentCount=VALUES(studentCount), teachersCount=VALUES(teachersCount), foundedYear=VALUES(foundedYear), address=VALUES(address), addressAr=VALUES(addressAr), applicationLink=VALUES(applicationLink)");
             $stmt->execute([
-                $s['id'] ?? uniqid(),
+                $schoolId,
                 $s['name'] ?? '',
                 $s['nameAr'] ?? ($s['name'] ?? ''),
                 $s['location'] ?? '',
@@ -2462,8 +2463,7 @@ try {
     }
 } catch (Exception $e) {
     http_response_code(500);
-    // Log the real error server-side, never expose it to the client
-    error_log('[NIS API Error] Action: ' . ($action ?? 'unknown') . ' | ' . $e->getMessage());
-    echo json_encode(["status" => "error", "message" => "An internal server error occurred. Please try again."]);
+    error_log('[NIS API Error] Action: ' . ($action ?? 'unknown') . ' | ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine());
+    echo json_encode(["status" => "error", "message" => $e->getMessage(), "file" => basename($e->getFile()), "line" => $e->getLine()]);
 }
 ?>
