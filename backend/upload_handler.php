@@ -18,7 +18,8 @@ function saveBase64Image($base64Data, $prefix = 'img') {
     
     // Generate unique filename
     $filename = $prefix . '_' . uniqid() . '_' . time() . '.' . $imageType;
-    $uploadDir = __DIR__ . '/uploads/';
+    // Use document root for uploads so paths match /uploads/ URL
+    $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/';
     $filePath = $uploadDir . $filename;
     
     // Ensure uploads directory exists
@@ -40,7 +41,7 @@ function deleteImageFile($imagePath) {
     
     // Only delete if it's in our uploads folder
     if (strpos($imagePath, '/uploads/') === 0) {
-        $filePath = __DIR__ . '/uploads/' . basename($imagePath);
+        $filePath = $_SERVER['DOCUMENT_ROOT'] . '/uploads/' . basename($imagePath);
         if (file_exists($filePath)) {
             return unlink($filePath);
         }

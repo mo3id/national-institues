@@ -41,6 +41,12 @@ apiClient.interceptors.request.use(config => {
     if (authHeaders.Authorization) {
         config.headers = config.headers || {};
         config.headers.Authorization = authHeaders.Authorization;
+        // Also append token as query param (fallback for servers that strip Authorization header)
+        const token = authHeaders.Authorization.replace('Bearer ', '');
+        if (token) {
+            const sep = config.url?.includes('?') ? '&' : '?';
+            config.url = `${config.url}${sep}token=${encodeURIComponent(token)}`;
+        }
     }
     
     return config;

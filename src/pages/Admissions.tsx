@@ -160,21 +160,14 @@ const Admissions: React.FC = () => {
       setErrors({});
       setDocError(null);
     } catch (err: any) {
-      console.error('[Admissions] Submit error:', err?.response?.data || err);
-      const backendData = err?.response?.data;
-      // Handle duplicate application (ALREADY_APPLIED) — show existing application number
-      if (backendData?.error_code === 'ALREADY_APPLIED' && backendData?.data?.applicationNumber) {
-        setAdmissionId(backendData.data.applicationId || null);
-        setApplicationNumber(backendData.data.applicationNumber);
+      const resp = err?.response?.data;
+      if (resp?.error_code === 'ALREADY_APPLIED' && resp?.data) {
+        setSubmitError(resp.message || (lang === 'ar' ? 'لقد قدمت طلباً مسبقاً بهذا الرقم القومي' : 'You have already applied with this ID'));
+        if (resp.data.applicationId) setAdmissionId(resp.data.applicationId);
+        if (resp.data.applicationNumber) setApplicationNumber(resp.data.applicationNumber);
         setSubmitted(true);
-        return;
-      }
-      // Show descriptive error from backend if available
-      const backendMsg = backendData?.message;
-      if (backendMsg) {
-        setSubmitError(backendMsg);
       } else {
-        setSubmitError(lang === 'ar' ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى.' : err.message || 'Failed to submit application.');
+        setSubmitError(resp?.message || (lang === 'ar' ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى.' : err.message || 'Failed to submit application.'));
       }
     } finally {
       setIsSubmitting(false);
