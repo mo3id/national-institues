@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
 import Search from 'lucide-react/dist/esm/icons/search';
 import CheckCircle from 'lucide-react/dist/esm/icons/check-circle';
+import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
+import Edit from 'lucide-react/dist/esm/icons/edit';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import Send from 'lucide-react/dist/esm/icons/send';
 import Plus from 'lucide-react/dist/esm/icons/plus';
@@ -62,6 +64,7 @@ const Admissions: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [isAlreadyApplied, setIsAlreadyApplied] = useState(false);
   const [admissionId, setAdmissionId] = useState<string | null>(null);
   const [applicationNumber, setApplicationNumber] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -154,6 +157,7 @@ const Admissions: React.FC = () => {
       setAdmissionId(res.data?.applicationId || null);
       setApplicationNumber(res.data?.applicationNumber || res.data?.applicationId || null);
       setSubmitted(true);
+      setIsAlreadyApplied(false);
       setFormData({ studentName: '', studentDOB: '', studentNationalId: '', passportNumber: '', gradeStage: '', gradeClass: '', hasSibling: false, parentName: '', parentPhone: '', parentEmail: '', notes: '' });
       setPreferences([]);
       setDocuments((admSettings?.requiredDocuments || []).map((name: string) => ({ name, fileName: '' })));
@@ -165,6 +169,7 @@ const Admissions: React.FC = () => {
         setSubmitError(resp.message || (lang === 'ar' ? 'لقد قدمت طلباً مسبقاً بهذا الرقم القومي' : 'You have already applied with this ID'));
         if (resp.data.applicationId) setAdmissionId(resp.data.applicationId);
         if (resp.data.applicationNumber) setApplicationNumber(resp.data.applicationNumber);
+        setIsAlreadyApplied(true);
         setSubmitted(true);
       } else {
         setSubmitError(resp?.message || (lang === 'ar' ? 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى.' : err.message || 'Failed to submit application.'));
@@ -288,19 +293,25 @@ const Admissions: React.FC = () => {
                       </p>
                     </div>
                   ) : submitted ? (
-                    /* Success */
+                    /* Success or Already Applied */
                     <div className="text-center py-10 space-y-8 animate-fade-in">
                       <div className="flex justify-center">
-                        <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center animate-bounce">
-                          <CheckCircle className="h-12 w-12 text-green-600" />
+                        <div className={`w-24 h-24 rounded-full flex items-center justify-center ${isAlreadyApplied ? 'bg-amber-100' : 'bg-green-100'} ${isAlreadyApplied ? '' : 'animate-bounce'}`}>
+                          {isAlreadyApplied ? <AlertCircle className="h-12 w-12 text-amber-600" /> : <CheckCircle className="h-12 w-12 text-green-600" />}
                         </div>
                       </div>
                       <div className="space-y-4">
                         <h3 className="text-3xl font-black text-gray-900 mb-2">
-                          {lang === 'ar' ? 'تم تقديم الطلب بنجاح!' : 'Application Submitted!'}
+                          {isAlreadyApplied 
+                            ? (lang === 'ar' ? 'تم التسجيل مسبقاً!' : 'Already Applied!')
+                            : (lang === 'ar' ? 'تم تقديم الطلب بنجاح!' : 'Application Submitted!')
+                          }
                         </h3>
                         <p className="text-slate-500 font-medium text-lg max-w-md mx-auto">
-                          {lang === 'ar' ? 'احتفظ برقم الطلب لمتابعة حالة تقديمك.' : 'Keep your application ID to track your status.'}
+                          {isAlreadyApplied
+                            ? (lang === 'ar' ? 'لقد قدمت طلباً مسبقاً. يمكنك تتبع طلبك أو طلب تعديل الرغبات.' : 'You have already applied. You can track your application or request a modification.')
+                            : (lang === 'ar' ? 'احتفظ برقم الطلب لمتابعة حالة تقديمك.' : 'Keep your application ID to track your status.')
+                          }
                         </p>
                         {applicationNumber && (
                           <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 inline-block mx-auto min-w-[280px]">
@@ -318,7 +329,13 @@ const Admissions: React.FC = () => {
                             <Search className="w-5 h-5" />
                             <span>{lang === 'ar' ? 'تتبع الطلب' : 'Track Application'}</span>
                           </Link>
-                          <button onClick={() => { setSubmitted(false); setAdmissionId(null); setApplicationNumber(null); setFormData({ studentName: '', studentDOB: '', studentNationalId: '', passportNumber: '', gradeStage: '', gradeClass: '', hasSibling: false, parentName: '', parentPhone: '', parentEmail: '', notes: '' }); setPreferences([]); }} className="bg-slate-100 text-slate-700 px-8 py-3.5 rounded-xl font-bold hover:bg-slate-200 transition-all">
+                          {isAlreadyApplied && admissionId && (
+                            <Link to={`/modifications/request?admissionId=${admissionId}`} className="bg-amber-500 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-amber-600 hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                              <Edit className="w-5 h-5" />
+                              <span>{lang === 'ar' ? 'طلب تعديل الرغبات' : 'Request Modification'}</span>
+                            </Link>
+                          )}
+                          <button onClick={() => { setSubmitted(false); setIsAlreadyApplied(false); setAdmissionId(null); setApplicationNumber(null); setFormData({ studentName: '', studentDOB: '', studentNationalId: '', passportNumber: '', gradeStage: '', gradeClass: '', hasSibling: false, parentName: '', parentPhone: '', parentEmail: '', notes: '' }); setPreferences([]); }} className="bg-slate-100 text-slate-700 px-8 py-3.5 rounded-xl font-bold hover:bg-slate-200 transition-all">
                             {lang === 'ar' ? 'تقديم طلب آخر' : 'Submit Another'}
                           </button>
                         </div>

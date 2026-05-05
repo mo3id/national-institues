@@ -1177,12 +1177,44 @@ try {
             } elseif ($type === 'complaints') {
                 $stmt = $pdo->query("SELECT * FROM complaints ORDER BY created_at DESC");
                 $data = $stmt->fetchAll();
+                // Normalize snake_case DB columns to camelCase for frontend
+                foreach ($data as &$c) {
+                    $c['fullName'] = $c['full_name'] ?? '';
+                    $c['messageType'] = $c['message_type'] ?? '';
+                    $c['adminResponse'] = $c['admin_response'] ?? '';
+                    $c['createdAt'] = $c['created_at'] ?? '';
+                    $c['complaintNumber'] = $c['complaint_number'] ?? '';
+                }
+                unset($c);
             } elseif ($type === 'contactMessages') {
                 $stmt = $pdo->query("SELECT * FROM contact_messages ORDER BY created_at DESC");
                 $data = $stmt->fetchAll();
+                // Normalize snake_case DB columns to camelCase for frontend
+                foreach ($data as &$msg) {
+                    $msg['fullName'] = $msg['full_name'] ?? '';
+                    $msg['createdAt'] = $msg['created_at'] ?? '';
+                    $msg['messageNumber'] = $msg['message_number'] ?? '';
+                }
+                unset($msg);
             } elseif ($type === 'jobApplications') {
-                $stmt = $pdo->query("SELECT * FROM job_applications ORDER BY applied_at DESC");
+                $stmt = $pdo->query("SELECT ja.*, j.title AS jobTitle, j.titleAr AS jobTitleAr, j.department AS jobDepartment FROM job_applications ja LEFT JOIN jobs j ON ja.job_id COLLATE utf8mb4_unicode_ci = j.id COLLATE utf8mb4_unicode_ci ORDER BY ja.applied_at DESC");
                 $data = $stmt->fetchAll();
+                // Normalize snake_case DB columns to camelCase for frontend
+                foreach ($data as &$app) {
+                    $app['fullName'] = $app['full_name'] ?? '';
+                    $app['jobId'] = $app['job_id'] ?? '';
+                    $app['job'] = $app['job_id'] ?? '';
+                    $app['coverLetter'] = $app['cover_letter'] ?? '';
+                    $app['experience'] = $app['experience_years'] ?? '';
+                    $app['experienceYears'] = $app['experience_years'] ?? '';
+                    $app['appliedAt'] = $app['applied_at'] ?? '';
+                    $app['notes'] = $app['admin_notes'] ?? '';
+                    $app['adminNotes'] = $app['admin_notes'] ?? '';
+                    $app['applicationNumber'] = $app['application_number'] ?? '';
+                    $app['resumePath'] = $app['resume_path'] ?? '';
+                    $app['cvName'] = $app['resume_path'] ?? '';
+                }
+                unset($app);
             } elseif ($type === 'admissions') {
                 $stmt = $pdo->query("SELECT * FROM admissions ORDER BY created_at DESC");
                 $data = $stmt->fetchAll();
@@ -1217,7 +1249,7 @@ try {
                         $adm['documents'] = [];
                     }
                     // Fetch preferences
-                    $prefStmt = $pdo->prepare("SELECT ap.school_id as schoolId, ap.preference_order, s.name as schoolName, s.nameAr as schoolNameAr, s.type as stage FROM admission_preferences ap LEFT JOIN schools s ON ap.school_id = s.id WHERE ap.admission_id = ? ORDER BY ap.preference_order ASC");
+                    $prefStmt = $pdo->prepare("SELECT ap.school_id as schoolId, ap.preference_order, s.name as schoolName, s.nameAr as schoolNameAr, s.type as stage FROM admission_preferences ap LEFT JOIN schools s ON ap.school_id COLLATE utf8mb4_unicode_ci = s.id COLLATE utf8mb4_unicode_ci WHERE ap.admission_id = ? ORDER BY ap.preference_order ASC");
                     $prefStmt->execute([$adm['id']]);
                     $prefs = $prefStmt->fetchAll(PDO::FETCH_ASSOC);
                     foreach ($prefs as &$p) {
@@ -1270,7 +1302,7 @@ try {
             // Backend Filtering
             if ($search || $filterType !== 'All' || $filterSchool || $filterGov) {
                 $term = strtolower($search);
-                $data = array_filter($data, function($item) use ($term, $filterType, $type, $filterSchool, $filterGov, $schoolGovMapEn, $schoolGovMapAr, $schoolNameMap) {
+                $data = array_filter($data, function($item) use ($pdo, $term, $filterType, $type, $filterSchool, $filterGov, $schoolGovMapEn, $schoolGovMapAr, $schoolNameMap) {
                     // Filter by Type-specific field
                     if ($filterType !== 'All') {
                         if ($type === 'complaints') {
@@ -1282,7 +1314,6 @@ try {
                                 // Not an exact job ID match, check if filterType is a department name
                                 static $jobsMapping = null;
                                 if ($jobsMapping === null) {
-                                    global $pdo;
                                     $stmt = $pdo->query("SELECT id, department, departmentAr FROM jobs");
                                     $jobsMapping = [];
                                     while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -1374,11 +1405,24 @@ try {
             $id = $_GET['id'] ?? '';
             if (!$id) throw new Exception("ID required");
 
-            $stmt = $pdo->prepare("SELECT * FROM job_applications WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT ja.*, j.title AS jobTitle, j.titleAr AS jobTitleAr, j.department AS jobDepartment FROM job_applications ja LEFT JOIN jobs j ON ja.job_id COLLATE utf8mb4_unicode_ci = j.id COLLATE utf8mb4_unicode_ci WHERE ja.id = ?");
             $stmt->execute([$id]);
             $app = $stmt->fetch();
 
             if ($app) {
+                // Normalize snake_case DB columns to camelCase for frontend
+                $app['fullName'] = $app['full_name'] ?? '';
+                $app['jobId'] = $app['job_id'] ?? '';
+                $app['job'] = $app['job_id'] ?? '';
+                $app['coverLetter'] = $app['cover_letter'] ?? '';
+                $app['experience'] = $app['experience_years'] ?? '';
+                $app['experienceYears'] = $app['experience_years'] ?? '';
+                $app['appliedAt'] = $app['applied_at'] ?? '';
+                $app['notes'] = $app['admin_notes'] ?? '';
+                $app['adminNotes'] = $app['admin_notes'] ?? '';
+                $app['applicationNumber'] = $app['application_number'] ?? '';
+                $app['resumePath'] = $app['resume_path'] ?? '';
+                $app['cvName'] = $app['resume_path'] ?? '';
                 echo json_encode(["status" => "success", "data" => $app]);
             } else {
                 throw new Exception("Application not found");
@@ -1835,7 +1879,7 @@ try {
             $stmt = $pdo->prepare("
                 SELECT a.*, s.name as accepted_school_name, s.nameAr as accepted_school_name_ar
                 FROM admissions a
-                LEFT JOIN schools s ON a.accepted_school_id = s.id
+                LEFT JOIN schools s ON a.accepted_school_id COLLATE utf8mb4_unicode_ci = s.id COLLATE utf8mb4_unicode_ci
                 WHERE {$whereClause}
             ");
             $stmt->execute($params);
@@ -1965,7 +2009,7 @@ try {
             }
 
             // Fetch preferences with school names
-            $prefStmt = $pdo->prepare("SELECT ap.*, s.name as schoolName, s.nameAr as schoolNameAr, s.type as stage FROM admission_preferences ap LEFT JOIN schools s ON ap.school_id = s.id WHERE ap.admission_id = ? ORDER BY ap.preference_order ASC");
+            $prefStmt = $pdo->prepare("SELECT ap.*, s.name as schoolName, s.nameAr as schoolNameAr, s.type as stage FROM admission_preferences ap LEFT JOIN schools s ON ap.school_id COLLATE utf8mb4_unicode_ci = s.id COLLATE utf8mb4_unicode_ci WHERE ap.admission_id = ? ORDER BY ap.preference_order ASC");
             $prefStmt->execute([$id]);
             $preferences = $prefStmt->fetchAll();
             foreach ($preferences as &$pref) {
@@ -2581,6 +2625,6 @@ try {
 } catch (Exception $e) {
     http_response_code(500);
     error_log('[NIS API Error] Action: ' . ($action ?? 'unknown') . ' | ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine());
-    echo json_encode(["status" => "error", "message" => "An internal server error occurred. Please try again."]);
+    echo json_encode(["status" => "error", "message" => "Internal Server Error: " . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine()]);
 }
 ?>

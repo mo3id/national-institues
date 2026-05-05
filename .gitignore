@@ -36,3 +36,4 @@ coverage/
 
 # ── Deployment artifacts ───────────────────────────────────────────
 deployment.zip
+dist.zip

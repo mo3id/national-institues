@@ -17,7 +17,17 @@ if (!ob_start('ob_gzhandler')) {
 // ═══════════════════════════════════════════════════════════════════════════
 // IMAGE UPLOAD HANDLER — Convert base64 to file paths
 // ═══════════════════════════════════════════════════════════════════════════
-require_once __DIR__ . '/upload_handler.php';
+// Look for upload_handler.php in multiple locations
+$uploadHandlerPaths = [
+    __DIR__ . '/upload_handler.php',
+    $_SERVER['DOCUMENT_ROOT'] . '/upload_handler.php',
+];
+foreach ($uploadHandlerPaths as $uploadHandlerPath) {
+    if (file_exists($uploadHandlerPath)) {
+        require_once $uploadHandlerPath;
+        break;
+    }
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CORS — Allowed Origins Whitelist (never use * in production)
@@ -93,7 +103,17 @@ function bustCache(): void {
 
 $action = $_GET['action'] ?? '';
 
-require_once 'db_config.php';
+// Look for db_config.php in multiple locations (backend/ dir or document root)
+$dbConfigPaths = [
+    __DIR__ . '/db_config.php',
+    $_SERVER['DOCUMENT_ROOT'] . '/db_config.php',
+];
+foreach ($dbConfigPaths as $dbConfigPath) {
+    if (file_exists($dbConfigPath)) {
+        require_once $dbConfigPath;
+        break;
+    }
+}
 
 // ── Handle OPTIONS preflight (must be after headers, before DB) ───────────
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -566,6 +586,18 @@ try {
             ]);
             break;
 
+        case 'get_schools':
+            $stmt = $pdo->query("SELECT id, name, nameAr, location, locationAr, governorate, governorateAr, type FROM schools ORDER BY name");
+            $schools = $stmt->fetchAll();
+            foreach ($schools as &$school) {
+                if (!empty($school['type']) && is_string($school['type'])) {
+                    $decoded = json_decode($school['type'], true);
+                    $school['type'] = is_array($decoded) ? $decoded : $school['type'];
+                }
+            }
+            echo json_encode(["status" => "success", "data" => $schools]);
+            break;
+
         case 'get_site_data':
             // Serve from file cache if fresh (TTL: 60s) — avoids 4 SQL queries per request
             if (serveFromCache()) break;
@@ -584,6 +616,11 @@ try {
             $schools = $stmt->fetchAll();
             $needsMigration = false;
             foreach ($schools as &$school) {
+                // Decode type JSON
+                if (!empty($school['type']) && is_string($school['type'])) {
+                    $decoded = json_decode($school['type'], true);
+                    $school['type'] = is_array($decoded) ? $decoded : $school['type'];
+                }
                 // Decode gallery JSON
                 if (!empty($school['gallery'])) {
                     $school['gallery'] = json_decode($school['gallery'], true);
@@ -596,7 +633,7 @@ try {
                 }
                 if (!empty($school['mainImage']) && strpos($school['mainImage'], 'data:image') === 0) {
                     $school['mainImage'] = processImageField($school['mainImage'], 'school_main_' . ($school['id'] ?? ''));
-                    $pdo->prepare("UPDATE schools SET mainImage = ? WHERE id = ?")->execute([$school['mainImage'], $school['id']]);
+                    $pdo->prepare("UPDATE schools SET mainimage = ? WHERE id = ?")->execute([$school['mainImage'], $school['id']]);
                     $needsMigration = true;
                 }
                 if (is_array($school['gallery'] ?? null)) {
@@ -673,7 +710,12 @@ try {
                 'news' => $news,
                 'jobs' => $jobs,
                 'alumni' => $alumni,
-                'jobDepartments' => $settings['jobDepartments'] ?? [],
+                'jobDepartments' => (function() use ($pdo) {
+                    $depts = $pdo->query("SELECT id, name, name_ar FROM job_departments ORDER BY sort_order")->fetchAll();
+                    return array_map(function($d) {
+                        return ['id' => $d['id'], 'nameEn' => $d['name'], 'nameAr' => $d['name_ar']];
+                    }, $depts);
+                })(),
                 'governorates' => $governorates,
                 'heroSlides' => $settings['heroSlides'] ?? [],
                 'aboutData' => $settings['aboutData'] ?? new stdClass(),
@@ -749,7 +791,7 @@ try {
                     if (!in_array('applicationLink', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN applicationLink text");
 
                     $pdo->exec("DELETE FROM schools");
-                    $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, teachersCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainimage, gallery, about, aboutAr, phone, email, website, rating, studentCount, teachersCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     foreach ($newData as $s) {
                         // Convert base64 images to file paths
                         $logo = processImageField($s['logo'] ?? '', 'school_logo');
@@ -853,6 +895,28 @@ try {
                             $jobImg
                         ]);
                     }
+                } elseif ($category === 'jobDepartments') {
+                    $pdo->exec("DELETE FROM job_departments");
+                    $stmt = $pdo->prepare("INSERT INTO job_departments (id, name, name_ar, sort_order, is_active) VALUES (?, ?, ?, ?, 1)");
+                    $sortOrder = 1;
+                    foreach ($newData as $d) {
+                        $stmt->execute([
+                            $d['id'] ?? uniqid('DEPT_'),
+                            $d['nameEn'] ?? $d['name'] ?? '',
+                            $d['nameAr'] ?? '',
+                            $sortOrder++
+                        ]);
+                    }
+                } elseif ($category === 'governorates') {
+                    $pdo->exec("DELETE FROM governorates");
+                    $stmt = $pdo->prepare("INSERT INTO governorates (id, name, nameAr) VALUES (?, ?, ?)");
+                    foreach ($newData as $g) {
+                        $stmt->execute([
+                            $g['id'] ?? uniqid('GOV_'),
+                            $g['name'] ?? '',
+                            $g['nameAr'] ?? ''
+                        ]);
+                    }
                 } else {
                     // Process any base64 images in settings data before storing
                     $settingsWithImages = ['heroSlides', 'aboutData', 'partners', 'galleryImages', 'homeData', 'pagesHeroSettings'];
@@ -882,14 +946,10 @@ try {
             // ── Sanitize all user-supplied text fields ─────────────────────
             $input = sanitizeArray($input, ['fullName', 'email', 'phone', 'messageType', 'school', 'message']);
 
-            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'complaints'");
-            $row = $stmt->fetch();
-            $complaints = $row ? json_decode($row['setting_value'], true) : [];
-            
             $msgType = $input['messageType'] ?? '';
             // Only generate ID for Complaint (شكوى) and Inquiry (استفسار)
             $shouldGenerateId = in_array($msgType, ['شكوى', 'استفسار', 'Complaint', 'Inquiry']);
-            
+
             // Assign a distinctive prefix per message type
             $prefixMap = [
                 'شكوى'      => 'CMP',
@@ -902,44 +962,53 @@ try {
                 'Thanks'    => 'THX',
             ];
             $prefix = $prefixMap[$msgType] ?? 'MSG';
-            $input['id']       = $prefix . '-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
-            $input['status']   = $shouldGenerateId ? 'Pending' : '';
-            $input['response'] = '';
-            
-            $input['createdAt'] = date('c');
-            
-            $complaints[] = $input;
-            $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('complaints', ?)");
-            $stmt->execute([json_encode($complaints, JSON_UNESCAPED_UNICODE)]);
+            $complaintNumber = generateComplaintNumber($pdo);
+            $complaintId = uniqid('comp_');
+
+            $stmt = $pdo->prepare("INSERT INTO complaints (id, complaint_number, full_name, email, phone, message_type, school, message, status, admin_response, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([
+                $complaintId,
+                $complaintNumber,
+                $input['fullName'] ?? '',
+                $input['email'] ?? '',
+                $input['phone'] ?? '',
+                $msgType,
+                $input['school'] ?? '',
+                $input['message'] ?? '',
+                $shouldGenerateId ? 'pending' : '',
+                '',
+                date('Y-m-d H:i:s')
+            ]);
             bustCache();
-            echo json_encode(["status" => "success", "message" => "Complaint added successfully.", "data" => $input]);
+
+            $data = array_merge($input, [
+                'id' => $complaintId,
+                'complaint_number' => $complaintNumber,
+                'status' => $shouldGenerateId ? 'pending' : '',
+                'admin_response' => '',
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+            echo json_encode(["status" => "success", "message" => "Complaint added successfully.", "data" => $data]);
             break;
 
         case 'get_complaint_status':
             $id = $_GET['complaintId'] ?? '';
             if (!$id) throw new Exception("Complaint ID is required");
 
-            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'complaints'");
-            $row = $stmt->fetch();
-            $complaints = $row ? json_decode($row['setting_value'], true) : [];
+            $stmt = $pdo->prepare("SELECT id, complaint_number, status, admin_response, created_at, full_name FROM complaints WHERE id = ?");
+            $stmt->execute([$id]);
+            $complaint = $stmt->fetch();
 
-            $found = null;
-            foreach ($complaints as $c) {
-                if (($c['id'] ?? '') === $id) {
-                    $found = $c;
-                    break;
-                }
-            }
-
-            if (!$found) {
+            if (!$complaint) {
                 echo json_encode(["status" => "error", "message" => "Complaint not found."]);
             } else {
                 echo json_encode(["status" => "success", "data" => [
-                    'id' => $found['id'],
-                    'status' => $found['status'],
-                    'response' => $found['response'] ?? '',
-                    'createdAt' => $found['createdAt'],
-                    'fullName' => $found['fullName'] ?? '***' // Mask name for privacy
+                    'id' => $complaint['id'],
+                    'complaint_number' => $complaint['complaint_number'],
+                    'status' => $complaint['status'],
+                    'admin_response' => $complaint['admin_response'] ?? '',
+                    'created_at' => $complaint['created_at'],
+                    'fullName' => $complaint['full_name'] ?? '***'
                 ]]);
             }
             break;
@@ -951,17 +1020,30 @@ try {
              // ── Sanitize all user-supplied text fields ─────────────────────
              $input = sanitizeArray($input, ['fullName', 'email', 'phone', 'subject', 'message']);
 
-             $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'contactMessages'");
-             $row = $stmt->fetch();
-             $messages = $row ? json_decode($row['setting_value'], true) : [];
-             $input['id']        = uniqid('msg_', true);
-             $input['createdAt'] = date('c');
-             $input['status']    = 'Pending';
-             $messages[] = $input;
-             $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('contactMessages', ?)");
-             $stmt->execute([json_encode($messages, JSON_UNESCAPED_UNICODE)]);
+             $messageId = uniqid('msg_');
+             $messageNumber = generateMessageNumber($pdo);
+
+             $stmt = $pdo->prepare("INSERT INTO contact_messages (id, message_number, full_name, email, phone, subject, message, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+             $stmt->execute([
+                 $messageId,
+                 $messageNumber,
+                 $input['fullName'] ?? '',
+                 $input['email'] ?? '',
+                 $input['phone'] ?? '',
+                 $input['subject'] ?? '',
+                 $input['message'] ?? '',
+                 'pending',
+                 date('Y-m-d H:i:s')
+             ]);
              bustCache();
-             echo json_encode(["status" => "success", "message" => "Message sent successfully.", "data" => $input]);
+
+             $data = array_merge($input, [
+                 'id' => $messageId,
+                 'message_number' => $messageNumber,
+                 'status' => 'pending',
+                 'created_at' => date('Y-m-d H:i:s')
+             ]);
+             echo json_encode(["status" => "success", "message" => "Message sent successfully.", "data" => $data]);
              break;
 
         case 'add_job_application':
@@ -981,17 +1063,32 @@ try {
                  }
              }
 
-             $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'jobApplications'");
-             $row = $stmt->fetch();
-             $applications = $row ? json_decode($row['setting_value'], true) : [];
-             $input['id']        = uniqid('app_', true);
-             $input['appliedAt'] = date('c');
-             $input['status']    = 'Pending';
-             $applications[] = $input;
-             $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('jobApplications', ?)");
-             $stmt->execute([json_encode($applications, JSON_UNESCAPED_UNICODE)]);
+             $appId = uniqid('app_');
+             $appNumber = generateJobApplicationNumber($pdo);
+
+             $stmt = $pdo->prepare("INSERT INTO job_applications (id, application_number, job_id, full_name, email, phone, experience_years, cover_letter, resume_path, status, applied_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+             $stmt->execute([
+                 $appId,
+                 $appNumber,
+                 $input['job'] ?? '',
+                 $input['fullName'] ?? '',
+                 $input['email'] ?? '',
+                 $input['phone'] ?? '',
+                 (int)($input['experience'] ?? 0),
+                 $input['coverLetter'] ?? '',
+                 $fileName,
+                 'pending',
+                 date('Y-m-d H:i:s')
+             ]);
              bustCache();
-             echo json_encode(["status" => "success", "message" => "Application submitted successfully.", "data" => $input]);
+
+             $data = array_merge($input, [
+                 'id' => $appId,
+                 'application_number' => $appNumber,
+                 'status' => 'pending',
+                 'applied_at' => date('Y-m-d H:i:s')
+             ]);
+             echo json_encode(["status" => "success", "message" => "Application submitted successfully.", "data" => $data]);
              break;
 
         case 'get_entries':
@@ -1018,6 +1115,10 @@ try {
                 
                 // Decode JSON fields
                 foreach ($data as &$school) {
+                    if (!empty($school['type']) && is_string($school['type'])) {
+                        $decoded = json_decode($school['type'], true);
+                        $school['type'] = is_array($decoded) ? $decoded : $school['type'];
+                    }
                     if (!empty($school['gallery'])) {
                         $school['gallery'] = json_decode($school['gallery'], true);
                     } else {
@@ -1063,36 +1164,103 @@ try {
                     $a['featured'] = (bool)($a['featured'] ?? false);
                 }
             } elseif ($type === 'jobDepartments') {
-                $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'jobDepartments'");
-                $row = $stmt->fetch();
-                $data = $row ? json_decode($row['setting_value'], true) : [];
-            } elseif (in_array($type, ['complaints', 'contactMessages', 'jobApplications', 'admissions'])) {
-                $stmt = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = ?");
-                $stmt->execute([$type]);
-                $row = $stmt->fetch();
-                $data = $row ? json_decode($row['setting_value'], true) : [];
-
-                // Auto-migrate: assign unique id to any entries with null/empty id
-                $migrated = false;
-                foreach ($data as &$entry) {
-                    if (empty($entry['id'])) {
-                        $entry['id'] = 'MSG-' . uniqid();
-                        $migrated = true;
+                $stmt = $pdo->query("SELECT id, name, name_ar FROM job_departments ORDER BY sort_order");
+                $rows = $stmt->fetchAll();
+                $data = [];
+                foreach ($rows as $row) {
+                    $data[] = [
+                        'id' => $row['id'],
+                        'nameEn' => $row['name'],
+                        'nameAr' => $row['name_ar']
+                    ];
+                }
+            } elseif ($type === 'complaints') {
+                $stmt = $pdo->query("SELECT * FROM complaints ORDER BY created_at DESC");
+                $data = $stmt->fetchAll();
+                // Normalize snake_case DB columns to camelCase for frontend
+                foreach ($data as &$c) {
+                    $c['fullName'] = $c['full_name'] ?? '';
+                    $c['messageType'] = $c['message_type'] ?? '';
+                    $c['adminResponse'] = $c['admin_response'] ?? '';
+                    $c['createdAt'] = $c['created_at'] ?? '';
+                    $c['complaintNumber'] = $c['complaint_number'] ?? '';
+                }
+                unset($c);
+            } elseif ($type === 'contactMessages') {
+                $stmt = $pdo->query("SELECT * FROM contact_messages ORDER BY created_at DESC");
+                $data = $stmt->fetchAll();
+                // Normalize snake_case DB columns to camelCase for frontend
+                foreach ($data as &$msg) {
+                    $msg['fullName'] = $msg['full_name'] ?? '';
+                    $msg['createdAt'] = $msg['created_at'] ?? '';
+                    $msg['messageNumber'] = $msg['message_number'] ?? '';
+                }
+                unset($msg);
+            } elseif ($type === 'jobApplications') {
+                $stmt = $pdo->query("SELECT ja.*, j.title AS jobTitle, j.titleAr AS jobTitleAr, j.department AS jobDepartment FROM job_applications ja LEFT JOIN jobs j ON ja.job_id COLLATE utf8mb4_unicode_ci = j.id COLLATE utf8mb4_unicode_ci ORDER BY ja.applied_at DESC");
+                $data = $stmt->fetchAll();
+                // Normalize snake_case DB columns to camelCase for frontend
+                foreach ($data as &$app) {
+                    $app['fullName'] = $app['full_name'] ?? '';
+                    $app['jobId'] = $app['job_id'] ?? '';
+                    $app['job'] = $app['job_id'] ?? '';
+                    $app['coverLetter'] = $app['cover_letter'] ?? '';
+                    $app['experience'] = $app['experience_years'] ?? '';
+                    $app['experienceYears'] = $app['experience_years'] ?? '';
+                    $app['appliedAt'] = $app['applied_at'] ?? '';
+                    $app['notes'] = $app['admin_notes'] ?? '';
+                    $app['adminNotes'] = $app['admin_notes'] ?? '';
+                    $app['applicationNumber'] = $app['application_number'] ?? '';
+                    $app['resumePath'] = $app['resume_path'] ?? '';
+                    $app['cvName'] = $app['resume_path'] ?? '';
+                }
+                unset($app);
+            } elseif ($type === 'admissions') {
+                $stmt = $pdo->query("SELECT * FROM admissions ORDER BY created_at DESC");
+                $data = $stmt->fetchAll();
+                // Normalize snake_case DB columns to camelCase for frontend
+                foreach ($data as &$adm) {
+                    $adm['applicationNumber'] = $adm['application_number'] ?? null;
+                    $adm['studentName'] = $adm['student_name'] ?? '';
+                    $adm['studentNameAr'] = $adm['student_name_ar'] ?? '';
+                    $adm['studentDOB'] = $adm['student_dob'] ?? null;
+                    $adm['studentNationalId'] = $adm['student_national_id'] ?? null;
+                    $adm['studentBirthCertificate'] = $adm['student_birth_certificate'] ?? null;
+                    $adm['gradeStage'] = $adm['grade_stage'] ?? '';
+                    $adm['gradeClass'] = $adm['grade_class'] ?? '';
+                    $adm['parentName'] = $adm['parent_name'] ?? '';
+                    $adm['parentNameAr'] = $adm['parent_name_ar'] ?? '';
+                    $adm['parentPhone'] = $adm['parent_phone'] ?? '';
+                    $adm['parentEmail'] = $adm['parent_email'] ?? '';
+                    $adm['parentNationalId'] = $adm['parent_national_id'] ?? '';
+                    $adm['parentJob'] = $adm['parent_job'] ?? '';
+                    $adm['siblingSchool'] = $adm['sibling_school'] ?? null;
+                    $adm['passportNumber'] = $adm['passport_number'] ?? null;
+                    $adm['idType'] = $adm['id_type'] ?? 'national_id';
+                    $adm['acceptedSchoolId'] = $adm['accepted_school_id'] ?? null;
+                    $adm['adminNotes'] = $adm['admin_notes'] ?? '';
+                    $adm['createdAt'] = $adm['created_at'] ?? null;
+                    $adm['updatedAt'] = $adm['updated_at'] ?? null;
+                    // Decode JSON fields
+                    if (!empty($adm['documents'])) {
+                        $decoded = json_decode($adm['documents'], true);
+                        $adm['documents'] = is_array($decoded) ? $decoded : [];
+                    } else {
+                        $adm['documents'] = [];
                     }
+                    // Fetch preferences
+                    $prefStmt = $pdo->prepare("SELECT ap.school_id as schoolId, ap.preference_order, s.name as schoolName, s.nameAr as schoolNameAr, s.type as stage FROM admission_preferences ap LEFT JOIN schools s ON ap.school_id COLLATE utf8mb4_unicode_ci = s.id COLLATE utf8mb4_unicode_ci WHERE ap.admission_id = ? ORDER BY ap.preference_order ASC");
+                    $prefStmt->execute([$adm['id']]);
+                    $prefs = $prefStmt->fetchAll(PDO::FETCH_ASSOC);
+                    foreach ($prefs as &$p) {
+                        if (!empty($p['stage']) && is_string($p['stage'])) {
+                            $dec = json_decode($p['stage'], true);
+                            $p['stage'] = is_array($dec) ? $dec : $p['stage'];
+                        }
+                    }
+                    $adm['preferences'] = $prefs;
                 }
-                unset($entry);
-                if ($migrated) {
-                    $stmtMig = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES (?, ?)");
-                    $stmtMig->execute([$type, json_encode($data, JSON_UNESCAPED_UNICODE)]);
-                    bustCache();
-                }
-
-                // Primary Sort: Sort by date descending
-                usort($data, function($a, $b) {
-                    $dateA = $a['createdAt'] ?? $a['appliedAt'] ?? $a['date'] ?? '';
-                    $dateB = $b['createdAt'] ?? $b['appliedAt'] ?? $b['date'] ?? '';
-                    return strcmp($dateB, $dateA);
-                });
+                unset($adm);
             }
 
             // Calculate top schools by complaints from ALL data (before filtering)
@@ -1134,7 +1302,7 @@ try {
             // Backend Filtering
             if ($search || $filterType !== 'All' || $filterSchool || $filterGov) {
                 $term = strtolower($search);
-                $data = array_filter($data, function($item) use ($term, $filterType, $type, $filterSchool, $filterGov, $schoolGovMapEn, $schoolGovMapAr, $schoolNameMap) {
+                $data = array_filter($data, function($item) use ($pdo, $term, $filterType, $type, $filterSchool, $filterGov, $schoolGovMapEn, $schoolGovMapAr, $schoolNameMap) {
                     // Filter by Type-specific field
                     if ($filterType !== 'All') {
                         if ($type === 'complaints') {
@@ -1146,7 +1314,6 @@ try {
                                 // Not an exact job ID match, check if filterType is a department name
                                 static $jobsMapping = null;
                                 if ($jobsMapping === null) {
-                                    global $pdo;
                                     $stmt = $pdo->query("SELECT id, department, departmentAr FROM jobs");
                                     $jobsMapping = [];
                                     while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -1238,48 +1405,42 @@ try {
             $id = $_GET['id'] ?? '';
             if (!$id) throw new Exception("ID required");
 
-            $stmt = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'jobApplications'");
-            $stmt->execute();
-            $row = $stmt->fetch();
-            $apps = $row ? json_decode($row['setting_value'], true) : [];
-            
-            $found = null;
-            foreach ($apps as $app) {
-                if (($app['id'] ?? '') === $id) {
-                    $found = $app;
-                    break;
-                }
-            }
-            
-            if ($found) {
-                echo json_encode(["status" => "success", "data" => $found]);
+            $stmt = $pdo->prepare("SELECT ja.*, j.title AS jobTitle, j.titleAr AS jobTitleAr, j.department AS jobDepartment FROM job_applications ja LEFT JOIN jobs j ON ja.job_id COLLATE utf8mb4_unicode_ci = j.id COLLATE utf8mb4_unicode_ci WHERE ja.id = ?");
+            $stmt->execute([$id]);
+            $app = $stmt->fetch();
+
+            if ($app) {
+                // Normalize snake_case DB columns to camelCase for frontend
+                $app['fullName'] = $app['full_name'] ?? '';
+                $app['jobId'] = $app['job_id'] ?? '';
+                $app['job'] = $app['job_id'] ?? '';
+                $app['coverLetter'] = $app['cover_letter'] ?? '';
+                $app['experience'] = $app['experience_years'] ?? '';
+                $app['experienceYears'] = $app['experience_years'] ?? '';
+                $app['appliedAt'] = $app['applied_at'] ?? '';
+                $app['notes'] = $app['admin_notes'] ?? '';
+                $app['adminNotes'] = $app['admin_notes'] ?? '';
+                $app['applicationNumber'] = $app['application_number'] ?? '';
+                $app['resumePath'] = $app['resume_path'] ?? '';
+                $app['cvName'] = $app['resume_path'] ?? '';
+                echo json_encode(["status" => "success", "data" => $app]);
             } else {
                 throw new Exception("Application not found");
             }
             break;
 
         case 'update_complaint':
-            requireAuth(); // Protected: only admin can update complaints
+            requireAuth();
             $input = json_decode(file_get_contents('php://input'), true);
             $id = $input['id'] ?? '';
             $status = $input['status'] ?? '';
             $response = $input['response'] ?? '';
             if (!$id) throw new Exception("ID required");
-            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'complaints'");
-            $row = $stmt->fetch();
-            $complaints = $row ? json_decode($row['setting_value'], true) : [];
-            $found = false;
-            foreach ($complaints as &$c) {
-                if (($c['id'] ?? '') === $id) {
-                    $c['status'] = $status;
-                    $c['response'] = $response;
-                    $found = true;
-                    break;
-                }
-            }
-            if ($found) {
-                $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('complaints', ?)");
-                $stmt->execute([json_encode($complaints, JSON_UNESCAPED_UNICODE)]);
+
+            $stmt = $pdo->prepare("UPDATE complaints SET status = ?, admin_response = ? WHERE id = ?");
+            $result = $stmt->execute([$status, $response, $id]);
+
+            if ($result && $stmt->rowCount() > 0) {
                 bustCache();
                 echo json_encode(["status" => "success", "message" => "Updated successfully."]);
             } else {
@@ -1686,16 +1847,16 @@ try {
 
         case 'get_admission_status':
             // ═══════════════════════════════════════════════════════════════════════════
-            // NEW: Get admission status from database with preferences and modifications
-            // Supports: admissionId, applicationNumber, or nationalId
+            // Get admission status from database with preferences and modifications
+            // Supports: applicationNumber or nationalId
             // ═══════════════════════════════════════════════════════════════════════════
-            $admissionId = $_GET['admissionId'] ?? '';
             $applicationNumber = $_GET['applicationNumber'] ?? '';
             $nationalId = $_GET['nationalId'] ?? '';
+            $admissionId = $_GET['admissionId'] ?? '';
             
-            if (empty($admissionId) && empty($applicationNumber) && empty($nationalId)) {
+            if (empty($applicationNumber) && empty($nationalId) && empty($admissionId)) {
                 http_response_code(400);
-                echo json_encode(["status" => "error", "message" => "يرجى إدخال رقم الطلب أو رقم القيد أو الرقم القومي"]);
+                echo json_encode(["status" => "error", "message" => "يرجى إدخال رقم الطلب أو الرقم القومي"]);
                 break;
             }
             
@@ -1706,7 +1867,8 @@ try {
                 $whereClause = 'a.id = ?';
                 $params[] = $admissionId;
             } elseif (!empty($applicationNumber)) {
-                $whereClause = 'a.application_number = ?';
+                $whereClause = '(a.id = ? OR a.application_number = ?)';
+                $params[] = $applicationNumber;
                 $params[] = $applicationNumber;
             } else {
                 $whereClause = 'a.student_national_id = ?';
@@ -1717,7 +1879,7 @@ try {
             $stmt = $pdo->prepare("
                 SELECT a.*, s.name as accepted_school_name, s.nameAr as accepted_school_name_ar
                 FROM admissions a
-                LEFT JOIN schools s ON a.accepted_school_id = s.id
+                LEFT JOIN schools s ON a.accepted_school_id COLLATE utf8mb4_unicode_ci = s.id COLLATE utf8mb4_unicode_ci
                 WHERE {$whereClause}
             ");
             $stmt->execute($params);
@@ -1731,7 +1893,7 @@ try {
             
             // Get preferences
             $prefStmt = $pdo->prepare("
-                SELECT ap.*, s.name as school_name, s.nameAr as school_name_ar
+                SELECT ap.*, s.name as school_name, s.nameAr as school_name_ar, s.type as stage
                 FROM admission_preferences ap
                 JOIN schools s ON ap.school_id = s.id
                 WHERE ap.admission_id = ?
@@ -1811,68 +1973,153 @@ try {
         case 'get_admission_detail':
             $id = $_GET['id'] ?? '';
             if (!$id) throw new Exception("Admission ID is required");
-            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'admissions'");
-            $row = $stmt->fetch();
-            $admissions = $row ? json_decode($row['setting_value'], true) : [];
-            $found = null;
-            foreach ($admissions as $a) {
-                if (($a['id'] ?? '') === $id) { $found = $a; break; }
+
+            $stmt = $pdo->prepare("SELECT * FROM admissions WHERE id = ?");
+            $stmt->execute([$id]);
+            $admission = $stmt->fetch();
+
+            if (!$admission) throw new Exception("Admission not found");
+            // Normalize snake_case DB columns to camelCase
+            $admission['applicationNumber'] = $admission['application_number'] ?? null;
+            $admission['studentName'] = $admission['student_name'] ?? '';
+            $admission['studentNameAr'] = $admission['student_name_ar'] ?? '';
+            $admission['studentDOB'] = $admission['student_dob'] ?? null;
+            $admission['studentNationalId'] = $admission['student_national_id'] ?? null;
+            $admission['studentBirthCertificate'] = $admission['student_birth_certificate'] ?? null;
+            $admission['gradeStage'] = $admission['grade_stage'] ?? '';
+            $admission['gradeClass'] = $admission['grade_class'] ?? '';
+            $admission['parentName'] = $admission['parent_name'] ?? '';
+            $admission['parentNameAr'] = $admission['parent_name_ar'] ?? '';
+            $admission['parentPhone'] = $admission['parent_phone'] ?? '';
+            $admission['parentEmail'] = $admission['parent_email'] ?? '';
+            $admission['parentNationalId'] = $admission['parent_national_id'] ?? '';
+            $admission['parentJob'] = $admission['parent_job'] ?? '';
+            $admission['siblingSchool'] = $admission['sibling_school'] ?? null;
+            $admission['passportNumber'] = $admission['passport_number'] ?? null;
+            $admission['idType'] = $admission['id_type'] ?? 'national_id';
+            $admission['acceptedSchoolId'] = $admission['accepted_school_id'] ?? null;
+            $admission['adminNotes'] = $admission['admin_notes'] ?? '';
+            $admission['createdAt'] = $admission['created_at'] ?? null;
+            $admission['updatedAt'] = $admission['updated_at'] ?? null;
+            if (!empty($admission['documents'])) {
+                $decoded = json_decode($admission['documents'], true);
+                $admission['documents'] = is_array($decoded) ? $decoded : [];
+            } else {
+                $admission['documents'] = [];
             }
-            if (!$found) throw new Exception("Admission not found");
-            echo json_encode(["status" => "success", "data" => $found]);
+
+            // Fetch preferences with school names
+            $prefStmt = $pdo->prepare("SELECT ap.*, s.name as schoolName, s.nameAr as schoolNameAr, s.type as stage FROM admission_preferences ap LEFT JOIN schools s ON ap.school_id COLLATE utf8mb4_unicode_ci = s.id COLLATE utf8mb4_unicode_ci WHERE ap.admission_id = ? ORDER BY ap.preference_order ASC");
+            $prefStmt->execute([$id]);
+            $preferences = $prefStmt->fetchAll();
+            foreach ($preferences as &$pref) {
+                $pref['schoolId'] = $pref['school_id'];
+                if (!empty($pref['stage']) && is_string($pref['stage'])) {
+                    $decoded = json_decode($pref['stage'], true);
+                    $pref['stage'] = is_array($decoded) ? $decoded : $pref['stage'];
+                }
+            }
+            $admission['preferences'] = $preferences;
+
+            echo json_encode(["status" => "success", "data" => $admission]);
             break;
 
         case 'update_admission':
-            requireAuth(); // Protected: only admin can update admissions
+            // Admin only: Update admission status and accepted school
+            requireAuth();
+            
             $input = json_decode(file_get_contents('php://input'), true);
-            $id     = $input['id'] ?? '';
+            $id = sanitizeInput($input['id'] ?? '');
             $status = $input['status'] ?? '';
-            $acceptedSchool = $input['acceptedSchool'] ?? '';
-            $adminNotes = $input['adminNotes'] ?? '';
-            if (!$id) throw new Exception("ID required");
-            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'admissions'");
-            $row = $stmt->fetch();
-            $admissions = $row ? json_decode($row['setting_value'], true) : [];
-            $found = false;
-            foreach ($admissions as &$a) {
-                if (($a['id'] ?? '') === $id) {
-                    $a['status']        = $status;
-                    $a['acceptedSchool']= $acceptedSchool;
-                    $a['adminNotes']    = $adminNotes;
-                    $found = true;
-                    break;
+            $acceptedSchoolId = sanitizeInput($input['acceptedSchoolId'] ?? $input['acceptedSchool'] ?? null);
+            $adminNotes = sanitizeInput($input['adminNotes'] ?? '');
+            
+            if (empty($id)) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Admission ID is required"]);
+                break;
+            }
+
+            // Normalize status: accept both "Under Review" and "under_review"
+            $statusMap = [
+                'pending' => 'pending',
+                'under review' => 'under_review',
+                'under_review' => 'under_review',
+                'accepted' => 'accepted',
+                'waitlist' => 'waitlist',
+                'rejected' => 'rejected',
+                'modification_approved' => 'modification_approved',
+                'modification approved' => 'modification_approved',
+            ];
+            $statusKey = strtolower(trim($status));
+            $status = $statusMap[$statusKey] ?? $statusKey;
+            
+            $validStatuses = ['pending', 'under_review', 'accepted', 'rejected', 'modification_approved', 'waitlist'];
+            if (!empty($status) && !in_array($status, $validStatuses)) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Invalid status: $status"]);
+                break;
+            }
+            
+            $updates = [];
+            $params = [];
+            
+            if (!empty($status)) {
+                $updates[] = "status = ?";
+                $params[] = $status;
+            }
+            if ($acceptedSchoolId !== null) {
+                // If it's a school name instead of ID, resolve it
+                if (!empty($acceptedSchoolId) && !preg_match('/^\d+$/', $acceptedSchoolId)) {
+                    $schoolLookup = $pdo->prepare("SELECT id FROM schools WHERE name = ? OR nameAr = ? OR id = ? LIMIT 1");
+                    $schoolLookup->execute([$acceptedSchoolId, $acceptedSchoolId, $acceptedSchoolId]);
+                    $schoolRow = $schoolLookup->fetch();
+                    $acceptedSchoolId = $schoolRow ? $schoolRow['id'] : null;
                 }
+                $updates[] = "accepted_school_id = ?";
+                $params[] = $acceptedSchoolId ?: null;
             }
-            if ($found) {
-                $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('admissions', ?)");
-                $stmt->execute([json_encode($admissions, JSON_UNESCAPED_UNICODE)]);
-                bustCache();
-                echo json_encode(["status" => "success", "message" => "Updated successfully."]);
-            } else {
-                throw new Exception("Admission not found");
+            if (!empty($adminNotes)) {
+                $updates[] = "admin_notes = ?";
+                $params[] = $adminNotes;
             }
+            
+            if (empty($updates)) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "No fields to update"]);
+                break;
+            }
+            
+            $params[] = $id;
+            $sql = "UPDATE admissions SET " . implode(', ', $updates) . " WHERE id = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            
+            if ($stmt->rowCount() === 0) {
+                http_response_code(404);
+                echo json_encode(["status" => "error", "message" => "Admission not found"]);
+                break;
+            }
+            
+            bustCache();
+            echo json_encode([
+                "status" => "success",
+                "message" => "تم تحديث حالة الطلب بنجاح",
+                "data" => ["id" => $id, "status" => $status]
+            ]);
             break;
 
         case 'update_job_application':
-            requireAuth(); // Protected: only admin can update job applications
+            requireAuth();
             $input = json_decode(file_get_contents('php://input'), true);
             $id = $input['id'] ?? '';
             $status = $input['status'] ?? '';
             if (!$id) throw new Exception("ID required");
-            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'jobApplications'");
-            $row = $stmt->fetch();
-            $apps = $row ? json_decode($row['setting_value'], true) : [];
-            $found = false;
-            foreach ($apps as &$a) {
-                if (($a['id'] ?? '') === $id) {
-                    $a['status'] = $status;
-                    $found = true;
-                    break;
-                }
-            }
-            if ($found) {
-                $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES ('jobApplications', ?)");
-                $stmt->execute([json_encode($apps, JSON_UNESCAPED_UNICODE)]);
+
+            $stmt = $pdo->prepare("UPDATE job_applications SET status = ? WHERE id = ?");
+            $result = $stmt->execute([$status, $id]);
+
+            if ($result && $stmt->rowCount() > 0) {
                 bustCache();
                 echo json_encode(["status" => "success", "message" => "Updated successfully."]);
             } else {
@@ -1939,9 +2186,10 @@ try {
                 }
             }
 
-            $stmt = $pdo->prepare("REPLACE INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, teachersCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $schoolId = $s['id'] ?? uniqid();
+            $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainimage, gallery, about, aboutAr, phone, email, website, rating, studentCount, teachersCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), nameAr=VALUES(nameAr), location=VALUES(location), locationAr=VALUES(locationAr), governorate=VALUES(governorate), governorateAr=VALUES(governorateAr), principal=VALUES(principal), principalAr=VALUES(principalAr), logo=VALUES(logo), type=VALUES(type), mainimage=VALUES(mainimage), gallery=VALUES(gallery), about=VALUES(about), aboutAr=VALUES(aboutAr), phone=VALUES(phone), email=VALUES(email), website=VALUES(website), rating=VALUES(rating), studentCount=VALUES(studentCount), teachersCount=VALUES(teachersCount), foundedYear=VALUES(foundedYear), address=VALUES(address), addressAr=VALUES(addressAr), applicationLink=VALUES(applicationLink)");
             $stmt->execute([
-                $s['id'] ?? uniqid(),
+                $schoolId,
                 $s['name'] ?? '',
                 $s['nameAr'] ?? ($s['name'] ?? ''),
                 $s['location'] ?? '',
@@ -2036,11 +2284,10 @@ try {
             break;
 
         case 'delete_entry':
-            requireAuth(); // Protected: only admin can delete entries
+            requireAuth();
             $input = json_decode(file_get_contents('php://input'), true);
             if (!is_array($input)) throw new Exception('Invalid JSON payload');
 
-            // Whitelist allowed types — never expose arbitrary settings keys to the client
             $allowedTypes = ['complaints', 'contactMessages', 'jobApplications', 'admissions'];
             $type = $input['type'] ?? '';
             $id   = $input['id']   ?? '';
@@ -2048,17 +2295,17 @@ try {
             if (!in_array($type, $allowedTypes, true)) throw new Exception('Invalid entry type');
             if (!$id) throw new Exception('Entry id is required');
 
-            $stmt = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = " . $pdo->quote($type));
-            $row  = $stmt->fetch();
-            $entries = $row ? json_decode($row['setting_value'], true) : [];
+            $tableMap = [
+                'complaints' => 'complaints',
+                'contactMessages' => 'contact_messages',
+                'jobApplications' => 'job_applications',
+                'admissions' => 'admissions'
+            ];
+            $tableName = $tableMap[$type] ?? null;
+            if (!$tableName) throw new Exception('Invalid entry type');
 
-            // Filter out the entry whose id matches
-            $updated = array_values(array_filter($entries, function($e) use ($id) {
-                return ($e['id'] ?? '') !== $id;
-            }));
-
-            $stmt = $pdo->prepare("REPLACE INTO settings (setting_key, setting_value) VALUES (?, ?)");
-            $stmt->execute([$type, json_encode($updated, JSON_UNESCAPED_UNICODE)]);
+            $stmt = $pdo->prepare("DELETE FROM {$tableName} WHERE id = ?");
+            $stmt->execute([$id]);
 
             bustCache();
             echo json_encode(["status" => "success", "message" => "Entry deleted successfully."]);
@@ -2142,71 +2389,6 @@ try {
         // ═══════════════════════════════════════════════════════════════════════════
         // NEW ADMISSION & MODIFICATION APIs
         // ═══════════════════════════════════════════════════════════════════════════
-
-        case 'update_admission':
-            // Admin only: Update admission status and accepted school
-            requireAuth();
-            
-            $input = json_decode(file_get_contents('php://input'), true);
-            $id = sanitizeInput($input['id'] ?? '');
-            $status = sanitizeInput($input['status'] ?? '');
-            $acceptedSchoolId = sanitizeInput($input['acceptedSchoolId'] ?? null);
-            $adminNotes = sanitizeInput($input['adminNotes'] ?? '');
-            
-            if (empty($id)) {
-                http_response_code(400);
-                echo json_encode(["status" => "error", "message" => "Admission ID is required"]);
-                break;
-            }
-            
-            $validStatuses = ['pending', 'under_review', 'accepted', 'rejected', 'modification_approved'];
-            if (!empty($status) && !in_array($status, $validStatuses)) {
-                http_response_code(400);
-                echo json_encode(["status" => "error", "message" => "Invalid status"]);
-                break;
-            }
-            
-            // Build update query dynamically
-            $updates = [];
-            $params = [];
-            
-            if (!empty($status)) {
-                $updates[] = "status = ?";
-                $params[] = $status;
-            }
-            if ($acceptedSchoolId !== null) {
-                $updates[] = "accepted_school_id = ?";
-                $params[] = $acceptedSchoolId ?: null;
-            }
-            if (!empty($adminNotes)) {
-                $updates[] = "admin_notes = ?";
-                $params[] = $adminNotes;
-            }
-            
-            if (empty($updates)) {
-                http_response_code(400);
-                echo json_encode(["status" => "error", "message" => "No fields to update"]);
-                break;
-            }
-            
-            $params[] = $id;
-            $sql = "UPDATE admissions SET " . implode(', ', $updates) . " WHERE id = ?";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($params);
-            
-            if ($stmt->rowCount() === 0) {
-                http_response_code(404);
-                echo json_encode(["status" => "error", "message" => "Admission not found"]);
-                break;
-            }
-            
-            bustCache();
-            echo json_encode([
-                "status" => "success",
-                "message" => "تم تحديث حالة الطلب بنجاح",
-                "data" => ["id" => $id, "status" => $status]
-            ]);
-            break;
 
         case 'request_modification':
             // Student: Request to modify preferences
@@ -2442,8 +2624,7 @@ try {
     }
 } catch (Exception $e) {
     http_response_code(500);
-    // Log the real error server-side, never expose it to the client
-    error_log('[NIS API Error] Action: ' . ($action ?? 'unknown') . ' | ' . $e->getMessage());
-    echo json_encode(["status" => "error", "message" => "An internal server error occurred. Please try again."]);
+    error_log('[NIS API Error] Action: ' . ($action ?? 'unknown') . ' | ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine());
+    echo json_encode(["status" => "error", "message" => "Internal Server Error: " . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine()]);
 }
 ?>

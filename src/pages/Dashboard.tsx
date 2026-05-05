@@ -1718,11 +1718,11 @@ const Dashboard: React.FC = () => {
                         <td style={{ padding: '16px 24px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--accent)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>
-                              {app.fullName.charAt(0).toUpperCase()}
+                              {(app.fullName || '?').charAt(0).toUpperCase()}
                             </div>
                             <div>
-                              <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)' }}>{app.fullName}</p>
-                              <p style={{ fontSize: 11, color: 'var(--text2)' }}>{app.email}</p>
+                              <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)' }}>{app.fullName || 'No Name'}</p>
+                              <p style={{ fontSize: 11, color: 'var(--text2)' }}>{app.email || 'No Email'}</p>
                             </div>
                           </div>
                         </td>
