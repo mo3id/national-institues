@@ -13,6 +13,7 @@ import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import Clipboard from 'lucide-react/dist/esm/icons/clipboard';
 import Check from 'lucide-react/dist/esm/icons/check';
+import XCircle from 'lucide-react/dist/esm/icons/x-circle';
 import PageTransition from '@/components/common/PageTransition';
 import ScrollReveal from '@/components/common/ScrollReveal';
 import { getComplaintStatus } from '@/services/api';
@@ -50,8 +51,8 @@ const ComplaintInquiry: React.FC = () => {
     };
 
     const copyToClipboard = () => {
-        if (!complaint?.id) return;
-        navigator.clipboard.writeText(complaint.id);
+        if (!complaint?.complaint_number && !complaint?.id) return;
+        navigator.clipboard.writeText(complaint.complaint_number || complaint.id);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -76,6 +77,7 @@ const ComplaintInquiry: React.FC = () => {
             case 'pending': return 'bg-amber-100 text-amber-700 border-amber-200';
             case 'in progress': return 'bg-blue-100 text-blue-700 border-blue-200';
             case 'responded': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+            case 'rejected': return 'bg-red-100 text-red-700 border-red-200';
             case 'closed': return 'bg-slate-100 text-slate-700 border-slate-200';
             default: return 'bg-blue-100 text-blue-700 border-blue-200';
         }
@@ -86,6 +88,7 @@ const ComplaintInquiry: React.FC = () => {
             case 'pending': return <Clock className="w-4 h-4" />;
             case 'in progress': return <Clock className="w-4 h-4 animate-pulse" />;
             case 'responded': return <CheckCircle className="w-4 h-4" />;
+            case 'rejected': return <XCircle className="w-4 h-4" />;
             default: return <Info className="w-4 h-4" />;
         }
     };
@@ -132,7 +135,7 @@ const ComplaintInquiry: React.FC = () => {
                                                     value={complaintId}
                                                     onChange={(e) => setComplaintId(e.target.value)}
                                                     className={`w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent transition-all pr-12 ${isRTL ? 'text-right' : 'text-left'}`}
-                                                    placeholder="CMP-XXXX"
+                                                    placeholder="COMP-YYYY-XXX"
                                                     dir="ltr"
                                                 />
                                                 <div className={`absolute inset-y-0 ${isRTL ? 'left-4' : 'right-4'} flex items-center pointer-events-none`}>
@@ -168,7 +171,7 @@ const ComplaintInquiry: React.FC = () => {
                                                 <div>
                                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{t?.complaints?.complaintNumber}</p>
                                                     <div className="flex items-center gap-3">
-                                                        <h3 className="text-2xl font-black text-[#1e3a8a] tracking-tight">{complaint.id}</h3>
+                                                        <h3 className="text-2xl font-black text-[#1e3a8a] tracking-tight">{complaint.complaint_number || complaint.id}</h3>
                                                         <button
                                                             onClick={copyToClipboard}
                                                             className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-[#1e3a8a]"

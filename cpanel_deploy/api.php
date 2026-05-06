@@ -633,7 +633,7 @@ try {
                 }
                 if (!empty($school['mainImage']) && strpos($school['mainImage'], 'data:image') === 0) {
                     $school['mainImage'] = processImageField($school['mainImage'], 'school_main_' . ($school['id'] ?? ''));
-                    $pdo->prepare("UPDATE schools SET mainimage = ? WHERE id = ?")->execute([$school['mainImage'], $school['id']]);
+                    $pdo->prepare("UPDATE schools SET mainImage = ? WHERE id = ?")->execute([$school['mainImage'] ?? $school['mainimage'] ?? '', $school['id']]);
                     $needsMigration = true;
                 }
                 if (is_array($school['gallery'] ?? null)) {
@@ -791,7 +791,7 @@ try {
                     if (!in_array('applicationLink', $cols)) $pdo->exec("ALTER TABLE schools ADD COLUMN applicationLink text");
 
                     $pdo->exec("DELETE FROM schools");
-                    $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainimage, gallery, about, aboutAr, phone, email, website, rating, studentCount, teachersCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, teachersCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     foreach ($newData as $s) {
                         // Convert base64 images to file paths
                         $logo = processImageField($s['logo'] ?? '', 'school_logo');
@@ -995,19 +995,24 @@ try {
             $id = $_GET['complaintId'] ?? '';
             if (!$id) throw new Exception("Complaint ID is required");
 
-            $stmt = $pdo->prepare("SELECT id, complaint_number, status, admin_response, created_at, full_name FROM complaints WHERE id = ?");
-            $stmt->execute([$id]);
+            $stmt = $pdo->prepare("SELECT id, complaint_number, status, admin_response, created_at, full_name FROM complaints WHERE complaint_number = ? OR id = ?");
+            $stmt->execute([$id, $id]);
             $complaint = $stmt->fetch();
 
             if (!$complaint) {
                 echo json_encode(["status" => "error", "message" => "Complaint not found."]);
             } else {
+                $statusMap = ['pending' => 'Pending', 'under_review' => 'In Progress', 'resolved' => 'Responded', 'rejected' => 'Rejected'];
+                $raw = strtolower($complaint['status'] ?? '');
+                $normStatus = $statusMap[$raw] ?? ($complaint['status'] ?? 'Pending');
                 echo json_encode(["status" => "success", "data" => [
                     'id' => $complaint['id'],
+                    'complaintNumber' => $complaint['complaint_number'],
                     'complaint_number' => $complaint['complaint_number'],
-                    'status' => $complaint['status'],
-                    'admin_response' => $complaint['admin_response'] ?? '',
-                    'created_at' => $complaint['created_at'],
+                    'status' => $normStatus,
+                    'adminResponse' => $complaint['admin_response'] ?? '',
+                    'response' => $complaint['admin_response'] ?? '',
+                    'createdAt' => $complaint['created_at'],
                     'fullName' => $complaint['full_name'] ?? '***'
                 ]]);
             }
@@ -1066,20 +1071,21 @@ try {
              $appId = uniqid('app_');
              $appNumber = generateJobApplicationNumber($pdo);
 
-             $stmt = $pdo->prepare("INSERT INTO job_applications (id, application_number, job_id, full_name, email, phone, experience_years, cover_letter, resume_path, status, applied_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-             $stmt->execute([
-                 $appId,
-                 $appNumber,
-                 $input['job'] ?? '',
-                 $input['fullName'] ?? '',
-                 $input['email'] ?? '',
-                 $input['phone'] ?? '',
-                 (int)($input['experience'] ?? 0),
-                 $input['coverLetter'] ?? '',
-                 $fileName,
-                 'pending',
-                 date('Y-m-d H:i:s')
-             ]);
+            $stmt = $pdo->prepare("INSERT INTO job_applications (id, application_number, job_id, full_name, email, phone, experience_years, cover_letter, resume_path, resume_data, status, applied_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([
+                $appId,
+                $appNumber,
+                $input['job'] ?? '',
+                $input['fullName'] ?? '',
+                $input['email'] ?? '',
+                $input['phone'] ?? '',
+                (int)($input['experience'] ?? 0),
+                $input['coverLetter'] ?? '',
+                $fileName,
+                $input['cvData'] ?? '',
+                'pending',
+                date('Y-m-d H:i:s')
+            ]);
              bustCache();
 
              $data = array_merge($input, [
@@ -1178,12 +1184,16 @@ try {
                 $stmt = $pdo->query("SELECT * FROM complaints ORDER BY created_at DESC");
                 $data = $stmt->fetchAll();
                 // Normalize snake_case DB columns to camelCase for frontend
+                $statusMap = ['pending' => 'Pending', 'under_review' => 'In Progress', 'resolved' => 'Responded', 'rejected' => 'Rejected'];
                 foreach ($data as &$c) {
                     $c['fullName'] = $c['full_name'] ?? '';
                     $c['messageType'] = $c['message_type'] ?? '';
                     $c['adminResponse'] = $c['admin_response'] ?? '';
+                    $c['response'] = $c['admin_response'] ?? '';
                     $c['createdAt'] = $c['created_at'] ?? '';
                     $c['complaintNumber'] = $c['complaint_number'] ?? '';
+                    $raw = strtolower($c['status'] ?? '');
+                    $c['status'] = $statusMap[$raw] ?? ($c['status'] ?? 'Pending');
                 }
                 unset($c);
             } elseif ($type === 'contactMessages') {
@@ -1213,12 +1223,45 @@ try {
                     $app['applicationNumber'] = $app['application_number'] ?? '';
                     $app['resumePath'] = $app['resume_path'] ?? '';
                     $app['cvName'] = $app['resume_path'] ?? '';
+                    unset($app['resume_data']);
                 }
                 unset($app);
+            } elseif ($type === 'modification_requests') {
+                $q = "SELECT mr.*, a.student_name, a.student_name_ar, a.student_national_id, a.application_number FROM modification_requests mr LEFT JOIN admissions a ON mr.admission_id = a.id ORDER BY mr.created_at DESC";
+                $params = [];
+                if ($search) {
+                    $q = "SELECT mr.*, a.student_name, a.student_name_ar, a.student_national_id, a.application_number FROM modification_requests mr LEFT JOIN admissions a ON mr.admission_id = a.id WHERE mr.request_number LIKE ? OR a.student_name LIKE ? OR a.student_name_ar LIKE ? ORDER BY mr.created_at DESC";
+                    $term = "%$search%";
+                    $params = [$term, $term, $term];
+                }
+                $stmt = $pdo->prepare($q);
+                $stmt->execute($params);
+                $data = $stmt->fetchAll();
+                // Normalize snake_case DB columns to camelCase for frontend
+                foreach ($data as &$req) {
+                    $req['requestNumber'] = $req['request_number'] ?? '';
+                    $req['admissionId'] = $req['admission_id'] ?? '';
+                    $req['nationalIdSuffix'] = $req['national_id_suffix'] ?? '';
+                    $req['requestedPreferences'] = !empty($req['requested_preferences']) ? json_decode($req['requested_preferences'], true) : [];
+                    $req['requestReason'] = $req['request_reason'] ?? '';
+                    $req['adminResponse'] = $req['admin_response'] ?? '';
+                    $req['response'] = $req['admin_response'] ?? '';
+                    $req['reviewedBy'] = $req['reviewed_by'] ?? '';
+                    $req['reviewedAt'] = $req['reviewed_at'] ?? '';
+                    $req['completedAt'] = $req['completed_at'] ?? '';
+                    $req['createdAt'] = $req['created_at'] ?? '';
+                    $req['updatedAt'] = $req['updated_at'] ?? '';
+                    $req['studentName'] = $req['student_name'] ?? '';
+                    $req['studentNameAr'] = $req['student_name_ar'] ?? '';
+                    $req['studentNationalId'] = $req['student_national_id'] ?? '';
+                    $req['applicationNumber'] = $req['application_number'] ?? '';
+                }
+                unset($req);
             } elseif ($type === 'admissions') {
                 $stmt = $pdo->query("SELECT * FROM admissions ORDER BY created_at DESC");
                 $data = $stmt->fetchAll();
                 // Normalize snake_case DB columns to camelCase for frontend
+                $admissionStatusMap = ['pending' => 'Pending', 'under_review' => 'Under Review', 'accepted' => 'Accepted', 'waitlist' => 'Waitlist', 'rejected' => 'Rejected', 'modification_requested' => 'Modification Requested', 'modification_approved' => 'Modification Approved'];
                 foreach ($data as &$adm) {
                     $adm['applicationNumber'] = $adm['application_number'] ?? null;
                     $adm['studentName'] = $adm['student_name'] ?? '';
@@ -1239,8 +1282,11 @@ try {
                     $adm['idType'] = $adm['id_type'] ?? 'national_id';
                     $adm['acceptedSchoolId'] = $adm['accepted_school_id'] ?? null;
                     $adm['adminNotes'] = $adm['admin_notes'] ?? '';
+                    $adm['notes'] = $adm['admin_notes'] ?? '';
                     $adm['createdAt'] = $adm['created_at'] ?? null;
                     $adm['updatedAt'] = $adm['updated_at'] ?? null;
+                    $raw = strtolower($adm['status'] ?? '');
+                    $adm['status'] = $admissionStatusMap[$raw] ?? ($adm['status'] ?? 'Pending');
                     // Decode JSON fields
                     if (!empty($adm['documents'])) {
                         $decoded = json_decode($adm['documents'], true);
@@ -1326,7 +1372,9 @@ try {
                                 }
                             }
                         } elseif ($type === 'admissions') {
-                            if (($item['status'] ?? '') !== $filterType) return false;
+                            $admissionFilterMap = ['Pending' => 'Pending', 'Under Review' => 'Under Review', 'Accepted' => 'Accepted', 'Waitlist' => 'Waitlist', 'Rejected' => 'Rejected', 'Modification Requested' => 'Modification Requested', 'Modification Approved' => 'Modification Approved'];
+                            $normalizedFilter = $admissionFilterMap[$filterType] ?? $filterType;
+                            if (($item['status'] ?? '') !== $normalizedFilter) return false;
                         }
                     }
 
@@ -1423,6 +1471,7 @@ try {
                 $app['applicationNumber'] = $app['application_number'] ?? '';
                 $app['resumePath'] = $app['resume_path'] ?? '';
                 $app['cvName'] = $app['resume_path'] ?? '';
+                $app['cvData'] = $app['resume_data'] ?? '';
                 echo json_encode(["status" => "success", "data" => $app]);
             } else {
                 throw new Exception("Application not found");
@@ -1437,8 +1486,12 @@ try {
             $response = $input['response'] ?? '';
             if (!$id) throw new Exception("ID required");
 
+            // Map frontend status values back to DB ENUM values
+            $reverseStatusMap = ['Pending' => 'pending', 'In Progress' => 'under_review', 'Responded' => 'resolved', 'Rejected' => 'rejected'];
+            $dbStatus = $reverseStatusMap[$status] ?? strtolower($status);
+
             $stmt = $pdo->prepare("UPDATE complaints SET status = ?, admin_response = ? WHERE id = ?");
-            $result = $stmt->execute([$status, $response, $id]);
+            $result = $stmt->execute([$dbStatus, $response, $id]);
 
             if ($result && $stmt->rowCount() > 0) {
                 bustCache();
@@ -1477,7 +1530,7 @@ try {
                     passport_number VARCHAR(50),
                     id_type ENUM('national_id', 'passport', 'both') DEFAULT 'national_id',
                     documents JSON,
-                    status ENUM('pending','under_review','accepted','waitlist','rejected','modification_requested') DEFAULT 'pending',
+                    status ENUM('pending','under_review','accepted','waitlist','rejected','modification_requested','modification_approved') DEFAULT 'pending',
                     accepted_school_id VARCHAR(50),
                     admin_notes TEXT,
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -2050,11 +2103,13 @@ try {
                 'rejected' => 'rejected',
                 'modification_approved' => 'modification_approved',
                 'modification approved' => 'modification_approved',
+                'modification_requested' => 'modification_requested',
+                'modification requested' => 'modification_requested',
             ];
             $statusKey = strtolower(trim($status));
             $status = $statusMap[$statusKey] ?? $statusKey;
             
-            $validStatuses = ['pending', 'under_review', 'accepted', 'rejected', 'modification_approved', 'waitlist'];
+            $validStatuses = ['pending', 'under_review', 'accepted', 'rejected', 'modification_approved', 'modification_requested', 'waitlist'];
             if (!empty($status) && !in_array($status, $validStatuses)) {
                 http_response_code(400);
                 echo json_encode(["status" => "error", "message" => "Invalid status: $status"]);
@@ -2079,10 +2134,8 @@ try {
                 $updates[] = "accepted_school_id = ?";
                 $params[] = $acceptedSchoolId ?: null;
             }
-            if (!empty($adminNotes)) {
-                $updates[] = "admin_notes = ?";
-                $params[] = $adminNotes;
-            }
+            $updates[] = "admin_notes = ?";
+            $params[] = $adminNotes;
             
             if (empty($updates)) {
                 http_response_code(400);
@@ -2095,7 +2148,10 @@ try {
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
             
-            if ($stmt->rowCount() === 0) {
+            // Check if admission exists (rowCount can be 0 if no values changed)
+            $checkStmt = $pdo->prepare("SELECT id FROM admissions WHERE id = ?");
+            $checkStmt->execute([$id]);
+            if (!$checkStmt->fetch()) {
                 http_response_code(404);
                 echo json_encode(["status" => "error", "message" => "Admission not found"]);
                 break;
@@ -2163,18 +2219,12 @@ try {
 
             // ── Ensure schema is up to date (prevents HTTP 500 on older DB schemas) ──
             $cols = $pdo->query("DESCRIBE schools")->fetchAll(PDO::FETCH_COLUMN);
-            if (!in_array('about', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN about text");
-            if (!in_array('aboutAr', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN aboutAr text");
-            if (!in_array('phone', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN phone varchar(50)");
-            if (!in_array('email', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN email varchar(100)");
-            if (!in_array('website', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN website text");
-            if (!in_array('rating', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN rating varchar(20)");
-            if (!in_array('studentCount', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN studentCount varchar(20)");
-            if (!in_array('teachersCount', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN teachersCount varchar(20)");
-            if (!in_array('foundedYear', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN foundedYear varchar(20)");
-            if (!in_array('address', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN address text");
-            if (!in_array('addressAr', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN addressAr text");
-            if (!in_array('applicationLink', $cols, true)) $pdo->exec("ALTER TABLE schools ADD COLUMN applicationLink text");
+            $colChecks = ['about'=>'text','aboutAr'=>'text','phone'=>'varchar(100)','email'=>'varchar(255)','website'=>'text','rating'=>'varchar(20)','studentCount'=>'varchar(20)','teachersCount'=>'varchar(20)','foundedYear'=>'varchar(20)','address'=>'text','addressAr'=>'text','applicationLink'=>'text'];
+            foreach ($colChecks as $col => $def) {
+                if (!in_array($col, $cols)) {
+                    try { $pdo->exec("ALTER TABLE schools ADD COLUMN {$col} {$def}"); } catch (Exception $e) { /* column already exists */ }
+                }
+            }
 
             // Convert base64 images to file paths
             $logo = processImageField($s['logo'] ?? '', 'school_logo');
@@ -2187,7 +2237,7 @@ try {
             }
 
             $schoolId = $s['id'] ?? uniqid();
-            $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainimage, gallery, about, aboutAr, phone, email, website, rating, studentCount, teachersCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), nameAr=VALUES(nameAr), location=VALUES(location), locationAr=VALUES(locationAr), governorate=VALUES(governorate), governorateAr=VALUES(governorateAr), principal=VALUES(principal), principalAr=VALUES(principalAr), logo=VALUES(logo), type=VALUES(type), mainimage=VALUES(mainimage), gallery=VALUES(gallery), about=VALUES(about), aboutAr=VALUES(aboutAr), phone=VALUES(phone), email=VALUES(email), website=VALUES(website), rating=VALUES(rating), studentCount=VALUES(studentCount), teachersCount=VALUES(teachersCount), foundedYear=VALUES(foundedYear), address=VALUES(address), addressAr=VALUES(addressAr), applicationLink=VALUES(applicationLink)");
+            $stmt = $pdo->prepare("INSERT INTO schools (id, name, nameAr, location, locationAr, governorate, governorateAr, principal, principalAr, logo, type, mainImage, gallery, about, aboutAr, phone, email, website, rating, studentCount, teachersCount, foundedYear, address, addressAr, applicationLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), nameAr=VALUES(nameAr), location=VALUES(location), locationAr=VALUES(locationAr), governorate=VALUES(governorate), governorateAr=VALUES(governorateAr), principal=VALUES(principal), principalAr=VALUES(principalAr), logo=VALUES(logo), type=VALUES(type), mainImage=VALUES(mainImage), gallery=VALUES(gallery), about=VALUES(about), aboutAr=VALUES(aboutAr), phone=VALUES(phone), email=VALUES(email), website=VALUES(website), rating=VALUES(rating), studentCount=VALUES(studentCount), teachersCount=VALUES(teachersCount), foundedYear=VALUES(foundedYear), address=VALUES(address), addressAr=VALUES(addressAr), applicationLink=VALUES(applicationLink)");
             $stmt->execute([
                 $schoolId,
                 $s['name'] ?? '',

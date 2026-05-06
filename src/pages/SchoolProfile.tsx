@@ -55,7 +55,7 @@ const SchoolProfile: React.FC = () => {
     setSelectedImageIndex(newIndex);
   };
 
-  // SEO: Update Meta Tags
+  // SEO: Update Meta Tags (including Open Graph for social sharing)
   React.useEffect(() => {
     if (school) {
       const pageTitle = `${name} | ${gov} | NIS`;
@@ -63,22 +63,41 @@ const SchoolProfile: React.FC = () => {
 
       document.title = pageTitle;
 
-      // Update meta description
-      let metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) {
-        metaDesc.setAttribute('content', pageDesc);
-      } else {
-        metaDesc = document.createElement('meta');
-        metaDesc.setAttribute('name', 'description');
-        metaDesc.setAttribute('content', pageDesc);
-        document.head.appendChild(metaDesc);
-      }
+      // Helper to update or create meta tags
+      const updateMetaTag = (attrName: string, content: string, isProperty = false) => {
+        const attr = isProperty ? 'property' : 'name';
+        let element = document.querySelector(`meta[${attr}="${attrName}"]`);
+        if (!element) {
+          element = document.createElement('meta');
+          element.setAttribute(attr, attrName);
+          document.head.appendChild(element);
+        }
+        element.setAttribute('content', content);
+      };
+
+      // Use logo for OG image (brand identity), fallback to mainImage
+      const rawImage = school?.logo || school?.mainImage || (school as any)?.mainimage || '';
+      const pageImage = rawImage.startsWith('http') ? rawImage : window.location.origin + (rawImage.startsWith('/') ? rawImage : '/' + rawImage);
+      const pageUrl = window.location.href;
+
+      updateMetaTag('description', pageDesc);
+      updateMetaTag('og:title', pageTitle, true);
+      updateMetaTag('og:description', pageDesc, true);
+      updateMetaTag('og:image', pageImage, true);
+      updateMetaTag('og:url', pageUrl, true);
+      updateMetaTag('og:site_name', 'National Institutes Schools Portal', true);
+      updateMetaTag('og:locale', lang === 'ar' ? 'ar_EG' : 'en_US', true);
+      updateMetaTag('og:type', 'website', true);
+      updateMetaTag('twitter:card', 'summary_large_image');
+      updateMetaTag('twitter:title', pageTitle);
+      updateMetaTag('twitter:description', pageDesc);
+      updateMetaTag('twitter:image', pageImage);
 
       return () => {
         document.title = "National Institutes Schools Portal";
       };
     }
-  }, [school, name, gov, loc, principalName, t.schools.principal]);
+  }, [school, name, gov, loc, principalName, t.schools.principal, lang]);
 
   if (!school) return (
     <div className="min-h-[60vh] flex items-center justify-center">

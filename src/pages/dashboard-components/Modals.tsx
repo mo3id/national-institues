@@ -276,7 +276,7 @@ export const EditSchoolForm: React.FC<{ school: DashSchool; lang: Lang; onSave: 
                 }
                 return trimmed.split(',').map((x: string) => x.trim()).filter(Boolean);
             })(),
-            mainImage: school.mainimage || '',
+            mainImage: school.mainImage || school.mainimage || '',
             logo: school.logo || ''
         };
         setD(normalizedSchool);

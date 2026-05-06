@@ -11,7 +11,13 @@ $pathParts = explode('/', trim($path, '/'));
 
 $title = "National Institutes Schools Portal";
 $description = "National Institutes Schools Portal (NIS) - The official digital portal for Egypt's largest educational network.";
-$image = "/layer-1-small.webp"; // Default fallback image from the site
+$image = "/og-default.jpg"; // Default OG image (1200x630) for social sharing
+
+// Include upload handler for processImageField
+$uploadHandlerPath = __DIR__ . '/upload_handler.php';
+if (file_exists($uploadHandlerPath)) {
+    require_once $uploadHandlerPath;
+}
 
 // Database connection
 try {
@@ -35,16 +41,36 @@ try {
             if ($item) {
                 $title = $item['titleAr'];
                 $description = mb_substr(strip_tags($item['summaryAr']), 0, 160);
-                $image = $item['image'] ?: $image;
+                $rawImage = $item['image'] ?: '';
+                if (!empty($rawImage) && function_exists('processImageField')) {
+                    $rawImage = processImageField($rawImage, 'news_og_' . $id);
+                    if ($rawImage !== ($item['image'] ?: '')) {
+                        $pdo->prepare("UPDATE news SET image = ? WHERE id = ?")->execute([$rawImage, $id]);
+                    }
+                }
+                $image = $rawImage ?: $image;
             }
         } elseif ($type === 'schools') {
-            $stmt = $pdo->prepare("SELECT nameAr, aboutAr, logo, mainImage FROM schools WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT nameAr, aboutAr, logo, mainImage, mainimage FROM schools WHERE id = ?");
             $stmt->execute([$id]);
             $item = $stmt->fetch();
             if ($item) {
                 $title = $item['nameAr'];
                 $description = mb_substr(strip_tags($item['aboutAr']), 0, 160);
-                $image = !empty($item['mainImage']) ? $item['mainImage'] : (!empty($item['logo']) ? $item['logo'] : $image);
+                // For schools, use logo first (brand identity), then mainImage
+                $rawImage = $item['logo'] ?? '';
+                if (empty($rawImage)) {
+                    $rawImage = $item['mainImage'] ?? $item['mainimage'] ?? '';
+                }
+                if (!empty($rawImage) && function_exists('processImageField')) {
+                    $processedImage = processImageField($rawImage, 'school_og_' . $id);
+                    if ($processedImage !== $rawImage) {
+                        $colName = !empty($item['logo']) ? 'logo' : (!empty($item['mainImage']) ? 'mainImage' : 'mainimage');
+                        $pdo->prepare("UPDATE schools SET {$colName} = ? WHERE id = ?")->execute([$processedImage, $id]);
+                    }
+                    $rawImage = $processedImage;
+                }
+                $image = $rawImage ?: $image;
             }
         } elseif ($type === 'alumni') {
              $stmt = $pdo->prepare("SELECT nameAr, testimonialAr, image FROM alumni WHERE id = ?");
@@ -53,7 +79,11 @@ try {
              if ($item) {
                  $title = $item['nameAr'];
                  $description = mb_substr(strip_tags($item['testimonialAr']), 0, 160);
-                 $image = $item['image'] ?: $image;
+                 $rawImage = $item['image'] ?: '';
+                 if (!empty($rawImage) && function_exists('processImageField')) {
+                     $rawImage = processImageField($rawImage, 'alumni_og_' . $id);
+                 }
+                 $image = $rawImage ?: $image;
              }
         } elseif ($type === 'jobs') {
              $stmt = $pdo->prepare("SELECT titleAr, descriptionAr, image FROM jobs WHERE id = ?");
@@ -62,7 +92,11 @@ try {
              if ($item) {
                  $title = $item['titleAr'];
                  $description = mb_substr(strip_tags($item['descriptionAr']), 0, 160);
-                 $image = $item['image'] ?: $image;
+                 $rawImage = $item['image'] ?: '';
+                 if (!empty($rawImage) && function_exists('processImageField')) {
+                     $rawImage = processImageField($rawImage, 'job_og_' . $id);
+                 }
+                 $image = $rawImage ?: $image;
              }
         }
     }
@@ -76,10 +110,15 @@ $host = $_SERVER['HTTP_HOST'];
 $baseUrl = $protocol . "://" . $host;
 
 if (!empty($image) && !preg_match('~^(?:f|ht)tps?://~i', $image)) {
-    if (strpos($image, '/') !== 0) {
-        $image = '/' . $image;
+    // Skip base64 data URIs — they are invalid for social media
+    if (strpos($image, 'data:') === 0) {
+        $image = $baseUrl . '/og-default.jpg';
+    } else {
+        if (strpos($image, '/') !== 0) {
+            $image = '/' . $image;
+        }
+        $image = $baseUrl . $image;
     }
-    $image = $baseUrl . $image;
 }
 
 $pageUrl = $baseUrl . $requestUri;
@@ -108,4 +147,3 @@ $html = str_replace('</head>', $ogTags, $html);
 
 // Output the modified HTML
 echo $html;
-?>

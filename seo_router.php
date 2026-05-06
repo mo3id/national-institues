@@ -11,7 +11,7 @@ $pathParts = explode('/', trim($path, '/'));
 
 $title = "National Institutes Schools Portal";
 $description = "National Institutes Schools Portal (NIS) - The official digital portal for Egypt's largest educational network.";
-$image = "/layer-1-small.webp"; // Default fallback image from the site
+$image = "/og-default.jpg"; // Default OG image (1200x630) for social sharing
 
 // Database connection
 try {
@@ -38,13 +38,14 @@ try {
                 $image = $item['image'] ?: $image;
             }
         } elseif ($type === 'schools') {
-            $stmt = $pdo->prepare("SELECT nameAr, aboutAr, logo, mainImage FROM schools WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT nameAr, aboutAr, logo, mainImage, mainimage FROM schools WHERE id = ?");
             $stmt->execute([$id]);
             $item = $stmt->fetch();
             if ($item) {
                 $title = $item['nameAr'];
                 $description = mb_substr(strip_tags($item['aboutAr']), 0, 160);
-                $image = !empty($item['mainImage']) ? $item['mainImage'] : (!empty($item['logo']) ? $item['logo'] : $image);
+                // For schools, use logo first (brand identity), then mainImage/mainimage
+                $image = !empty($item['logo']) ? $item['logo'] : (!empty($item['mainImage']) ? $item['mainImage'] : (!empty($item['mainimage']) ? $item['mainimage'] : $image));
             }
         } elseif ($type === 'alumni') {
              $stmt = $pdo->prepare("SELECT nameAr, testimonialAr, image FROM alumni WHERE id = ?");

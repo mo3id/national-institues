@@ -426,8 +426,10 @@ const toDisplayStatus = (s: string): string => {
   const map: Record<string, string> = {
     'pending': 'Pending', 'under_review': 'Under Review', 'accepted': 'Accepted',
     'waitlist': 'Waitlist', 'rejected': 'Rejected', 'modification_approved': 'Modification Approved',
+    'modification_requested': 'Modification Requested',
     'Under Review': 'Under Review', 'Pending': 'Pending', 'Accepted': 'Accepted',
-    'Waitlist': 'Waitlist', 'Rejected': 'Rejected',
+    'Waitlist': 'Waitlist', 'Rejected': 'Rejected', 'Modification Approved': 'Modification Approved',
+    'Modification Requested': 'Modification Requested',
   };
   return map[s] || s || 'Pending';
 };
@@ -466,6 +468,8 @@ const AdmissionModal: React.FC<{
     'Accepted':     { bg: 'rgba(16,185,129,0.12)',  color: '#10b981' },
     'Waitlist':     { bg: 'rgba(251,146,60,0.12)',  color: '#fb923c' },
     'Rejected':     { bg: 'rgba(239,68,68,0.12)',   color: '#ef4444' },
+    'Modification Requested': { bg: 'rgba(234,179,8,0.12)',  color: '#eab308' },
+    'Modification Approved': { bg: 'rgba(34,197,94,0.12)',   color: '#22c55e' },
   };
   const sc = statusColors[status] || statusColors['Pending'];
 
@@ -591,6 +595,8 @@ const AdmissionModal: React.FC<{
               { value: 'Accepted',     label: u.accepted },
               { value: 'Waitlist',     label: u.waitlist },
               { value: 'Rejected',     label: u.rejected },
+              { value: 'Modification Requested', label: lang === 'ar' ? 'طلب تعديل' : 'Modification Requested' },
+              { value: 'Modification Approved', label: lang === 'ar' ? 'تعديل معتمد' : 'Modification Approved' },
             ]}
           />
 
@@ -2255,7 +2261,7 @@ const Dashboard: React.FC = () => {
                     {filteredComplaints.length > 0 ? filteredComplaints.map((c, i) => (
                       <tr key={i} style={{ borderBottom: i === filteredComplaints.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease' }} onClick={() => { setSelectedComplaint(c); setComplaintModalOpen(true); }} onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
                         <td style={{ padding: '16px 24px', color: 'var(--accent)', fontWeight: 800, fontSize: 12, fontFamily: 'monospace', cursor: 'pointer' }}>
-                          {c.id || '—'}
+                          {c.complaintNumber || c.id || '—'}
                         </td>
                         <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
                           <p>{c.fullName}</p>
@@ -2271,8 +2277,8 @@ const Dashboard: React.FC = () => {
                         <td style={{ padding: '16px 24px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
                           <span style={{
                             padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700,
-                            background: c.status === 'Responded' ? 'rgba(16,185,129,0.15)' : c.status === 'In Progress' ? 'rgba(245,158,11,0.15)' : 'rgba(99,102,241,0.12)',
-                            color: c.status === 'Responded' ? '#10b981' : c.status === 'In Progress' ? '#f59e0b' : 'var(--accent)',
+                            background: c.status === 'Responded' ? 'rgba(16,185,129,0.15)' : c.status === 'In Progress' ? 'rgba(245,158,11,0.15)' : c.status === 'Rejected' ? 'rgba(239,68,68,0.15)' : 'rgba(99,102,241,0.12)',
+                            color: c.status === 'Responded' ? '#10b981' : c.status === 'In Progress' ? '#f59e0b' : c.status === 'Rejected' ? '#ef4444' : 'var(--accent)',
                           }}>{c.status || 'Pending'}</span>
                         </td>
                         <td style={{ padding: '16px 12px' }} onClick={e => e.stopPropagation()}>
@@ -2458,13 +2464,15 @@ const Dashboard: React.FC = () => {
                   </thead>
                   <tbody>
                     {admissionsList.length > 0 ? admissionsList.map((adm, i) => {
-                      const statusColors: Record<string, { bg: string; color: string }> = {
-                        'Pending':      { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b' },
-                        'Under Review': { bg: 'rgba(99,102,241,0.12)',  color: 'var(--accent)' },
-                        'Accepted':     { bg: 'rgba(16,185,129,0.12)',  color: '#10b981' },
-                        'Waitlist':     { bg: 'rgba(251,146,60,0.12)',  color: '#fb923c' },
-                        'Rejected':     { bg: 'rgba(239,68,68,0.12)',   color: '#ef4444' },
-                      };
+const statusColors: Record<string, { bg: string; color: string }> = {
+                         'Pending':      { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b' },
+                         'Under Review': { bg: 'rgba(99,102,241,0.12)',  color: 'var(--accent)' },
+                         'Accepted':     { bg: 'rgba(16,185,129,0.12)',  color: '#10b981' },
+                         'Waitlist':     { bg: 'rgba(251,146,60,0.12)',  color: '#fb923c' },
+                         'Rejected':     { bg: 'rgba(239,68,68,0.12)',   color: '#ef4444' },
+                         'Modification Requested': { bg: 'rgba(234,179,8,0.12)',  color: '#eab308' },
+                         'Modification Approved': { bg: 'rgba(34,197,94,0.12)',   color: '#22c55e' },
+                       };
                       const sc = statusColors[toDisplayStatus(adm.status)] || statusColors['Pending'];
                       return (
                         <tr key={adm.id} style={{ borderBottom: i === admissionsList.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background 0.2s ease', cursor: 'pointer' }}
@@ -2725,7 +2733,7 @@ const Dashboard: React.FC = () => {
               <CustomSelect
                 value={selectedComplaint.status || 'Pending'}
                 onChange={val => setSelectedComplaint(c => c ? { ...c, status: val } : null)}
-                options={['Pending', 'In Progress', 'Responded'].map(st => ({
+                options={['Pending', 'In Progress', 'Responded', 'Rejected'].map(st => ({
                   value: st,
                   label: u[st.toLowerCase().replace(/ /g, '') as keyof typeof u] || st
                 }))}

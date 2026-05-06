@@ -74,7 +74,7 @@ const Complaints: React.FC = () => {
     try {
       const result = await submitComplaint({ ...formData });
 
-      setComplaintId(result.data?.id || null);
+      setComplaintId(result.data?.complaint_number || result.data?.id || null);
       setSubmitted(true);
       // Store the submitted message type to use in success screen
       (window as any)._lastSubmittedType = formData.messageType;

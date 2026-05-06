@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS admissions (
   passport_number VARCHAR(50) UNIQUE,
   id_type ENUM('national_id', 'passport', 'both') DEFAULT 'national_id',
   documents JSON,
-  status ENUM('pending','under_review','accepted','waitlist','rejected','modification_requested') DEFAULT 'pending',
+  status ENUM('pending','under_review','accepted','waitlist','rejected','modification_requested','modification_approved') DEFAULT 'pending',
   accepted_school_id VARCHAR(50),
   admin_notes TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

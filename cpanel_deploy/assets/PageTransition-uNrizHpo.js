@@ -1,1 +1,0 @@
-import{j as i,m as a}from"./vendor-DCFkXH8n.js";const n=({children:t})=>i.jsx(a.div,{initial:{opacity:0,y:20},animate:{opacity:1,y:0},exit:{opacity:0,y:-20},transition:{duration:.5,ease:"easeOut"},children:t});export{n as P};

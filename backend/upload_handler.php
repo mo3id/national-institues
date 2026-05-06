@@ -50,7 +50,7 @@ function deleteImageFile($imagePath) {
 }
 
 function processImageField($value, $prefix = 'img') {
-    if (empty($value)) return '';
+    if (empty($value) || is_array($value)) return '';
     
     // If it's already a URL path, return as is
     if (strpos($value, '/uploads/') === 0 || strpos($value, 'http') === 0) {
@@ -61,7 +61,7 @@ function processImageField($value, $prefix = 'img') {
     if (strpos($value, 'data:image') === 0 || strlen($value) > 500) {
         try {
             return saveBase64Image($value, $prefix);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             error_log("Image conversion error: " . $e->getMessage());
             return '';
         }

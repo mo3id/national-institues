@@ -18,7 +18,8 @@ function saveBase64Image($base64Data, $prefix = 'img') {
     
     // Generate unique filename
     $filename = $prefix . '_' . uniqid() . '_' . time() . '.' . $imageType;
-    $uploadDir = __DIR__ . '/uploads/';
+    // Use document root for uploads so paths match /uploads/ URL
+    $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/';
     $filePath = $uploadDir . $filename;
     
     // Ensure uploads directory exists
@@ -40,7 +41,7 @@ function deleteImageFile($imagePath) {
     
     // Only delete if it's in our uploads folder
     if (strpos($imagePath, '/uploads/') === 0) {
-        $filePath = __DIR__ . '/uploads/' . basename($imagePath);
+        $filePath = $_SERVER['DOCUMENT_ROOT'] . '/uploads/' . basename($imagePath);
         if (file_exists($filePath)) {
             return unlink($filePath);
         }
@@ -49,7 +50,7 @@ function deleteImageFile($imagePath) {
 }
 
 function processImageField($value, $prefix = 'img') {
-    if (empty($value)) return '';
+    if (empty($value) || is_array($value)) return '';
     
     // If it's already a URL path, return as is
     if (strpos($value, '/uploads/') === 0 || strpos($value, 'http') === 0) {
@@ -60,7 +61,7 @@ function processImageField($value, $prefix = 'img') {
     if (strpos($value, 'data:image') === 0 || strlen($value) > 500) {
         try {
             return saveBase64Image($value, $prefix);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             error_log("Image conversion error: " . $e->getMessage());
             return '';
         }
