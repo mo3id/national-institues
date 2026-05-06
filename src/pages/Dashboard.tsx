@@ -7,6 +7,7 @@ import {
   saveGovernorate, deleteGovernorate as apiDeleteGovernorate,
   saveAlumni as apiSaveAlumni, deleteAlumni as apiDeleteAlumni
 } from '@/services/api';
+import { deleteModification, reviewModification } from '@/services/admissionsApi';
 import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
 import Newspaper from 'lucide-react/dist/esm/icons/newspaper';
 import School from 'lucide-react/dist/esm/icons/school';
@@ -32,6 +33,7 @@ import Search from 'lucide-react/dist/esm/icons/search';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import CheckCircle from 'lucide-react/dist/esm/icons/check-circle';
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
+import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import Menu from 'lucide-react/dist/esm/icons/menu';
 import Moon from 'lucide-react/dist/esm/icons/moon';
 import Sun from 'lucide-react/dist/esm/icons/sun';
@@ -503,6 +505,26 @@ const AdmissionModal: React.FC<{
           </div>
         </div>
 
+        {/* Pending Modification Banner */}
+        {admission.hasPendingModification && (
+          <div style={{
+            background: 'rgba(234,179,8,0.12)',
+            border: '1px solid rgba(234,179,8,0.3)',
+            borderRadius: 12, padding: '14px 16px',
+            display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20
+          }}>
+            <AlertTriangle style={{ width: 20, height: 20, color: '#eab308', flexShrink: 0 }} />
+            <div>
+              <p style={{ fontWeight: 700, fontSize: 14, color: '#eab308' }}>
+                {lang === 'ar' ? 'يوجد طلب تعديل رغبات معلق' : 'Pending modification request'}
+              </p>
+              <p style={{ fontSize: 12, color: 'var(--text2)' }}>
+                {lang === 'ar' ? 'لا يمكن تعديل الطلب حتى يتم مراجعة طلب التعديل' : 'Cannot modify until the modification request is reviewed'}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
           <div>
@@ -583,58 +605,135 @@ const AdmissionModal: React.FC<{
           </div>
         )}
 
+        {/* Modification History */}
+        {(admission.modifications || []).length > 0 && (
+          <div style={{ background: 'var(--surface2)', borderRadius: 12, padding: '16px', marginBottom: 20 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
+              {lang === 'ar' ? '📋 سجل التعديلات' : '📋 Modification History'}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {admission.modifications.map((mod: any, i: number) => (
+                <div key={i} style={{ background: 'var(--surface)', borderRadius: 10, padding: '12px 14px', border: '1px solid var(--border)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: 'var(--accent)' }}>#{i + 1}</span>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{mod.requestNumber}</span>
+                      <span style={{
+                        padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 700,
+                        background: mod.status === 'approved' ? 'rgba(16,185,129,0.12)' : mod.status === 'rejected' ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
+                        color: mod.status === 'approved' ? '#10b981' : mod.status === 'rejected' ? '#ef4444' : '#f59e0b'
+                      }}>
+                        {mod.status === 'approved' ? (lang === 'ar' ? 'معتمد' : 'Approved') : mod.status === 'rejected' ? (lang === 'ar' ? 'مرفوض' : 'Rejected') : (lang === 'ar' ? 'معلق' : 'Pending')}
+                      </span>
+                    </div>
+                    <span style={{ fontSize: 11, color: 'var(--text2)' }}>
+                      {mod.createdAt ? new Date(mod.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB') : '—'}
+                    </span>
+                  </div>
+                  {(mod.oldPreferences?.length > 0 || mod.requestedPreferences?.length > 0) && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>
+                      <div>
+                        <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text2)', marginBottom: 4 }}>{lang === 'ar' ? 'الرغبات القديمة' : 'Old Preferences'}</p>
+                        <ol style={{ margin: 0, paddingInlineStart: 16 }}>
+                          {(mod.oldPreferences || []).map((p: any, idx: number) => (
+                            <li key={idx} style={{ fontSize: 11, color: 'var(--text2)', marginBottom: 2 }}>
+                              {lang === 'ar' ? (p.schoolNameAr || p.schoolName) : p.schoolName}
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                      <div>
+                        <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text2)', marginBottom: 4 }}>{lang === 'ar' ? 'الرغبات الجديدة' : 'New Preferences'}</p>
+                        <ol style={{ margin: 0, paddingInlineStart: 16 }}>
+                          {(mod.requestedPreferences || []).map((p: any, idx: number) => (
+                            <li key={idx} style={{ fontSize: 11, color: 'var(--text)', marginBottom: 2, fontWeight: 600 }}>
+                              {lang === 'ar' ? (p.schoolNameAr || p.schoolName) : p.schoolName}
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    </div>
+                  )}
+                  {mod.requestReason && (
+                    <p style={{ fontSize: 11, color: 'var(--text2)', marginTop: 6, fontStyle: 'italic' }}>
+                      {lang === 'ar' ? 'السبب:' : 'Reason:'} {mod.requestReason}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Update Status */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{u.changeStatus}</p>
-          <CustomSelect
-            value={status}
-            onChange={val => { setStatus(val); if (val !== 'Accepted') setAcceptedSchool(''); }}
-            options={[
-              { value: 'Pending',      label: u.pending },
-              { value: 'Under Review', label: u.underReview },
-              { value: 'Accepted',     label: u.accepted },
-              { value: 'Waitlist',     label: u.waitlist },
-              { value: 'Rejected',     label: u.rejected },
-              { value: 'Modification Requested', label: lang === 'ar' ? 'طلب تعديل' : 'Modification Requested' },
-              { value: 'Modification Approved', label: lang === 'ar' ? 'تعديل معتمد' : 'Modification Approved' },
-            ]}
-          />
-
-          {status === 'Accepted' && (
-            <div>
-              <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', marginBottom: 6 }}>{u.acceptedSchool}</p>
+          
+          {admission.hasPendingModification ? (
+            <div style={{
+              background: 'rgba(234,179,8,0.08)',
+              border: '1px solid rgba(234,179,8,0.2)',
+              borderRadius: 10, padding: '12px 16px',
+              display: 'flex', alignItems: 'center', gap: 8
+            }}>
+              <AlertTriangle style={{ width: 16, height: 16, color: '#eab308', flexShrink: 0 }} />
+              <p style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600 }}>
+                {lang === 'ar' ? 'التعديل معطل - يوجد طلب تعديل معلق' : 'Editing disabled - pending modification request exists'}
+              </p>
+            </div>
+          ) : (
+            <>
               <CustomSelect
-                value={acceptedSchool}
-                onChange={setAcceptedSchool}
+                value={status}
+                onChange={val => { setStatus(val); if (val !== 'Accepted') setAcceptedSchool(''); }}
                 options={[
-                  { value: '', label: lang === 'ar' ? 'اختر مدرسة...' : 'Select school...' },
-                  ...(admission.preferences || []).map((p: any) => ({
-                    value: p.schoolId || p.school_id || '',
-                    label: lang === 'ar' ? (p.schoolNameAr || p.schoolName) : p.schoolName,
-                  }))
+                  { value: 'Pending',      label: u.pending },
+                  { value: 'Under Review', label: u.underReview },
+                  { value: 'Accepted',     label: u.accepted },
+                  { value: 'Waitlist',     label: u.waitlist },
+                  { value: 'Rejected',     label: u.rejected },
+                  { value: 'Modification Requested', label: lang === 'ar' ? 'طلب تعديل' : 'Modification Requested' },
+                  { value: 'Modification Approved', label: lang === 'ar' ? 'تعديل معتمد' : 'Modification Approved' },
                 ]}
               />
-            </div>
+
+              {status === 'Accepted' && (
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', marginBottom: 6 }}>{u.acceptedSchool}</p>
+                  <CustomSelect
+                    value={acceptedSchool}
+                    onChange={setAcceptedSchool}
+                    options={[
+                      { value: '', label: lang === 'ar' ? 'اختر مدرسة...' : 'Select school...' },
+                      ...(admission.preferences || []).map((p: any) => ({
+                        value: p.schoolId || p.school_id || '',
+                        label: lang === 'ar' ? (p.schoolNameAr || p.schoolName) : p.schoolName,
+                      }))
+                    ]}
+                  />
+                </div>
+              )}
+
+              <div>
+                <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', marginBottom: 6 }}>{u.adminNotes}</p>
+                <textarea
+                  className="dash-input"
+                  style={{ width: '100%', minHeight: 80, resize: 'vertical', fontSize: 13 }}
+                  value={adminNotes}
+                  onChange={e => setAdminNotes(e.target.value)}
+                  placeholder={u.writeResponse}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, paddingTop: 4 }}>
+                <button className="dash-btn dash-btn-ghost" onClick={onClose}>{u.cancel}</button>
+                <button className="dash-btn dash-btn-primary" onClick={handleSave} disabled={saving}>
+                  {saving ? <div style={{ width: 14, height: 14, border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin" /> : <Save style={{ width: 14, height: 14 }} />}
+                  {u.save}
+                </button>
+              </div>
+            </>
           )}
-
-          <div>
-            <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', marginBottom: 6 }}>{u.adminNotes}</p>
-            <textarea
-              className="dash-input"
-              style={{ width: '100%', minHeight: 80, resize: 'vertical', fontSize: 13 }}
-              value={adminNotes}
-              onChange={e => setAdminNotes(e.target.value)}
-              placeholder={u.writeResponse}
-            />
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, paddingTop: 4 }}>
-            <button className="dash-btn dash-btn-ghost" onClick={onClose}>{u.cancel}</button>
-            <button className="dash-btn dash-btn-primary" onClick={handleSave} disabled={saving}>
-              {saving ? <div style={{ width: 14, height: 14, border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin" /> : <Save style={{ width: 14, height: 14 }} />}
-              {u.save}
-            </button>
-          </div>
         </div>
       </div>
     </ModalWrap>
@@ -1081,7 +1180,7 @@ const Dashboard: React.FC = () => {
   };
 
   const normalizeSchoolType = (type: DashSchool['type']): string[] => {
-    const allowed = new Set(['Arabic', 'Languages', 'American', 'British', 'French']);
+    const allowed = new Set(['Arabic', 'Languages', 'American', 'British', 'French', 'Special Education']);
     const toArray = (t: any): string[] => {
       if (Array.isArray(t)) return t;
       if (typeof t === 'string' && t.trim()) {
@@ -1103,6 +1202,7 @@ const Dashboard: React.FC = () => {
       if (v === 'National') return 'Arabic';
       if (v === 'Language') return 'Languages';
       if (v === 'International') return 'American';
+      if (v === 'Special' || v === 'تربية خاصة' || v === 'تربيه خاصه') return 'Special Education';
       return v;
     });
 
@@ -1735,11 +1835,23 @@ const Dashboard: React.FC = () => {
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, fontWeight: 600 }}>{app.jobTitle}</td>
                         <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 11 }}>{app.appliedAt ? new Date(app.appliedAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB') : ''}</td>
                         <td style={{ padding: '16px 24px' }}>
-                          <span style={{
-                            padding: '4px 10px', borderRadius: 999, fontSize: 10, fontWeight: 800, textTransform: 'uppercase',
-                            background: app.status === 'Hired' ? 'rgba(16,185,129,0.12)' : app.status === 'Rejected' ? 'rgba(239,68,68,0.1)' : 'rgba(99,102,241,0.1)',
-                            color: app.status === 'Hired' ? '#10b981' : app.status === 'Rejected' ? '#ef4444' : 'var(--accent)',
-                          }}>{app.status}</span>
+                          {(() => {
+                            const jobAppStatusColors: Record<string, { bg: string; color: string }> = {
+                              'Pending':   { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b' },
+                              'Interview': { bg: 'rgba(99,102,241,0.12)',  color: 'var(--accent)' },
+                              'Hired':     { bg: 'rgba(16,185,129,0.12)',  color: '#10b981' },
+                              'Rejected':  { bg: 'rgba(239,68,68,0.12)',   color: '#ef4444' },
+                              'On Hold':   { bg: 'rgba(107,114,128,0.12)', color: '#6b7280' },
+                            };
+                            const cfg = jobAppStatusColors[app.status] || jobAppStatusColors['Pending'];
+                            return (
+                              <span style={{
+                                padding: '4px 10px', borderRadius: 999, fontSize: 10, fontWeight: 800, textTransform: 'uppercase',
+                                background: cfg.bg,
+                                color: cfg.color,
+                              }}>{app.status}</span>
+                            );
+                          })()}
                         </td>
                         <td style={{ padding: '16px 12px' }}>
                           <ChevronRight style={{ width: 16, height: 16, color: 'var(--border)', transform: isRTL ? 'rotate(180deg)' : 'none' }} />
@@ -2559,6 +2671,7 @@ const statusColors: Record<string, { bg: string; color: string }> = {
                 isRTL={isRTL} 
                 u={u} 
                 showToast={showToast}
+                setConfirmAction={setConfirmAction}
               />
             </div>
           )}
@@ -2837,15 +2950,16 @@ interface ModificationsSectionProps {
   isRTL: boolean;
   u: Record<string, string>;
   showToast: (msg: string, type?: 'success' | 'error') => void;
+  setConfirmAction: (action: { message: string, onConfirm: () => void } | null) => void;
 }
 
-const ModificationsSection: React.FC<ModificationsSectionProps> = ({ lang, isRTL, u, showToast }) => {
+const ModificationsSection: React.FC<ModificationsSectionProps> = ({ lang, isRTL, u, showToast, setConfirmAction }) => {
   const [requests, setRequests] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [adminResponse, setAdminResponse] = useState('');
-  const [filterStatus, setFilterStatus] = useState('pending');
+  const [filterStatus, setFilterStatus] = useState('all');
 
   useEffect(() => {
     fetchRequests();
@@ -2859,15 +2973,10 @@ const ModificationsSection: React.FC<ModificationsSectionProps> = ({ lang, isRTL
         type: 'modification_requests', 
         page: 1, 
         limit: 100,
-        search: filterStatus === 'all' ? '' : filterStatus
+        filterType: filterStatus === 'all' ? 'All' : filterStatus
       });
       if (res.status === 'success') {
-        // Filter by status on client side since API doesn't support status filter
-        let items = res.data.items || [];
-        if (filterStatus !== 'all') {
-          items = items.filter((req: any) => req.status === filterStatus);
-        }
-        setRequests(items);
+        setRequests(res.data.items || []);
       }
     } catch (err) {
       console.error('Failed to fetch modification requests:', err);
@@ -2884,16 +2993,11 @@ const ModificationsSection: React.FC<ModificationsSectionProps> = ({ lang, isRTL
     }
 
     try {
-      const res = await fetch('/api.php?action=review_modification', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          requestId: selectedRequest.id,
-          action,
-          adminResponse: adminResponse.trim(),
-        }),
+      const data = await reviewModification({
+        requestId: selectedRequest.id,
+        action,
+        adminResponse: adminResponse.trim(),
       });
-      const data = await res.json();
       
       if (data.status === 'success') {
         showToast(action === 'approve' ? (u.approved || 'Approved') : (u.rejected || 'Rejected'));
@@ -2907,6 +3011,30 @@ const ModificationsSection: React.FC<ModificationsSectionProps> = ({ lang, isRTL
     } catch (err) {
       showToast(u.error, 'error');
     }
+  };
+
+  const handleDelete = () => {
+    if (!selectedRequest) return;
+    setConfirmAction({
+      message: lang === 'ar' 
+        ? `هل أنت متأكد من حذف طلب التعديل ${selectedRequest.requestNumber}؟`
+        : `Are you sure you want to delete modification request ${selectedRequest.requestNumber}?`,
+      onConfirm: async () => {
+        try {
+          const res = await deleteModification(selectedRequest.id);
+          if (res.status === 'success') {
+            showToast(lang === 'ar' ? 'تم حذف طلب التعديل' : 'Modification request deleted');
+            setReviewModalOpen(false);
+            setSelectedRequest(null);
+            fetchRequests();
+          } else {
+            showToast(res.message || u.error, 'error');
+          }
+        } catch (err) {
+          showToast(u.error, 'error');
+        }
+      }
+    });
   };
 
   const statusColors: Record<string, { bg: string; color: string }> = {
@@ -2984,7 +3112,7 @@ const ModificationsSection: React.FC<ModificationsSectionProps> = ({ lang, isRTL
                 onMouseOver={e => e.currentTarget.style.background = 'var(--surface2)'}
                 onMouseOut={e => e.currentTarget.style.background = 'transparent'}
               >
-                <td style={{ padding: '16px 24px', color: 'var(--text)', fontFamily: 'monospace', fontWeight: 700, fontSize: 13 }}>{req.requestNumber}</td>
+                <td style={{ padding: '16px 24px', color: 'var(--accent)', fontFamily: 'monospace', fontWeight: 800, fontSize: 12 }}>{req.requestNumber}</td>
                 <td style={{ padding: '16px 24px', color: 'var(--text)', fontWeight: 600, fontSize: 13 }}>{req.studentName}</td>
                 <td style={{ padding: '16px 24px', color: 'var(--text2)', fontSize: 13, maxWidth: 200 }}>
                   <p style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={req.requestReason}>{req.requestReason}</p>
@@ -3048,16 +3176,33 @@ const ModificationsSection: React.FC<ModificationsSectionProps> = ({ lang, isRTL
               <p style={{ fontWeight: 600 }}>{selectedRequest.requestReason}</p>
             </div>
 
-            {/* Requested Preferences */}
-            <div className="dash-card" style={{ padding: 16, marginBottom: 20 }}>
-              <p className="dash-label">{u.requestedPreferences || 'Requested Preferences'}</p>
-              <ol style={{ paddingLeft: 20 }}>
-                {selectedRequest.requestedPreferences && JSON.parse(selectedRequest.requestedPreferences || '[]').map((pref: any, idx: number) => (
-                  <li key={idx} style={{ fontWeight: 600, marginBottom: 4 }}>
-                    {pref.schoolNameAr || pref.schoolName}
-                  </li>
-                ))}
-              </ol>
+            {/* Preferences Comparison */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+              <div className="dash-card" style={{ padding: 16 }}>
+                <p className="dash-label">{lang === 'ar' ? 'الرغبات الحالية' : 'Current Preferences'}</p>
+                <ol style={{ paddingLeft: 20, margin: 0 }}>
+                  {(selectedRequest.oldPreferences || []).map((pref: any, idx: number) => (
+                    <li key={idx} style={{ fontWeight: 500, marginBottom: 4, color: 'var(--text2)' }}>
+                      {pref.schoolNameAr || pref.schoolName}
+                    </li>
+                  ))}
+                  {(selectedRequest.oldPreferences || []).length === 0 && (
+                    <li style={{ fontStyle: 'italic', color: 'var(--text2)', fontSize: 12 }}>
+                      {lang === 'ar' ? 'الرغبات السابقة غير متاحة (طلب قديم)' : 'Previous preferences unavailable (old request)'}
+                    </li>
+                  )}
+                </ol>
+              </div>
+              <div className="dash-card" style={{ padding: 16, borderColor: 'rgba(16,185,129,0.3)' }}>
+                <p className="dash-label">{lang === 'ar' ? 'الرغبات المطلوبة' : 'Requested Preferences'}</p>
+                <ol style={{ paddingLeft: 20, margin: 0 }}>
+                  {(selectedRequest.requestedPreferences || []).map((pref: any, idx: number) => (
+                    <li key={idx} style={{ fontWeight: 700, marginBottom: 4, color: 'var(--text)' }}>
+                      {pref.schoolNameAr || pref.schoolName}
+                    </li>
+                  ))}
+                </ol>
+              </div>
             </div>
 
             {/* Admin Response */}
@@ -3097,23 +3242,22 @@ const ModificationsSection: React.FC<ModificationsSectionProps> = ({ lang, isRTL
                     <XCircle style={{ width: 14, height: 14 }} />
                     {u.reject || 'Reject'}
                   </button>
-                  <button 
-                    className="dash-btn dash-btn-ghost" 
-                    onClick={() => { setReviewModalOpen(false); setAdminResponse(''); }}
-                    style={{ marginInlineStart: 'auto' }}
-                  >
-                    {u.cancel}
-                  </button>
                 </>
-              ) : (
-                <button 
-                  className="dash-btn dash-btn-ghost" 
-                  onClick={() => { setReviewModalOpen(false); setAdminResponse(''); }}
-                  style={{ marginInlineStart: 'auto' }}
-                >
-                  {u.close || 'Close'}
-                </button>
-              )}
+              ) : null}
+              <button 
+                className="dash-btn dash-btn-danger" 
+                onClick={handleDelete}
+                style={{ marginInlineStart: 'auto' }}
+              >
+                <Trash2 style={{ width: 14, height: 14 }} />
+                {u.delete || 'Delete'}
+              </button>
+              <button 
+                className="dash-btn dash-btn-ghost" 
+                onClick={() => { setReviewModalOpen(false); setAdminResponse(''); }}
+              >
+                {u.close || 'Close'}
+              </button>
             </div>
           </div>
         </ModalWrap>

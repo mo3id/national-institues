@@ -215,7 +215,7 @@ const Admissions: React.FC = () => {
 
   const typeOptions = allTypes.map((t: string) => ({
     value: t,
-    label: lang === 'ar' ? ({ Arabic: 'عربي', Languages: 'لغات', American: 'أمريكي', British: 'بريطاني', French: 'فرنسي' }[t] || t) : t
+    label: lang === 'ar' ? ({ Arabic: 'عربي', Languages: 'لغات', American: 'أمريكي', British: 'بريطاني', French: 'فرنسي', 'Special Education': 'تربية خاصة' }[t] || t) : t
   }));
 
   const filteredSchools = availableSchools.filter(s => {

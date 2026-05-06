@@ -12,7 +12,7 @@ export interface School {
   principal: string;
   principalAr?: string;
   logo: string;
-  type: 'Arabic' | 'Languages' | 'American' | 'British' | 'French';
+  type: 'Arabic' | 'Languages' | 'American' | 'British' | 'French' | 'Special Education';
   mainImage?: string;
   gallery?: string[];
   about?: string;

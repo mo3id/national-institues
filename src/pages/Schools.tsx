@@ -155,7 +155,7 @@ const Schools: React.FC = () => {
   const [selectedType, setSelectedType] = useState('');
   const navigate = useNavigate();
 
-  const schoolTypes = ['Arabic', 'Languages', 'American', 'British', 'French'];
+  const schoolTypes = ['Arabic', 'Languages', 'American', 'British', 'French', 'Special Education'];
 
   const filteredSchools = useMemo(() => {
     return SCHOOLS_DATA.filter(school => {

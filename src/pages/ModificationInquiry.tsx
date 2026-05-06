@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Search from 'lucide-react/dist/esm/icons/search';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
@@ -27,30 +27,66 @@ const STATUS_CONFIG: Record<string, { color: string; bg: string; icon: React.Ele
 const ModificationInquiry: React.FC = () => {
   const { lang, isRTL } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [requestNumber, setRequestNumber] = useState('');
   const [nationalIdSuffix, setNationalIdSuffix] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [request, setRequest] = useState<ModificationStatus | null>(null);
 
-  const handleInquiry = async (e: React.FormEvent) => {
+  // Auto-search if requestNumber is provided in URL
+  useEffect(() => {
+    const modRequestNumber = searchParams.get('requestNumber');
+    if (modRequestNumber) {
+      setRequestNumber(modRequestNumber.toUpperCase());
+      // Trigger search automatically
+      setTimeout(() => {
+        const formEvent = { preventDefault: () => {} } as React.FormEvent;
+        handleInquiry(formEvent, modRequestNumber.toUpperCase());
+      }, 100);
+    }
+  }, [searchParams]);
+
+  const handleInquiry = async (e: React.FormEvent, autoSearchNumber?: string) => {
     e.preventDefault();
-    const num = requestNumber.trim().toUpperCase();
+    const num = (autoSearchNumber || requestNumber).trim().toUpperCase();
     if (!num) return;
-    
+
     setIsLoading(true);
     setError(null);
     setRequest(null);
-    
+
     try {
-      const result = await getModificationStatus(num, nationalIdSuffix.trim() || undefined);
-      if (result.status === 'success' && result.data) {
+      let result;
+      if (num.startsWith('MOD-')) {
+        result = await getModificationStatus(num, nationalIdSuffix.trim() || undefined);
+      } else if (num.startsWith('APP-')) {
+        result = await getModificationStatus(undefined, nationalIdSuffix.trim() || undefined, num);
+      } else {
+        // Try both — request number first, then application number
+        try {
+          result = await getModificationStatus(num, nationalIdSuffix.trim() || undefined);
+        } catch (firstErr: any) {
+          // If first attempt failed, try as application number
+          if (firstErr?.response?.status === 404) {
+            result = await getModificationStatus(undefined, nationalIdSuffix.trim() || undefined, num);
+          } else {
+            throw firstErr;
+          }
+        }
+      }
+
+      if (result && result.status === 'success' && result.data) {
         setRequest(result.data);
       } else {
         setError(lang === 'ar' ? 'لم يتم العثور على طلب بهذا الرقم.' : 'No request found with this number.');
       }
     } catch (err: any) {
-      setError(err.message || (lang === 'ar' ? 'حدث خطأ، يرجى المحاولة مرة أخرى.' : 'An error occurred, please try again.'));
+      if (err?.response?.status === 404) {
+        setError(lang === 'ar' ? 'لم يتم العثور على طلب بهذا الرقم.' : 'No request found with this number.');
+      } else {
+        setError(err?.response?.data?.message || err.message || (lang === 'ar' ? 'حدث خطأ، يرجى المحاولة مرة أخرى.' : 'An error occurred, please try again.'));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +126,7 @@ const ModificationInquiry: React.FC = () => {
                 {lang === 'ar' ? 'تتبع حالة طلب التعديل' : 'Track Your Modification Request'}
               </h1>
               <p className="text-blue-100/70 text-lg font-medium">
-                {lang === 'ar' ? 'أدخل رقم طلب التعديل الذي حصلت عليه' : 'Enter the modification request number you received'}
+                {lang === 'ar' ? 'أدخل رقم طلب التعديل أو رقم طلب القبول' : 'Enter the modification request number or application number'}
               </p>
             </ScrollReveal>
           </div>
@@ -104,14 +140,14 @@ const ModificationInquiry: React.FC = () => {
                 <form onSubmit={handleInquiry} className="space-y-5" dir={isRTL ? 'rtl' : 'ltr'}>
                   <div>
                     <label className={`block font-bold text-slate-700 mb-2 ${isRTL ? 'text-sm' : 'text-xs uppercase tracking-widest'}`}>
-                      {lang === 'ar' ? 'رقم طلب التعديل' : 'Modification Request Number'}
+                      {lang === 'ar' ? 'رقم طلب التعديل أو رقم طلب القبول' : 'Modification Request Number or Application Number'}
                     </label>
                     <input
                       type="text"
                       value={requestNumber}
                       onChange={e => { setRequestNumber(e.target.value.toUpperCase()); setError(null); }}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all text-lg font-mono tracking-widest text-center"
-                      placeholder="MOD-2026-XXX-NNNN"
+                      placeholder="MOD-2026-XXX-NNNN أو APP-2026-XXX-NNNN"
                       dir="ltr"
                       autoComplete="off"
                       spellCheck={false}

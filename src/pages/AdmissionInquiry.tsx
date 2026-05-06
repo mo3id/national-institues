@@ -30,7 +30,7 @@ const STATUS_CONFIG: Record<string, { color: string; bg: string; icon: React.Ele
 const AdmissionInquiry: React.FC = () => {
   const { lang, isRTL } = useLanguage();
   const navigate = useNavigate();
-  const [searchType, setSearchType] = useState<'applicationNumber' | 'nationalId'>('applicationNumber');
+  const [searchType, setSearchType] = useState<'applicationNumber' | 'nationalId' | 'modificationRequest'>('applicationNumber');
   const [searchValue, setSearchValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,8 +38,14 @@ const AdmissionInquiry: React.FC = () => {
 
   const handleInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
-    const value = searchValue.trim();
+    const value = searchValue.trim().toUpperCase();
     if (!value) return;
+    
+    // If modification request number, redirect to modification tracking page
+    if (searchType === 'modificationRequest' || value.startsWith('MOD-')) {
+      navigate(`/modifications/track?requestNumber=${value}`);
+      return;
+    }
     
     setIsLoading(true);
     setError(null);
@@ -98,7 +104,7 @@ const AdmissionInquiry: React.FC = () => {
                 {lang === 'ar' ? 'تتبع حالة طلبك' : 'Track Your Application'}
               </h1>
               <p className="text-blue-100/70 text-lg font-medium">
-                {lang === 'ar' ? 'أدخل رقم الطلب الذي حصلت عليه عند التقديم' : 'Enter the application ID you received when you applied'}
+                {lang === 'ar' ? 'أدخل رقم الطلب أو رقم طلب التعديل' : 'Enter your application or modification request number'}
               </p>
             </ScrollReveal>
           </div>
@@ -114,10 +120,11 @@ const AdmissionInquiry: React.FC = () => {
                     <label className={`block font-bold text-slate-700 mb-2 ${isRTL ? 'text-sm' : 'text-xs uppercase tracking-widest'}`}>
                       {lang === 'ar' ? 'طريقة البحث' : 'Search Method'}
                     </label>
-                    <div className="grid grid-cols-2 gap-2 mb-3">
+                    <div className="grid grid-cols-3 gap-2 mb-3">
                       {[
                         { key: 'applicationNumber', labelAr: 'رقم الطلب', labelEn: 'App Number' },
                         { key: 'nationalId', labelAr: 'الرقم القومي', labelEn: 'National ID' },
+                        { key: 'modificationRequest', labelAr: 'طلب تعديل', labelEn: 'Modification' },
                       ].map((type) => (
                         <button
                           key={type.key}
@@ -136,14 +143,16 @@ const AdmissionInquiry: React.FC = () => {
                     <label className={`block font-bold text-slate-700 mb-2 ${isRTL ? 'text-sm' : 'text-xs uppercase tracking-widest'}`}>
                       {searchType === 'applicationNumber' 
                         ? (lang === 'ar' ? 'رقم الطلب' : 'Application Number')
-                        : (lang === 'ar' ? 'الرقم القومي' : 'National ID')}
+                        : searchType === 'nationalId'
+                        ? (lang === 'ar' ? 'الرقم القومي' : 'National ID')
+                        : (lang === 'ar' ? 'رقم طلب التعديل' : 'Modification Request Number')}
                     </label>
                     <input
                       type="text"
                       value={searchValue}
                       onChange={e => { setSearchValue(e.target.value); setError(null); }}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent transition-all text-lg font-mono tracking-widest text-center"
-                      placeholder={searchType === 'applicationNumber' ? 'APP-2026-XXX-NNNN' : 'XXXXXXXXXXXXXX'}
+                      placeholder={searchType === 'applicationNumber' ? 'APP-2026-XXX-NNNN' : searchType === 'nationalId' ? 'XXXXXXXXXXXXXX' : 'MOD-2026-XXX-NNNN'}
                       dir="ltr"
                       autoComplete="off"
                       spellCheck={false}

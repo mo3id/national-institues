@@ -368,7 +368,8 @@ export const EditSchoolForm: React.FC<{ school: DashSchool; lang: Lang; onSave: 
                             { value: 'Languages', label: lang === 'ar' ? 'لغات' : 'Languages' },
                             { value: 'American', label: lang === 'ar' ? 'أمريكي' : 'American' },
                             { value: 'British', label: lang === 'ar' ? 'بريطاني' : 'British' },
-                            { value: 'French', label: lang === 'ar' ? 'فرنسي' : 'French' }
+                            { value: 'French', label: lang === 'ar' ? 'فرنسي' : 'French' },
+                            { value: 'Special Education', label: lang === 'ar' ? 'تربية خاصة' : 'Special Education' }
                         ]}
                     />
                 </div>

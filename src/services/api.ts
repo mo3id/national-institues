@@ -25,8 +25,8 @@ export const apiClient = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    // timeout set to 120s to accommodate the massive ~6.2MB payload from cPanel
-    timeout: 120000,
+    // timeout set to 30s — server max_execution_time is also 30s
+    timeout: 30000,
 });
 
 // Axios interceptor to append /api.php and add Authorization header

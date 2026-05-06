@@ -194,7 +194,8 @@ export const ar = {
             Languages: "لغات",
             American: "أمريكي",
             British: "بريطاني",
-            French: "فرنسي"
+            French: "فرنسي",
+            "Special Education": "تربية خاصة"
         }
     },
     footer: {

@@ -190,17 +190,19 @@ export const requestModification = async (
  * Get modification request status
  */
 export const getModificationStatus = async (
-  requestNumber: string,
-  nationalIdSuffix?: string
+  requestNumber?: string,
+  nationalIdSuffix?: string,
+  applicationNumber?: string
 ): Promise<{
   status: string;
   data?: ModificationStatus;
   message?: string;
 }> => {
   const params = new URLSearchParams();
-  params.append('requestNumber', requestNumber);
+  if (requestNumber) params.append('requestNumber', requestNumber);
   if (nationalIdSuffix) params.append('nationalIdSuffix', nationalIdSuffix);
-  
+  if (applicationNumber) params.append('applicationNumber', applicationNumber);
+
   const response = await apiClient.get(`?action=get_modification_status&${params.toString()}`);
   return response.data;
 };
@@ -236,6 +238,19 @@ export const reviewModification = async (
   };
 }> => {
   const response = await apiClient.post(`?action=review_modification`, data);
+  return response.data;
+};
+
+/**
+ * Delete modification request (Admin only)
+ */
+export const deleteModification = async (
+  id: string
+): Promise<{
+  status: string;
+  message?: string;
+}> => {
+  const response = await apiClient.post(`?action=delete_modification`, { id });
   return response.data;
 };
 
