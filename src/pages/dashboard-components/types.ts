@@ -447,6 +447,12 @@ export const UI: Record<Lang, Record<string, string>> = {
         linkedin: 'LinkedIn URL',
         twitter: 'Twitter/X URL',
         alumniImage: 'Alumni Photo',
+        exportExcel: 'Export Excel',
+        exportLoading: 'Exporting...',
+        exportedAt: 'Exported at',
+        totalRecords: 'Total Records',
+        filterApplied: 'Filter Applied',
+        sheetTitle: 'Complaints Report',
     },
     ar: {
         overview: 'نظرة عامة', news: 'الأخبار', schools: 'المدارس', jobs: 'الوظائف الشاغرة',
@@ -728,6 +734,12 @@ export const UI: Record<Lang, Record<string, string>> = {
         linkedin: 'رابط لينكدإن',
         twitter: 'رابط تويتر/X',
         alumniImage: 'صورة الخريج',
+        exportExcel: 'تصدير إكسل',
+        exportLoading: 'جاري التصدير...',
+        exportedAt: 'تم التصدير في',
+        totalRecords: 'إجمالي السجلات',
+        filterApplied: 'الفلتر المطبق',
+        sheetTitle: 'تقرير الشكاوى',
     }
 };
 

@@ -165,6 +165,12 @@ export const getPaginatedEntries = async (params: { type: string, page: number, 
     return data;
 };
 
+export const getAllComplaintsForExport = async (params: { search?: string, filterType?: string, filterSchool?: string, filterGov?: string }): Promise<ApiResponse> => {
+    const { search = '', filterType = 'All', filterSchool = '', filterGov = '' } = params;
+    const { data } = await apiClient.get<ApiResponse>(`?action=get_entries&type=complaints&page=1&limit=9999&search=${encodeURIComponent(search)}&filterType=${encodeURIComponent(filterType)}&filterSchool=${encodeURIComponent(filterSchool)}&filterGov=${encodeURIComponent(filterGov)}`, { timeout: 120000 });
+    return data;
+};
+
 export const updateComplaint = async (id: string, status: string, response: string): Promise<ApiResponse> => {
     const { data } = await apiClient.post<ApiResponse>('?action=update_complaint', { id, status, response });
     return data;

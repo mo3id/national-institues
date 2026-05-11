@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  getPaginatedEntries, updateComplaint, updateJobApplication, updateAdmission, getAdmissionDetail, getJobApplicationDetails, getDashboardStats, deleteEntry,
+  getPaginatedEntries, getAllComplaintsForExport, updateComplaint, updateJobApplication, updateAdmission, getAdmissionDetail, getJobApplicationDetails, getDashboardStats, deleteEntry,
   saveNews as apiSaveNews, deleteNews as apiDeleteNews,
   saveSchool as apiSaveSchool, deleteSchool as apiDeleteSchool,
   saveJob as apiSaveJob, deleteJob as apiDeleteJob,
@@ -49,6 +49,7 @@ import ChevronLeft from 'lucide-react/dist/esm/icons/chevron-left';
 import ChevronsLeft from 'lucide-react/dist/esm/icons/chevrons-left';
 import ChevronsRight from 'lucide-react/dist/esm/icons/chevrons-right';
 import Copy from 'lucide-react/dist/esm/icons/copy';
+import Download from 'lucide-react/dist/esm/icons/download';
 import { NEWS, SCHOOLS } from '@/constants';
 import {
   Section, Theme, Lang, DashNewsItem, DashSchool, DashJob, DashJobApplication, DashAdmission, DashAlumni, HeroSlide, AboutData, AdminProfile,
@@ -68,6 +69,7 @@ import ContactMessagesSection from './dashboard-components/sections/ContactMessa
 import OverviewSection from './dashboard-components/sections/OverviewSection';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { exportToExcel } from '@/utils/exportToExcel';
 import NISLogo from '@/components/common/NISLogo';
 import { CustomSelect, CustomDatePicker, ImageUpload } from '@/components/common/FormControls';
 import { useSiteData } from '@/context/DataContext';
@@ -869,6 +871,7 @@ const Dashboard: React.FC = () => {
   const [newsPage, setNewsPage] = useState(1);
   const [newsTotalPages, setNewsTotalPages] = useState(1);
   const [isTableLoading, setIsTableLoading] = useState(false);
+  const [isExportingComplaints, setIsExportingComplaints] = useState(false);
   const [dashStats, setDashStats] = useState({ totalNews: 0, publishedNews: 0, schoolsCount: 0, totalStudents: 0, totalTeachers: 0 });
 
   const debouncedComplaintSearch = useDebounce(complaintsSearch, 500);
@@ -985,6 +988,45 @@ const Dashboard: React.FC = () => {
       }
     } catch (err) { console.error(err); }
     finally { setIsTableLoading(false); }
+  };
+
+  const handleExportComplaints = async () => {
+    setIsExportingComplaints(true);
+    try {
+      const res = await getAllComplaintsForExport({
+        search: debouncedComplaintSearch,
+        filterType: complaintsFilterType,
+        filterSchool: complaintsFilterSchool,
+        filterGov: complaintsFilterGov,
+      });
+      if (res.status === 'success') {
+        const allItems = res.data.items || [];
+        const filterParts: string[] = [];
+        if (complaintsFilterType && complaintsFilterType !== 'All') filterParts.push(`${u.messageType}: ${complaintsFilterType}`);
+        if (complaintsFilterGov) filterParts.push(`${u.governorate}: ${complaintsFilterGov}`);
+        if (complaintsFilterSchool) filterParts.push(`${u.school}: ${complaintsFilterSchool}`);
+        if (debouncedComplaintSearch) filterParts.push(`${u.search}: ${debouncedComplaintSearch}`);
+
+        await exportToExcel(allItems, [
+          { header: u.requestId, key: 'complaintNumber', width: 16 },
+          { header: u.senderName, key: 'fullName', width: 22 },
+          { header: u.phone, key: 'phone', width: 16 },
+          { header: u.email, key: 'email', width: 24 },
+          { header: u.school, key: 'school', width: 22 },
+          { header: u.messageType, key: 'messageType', width: 14 },
+          { header: u.message, key: 'message', width: 40 },
+          { header: u.status, key: 'status', width: 14 },
+          { header: u.date, key: 'createdAt', width: 16, format: (row: any) => row.createdAt ? new Date(row.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB') : '' },
+        ], {
+          title: u.sheetTitle,
+          exportedAt: new Date().toLocaleString(lang === 'ar' ? 'ar-EG' : 'en-GB'),
+          totalRecords: allItems.length,
+          filterInfo: filterParts.length > 0 ? filterParts.join(' | ') : undefined,
+          lang,
+        });
+      }
+    } catch (err) { console.error('Export failed:', err); }
+    finally { setIsExportingComplaints(false); }
   };
 
   const fetchMessages = async () => {
@@ -2333,6 +2375,25 @@ const Dashboard: React.FC = () => {
                         .map((s: any) => ({ value: s.name, label: lang === 'ar' ? (s.nameAr || s.name) : s.name }))
                     ]}
                   />
+                  {/* Export Excel button */}
+                  <button
+                    className="dash-btn dash-btn-primary"
+                    onClick={handleExportComplaints}
+                    disabled={isExportingComplaints}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}
+                  >
+                    {isExportingComplaints ? (
+                      <>
+                        <div style={{ width: 14, height: 14, border: '2px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin" />
+                        {u.exportLoading}
+                      </>
+                    ) : (
+                      <>
+                        <Download style={{ width: 14, height: 14 }} />
+                        {u.exportExcel}
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -2960,23 +3021,25 @@ const ModificationsSection: React.FC<ModificationsSectionProps> = ({ lang, isRTL
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [adminResponse, setAdminResponse] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [requestsPage, setRequestsPage] = useState(1);
+  const [requestsTotalPages, setRequestsTotalPages] = useState(1);
 
   useEffect(() => {
     fetchRequests();
-  }, [filterStatus]);
+  }, [filterStatus, requestsPage]);
 
   const fetchRequests = async () => {
     setIsLoading(true);
     try {
-      // Get paginated entries for modification_requests
-      const res = await getPaginatedEntries({ 
-        type: 'modification_requests', 
-        page: 1, 
-        limit: 100,
+      const res = await getPaginatedEntries({
+        type: 'modification_requests',
+        page: requestsPage,
+        limit: 12,
         filterType: filterStatus === 'all' ? 'All' : filterStatus
       });
       if (res.status === 'success') {
         setRequests(res.data.items || []);
+        setRequestsTotalPages(res.data.totalPages || 1);
       }
     } catch (err) {
       console.error('Failed to fetch modification requests:', err);
@@ -3060,7 +3123,7 @@ const ModificationsSection: React.FC<ModificationsSectionProps> = ({ lang, isRTL
             <CustomSelect
               className="!w-40"
               value={filterStatus}
-              onChange={val => setFilterStatus(val)}
+              onChange={val => { setFilterStatus(val); setRequestsPage(1); }}
               options={[
                 { value: 'all', label: u.all },
                 { value: 'pending', label: u.pending },
@@ -3138,8 +3201,9 @@ const ModificationsSection: React.FC<ModificationsSectionProps> = ({ lang, isRTL
               </tr>
             )}
           </tbody>
-        </table>
+         </table>
       </div>
+      <Pagination current={requestsPage} total={requestsTotalPages} onChange={setRequestsPage} lang={lang} />
 
       {/* Review Modal */}
       {reviewModalOpen && selectedRequest && (
