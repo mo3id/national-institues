@@ -453,6 +453,8 @@ export const UI: Record<Lang, Record<string, string>> = {
         totalRecords: 'Total Records',
         filterApplied: 'Filter Applied',
         sheetTitle: 'Complaints Report',
+        allGradeStages: 'All Grade Stages',
+        admissionExportTitle: 'Admission Applications Report',
     },
     ar: {
         overview: 'نظرة عامة', news: 'الأخبار', schools: 'المدارس', jobs: 'الوظائف الشاغرة',
@@ -740,6 +742,8 @@ export const UI: Record<Lang, Record<string, string>> = {
         totalRecords: 'إجمالي السجلات',
         filterApplied: 'الفلتر المطبق',
         sheetTitle: 'تقرير الشكاوى',
+        allGradeStages: 'جميع المراحل',
+        admissionExportTitle: 'تقرير طلبات الالتحاق',
     }
 };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  getPaginatedEntries, getAllComplaintsForExport, updateComplaint, updateJobApplication, updateAdmission, getAdmissionDetail, getJobApplicationDetails, getDashboardStats, deleteEntry,
+  getPaginatedEntries, getAllComplaintsForExport, getAllAdmissionsForExport, updateComplaint, updateJobApplication, updateAdmission, getAdmissionDetail, getJobApplicationDetails, getDashboardStats, deleteEntry,
   saveNews as apiSaveNews, deleteNews as apiDeleteNews,
   saveSchool as apiSaveSchool, deleteSchool as apiDeleteSchool,
   saveJob as apiSaveJob, deleteJob as apiDeleteJob,
@@ -769,6 +769,10 @@ const Dashboard: React.FC = () => {
   const [admissionModalOpen, setAdmissionModalOpen] = useState(false);
   const [admissionsSearch, setAdmissionsSearch] = useState('');
   const [admissionsFilterStatus, setAdmissionsFilterStatus] = useState('All');
+  const [admissionsFilterGov, setAdmissionsFilterGov] = useState('');
+  const [admissionsFilterSchool, setAdmissionsFilterSchool] = useState('');
+  const [admissionsFilterGrade, setAdmissionsFilterGrade] = useState('');
+  const [isExportingAdmissions, setIsExportingAdmissions] = useState(false);
   const [admissionSettings, setAdmissionSettings] = useState(siteData.admissionSettings);
   const [about, setAbout] = useState<AboutData>({
     ...(siteData.aboutData || {}),
@@ -940,7 +944,7 @@ const Dashboard: React.FC = () => {
   }, [section, newsPage, debouncedNewsSearch]);
 
   useEffect(() => {
-    if (section === 'schools' || section === 'complaints') fetchSchools();
+    if (section === 'schools' || section === 'complaints' || section === 'admissionApplications') fetchSchools();
   }, [section, debouncedSchoolSearch]);
 
   useEffect(() => {
@@ -961,7 +965,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (section === 'admissionApplications') fetchAdmissions();
-  }, [section, admissionsPage, admissionsSearch, admissionsFilterStatus]);
+  }, [section, admissionsPage, admissionsSearch, admissionsFilterStatus, admissionsFilterSchool, admissionsFilterGov, admissionsFilterGrade]);
 
   // Initial fetch for overview stats
   useEffect(() => {
@@ -1462,13 +1466,56 @@ const Dashboard: React.FC = () => {
   const fetchAdmissions = async () => {
     setIsTableLoading(true);
     try {
-      const res = await getPaginatedEntries({ type: 'admissions', page: admissionsPage, limit: 12, search: admissionsSearch, filterType: admissionsFilterStatus });
+      const res = await getPaginatedEntries({ type: 'admissions', page: admissionsPage, limit: 12, search: admissionsSearch, filterType: admissionsFilterStatus, filterSchool: admissionsFilterSchool, filterGov: admissionsFilterGov, filterGradeStage: admissionsFilterGrade });
       if (res.status === 'success') {
         setAdmissionsList(res.data.items);
         setAdmissionsTotalPages(res.data.totalPages);
       }
     } catch (err) { console.error(err); }
     finally { setIsTableLoading(false); }
+  };
+
+  const handleExportAdmissions = async () => {
+    setIsExportingAdmissions(true);
+    try {
+      const res = await getAllAdmissionsForExport({
+        search: admissionsSearch,
+        filterType: admissionsFilterStatus,
+        filterSchool: admissionsFilterSchool,
+        filterGov: admissionsFilterGov,
+        filterGradeStage: admissionsFilterGrade,
+      });
+      if (res.status === 'success') {
+        const allItems = res.data.items || [];
+        const filterParts: string[] = [];
+        if (admissionsFilterStatus && admissionsFilterStatus !== 'All') filterParts.push(`${u.status}: ${admissionsFilterStatus}`);
+        if (admissionsFilterGov) filterParts.push(`${u.governorate}: ${admissionsFilterGov}`);
+        if (admissionsFilterSchool) filterParts.push(`${u.school}: ${admissionsFilterSchool}`);
+        if (admissionsFilterGrade) filterParts.push(`${u.gradeStage}: ${admissionsFilterGrade}`);
+
+        await exportToExcel(allItems, [
+          { header: u.admissionId, key: 'applicationNumber', width: 18, format: (row: any) => row.applicationNumber || row.id || '' },
+          { header: u.studentName, key: 'studentName', width: 24 },
+          { header: u.studentDOB, key: 'studentDOB', width: 16 },
+          { header: lang === 'ar' ? 'الرقم القومي' : 'National ID', key: 'studentNationalId', width: 18 },
+          { header: u.gradeStage, key: 'gradeStage', width: 16 },
+          { header: u.gradeClass || 'Class', key: 'gradeClass', width: 14 },
+          { header: u.parentName, key: 'parentName', width: 22 },
+          { header: u.parentPhone, key: 'parentPhone', width: 16 },
+          { header: u.parentEmail, key: 'parentEmail', width: 24 },
+          { header: lang === 'ar' ? 'الرغبات' : 'Preferences', key: 'preferences', width: 40, format: (row: any) => (row.preferences || []).map((p: any, i: number) => `${i + 1}. ${lang === 'ar' ? (p.schoolNameAr || p.schoolName) : p.schoolName}`).join(' | ') },
+          { header: u.status, key: 'status', width: 16 },
+          { header: u.date, key: 'createdAt', width: 16, format: (row: any) => row.createdAt ? new Date(row.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB') : '' },
+        ], {
+          title: u.admissionExportTitle || (lang === 'ar' ? 'تقرير طلبات الالتحاق' : 'Admission Applications Report'),
+          exportedAt: new Date().toLocaleString(lang === 'ar' ? 'ar-EG' : 'en-GB'),
+          totalRecords: allItems.length,
+          filterInfo: filterParts.length > 0 ? filterParts.join(' | ') : undefined,
+          lang,
+        });
+      }
+    } catch (err) { console.error('Export failed:', err); }
+    finally { setIsExportingAdmissions(false); }
   };
 
   const deleteComplaint = (item: any) => {
@@ -2587,6 +2634,7 @@ const Dashboard: React.FC = () => {
                   <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 4 }}>{u.admissionApplicationsManage}</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {/* Search + Status filter */}
                   <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface2)', borderRadius: 16, border: '1px solid var(--border)', padding: '4px 8px', gap: 8 }}>
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                       <Search style={{ position: 'absolute', left: isRTL ? 'auto' : 10, right: isRTL ? 10 : 'auto', width: 14, height: 14, color: 'var(--text2)' }} />
@@ -2612,6 +2660,67 @@ const Dashboard: React.FC = () => {
                       ]}
                     />
                   </div>
+                  {/* Governorate filter */}
+                  <CustomSelect
+                    className="!w-36"
+                    value={admissionsFilterGov}
+                    onChange={val => { setAdmissionsFilterGov(val); setAdmissionsFilterSchool(''); setAdmissionsPage(1); }}
+                    options={[
+                      { value: '', label: u.allGovs },
+                      ...Array.from(new Set(schools.map((s: any) => lang === 'ar' ? (s.governorateAr || s.governorate) : s.governorate).filter(Boolean))).sort().map((g: string) => ({ value: g, label: g }))
+                    ]}
+                  />
+                  {/* School filter */}
+                  <CustomSelect
+                    className="!w-44"
+                    value={admissionsFilterSchool}
+                    onChange={val => {
+                      setAdmissionsFilterSchool(val);
+                      if (val) {
+                        const school = schools.find((s: any) => s.name === val || s.nameAr === val);
+                        if (school) {
+                          const gov = lang === 'ar' ? (school.governorateAr || school.governorate) : school.governorate;
+                          if (gov && gov !== admissionsFilterGov) setAdmissionsFilterGov(gov);
+                        }
+                      }
+                      setAdmissionsPage(1);
+                    }}
+                    options={[
+                      { value: '', label: u.allSchools },
+                      ...schools
+                        .filter((s: any) => !admissionsFilterGov || (lang === 'ar' ? (s.governorateAr || s.governorate) : s.governorate) === admissionsFilterGov)
+                        .map((s: any) => ({ value: s.name, label: lang === 'ar' ? (s.nameAr || s.name) : s.name }))
+                    ]}
+                  />
+                  {/* Grade Stage filter */}
+                  <CustomSelect
+                    className="!w-36"
+                    value={admissionsFilterGrade}
+                    onChange={val => { setAdmissionsFilterGrade(val); setAdmissionsPage(1); }}
+                    options={[
+                      { value: '', label: u.allGradeStages },
+                      ...(admissionSettings?.gradeStages || []).map((stage: string) => ({ value: stage, label: stage }))
+                    ]}
+                  />
+                  {/* Export button */}
+                  <button
+                    className="dash-btn dash-btn-primary"
+                    onClick={handleExportAdmissions}
+                    disabled={isExportingAdmissions}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}
+                  >
+                    {isExportingAdmissions ? (
+                      <>
+                        <div style={{ width: 14, height: 14, border: '2px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin" />
+                        {u.exportLoading}
+                      </>
+                    ) : (
+                      <>
+                        <Download style={{ width: 14, height: 14 }} />
+                        {u.exportExcel}
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
 

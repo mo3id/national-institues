@@ -1105,6 +1105,7 @@ try {
             $filterType = $_GET['filterType'] ?? 'All';
             $filterSchool = $_GET['filterSchool'] ?? '';
             $filterGov = $_GET['filterGov'] ?? '';
+            $filterGradeStage = $_GET['filterGradeStage'] ?? '';
 
             $data = [];
             if ($type === 'schools') {
@@ -1327,7 +1328,7 @@ try {
             $schoolGovMapEn = []; // school name/nameAr => governorate (English)
             $schoolGovMapAr = []; // school name/nameAr => governorateAr (Arabic)
             $schoolNameMap = [];  // school nameAr => name (English), name => nameAr (Arabic)
-            if ($type === 'complaints' && ($filterSchool || $filterGov)) {
+            if (($type === 'complaints' || $type === 'admissions') && ($filterSchool || $filterGov)) {
                 $stmtSG = $pdo->query("SELECT name, nameAr, governorate, governorateAr FROM schools");
                 while ($sr = $stmtSG->fetch(PDO::FETCH_ASSOC)) {
                     $gov = $sr['governorate'] ?? '';
@@ -1346,9 +1347,9 @@ try {
             }
 
             // Backend Filtering
-            if ($search || $filterType !== 'All' || $filterSchool || $filterGov) {
+            if ($search || $filterType !== 'All' || $filterSchool || $filterGov || $filterGradeStage) {
                 $term = strtolower($search);
-                $data = array_filter($data, function($item) use ($pdo, $term, $filterType, $type, $filterSchool, $filterGov, $schoolGovMapEn, $schoolGovMapAr, $schoolNameMap) {
+                $data = array_filter($data, function($item) use ($pdo, $term, $filterType, $type, $filterSchool, $filterGov, $filterGradeStage, $schoolGovMapEn, $schoolGovMapAr, $schoolNameMap) {
                     // Filter by Type-specific field
                     if ($filterType !== 'All') {
                         if ($type === 'complaints') {
@@ -1391,6 +1392,30 @@ try {
                         $schoolGov = $schoolGovMapEn[$itemSchool] ?? '';
                         $schoolGovAr = $schoolGovMapAr[$itemSchool] ?? '';
                         if ($schoolGov !== $filterGov && $schoolGovAr !== $filterGov) return false;
+                    }
+
+                    // Filter by School (admissions — match first preference school)
+                    if ($filterSchool && $type === 'admissions') {
+                        $firstPref = ($item['preferences'] ?? [])[0] ?? null;
+                        $matchSchoolName = $firstPref['schoolName'] ?? '';
+                        $matchSchoolNameAr = $firstPref['schoolNameAr'] ?? '';
+                        $altSchoolName = $schoolNameMap[$filterSchool] ?? '';
+                        if ($matchSchoolName !== $filterSchool && $matchSchoolName !== $altSchoolName && $matchSchoolNameAr !== $filterSchool && $matchSchoolNameAr !== $altSchoolName) return false;
+                    }
+
+                    // Filter by Governorate (admissions — resolve via first preference school)
+                    if ($filterGov && $type === 'admissions') {
+                        $firstPref = ($item['preferences'] ?? [])[0] ?? null;
+                        $prefSchool = $firstPref['schoolName'] ?? '';
+                        $prefSchoolAr = $firstPref['schoolNameAr'] ?? '';
+                        $schoolGov = $schoolGovMapEn[$prefSchool] ?? ($schoolGovMapEn[$prefSchoolAr] ?? '');
+                        $schoolGovAr = $schoolGovMapAr[$prefSchool] ?? ($schoolGovMapAr[$prefSchoolAr] ?? '');
+                        if ($schoolGov !== $filterGov && $schoolGovAr !== $filterGov) return false;
+                    }
+
+                    // Filter by Grade Stage (admissions only)
+                    if ($filterGradeStage && $type === 'admissions') {
+                        if (($item['gradeStage'] ?? '') !== $filterGradeStage) return false;
                     }
 
                     // Filter by Search Term

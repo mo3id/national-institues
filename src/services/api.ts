@@ -159,15 +159,21 @@ export const submitJobApplication = async (applicationData: Record<string, any>)
     return data;
 };
 
-export const getPaginatedEntries = async (params: { type: string, page: number, limit: number, search?: string, filterType?: string, filterSchool?: string, filterGov?: string }): Promise<ApiResponse> => {
-    const { type, page, limit, search = '', filterType = 'All', filterSchool = '', filterGov = '' } = params;
-    const { data } = await apiClient.get<ApiResponse>(`?action=get_entries&type=${type}&page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&filterType=${encodeURIComponent(filterType)}&filterSchool=${encodeURIComponent(filterSchool)}&filterGov=${encodeURIComponent(filterGov)}`);
+export const getPaginatedEntries = async (params: { type: string, page: number, limit: number, search?: string, filterType?: string, filterSchool?: string, filterGov?: string, filterGradeStage?: string }): Promise<ApiResponse> => {
+    const { type, page, limit, search = '', filterType = 'All', filterSchool = '', filterGov = '', filterGradeStage = '' } = params;
+    const { data } = await apiClient.get<ApiResponse>(`?action=get_entries&type=${type}&page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&filterType=${encodeURIComponent(filterType)}&filterSchool=${encodeURIComponent(filterSchool)}&filterGov=${encodeURIComponent(filterGov)}&filterGradeStage=${encodeURIComponent(filterGradeStage)}`);
     return data;
 };
 
 export const getAllComplaintsForExport = async (params: { search?: string, filterType?: string, filterSchool?: string, filterGov?: string }): Promise<ApiResponse> => {
     const { search = '', filterType = 'All', filterSchool = '', filterGov = '' } = params;
     const { data } = await apiClient.get<ApiResponse>(`?action=get_entries&type=complaints&page=1&limit=9999&search=${encodeURIComponent(search)}&filterType=${encodeURIComponent(filterType)}&filterSchool=${encodeURIComponent(filterSchool)}&filterGov=${encodeURIComponent(filterGov)}`, { timeout: 120000 });
+    return data;
+};
+
+export const getAllAdmissionsForExport = async (params: { search?: string, filterType?: string, filterSchool?: string, filterGov?: string, filterGradeStage?: string }): Promise<ApiResponse> => {
+    const { search = '', filterType = 'All', filterSchool = '', filterGov = '', filterGradeStage = '' } = params;
+    const { data } = await apiClient.get<ApiResponse>(`?action=get_entries&type=admissions&page=1&limit=9999&search=${encodeURIComponent(search)}&filterType=${encodeURIComponent(filterType)}&filterSchool=${encodeURIComponent(filterSchool)}&filterGov=${encodeURIComponent(filterGov)}&filterGradeStage=${encodeURIComponent(filterGradeStage)}`, { timeout: 120000 });
     return data;
 };
 
