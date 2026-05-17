@@ -940,29 +940,6 @@ try {
             break;
 
         case 'add_complaint':
-            // ── Auto-create complaints table if it doesn't exist ────────────
-            $pdo->exec("CREATE TABLE IF NOT EXISTS complaints (
-                id VARCHAR(50) PRIMARY KEY,
-                complaint_number VARCHAR(20) UNIQUE,
-                full_name VARCHAR(255) NOT NULL,
-                email VARCHAR(255) NOT NULL,
-                phone VARCHAR(50),
-                message_type VARCHAR(50),
-                school VARCHAR(255),
-                message TEXT NOT NULL,
-                status ENUM('pending','under_review','resolved','rejected') DEFAULT 'pending',
-                admin_response TEXT,
-                priority ENUM('low','medium','high','urgent') DEFAULT 'medium',
-                assigned_to VARCHAR(50),
-                resolved_at DATETIME,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
-                INDEX idx_email (email),
-                INDEX idx_status (status),
-                INDEX idx_type (message_type),
-                INDEX idx_created (created_at)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-
             $input = json_decode(file_get_contents('php://input'), true);
             if (!is_array($input)) throw new Exception('Invalid JSON payload');
 
@@ -998,7 +975,7 @@ try {
                 $msgType,
                 $input['school'] ?? '',
                 $input['message'] ?? '',
-                'pending',
+                $shouldGenerateId ? 'pending' : '',
                 '',
                 date('Y-m-d H:i:s')
             ]);
@@ -1007,7 +984,7 @@ try {
             $data = array_merge($input, [
                 'id' => $complaintId,
                 'complaint_number' => $complaintNumber,
-                'status' => 'pending',
+                'status' => $shouldGenerateId ? 'pending' : '',
                 'admin_response' => '',
                 'created_at' => date('Y-m-d H:i:s')
             ]);
@@ -1284,60 +1261,6 @@ try {
             } elseif ($type === 'admissions') {
                 $stmt = $pdo->query("SELECT * FROM admissions ORDER BY created_at DESC");
                 $data = $stmt->fetchAll();
-
-                // Batch load modification info for ALL admissions (fixes N+1 query problem)
-                $admissionIds = array_column($data, 'id');
-                $modMap = [];
-                if (!empty($admissionIds)) {
-                    $placeholders = implode(',', array_fill(0, count($admissionIds), '?'));
-                    $allModStmt = $pdo->prepare("SELECT id, admission_id, request_number, status, request_reason, old_preferences, requested_preferences, created_at, reviewed_at, admin_response FROM modification_requests WHERE admission_id IN ($placeholders) ORDER BY created_at DESC");
-                    $allModStmt->execute($admissionIds);
-                    $allMods = $allModStmt->fetchAll(PDO::FETCH_ASSOC);
-                    foreach ($allMods as $mod) {
-                        $aid = $mod['admission_id'];
-                        if (!isset($modMap[$aid])) {
-                            $modMap[$aid] = ['count' => 0, 'hasPending' => false, 'history' => []];
-                        }
-                        $modMap[$aid]['count']++;
-                        if ($mod['status'] === 'pending') {
-                            $modMap[$aid]['hasPending'] = true;
-                        }
-                        $modMap[$aid]['history'][] = [
-                            'id' => $mod['id'],
-                            'requestNumber' => $mod['request_number'],
-                            'status' => $mod['status'],
-                            'requestReason' => $mod['request_reason'],
-                            'oldPreferences' => json_decode($mod['old_preferences'] ?? '[]', true),
-                            'requestedPreferences' => json_decode($mod['requested_preferences'] ?? '[]', true),
-                            'createdAt' => $mod['created_at'],
-                            'reviewedAt' => $mod['reviewed_at'],
-                            'adminResponse' => $mod['admin_response'] ?? '',
-                            'response' => $mod['admin_response'] ?? ''
-                        ];
-                    }
-                }
-
-                // Batch load preferences for ALL admissions (fixes N+1 query problem)
-                $prefMap = [];
-                if (!empty($admissionIds)) {
-                    $placeholders = implode(',', array_fill(0, count($admissionIds), '?'));
-                    $allPrefStmt = $pdo->prepare("SELECT ap.admission_id, ap.school_id as schoolId, ap.preference_order, s.name as schoolName, s.nameAr as schoolNameAr, s.type as stage FROM admission_preferences ap LEFT JOIN schools s ON ap.school_id COLLATE utf8mb4_unicode_ci = s.id COLLATE utf8mb4_unicode_ci WHERE ap.admission_id IN ($placeholders) ORDER BY ap.admission_id, ap.preference_order ASC");
-                    $allPrefStmt->execute($admissionIds);
-                    $allPrefs = $allPrefStmt->fetchAll(PDO::FETCH_ASSOC);
-                    foreach ($allPrefs as $p) {
-                        $aid = $p['admission_id'];
-                        if (!isset($prefMap[$aid])) {
-                            $prefMap[$aid] = [];
-                        }
-                        if (!empty($p['stage']) && is_string($p['stage'])) {
-                            $dec = json_decode($p['stage'], true);
-                            $p['stage'] = is_array($dec) ? $dec : $p['stage'];
-                        }
-                        unset($p['admission_id']);
-                        $prefMap[$aid][] = $p;
-                    }
-                }
-
                 // Normalize snake_case DB columns to camelCase for frontend
                 $admissionStatusMap = ['pending' => 'Pending', 'under_review' => 'Under Review', 'accepted' => 'Accepted', 'waitlist' => 'Waitlist', 'rejected' => 'Rejected', 'modification_requested' => 'Modification Requested', 'modification_approved' => 'Modification Approved'];
                 foreach ($data as &$adm) {
@@ -1372,14 +1295,17 @@ try {
                     } else {
                         $adm['documents'] = [];
                     }
-                    // Assign batched preferences
-                    $adm['preferences'] = $prefMap[$adm['id']] ?? [];
-
-                    // Assign batched modification info
-                    $modInfo = $modMap[$adm['id']] ?? ['count' => 0, 'hasPending' => false, 'history' => []];
-                    $adm['hasPendingModification'] = $modInfo['hasPending'];
-                    $adm['modificationCount'] = $modInfo['count'];
-                    $adm['modifications'] = $modInfo['history'];
+                    // Fetch preferences
+                    $prefStmt = $pdo->prepare("SELECT ap.school_id as schoolId, ap.preference_order, s.name as schoolName, s.nameAr as schoolNameAr, s.type as stage FROM admission_preferences ap LEFT JOIN schools s ON ap.school_id COLLATE utf8mb4_unicode_ci = s.id COLLATE utf8mb4_unicode_ci WHERE ap.admission_id = ? ORDER BY ap.preference_order ASC");
+                    $prefStmt->execute([$adm['id']]);
+                    $prefs = $prefStmt->fetchAll(PDO::FETCH_ASSOC);
+                    foreach ($prefs as &$p) {
+                        if (!empty($p['stage']) && is_string($p['stage'])) {
+                            $dec = json_decode($p['stage'], true);
+                            $p['stage'] = is_array($dec) ? $dec : $p['stage'];
+                        }
+                    }
+                    $adm['preferences'] = $prefs;
                 }
                 unset($adm);
             }
@@ -2173,27 +2099,6 @@ try {
             }
             $admission['preferences'] = $preferences;
 
-            // Fetch modification requests for this admission
-            $modStmt = $pdo->prepare("SELECT id, request_number, status, request_reason, old_preferences, requested_preferences, created_at, reviewed_at, admin_response FROM modification_requests WHERE admission_id = ? ORDER BY created_at DESC");
-            $modStmt->execute([$id]);
-            $modifications = $modStmt->fetchAll(PDO::FETCH_ASSOC);
-            $hasPending = false;
-            foreach ($modifications as &$mod) {
-                $mod['requestNumber'] = $mod['request_number'] ?? '';
-                $mod['requestReason'] = $mod['request_reason'] ?? '';
-                $mod['oldPreferences'] = json_decode($mod['old_preferences'] ?? '[]', true);
-                $mod['requestedPreferences'] = json_decode($mod['requested_preferences'] ?? '[]', true);
-                $mod['adminResponse'] = $mod['admin_response'] ?? '';
-                $mod['response'] = $mod['admin_response'] ?? '';
-                $mod['createdAt'] = $mod['created_at'] ?? '';
-                $mod['reviewedAt'] = $mod['reviewed_at'] ?? '';
-                if ($mod['status'] === 'pending') $hasPending = true;
-            }
-            unset($mod);
-            $admission['modifications'] = $modifications;
-            $admission['hasPendingModification'] = $hasPending;
-            $admission['modificationCount'] = count($modifications);
-
             echo json_encode(["status" => "success", "data" => $admission]);
             break;
 
@@ -2591,38 +2496,6 @@ try {
                 echo json_encode(["status" => "error", "message" => "Admission not found"]);
                 break;
             }
-
-            // Ensure modification_requests table exists with all required columns
-            $pdo->exec("CREATE TABLE IF NOT EXISTS modification_requests (
-                id VARCHAR(50) PRIMARY KEY,
-                request_number VARCHAR(30) UNIQUE NOT NULL,
-                admission_id VARCHAR(50) NOT NULL,
-                national_id_suffix VARCHAR(4) NOT NULL,
-                original_status VARCHAR(50) DEFAULT 'pending',
-                requested_preferences JSON NOT NULL,
-                old_preferences JSON,
-                request_reason TEXT NOT NULL,
-                status ENUM('pending','approved','rejected','completed') DEFAULT 'pending',
-                admin_response TEXT,
-                reviewed_by VARCHAR(50),
-                reviewed_at DATETIME,
-                completed_at DATETIME,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
-                INDEX idx_request_number (request_number),
-                INDEX idx_admission (admission_id),
-                INDEX idx_status (status),
-                INDEX idx_national_suffix (national_id_suffix)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-
-            // Add missing columns if they don't exist (safe ALTER for existing installations)
-            try { $pdo->exec("ALTER TABLE modification_requests ADD COLUMN IF NOT EXISTS original_status VARCHAR(50) DEFAULT 'pending' AFTER national_id_suffix"); } catch (Exception $e) {}
-            try { $pdo->exec("ALTER TABLE modification_requests ADD COLUMN IF NOT EXISTS old_preferences JSON AFTER requested_preferences"); } catch (Exception $e) {}
-
-            // Also ensure admissions table has modification_approved in ENUM
-            try {
-                $pdo->exec("ALTER TABLE admissions MODIFY COLUMN status ENUM('pending','under_review','accepted','waitlist','rejected','modification_requested','modification_approved') DEFAULT 'pending'");
-            } catch (Exception $e) {}
             
             // Only allow modification requests for certain statuses
             if (!in_array($admission['status'], ['pending', 'under_review', 'accepted'])) {
@@ -2649,23 +2522,17 @@ try {
                 break;
             }
             
-// Generate modification request number
+            // Generate modification request number
             $nationalId = $admission['student_national_id'];
             $requestNumber = generateModificationNumber($nationalId, $pdo);
-            
-            // Save current preferences as old_preferences before modification
-            $oldPrefs = [];
-            $oldPrefStmt = $pdo->prepare("SELECT ap.school_id, ap.preference_order, s.name as schoolName, s.nameAr as schoolNameAr FROM admission_preferences ap LEFT JOIN schools s ON ap.school_id COLLATE utf8mb4_unicode_ci = s.id COLLATE utf8mb4_unicode_ci WHERE ap.admission_id = ? ORDER BY ap.preference_order ASC");
-            $oldPrefStmt->execute([$admissionId]);
-            $oldPrefs = $oldPrefStmt->fetchAll(PDO::FETCH_ASSOC);
             
             // Create modification request
             $id = uniqid('MODREQ_');
             $stmt = $pdo->prepare("
                 INSERT INTO modification_requests (
                     id, request_number, admission_id, national_id_suffix,
-                    original_status, requested_preferences, old_preferences, request_reason, status, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
+                    requested_preferences, request_reason, status, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())
             ");
             
             $stmt->execute([
@@ -2673,9 +2540,7 @@ try {
                 $requestNumber,
                 $admissionId,
                 substr($nationalId, -4),
-                $admission['status'],
                 json_encode($requestedPreferences, JSON_UNESCAPED_UNICODE),
-                json_encode($oldPrefs, JSON_UNESCAPED_UNICODE),
                 $reason
             ]);
             
@@ -2803,24 +2668,6 @@ try {
             ");
             $updateStmt->execute([$newStatus, $adminResponse, $user['id'], $requestId]);
             
-            // If approved, update admission preferences
-            if ($action === 'approve') {
-                $requestedPrefs = json_decode($request['requested_preferences'], true);
-                if (!empty($requestedPrefs) && is_array($requestedPrefs)) {
-                    // Delete old preferences
-                    $delStmt = $pdo->prepare("DELETE FROM admission_preferences WHERE admission_id = ?");
-                    $delStmt->execute([$request['admission_id']]);
-                    // Insert new preferences
-                    foreach ($requestedPrefs as $idx => $pref) {
-                        $prefId = uniqid('pref_');
-                        $schoolId = is_array($pref) ? ($pref['schoolId'] ?? $pref['school_id'] ?? '') : $pref;
-                        $order = is_array($pref) ? ($pref['preferenceOrder'] ?? ($pref['preference_order'] ?? $idx + 1)) : $idx + 1;
-                        $insStmt = $pdo->prepare("INSERT INTO admission_preferences (id, admission_id, school_id, preference_order) VALUES (?, ?, ?, ?)");
-                        $insStmt->execute([$prefId, $request['admission_id'], $schoolId, $order]);
-                    }
-                }
-            }
-            
             // Update admission status
             $admissionStmt = $pdo->prepare("
                 UPDATE admissions SET status = ? WHERE id = ?
@@ -2843,45 +2690,6 @@ try {
                     "adminResponse" => $adminResponse
                 ]
             ]);
-            break;
-
-        case 'delete_modification':
-            // Admin only: Delete modification request
-            requireAuth();
-            
-            $input = json_decode(file_get_contents('php://input'), true);
-            $requestId = sanitizeInput($input['id'] ?? '');
-            
-            if (empty($requestId)) {
-                http_response_code(400);
-                echo json_encode(["status" => "error", "message" => "Request ID is required"]);
-                break;
-            }
-            
-            // Get request details
-            $stmt = $pdo->prepare("SELECT * FROM modification_requests WHERE id = ?");
-            $stmt->execute([$requestId]);
-            $request = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            if (!$request) {
-                http_response_code(404);
-                echo json_encode(["status" => "error", "message" => "Request not found"]);
-                break;
-            }
-            
-            // If pending, restore admission to original status
-            if ($request['status'] === 'pending') {
-                $originalStatus = $request['original_status'] ?? 'pending';
-                $restoreStmt = $pdo->prepare("UPDATE admissions SET status = ? WHERE id = ?");
-                $restoreStmt->execute([$originalStatus, $request['admission_id']]);
-            }
-            
-            // Delete the modification request
-            $delStmt = $pdo->prepare("DELETE FROM modification_requests WHERE id = ?");
-            $delStmt->execute([$requestId]);
-            
-            bustCache();
-            echo json_encode(["status" => "success", "message" => "Modification request deleted successfully"]);
             break;
 
         default:

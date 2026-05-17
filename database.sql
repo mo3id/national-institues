@@ -150,7 +150,7 @@ CREATE TABLE IF NOT EXISTS `admissions` (
   `passport_number` varchar(50) DEFAULT NULL,
   `id_type` enum('national_id','passport','both') DEFAULT 'national_id',
   `documents` json DEFAULT NULL,
-  `status` enum('pending','under_review','accepted','waitlist','rejected','modification_requested') DEFAULT 'pending',
+  `status` enum('pending','under_review','accepted','waitlist','rejected','modification_requested','modification_approved') DEFAULT 'pending',
   `accepted_school_id` varchar(50) DEFAULT NULL,
   `admin_notes` text,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -172,4 +172,123 @@ CREATE TABLE IF NOT EXISTS `admission_preferences` (
   `updated_at` datetime ON UPDATE CURRENT_TIMESTAMP,
   INDEX `idx_pref_admission` (`admission_id`),
   INDEX `idx_pref_school` (`school_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- MODIFICATION REQUESTS TABLE
+-- ═══════════════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS `modification_requests` (
+  `id` varchar(50) NOT NULL PRIMARY KEY,
+  `request_number` varchar(30) NOT NULL UNIQUE,
+  `admission_id` varchar(50) NOT NULL,
+  `national_id_suffix` varchar(4) NOT NULL,
+  `original_status` varchar(50) DEFAULT 'pending',
+  `requested_preferences` json NOT NULL,
+  `old_preferences` json DEFAULT NULL,
+  `request_reason` text NOT NULL,
+  `status` enum('pending','approved','rejected','completed') DEFAULT 'pending',
+  `admin_response` text,
+  `reviewed_by` varchar(50) DEFAULT NULL,
+  `reviewed_at` datetime DEFAULT NULL,
+  `completed_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_request_number` (`request_number`),
+  INDEX `idx_admission` (`admission_id`),
+  INDEX `idx_status` (`status`),
+  INDEX `idx_national_suffix` (`national_id_suffix`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- COMPLAINTS TABLE
+-- ═══════════════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS `complaints` (
+  `id` varchar(50) NOT NULL PRIMARY KEY,
+  `complaint_number` varchar(20) DEFAULT NULL UNIQUE,
+  `full_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `message_type` varchar(50) DEFAULT NULL,
+  `school` varchar(255) DEFAULT NULL,
+  `message` text NOT NULL,
+  `status` enum('pending','under_review','resolved','rejected') DEFAULT 'pending',
+  `admin_response` text,
+  `priority` enum('low','medium','high','urgent') DEFAULT 'medium',
+  `assigned_to` varchar(50) DEFAULT NULL,
+  `resolved_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_email` (`email`),
+  INDEX `idx_status` (`status`),
+  INDEX `idx_type` (`message_type`),
+  INDEX `idx_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- CONTACT MESSAGES TABLE
+-- ═══════════════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS `contact_messages` (
+  `id` varchar(50) NOT NULL PRIMARY KEY,
+  `message_number` varchar(20) DEFAULT NULL UNIQUE,
+  `full_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `subject` varchar(255) DEFAULT NULL,
+  `message` text NOT NULL,
+  `status` enum('pending','read','replied','archived') DEFAULT 'pending',
+  `admin_notes` text,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_email` (`email`),
+  INDEX `idx_status` (`status`),
+  INDEX `idx_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- JOB APPLICATIONS TABLE
+-- ═══════════════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS `job_applications` (
+  `id` varchar(50) NOT NULL PRIMARY KEY,
+  `application_number` varchar(20) DEFAULT NULL UNIQUE,
+  `job_id` varchar(50) NOT NULL,
+  `full_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `resume_path` text,
+  `resume_data` longtext,
+  `cover_letter` text,
+  `experience_years` int DEFAULT NULL,
+  `current_employer` varchar(255) DEFAULT NULL,
+  `education_level` varchar(100) DEFAULT NULL,
+  `status` enum('pending','under_review','shortlisted','rejected','hired') DEFAULT 'pending',
+  `admin_notes` text,
+  `interview_date` datetime DEFAULT NULL,
+  `applied_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_email` (`email`),
+  INDEX `idx_job` (`job_id`),
+  INDEX `idx_status` (`status`),
+  INDEX `idx_applied` (`applied_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- USERS TABLE
+-- ═══════════════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` varchar(50) NOT NULL PRIMARY KEY,
+  `email` varchar(255) NOT NULL UNIQUE,
+  `passwordHash` varchar(255) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `role` enum('super_admin','school_admin') DEFAULT 'super_admin',
+  `schoolId` varchar(50) DEFAULT NULL,
+  `isActive` tinyint(1) DEFAULT 1,
+  `createdAt` datetime DEFAULT CURRENT_TIMESTAMP,
+  `lastLogin` datetime DEFAULT NULL,
+  INDEX `idx_email` (`email`),
+  INDEX `idx_role` (`role`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
